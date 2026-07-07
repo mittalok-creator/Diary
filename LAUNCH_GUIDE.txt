@@ -1,0 +1,103 @@
+ALOK OS — COMPLETE LAUNCH GUIDE (alokmittal.net on Squarespace)
+================================================================
+Follow top to bottom once. After this, it just works.
+
+────────────────────────────────────────────────────────────────
+PART 1 — HOST THE SITE (Netlify, free, reliable, HTTPS automatic)
+────────────────────────────────────────────────────────────────
+1. https://app.netlify.com  → sign up (use your Google account)
+2. "Add new site" → "Deploy manually" → drag the SITE folder in
+   (or https://app.netlify.com/drop)
+3. Note your site URL:  https://<something>.netlify.app
+4. Test it:  /          → landing page
+             /app/      → ALOK OS opens
+
+Why Netlify: global CDN, free SSL, 99.99% uptime, zero maintenance.
+Your app is static files — nothing to crash, no server to hack.
+
+────────────────────────────────────────────────────────────────
+PART 2 — CONNECT alokmittal.net (Squarespace DNS — exact clicks)
+────────────────────────────────────────────────────────────────
+A. In NETLIFY first:
+   Site → Domain management → Add a domain → alokmittal.net → Verify
+   (Netlify now expects the records below.)
+
+B. In SQUARESPACE:
+   1. account.squarespace.com → Domains → alokmittal.net
+   2. Open  "DNS"  (DNS Settings)
+   3. DELETE Squarespace's default records that point the domain to
+      Squarespace parking (the A records 198.185.159.x / 198.49.23.x
+      and the CNAME "www → ext-*.squarespace.com"), if present.
+   4. ADD these records:
+        Type   Host    Data
+        A      @       75.2.60.5
+        CNAME  www     <your-site>.netlify.app
+   5. Save. Propagation: 15 min – 24 hrs.
+
+C. Back in Netlify: Domain management → HTTPS → certificate issues
+   automatically once DNS is live. Force HTTPS: ON.
+
+RESULT:
+   https://alokmittal.net        → landing page
+   https://alokmittal.net/app/   → the app (Login buttons point here)
+
+────────────────────────────────────────────────────────────────
+PART 3 — WHY YOU CAN TRUST IT (the honest architecture)
+────────────────────────────────────────────────────────────────
+• The app is 100% static — there is NO server of ours that can go
+  down, leak, or be hacked. Netlify only serves files over HTTPS.
+• Every user's data lives in TWO places, both owned by the user:
+    1. Their device (works fully offline, instant)
+    2. Their own Google Drive app-folder (after 1-tap Google login)
+  Nothing ever touches your infrastructure. You hold zero user data,
+  zero passwords — Google handles identity.
+• Third safety net: Settings → Backup downloads a full file
+  (all data + attachments) that restores on any device.
+• Updating the app later = replace files in /app/ and re-drag to
+  Netlify. Users get the update automatically on next open.
+
+────────────────────────────────────────────────────────────────
+PART 4 — GOOGLE LOGIN (one-time, owner only)
+────────────────────────────────────────────────────────────────
+Do GOOGLE_SETUP.txt once (10 min). Users never set up anything —
+they see the welcome screen → "Continue with Google" → done.
+
+────────────────────────────────────────────────────────────────
+PART 5 — NOTIFICATIONS CHECKLIST (why "not working" happens)
+────────────────────────────────────────────────────────────────
+System notifications ONLY work when ALL of these are true:
+  ✓ You opened the HTTPS site (alokmittal.net/app) — NOT the local
+    .html file. file:// can never show system notifications.
+  ✓ Settings → Notifications → Enable → you tapped "Allow".
+  ✓ (Android) App/tab is running or in background.
+  ✓ (iPhone) iOS 16.4+, AND app added to Home Screen via Safari.
+In the app: Settings → Notifications → TEST button — it tells you
+exactly what's wrong if anything is.
+Alerts with the app FULLY closed need a push server — a future
+upgrade (Firebase/Supabase Web Push) whenever you want it.
+
+────────────────────────────────────────────────────────────────
+PART 6 — REAL ANDROID APK (optional, 15 minutes, no coding)
+────────────────────────────────────────────────────────────────
+Once the site is live on HTTPS:
+  1. Go to  https://www.pwabuilder.com
+  2. Enter  https://alokmittal.net/app/  → Start
+  3. It scores your PWA → "Package for Stores" → Android
+  4. Download the package → you get:
+       • .apk  → install directly on any Android phone
+                 (Settings → allow "install unknown apps" once)
+       • .aab  → upload to Google Play Console if you ever want
+                 it on the Play Store ($25 one-time developer fee)
+  5. The APK is a "Trusted Web Activity" — it IS your live site in
+    a native shell: full-screen, your AM icon, in the app drawer,
+    and it auto-updates whenever you update the website.
+iPhone equivalent: Safari → Share → Add to Home Screen (no APK
+concept on iOS without a Mac + App Store account).
+
+────────────────────────────────────────────────────────────────
+PART 7 — DESKTOP
+────────────────────────────────────────────────────────────────
+The app now has a TRUE desktop layout (≥1000px): left sidebar
+navigation, wide 4-column dashboard, full-width workspaces.
+Chrome/Edge on Windows or Mac → install icon in the address bar →
+runs as a desktop app with your icon.

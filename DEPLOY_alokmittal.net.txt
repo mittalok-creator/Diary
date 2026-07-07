@@ -1,0 +1,44 @@
+ALOK OS — Website + App Deploy Guide (alokmittal.net)
+======================================================
+
+WHAT'S IN THIS FOLDER
+  index.html        → the landing / promo page (root of alokmittal.net)
+  app/              → the full ALOK OS app (opens at alokmittal.net/app/)
+                      "Login →" buttons on the landing page point here.
+  DEPLOY_...txt     → this guide
+
+STEP 1 — HOST IT (Netlify, free, ~3 minutes)
+  1. Go to https://app.netlify.com/drop
+  2. Drag THIS ENTIRE FOLDER (site/) onto the page
+  3. You get a temporary URL like https://random-name.netlify.app — test it
+
+STEP 2 — CONNECT YOUR DOMAIN (alokmittal.net)
+  In Netlify:  Site settings → Domain management → Add custom domain → alokmittal.net
+  Netlify will show you the exact DNS records. At your domain provider
+  (where you bought alokmittal.net), add:
+
+     Type    Name    Value
+     A       @       75.2.60.5
+     CNAME   www     <your-site-name>.netlify.app
+
+  (Easier alternative: switch the domain's nameservers to the Netlify DNS
+   nameservers Netlify shows you — then Netlify manages everything.)
+
+  DNS takes 10 min – 24 hrs to propagate. HTTPS certificate is automatic.
+
+STEP 3 — VERIFY
+  https://alokmittal.net        → landing page
+  https://alokmittal.net/app/   → ALOK OS (Login button goes here)
+  On phone: open /app/ → Chrome menu → Install app  (HTTPS makes it a true PWA)
+  Settings → Notifications → Enable  → system alerts for meetings & tasks
+
+ALTERNATIVE — GitHub Pages
+  Repo → upload folder contents to root → Settings → Pages → deploy from main.
+  Custom domain: add alokmittal.net in Pages settings + at your DNS provider:
+     A records @ → 185.199.108.153 / .109. / .110. / .111.153
+     CNAME www → <username>.github.io
+
+NOTES
+  • App data stays on each device (private). Use in-app Backup regularly.
+  • To update the app later: replace files in app/ and re-deploy;
+    the service worker refreshes users automatically on next open.

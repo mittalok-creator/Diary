@@ -1,0 +1,65 @@
+ALOK OS — Google Sign-In + Drive Sync Setup (one-time, ~10 minutes, free)
+==========================================================================
+
+⭐ IMPORTANT — WHO DOES WHAT
+   • THIS setup is done ONCE, by YOU (the owner). Never by users.
+   • USERS do exactly ONE thing: tap "Continue with Google" → Allow. Done.
+     Their Drive is used automatically — they set up nothing, install nothing.
+
+WHY: users sign in with their own Google account and ALL their data syncs
+to a hidden app-folder in THEIR OWN Google Drive — nothing ever touches
+your server. Same account on phone/tablet/laptop = same data everywhere.
+
+STEP 1 — Create a Google Cloud project
+  1. Go to  https://console.cloud.google.com
+  2. Top bar → New Project → name: "ALOK OS" → Create
+
+STEP 2 — Enable the Drive API
+  APIs & Services → Library → search "Google Drive API" → Enable
+
+STEP 3 — OAuth consent screen
+  APIs & Services → OAuth consent screen
+  • User type: External → Create
+  • App name: ALOK OS · Support email: your gmail · Save
+  • Scopes → Add:  .../auth/drive.appdata,  .../auth/userinfo.email,
+                   .../auth/userinfo.profile
+  • Test users → Add your own gmail (and family members' gmails)
+  ("Testing" mode is perfect for personal/family use. Publish later if needed.)
+
+STEP 4 — Create the Client ID
+  APIs & Services → Credentials → + Create Credentials → OAuth client ID
+  • Application type: Web application · Name: ALOK OS Web
+  • Authorized JavaScript origins — add BOTH:
+        https://alokmittal.net
+        https://<your-site-name>.netlify.app
+  • Create → COPY the Client ID (ends with .apps.googleusercontent.com)
+
+STEP 5 — Paste it into the app
+  Open  app/index.html  → find this line near the sync code:
+     const GOOGLE_CLIENT_ID='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
+  Replace with your real Client ID → save → re-deploy the site.
+
+STEP 5.5 — Open it to ALL users (so anyone can sign in, one tap)
+  OAuth consent screen → Publishing status → "PUBLISH APP" → Confirm.
+  • In "Testing" mode only your listed test users can sign in.
+  • After publishing, ANY Google user signs in with a single tap.
+  • Google may show an "unverified app" notice to users until you complete
+    their short (free) verification form — for personal/family use you can
+    simply stay in Testing mode and add family gmails as test users instead.
+
+STEP 6 — Use it
+  App → Settings → "Sign in with Google" → Allow
+  You'll see: "Up to date · dd-mm-yyyy · time" — data is now in your Drive.
+  Sign in on any other device with the same account → everything appears.
+
+HOW & WHERE DATA LIVES
+  • Hidden "app data" space inside the USER's Drive (not visible as files;
+    manageable at Drive → Settings → Manage apps → ALOK OS).
+  • Sync rule: newest device wins (whole snapshot). Avoid editing offline
+    on two devices at the same time; open the app online first to pull.
+  • Auto-sync: ~20s after any change, on app open, and on "Sync now".
+
+TROUBLESHOOTING
+  • "Access blocked / unverified": you skipped adding yourself as Test user.
+  • Popup blocked: allow popups for your site once.
+  • Sign-in works only on HTTPS (your Netlify/alokmittal.net URL, not file://).

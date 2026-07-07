@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ALOK OS — The Personal Operating System · by Alok Mittal</title>
+<meta name="description" content="One system for your whole life — work, money, meetings, documents. Private by design. BY ALOK MITTAL.">
+<meta name="theme-color" content="#0B0E13">
+<link rel="icon" type="image/png" href="./app/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink0:#0B0E13; --ink1:#12161e; --ink2:#1a2029; --hair:#262f3c;
+  --gold:#D9A85C; --goldb:#F0C27B; --golddim:rgba(217,168,92,.14);
+  --hi:#F3EFE6; --lo:#8A93A3;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--ink0);color:var(--hi);font-family:'Space Grotesk',system-ui,sans-serif;
+  font-size:16px;overflow-x:hidden;line-height:1.6}
+::selection{background:var(--gold);color:#12151b}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.eyebrow{font-size:12px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+.serif{font-family:'Fraunces',serif}
+.goldtext{background:linear-gradient(120deg,#D9A85C 10%,#F6D89A 45%,#D9A85C 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  background-size:200% 100%;animation:shimmer 6s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+/* ---------- ambient orbs ---------- */
+.orb{position:fixed;border-radius:50%;filter:blur(90px);opacity:.35;pointer-events:none;z-index:0}
+#orbA{width:520px;height:520px;background:radial-gradient(circle,#3d3218,transparent 65%);top:-160px;left:-120px;animation:drift 22s ease-in-out infinite}
+#orbB{width:420px;height:420px;background:radial-gradient(circle,#1d2b3f,transparent 65%);top:40vh;right:-160px;animation:drift 26s ease-in-out infinite reverse}
+#orbC{width:380px;height:380px;background:radial-gradient(circle,#33270f,transparent 65%);bottom:-120px;left:30vw;animation:drift 30s ease-in-out infinite}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(40px,-50px)}}
+.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
+main{position:relative;z-index:2}
+/* ---------- nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:all .35s}
+nav .bar{max-width:1120px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
+nav.scrolled{background:rgba(11,14,19,.72);backdrop-filter:blur(18px);border-bottom:1px solid var(--hair)}
+.brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.12em;font-size:14px}
+.mono{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;
+  font-family:'Fraunces',serif;color:var(--gold);font-size:14px;font-weight:600}
+.btn{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:13px 26px;font-weight:700;font-size:14px;
+  letter-spacing:.03em;cursor:pointer;transition:transform .25s cubic-bezier(.22,1,.36,1),box-shadow .25s;border:none}
+.btn:active{transform:scale(.96)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--goldb));color:#12151b;box-shadow:0 8px 32px rgba(217,168,92,.35)}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 14px 44px rgba(217,168,92,.5)}
+.btn-ghost{background:transparent;color:var(--gold);border:1px solid var(--hair)}
+.btn-ghost:hover{border-color:var(--gold)}
+/* ---------- hero ---------- */
+.hero{min-height:100svh;display:flex;align-items:center;padding:130px 0 60px;position:relative}
+.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.hero h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(44px,6.4vw,84px);line-height:1.04;margin:22px 0 24px;letter-spacing:-.01em}
+.hero p.sub{color:var(--lo);font-size:clamp(16px,1.6vw,19px);max-width:520px;margin-bottom:38px}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.trust{margin-top:34px;color:var(--lo);font-size:13px;display:flex;gap:22px;flex-wrap:wrap}
+.trust b{color:var(--hi)}
+.w{display:inline-block;opacity:0;transform:translateY(26px);animation:wordin .8s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes wordin{to{opacity:1;transform:none}}
+/* ---------- phone mock ---------- */
+.stage{display:flex;justify-content:center;position:relative}
+.halo{position:absolute;inset:auto;width:460px;height:460px;border-radius:50%;
+  background:radial-gradient(circle,var(--golddim),transparent 66%);animation:pulse 5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(1.07);opacity:1}}
+.ringy{position:absolute;width:520px;height:520px;border-radius:50%;border:1px solid rgba(217,168,92,.18);animation:spin 40s linear infinite}
+.ringy::before{content:'';position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.phone{position:relative;width:292px;height:600px;border-radius:44px;background:linear-gradient(160deg,#171c25,#0d1117);
+  border:1px solid var(--hair);box-shadow:0 40px 90px rgba(0,0,0,.6),inset 0 1px 0 rgba(217,168,92,.15);
+  padding:14px;animation:floaty 7s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-16px) rotate(1deg)}}
+.screen{width:100%;height:100%;border-radius:32px;background:#0E1116;overflow:hidden;padding:20px 16px;position:relative}
+.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:86px;height:22px;border-radius:12px;background:#000}
+.m-date{font-size:9px;font-weight:700;letter-spacing:.12em;color:var(--gold);margin-top:22px}
+.m-greet{font-family:'Fraunces',serif;font-size:19px;margin-top:3px}
+.m-card{background:#151A22;border:1px solid #232b37;border-radius:14px;padding:12px;margin-top:12px;
+  opacity:0;transform:translateY(14px);animation:cardin .7s cubic-bezier(.22,1,.36,1) forwards}
+.m-card:nth-of-type(2){animation-delay:.5s}.m-card:nth-of-type(3){animation-delay:.8s}
+.m-card:nth-of-type(4){animation-delay:1.1s}.m-card:nth-of-type(5){animation-delay:1.4s}
+@keyframes cardin{to{opacity:1;transform:none}}
+.m-lab{font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--lo);text-transform:uppercase}
+.m-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:11.5px}
+.m-num{font-family:'Fraunces',serif;font-size:20px;margin-top:4px}
+.m-dot{width:16px;height:16px;border-radius:5px;border:1.3px solid var(--gold);flex-shrink:0}
+.m-cd{color:var(--gold);font-weight:700;font-size:10px;font-variant-numeric:tabular-nums}
+.m-ringwrap{display:flex;gap:12px;align-items:center}
+.m-ring circle.fg{stroke:url(#lg);stroke-linecap:round;stroke-dasharray:151;stroke-dashoffset:151;animation:ringdraw 1.6s .4s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes ringdraw{to{stroke-dashoffset:38}}
+.m-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.m-mini{background:#151A22;border:1px solid #232b37;border-radius:14px;padding:10px;
+  opacity:0;transform:translateY(14px);animation:cardin .7s 1.6s cubic-bezier(.22,1,.36,1) forwards}
+.m-mini:last-child{animation-delay:1.8s}
+/* ---------- marquee ---------- */
+.marquee{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:20px 0;overflow:hidden;
+  background:rgba(18,22,30,.5);backdrop-filter:blur(8px)}
+.track{display:flex;gap:44px;white-space:nowrap;animation:scroll 34s linear infinite;width:max-content}
+.track span{font-family:'Fraunces',serif;font-size:17px;color:var(--lo);display:flex;align-items:center;gap:44px}
+.track i{font-style:normal;color:var(--gold);font-size:11px}
+@keyframes scroll{to{transform:translateX(-50%)}}
+/* ---------- sections ---------- */
+section{padding:110px 0;position:relative}
+.sec-head{max-width:680px;margin-bottom:64px}
+.sec-head h2{font-family:'Fraunces',serif;font-size:clamp(32px,4.4vw,52px);font-weight:600;line-height:1.12;margin:18px 0 16px}
+.sec-head p{color:var(--lo);font-size:17px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.feat{background:linear-gradient(165deg,#141922,#10141b);border:1px solid var(--hair);border-radius:26px;padding:32px 28px;
+  position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.22,1,.36,1),border-color .4s}
+.feat:hover{transform:translateY(-8px);border-color:rgba(217,168,92,.45)}
+.feat::before{content:'';position:absolute;inset:0;background:radial-gradient(500px 200px at var(--mx,50%) -20%,var(--golddim),transparent 60%);opacity:0;transition:opacity .4s}
+.feat:hover::before{opacity:1}
+.feat .ico{width:52px;height:52px;border-radius:16px;background:var(--golddim);border:1px solid rgba(217,168,92,.3);
+  display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:22px}
+.feat h3{font-family:'Fraunces',serif;font-size:21px;font-weight:600;margin-bottom:10px}
+.feat p{color:var(--lo);font-size:14.5px}
+.feat .tagx{display:inline-block;margin-top:16px;font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--gold);text-transform:uppercase}
+/* reveals */
+.rv{opacity:0;transform:translateY(36px);transition:opacity .9s cubic-bezier(.22,1,.36,1),transform .9s cubic-bezier(.22,1,.36,1)}
+.rv.in{opacity:1;transform:none}
+.rv:nth-child(2){transition-delay:.08s}.rv:nth-child(3){transition-delay:.16s}
+.rv:nth-child(4){transition-delay:.24s}.rv:nth-child(5){transition-delay:.32s}.rv:nth-child(6){transition-delay:.4s}
+/* statement */
+.statement{text-align:center;padding:140px 0}
+.statement h2{font-family:'Fraunces',serif;font-size:clamp(34px,5.4vw,66px);font-weight:500;line-height:1.18;max-width:900px;margin:0 auto}
+.hairline{width:120px;height:1.5px;margin:38px auto 0;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;text-align:center}
+.stat h3{font-family:'Fraunces',serif;font-size:clamp(36px,4.6vw,58px);font-weight:600;color:var(--gold)}
+.stat p{color:var(--lo);font-size:13px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;margin-top:6px}
+/* final cta */
+.final{text-align:center;padding:150px 0 120px;position:relative}
+.final .mono{width:74px;height:74px;font-size:26px;margin:0 auto 34px;animation:pulse 5s ease-in-out infinite}
+.final h2{font-family:'Fraunces',serif;font-size:clamp(36px,5vw,62px);font-weight:600;margin-bottom:18px}
+.final p{color:var(--lo);margin-bottom:44px;font-size:17px}
+footer{border-top:1px solid var(--hair);padding:38px 0;color:var(--lo);font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+footer b{color:var(--gold);letter-spacing:.16em}
+@media(max-width:900px){
+  .hero-grid{grid-template-columns:1fr;gap:56px}
+  .hero{padding-top:110px}
+  .grid3{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(2,1fr);gap:34px}
+  .stage{transform:scale(.92)}
+  section{padding:80px 0}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="orb" id="orbA"></div><div class="orb" id="orbB"></div><div class="orb" id="orbC"></div>
+<div class="grain"></div>
+
+<nav id="nav"><div class="bar">
+  <a class="brand" href="#top"><span class="mono">AM</span> ALOK&nbsp;OS</a>
+  <a class="btn btn-gold" href="./app/">Login →</a>
+</div></nav>
+
+<main id="top">
+
+<!-- ============ HERO ============ -->
+<header class="hero"><div class="wrap hero-grid">
+  <div>
+    <div class="eyebrow w" style="animation-delay:.1s">✦ The Personal Operating System</div>
+    <h1>
+      <span class="w" style="animation-delay:.2s">One</span>
+      <span class="w" style="animation-delay:.3s">life.</span><br>
+      <span class="w goldtext" style="animation-delay:.45s">One</span>
+      <span class="w goldtext" style="animation-delay:.55s">system.</span>
+    </h1>
+    <p class="sub w" style="animation-delay:.7s">Work, money, meetings, circulars, documents, family — everything a serious professional runs in a day, unified in one beautifully quiet place. Built on the AURUM design language.</p>
+    <div class="hero-cta w" style="animation-delay:.85s">
+      <a class="btn btn-gold" href="./app/">Login to ALOK OS →</a>
+      <a class="btn btn-ghost" href="#features">Explore features</a>
+    </div>
+    <div class="trust w" style="animation-delay:1s">
+      <span><b>100% private</b> · syncs to <b>your own</b> Google Drive</span>
+      <span><b>Works offline</b> · installable app</span>
+      <span><b>Phone · Tablet · Laptop</b></span>
+    </div>
+  </div>
+
+  <div class="stage">
+    <div class="halo"></div><div class="ringy"></div>
+    <div class="phone"><div class="screen">
+      <div class="notch"></div>
+      <div class="m-date">TUESDAY · <span id="mDate">07-07-2026</span> <span style="color:#F3EFE6" id="mClock">09:41 AM</span></div>
+      <div class="m-greet">Good morning, Alok</div>
+      <div class="m-card"><div class="m-ringwrap">
+        <svg class="m-ring" width="54" height="54" viewBox="0 0 54 54">
+          <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#D9A85C"/><stop offset="1" stop-color="#F0C27B"/></linearGradient></defs>
+          <circle cx="27" cy="27" r="24" stroke="#232b37" stroke-width="4.5" fill="none"/>
+          <circle class="fg" cx="27" cy="27" r="24" stroke-width="4.5" fill="none" transform="rotate(-90 27 27)"/>
+        </svg>
+        <div><div class="m-lab">Today's Progress</div><div class="m-num">75%</div></div>
+      </div></div>
+      <div class="m-card">
+        <div class="m-lab" style="color:#D9A85C">✦ Today's Focus</div>
+        <div class="m-row"><div class="m-dot"></div><div>Submit branch report<br><span class="m-cd" id="mCd1">⏳ 2h 14m 09s left</span></div></div>
+        <div class="m-row"><div class="m-dot"></div><div>RBI circular — read v2</div></div>
+      </div>
+      <div class="m-card">
+        <div class="m-lab" style="color:#D9A85C">Today's Meetings</div>
+        <div class="m-row" style="justify-content:space-between"><span>Credit review call</span><b style="color:#D9A85C;font-size:11px">11:30 AM</b></div>
+      </div>
+      <div class="m-grid">
+        <div class="m-mini"><div class="m-lab">Money · Today</div><div class="m-num">₹1,240</div></div>
+        <div class="m-mini"><div class="m-lab">💧 Water</div><div class="m-num">5<span style="font-size:11px;color:#8A93A3">/8</span></div></div>
+      </div>
+    </div></div>
+  </div>
+</div></header>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marquee"><div class="track" id="track">
+  <span>Tasks <i>✦</i> Meetings <i>✦</i> Circulars <i>✦</i> Follow-ups <i>✦</i> Money <i>✦</i> Excel Export <i>✦</i> Documents Vault <i>✦</i> Calendar <i>✦</i> Notes <i>✦</i> Shopping <i>✦</i> Water <i>✦</i> Reminders <i>✦</i>&nbsp;</span>
+</div></div>
+
+<!-- ============ FEATURES ============ -->
+<section id="features"><div class="wrap">
+  <div class="sec-head rv">
+    <div class="eyebrow">Everything, connected</div>
+    <h2>Not another to-do app.<br><span class="goldtext">A system.</span></h2>
+    <p>Every module speaks to every other module — one dashboard, one search, one calendar over your entire life.</p>
+  </div>
+  <div class="grid3">
+    <div class="feat rv"><div class="ico">◐</div><h3>Command Dashboard</h3>
+      <p>Your whole day ranked by time — with live stopwatch countdowns on every deadline and one-tap joins for meetings.</p>
+      <span class="tagx">⏳ 2h 14m 09s left</span></div>
+    <div class="feat rv"><div class="ico">🎥</div><h3>Meetings that run themselves</h3>
+      <p>Host, link, ID, password, reminders — the dashboard shows just name & time; a tap drops you straight into the call.</p>
+      <span class="tagx">One-tap join</span></div>
+    <div class="feat rv"><div class="ico">📑</div><h3>Circulars with memory</h3>
+      <p>Every circular by name, date and type — with full version history. New update arrives? Add it; the old ones stay, date-sorted, readable and downloadable.</p>
+      <span class="tagx">Version history</span></div>
+    <div class="feat rv"><div class="ico">₹</div><h3>Money you can analyse</h3>
+      <p>Log expenses in seconds, backdate old entries, attach receipts — then export the entire ledger to Excel for real analysis.</p>
+      <span class="tagx">Excel export</span></div>
+    <div class="feat rv"><div class="ico">🔒</div><h3>Documents vault</h3>
+      <p>PAN, RC, policies, warranties — titled, searchable, image or PDF. Backed up in one file, restored anywhere.</p>
+      <span class="tagx">Private by design</span></div>
+    <div class="feat rv"><div class="ico">📅</div><h3>Calendar time machine</h3>
+      <p>Jump to any date — past or future — and see everything from that day: tasks, meetings, spends, notes, circulars. Life and Work, one timeline.</p>
+      <span class="tagx">dd-mm-yyyy · everywhere</span></div>
+  </div>
+</div></section>
+
+<!-- ============ STATEMENT ============ -->
+<section class="statement"><div class="wrap rv">
+  <div class="eyebrow">The AURUM design language</div>
+  <h2>Ink-dark calm.<br>Gold falls only on <span class="goldtext">what matters.</span></h2>
+  <div class="hairline"></div>
+</div></section>
+
+<!-- ============ STATS ============ -->
+<section style="padding-top:0"><div class="wrap">
+  <div class="stats">
+    <div class="stat rv"><h3><span class="cnt" data-n="21">0</span></h3><p>Modules</p></div>
+    <div class="stat rv"><h3><span class="cnt" data-n="100">0</span>%</h3><p>Offline capable</p></div>
+    <div class="stat rv"><h3><span class="cnt" data-n="0">0</span></h3><p>Servers holding your data</p></div>
+    <div class="stat rv"><h3>∞</h3><p>Yours, forever</p></div>
+  </div>
+</div></section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final"><div class="wrap rv">
+  <div class="mono">AM</div>
+  <h2>Your life, <span class="goldtext">beautifully run.</span></h2>
+  <p>Install once. Works on your phone, tablet and laptop — even without internet.</p>
+  <a class="btn btn-gold" style="font-size:16px;padding:17px 38px" href="./app/">Login to ALOK OS →</a>
+</div></section>
+
+</main>
+<footer><div class="wrap">
+  <span><b>BY ALOK MITTAL</b></span>
+  <span>alokmittal.net · ALOK OS · AURUM design language</span>
+</div></footer>
+
+<script>
+/* nav glass on scroll */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>{nav.classList.toggle('scrolled',scrollY>24);
+  /* parallax orbs */
+  document.getElementById('orbA').style.transform='translateY('+scrollY*.08+'px)';
+  document.getElementById('orbB').style.transform='translateY('+scrollY*-.06+'px)';
+},{passive:true});
+/* duplicate marquee track for seamless loop */
+const tr=document.getElementById('track');tr.innerHTML+=tr.innerHTML;
+/* scroll reveals + count-ups */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting)return;e.target.classList.add('in');
+  e.target.querySelectorAll('.cnt').forEach(c=>{
+    if(c._done)return;c._done=1;const n=+c.dataset.n,st=performance.now();
+    (function f(t){const p=Math.min(1,(t-st)/1400),ease=1-Math.pow(1-p,3);
+      c.textContent=Math.round(n*ease);if(p<1)requestAnimationFrame(f)})(st)});
+  io.unobserve(e.target)}),{threshold:.18});
+document.querySelectorAll('.rv,.stat').forEach(el=>io.observe(el));
+/* phone mock: live clock, date, ticking countdown */
+function p2(n){return String(n).padStart(2,'0')}
+const d0=new Date();
+document.getElementById('mDate').textContent=p2(d0.getDate())+'-'+p2(d0.getMonth()+1)+'-'+d0.getFullYear();
+let cdS=2*3600+14*60+9;
+setInterval(()=>{const d=new Date();let h=d.getHours();const ap=h>=12?'PM':'AM';h=h%12||12;
+  document.getElementById('mClock').textContent=h+':'+p2(d.getMinutes())+' '+ap;
+  cdS=cdS>0?cdS-1:2*3600+14*60+9;
+  const H=Math.floor(cdS/3600),M=Math.floor(cdS%3600/60),S=cdS%60;
+  document.getElementById('mCd1').textContent='⏳ '+H+'h '+p2(M)+'m '+p2(S)+'s left'},1000);
+/* feature card spotlight follows cursor */
+document.querySelectorAll('.feat').forEach(f=>f.addEventListener('pointermove',e=>{
+  const r=f.getBoundingClientRect();f.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%')}));
+</script>
+</body>
+</html>
