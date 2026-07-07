@@ -159,7 +159,7 @@ select.inp{appearance:none;-webkit-appearance:none}
 #loginOv{position:absolute;inset:0;z-index:98;display:none;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(700px 500px at 50% 20%,#161c26,var(--ink0) 70%);padding:32px;text-align:center}
 #loginOv.open{display:flex}
-#loginOv .mono-big{width:84px;height:84px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;
+.mono-big{width:84px;height:84px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;
   font-family:'Fraunces',serif;color:var(--gold);font-size:28px;margin-bottom:28px;animation:lpulse 4s ease-in-out infinite}
 @keyframes lpulse{0%,100%{box-shadow:0 0 0 0 rgba(217,168,92,.25)}50%{box-shadow:0 0 0 18px rgba(217,168,92,0)}}
 #loginOv h2{font-family:'Fraunces',serif;font-size:28px;font-weight:600;margin-bottom:10px}
@@ -193,6 +193,21 @@ select.inp{appearance:none;-webkit-appearance:none}
   #toast{bottom:36px}
 }
 @media(min-width:1000px){#waterCard{cursor:pointer}}
+#lockOv{position:absolute;inset:0;z-index:120;display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(700px 500px at 50% 18%,#161c26,var(--ink0) 70%);padding:30px;text-align:center}
+#lockOv.open{display:flex}
+.lk-title{font-family:'Fraunces',serif;font-size:22px;margin:18px 0 4px}
+.lk-sub{color:var(--lo);font-size:13px;margin-bottom:24px;min-height:18px}
+.lk-dots{display:flex;gap:14px;margin-bottom:28px}
+.lk-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--gold);transition:background .15s}
+.lk-dot.on{background:var(--gold)}
+.lk-pad{display:grid;grid-template-columns:repeat(3,70px);gap:13px}
+.lk-key{width:70px;height:70px;border-radius:50%;border:1px solid var(--hair);background:var(--ink1);color:var(--hi);
+  font-family:inherit;font-size:23px;font-weight:600;cursor:pointer;transition:transform .15s,border-color .15s}
+.lk-key:active{transform:scale(.92);border-color:var(--gold)}
+.lk-key.ghost{border:none;background:none;font-size:22px;color:var(--gold)}
+.shake{animation:shk .4s}
+@keyframes shk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
 </style>
 </head>
 <body>
@@ -481,6 +496,21 @@ select.inp{appearance:none;-webkit-appearance:none}
     </div>
   </div>
 
+  <div class="eyebrow">Security</div>
+  <div class="card">
+    <div class="set-row">
+      <div><div class="set-name">App lock (PIN)</div><div class="set-sub" id="pinStatus">Off</div></div>
+      <div style="display:flex;gap:8px;flex-shrink:0">
+        <button class="btn btn-ghost btn-sm" onclick="pinSetup()">Set / Change</button>
+        <button class="btn btn-risk btn-sm" onclick="pinRemove()">Remove</button>
+      </div>
+    </div>
+    <div class="set-row">
+      <div><div class="set-name">Biometric unlock</div><div class="set-sub" id="bioStatus">Set a PIN first</div></div>
+      <button class="btn btn-ghost btn-sm" id="bioBtn" onclick="bioToggle()">Enable</button>
+    </div>
+  </div>
+
   <div class="eyebrow">Data · Local backup</div>
   <div class="card">
     <div class="set-row">
@@ -523,6 +553,19 @@ select.inp{appearance:none;-webkit-appearance:none}
   <button id="nb-settings" class="desk-only" onclick="go('settings')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.2 3h-4l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg>Settings</button>
 </nav>
+
+<div id="lockOv">
+  <div class="mono-big">AM</div>
+  <div class="lk-title" id="lkTitle">Enter PIN</div>
+  <div class="lk-sub" id="lkSub"></div>
+  <div class="lk-dots"><div class="lk-dot"></div><div class="lk-dot"></div><div class="lk-dot"></div><div class="lk-dot"></div></div>
+  <div class="lk-pad">
+    <button class="lk-key" onclick="lkKey('1')">1</button><button class="lk-key" onclick="lkKey('2')">2</button><button class="lk-key" onclick="lkKey('3')">3</button>
+    <button class="lk-key" onclick="lkKey('4')">4</button><button class="lk-key" onclick="lkKey('5')">5</button><button class="lk-key" onclick="lkKey('6')">6</button>
+    <button class="lk-key" onclick="lkKey('7')">7</button><button class="lk-key" onclick="lkKey('8')">8</button><button class="lk-key" onclick="lkKey('9')">9</button>
+    <button class="lk-key ghost" id="lkBio" onclick="lkKey('f')">👆</button><button class="lk-key" onclick="lkKey('0')">0</button><button class="lk-key ghost" onclick="lkKey('b')">⌫</button>
+  </div>
+</div>
 
 <div id="loginOv">
   <div class="mono-big">AM</div>
@@ -968,6 +1011,58 @@ function renderCal(){const d=document.getElementById('calDate').value||today();
   document.getElementById('calOut').innerHTML='<div class="eyebrow" style="margin-top:18px">'+label+'</div>'+
     (secs.length?secs.map(s=>'<div class="eyebrow">'+s[0]+'</div>'+s[1]).join('')
      :'<div class="empty"><div class="em-ring">📅</div>Nothing recorded on this date.<br>Past & future entries — Life and Work — will all appear here.</div>')}
+/* ============ APP LOCK: PIN + BIOMETRIC ============ */
+let lkMode='verify',lkBuf='',lkFirst='',lkAfter=null,hiddenAt=0;
+async function hashPin(pin,salt){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));
+  return btoa(String.fromCharCode.apply(null,new Uint8Array(h)))}
+function lkRender(){document.querySelectorAll('#lockOv .lk-dot').forEach((d,i)=>d.classList.toggle('on',i<lkBuf.length));
+  const b=document.getElementById('lkBio');if(b)b.style.visibility=(lkMode==='verify'&&S.lock&&S.lock.bio)?'visible':'hidden'}
+function showLock(mode){lkMode=mode||'verify';lkBuf='';lkFirst='';
+  document.getElementById('lkTitle').textContent=lkMode==='verify'?'Enter PIN':'Choose a 4-digit PIN';
+  document.getElementById('lkSub').textContent=lkMode==='verify'?'ALOK OS is locked':'';
+  document.getElementById('lockOv').classList.add('open');lkRender();
+  if(lkMode==='verify'&&S.lock&&S.lock.bio)setTimeout(bioUnlock,500)}
+function hideLock(){document.getElementById('lockOv').classList.remove('open')}
+function lkFail(msg){document.getElementById('lkSub').textContent=msg;lkBuf='';lkRender();
+  const p=document.querySelector('#lockOv .lk-pad');p.classList.add('shake');setTimeout(()=>p.classList.remove('shake'),430)}
+async function lkKey(k){
+  if(k==='b'){lkBuf=lkBuf.slice(0,-1);lkRender();return}
+  if(k==='f'){bioUnlock();return}
+  if(lkBuf.length>=4)return;lkBuf+=k;lkRender();
+  if(lkBuf.length<4)return;
+  if(lkMode==='set'){lkFirst=lkBuf;lkBuf='';lkMode='confirm';
+    document.getElementById('lkTitle').textContent='Confirm PIN';lkRender();return}
+  if(lkMode==='confirm'){
+    if(lkBuf===lkFirst){const salt=uid();
+      S.lock={pinHash:await hashPin(lkBuf,salt),salt,bio:(S.lock&&S.lock.bio)||null};
+      save(true);hideLock();renderSettings();toast('App lock enabled 🔒')}
+    else{lkMode='set';document.getElementById('lkTitle').textContent='Choose a 4-digit PIN';
+      lkFail("PINs didn't match — start again")}
+    return}
+  const ok=S.lock&&(await hashPin(lkBuf,S.lock.salt))===S.lock.pinHash;
+  if(ok){hideLock();if(lkAfter){const fn=lkAfter;lkAfter=null;fn()}}
+  else lkFail('Wrong PIN — try again')}
+function pinSetup(){if(S.lock&&S.lock.pinHash){lkAfter=()=>showLock('set');showLock('verify')}else showLock('set')}
+function pinRemove(){if(!S.lock||!S.lock.pinHash){toast('No PIN is set');return}
+  lkAfter=()=>{delete S.lock;save(true);renderSettings();toast('App lock removed')};showLock('verify')}
+function bioToggle(){if(!S.lock||!S.lock.pinHash){toast('Set a PIN first');return}
+  if(S.lock.bio){S.lock.bio=null;save(true);renderSettings();toast('Biometric unlock disabled');return}
+  bioEnroll()}
+async function bioEnroll(){if(!window.PublicKeyCredential||!navigator.credentials){toast('Biometrics not supported in this browser');return}
+  try{const cred=await navigator.credentials.create({publicKey:{
+    challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'ALOK OS'},
+    user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'alokos-user',displayName:'ALOK OS'},
+    pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+    authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required'},timeout:60000}});
+    S.lock.bio=btoa(String.fromCharCode.apply(null,new Uint8Array(cred.rawId)));
+    save(true);renderSettings();toast('👆 Biometric unlock enabled')}
+  catch(e){toast('Biometric setup cancelled or unavailable on this device')}}
+async function bioUnlock(){if(!S.lock||!S.lock.bio)return;
+  try{const id=Uint8Array.from(atob(S.lock.bio),c=>c.charCodeAt(0));
+    await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials:[{type:'public-key',id,transports:['internal']}],userVerification:'required',timeout:60000}});
+    hideLock();if(lkAfter){const fn=lkAfter;lkAfter=null;fn()}}
+  catch(e){document.getElementById('lkSub').textContent='Use your PIN'}}
 /* ============ GOOGLE SIGN-IN + DRIVE SYNC (user's own Drive) ============ */
 const GOOGLE_CLIENT_ID='804623197611-nr730ggbqtje62p7rfhlf8o7ptophjdj.apps.googleusercontent.com'; // ← paste your Client ID (see GOOGLE_SETUP guide)
 let gToken=null,gTokenExp=0,tokenClient=null,syncBusy=false,pushT=null;
@@ -980,9 +1075,11 @@ function initGoogle(){if(!gConfigured()||typeof google==='undefined'||!google.ac
     scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     callback:async r=>{if(!r||!r.access_token)return;
       gToken=r.access_token;gTokenExp=Date.now()+((r.expires_in||3600)-90)*1000;
+      S.gAuth={t:gToken,exp:gTokenExp};save(true);
       if(!S.profile.google)await fetchGProfile();
       hideLogin();renderSettings();cloudSync()}});
-  if(S.profile.google)tokenClient.requestAccessToken({prompt:''});}
+  if(S.gAuth&&Date.now()<S.gAuth.exp){gToken=S.gAuth.t;gTokenExp=S.gAuth.exp;cloudSync()}
+  else if(S.profile.google)setSyncStatus('Session expired — tap Sync now to reconnect');}
 function gSignIn(){if(!gConfigured()){toast('Add your Google Client ID first — see the setup guide');return}
   if(!tokenClient){initGoogle();if(!tokenClient){toast('Google Sign-In is loading — try again in a moment');return}}
   tokenClient.requestAccessToken({prompt:S.profile.google?'':'consent'})}
@@ -992,7 +1089,7 @@ function hideLogin(){document.getElementById('loginOv').classList.remove('open')
 function loginSkip(){S.loginSkipped=true;save();hideLogin();
   toast('No problem — you can sign in anytime from Settings')}
 function gSignOut(){try{if(gToken&&typeof google!=='undefined')google.accounts.oauth2.revoke(gToken)}catch(e){}
-  gToken=null;delete S.profile.google;save();renderSettings();renderHeader();
+  gToken=null;delete S.profile.google;delete S.gAuth;save();renderSettings();renderHeader();
   toast('Signed out — your data stays safely on this device')}
 async function fetchGProfile(){try{
   const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}});
@@ -1026,7 +1123,7 @@ async function drivePush(fileId){setSyncStatus('Uploading to your Drive…');
   if(!r.ok)await driveErr(r)}
 async function cloudSync(manual){
   if(!S.profile.google&&!manual)return;
-  if(!gToken||Date.now()>gTokenExp){if(tokenClient)tokenClient.requestAccessToken({prompt:manual?undefined:''});return}
+  if(!gToken||Date.now()>gTokenExp){if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:''});else setSyncStatus('Reconnect needed — tap Sync now');return}
   if(syncBusy)return;syncBusy=true;
   try{setSyncStatus('Syncing…');
     const meta=await driveFind();
@@ -1034,8 +1131,8 @@ async function cloudSync(manual){
     if(!meta){await drivePush(null)}
     else{const cloudU=+((meta.appProperties&&meta.appProperties.updatedAt)||0);
       if(cloudU>localU){const snap=await driveDownload(meta.id);
-        if(snap&&snap.state){const keepG=S.profile.google;
-          S={...blank(),...snap.state};if(keepG)S.profile.google=keepG;migrate();
+        if(snap&&snap.state){const keepG=S.profile.google,keepA=S.gAuth;
+          S={...blank(),...snap.state};if(keepG)S.profile.google=keepG;if(keepA)S.gAuth=keepA;migrate();
           for(const id in (snap.files||{}))await fileSave(id,snap.files[id]);
           S.updatedAt=cloudU;S.lastSync=Date.now();save(true);
           applyTheme();renderAll();toast('☁ Updated from your Google Drive')}}
@@ -1065,7 +1162,13 @@ function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCar
     :!('Notification' in window)?'Not supported in this browser'
     :Notification.permission==='granted'?'Enabled ✓ — tap Test to verify'
     :Notification.permission==='denied'?'Blocked — allow this site in browser notification settings'
-    :'Tap Enable, then Allow'}
+    :'Tap Enable, then Allow';
+  const ps=document.getElementById('pinStatus');
+  if(ps)ps.textContent=(S.lock&&S.lock.pinHash)?'On — asks on open & after 1 min in background':'Off';
+  const bs=document.getElementById('bioStatus');
+  if(bs)bs.textContent=!(S.lock&&S.lock.pinHash)?'Set a PIN first':(S.lock.bio?'Enabled — fingerprint / face':'Available on this device — tap Enable');
+  const bb=document.getElementById('bioBtn');
+  if(bb)bb.textContent=(S.lock&&S.lock.bio)?'Disable':'Enable'}
 function saveName(){S.profile.name=setName.value.trim();save();renderHeader();toast('Saved, '+(S.profile.name||'friend'))}
 let crop={img:null,scale:1,base:1,x:0,y:0,drag:false,sx:0,sy:0};const CV=260;
 function setPhoto(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();
@@ -1126,10 +1229,16 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   applyTheme();renderAll();initCrop();
   tick();setInterval(tick,1000);
   checkReminders();setInterval(checkReminders,30000);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkReminders();renderToday();cloudSync()}});
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){hiddenAt=Date.now();return}
+    checkReminders();renderToday();cloudSync();
+    if(S.lock&&S.lock.pinHash&&Date.now()-hiddenAt>60000)showLock('verify')});
+  addEventListener('focus',()=>cloudSync());
+  setInterval(()=>cloudSync(),45000);
   (function gw(n){if(typeof google!=='undefined'&&google.accounts)initGoogle();else if(n<24)setTimeout(()=>gw(n+1),500)})(0);
   if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
     navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+  if(S.lock&&S.lock.pinHash)showLock('verify');
   showLoginIfNeeded();
   if(!S.profile.name&&!document.getElementById('loginOv').classList.contains('open'))setTimeout(()=>{go('settings');toast('Set your name & photo to begin ✦')},600)})();
 </script>
