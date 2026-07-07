@@ -969,7 +969,7 @@ function renderCal(){const d=document.getElementById('calDate').value||today();
     (secs.length?secs.map(s=>'<div class="eyebrow">'+s[0]+'</div>'+s[1]).join('')
      :'<div class="empty"><div class="em-ring">📅</div>Nothing recorded on this date.<br>Past & future entries — Life and Work — will all appear here.</div>')}
 /* ============ GOOGLE SIGN-IN + DRIVE SYNC (user's own Drive) ============ */
-const GOOGLE_CLIENT_ID='YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'; // ← paste your Client ID (see GOOGLE_SETUP guide)
+const GOOGLE_CLIENT_ID='804623197611-nr730ggbqtje62p7rfhlf8o7ptophjdj.apps.googleusercontent.com'; // ← paste your Client ID (see GOOGLE_SETUP guide)
 let gToken=null,gTokenExp=0,tokenClient=null,syncBusy=false,pushT=null;
 function gConfigured(){return GOOGLE_CLIENT_ID.indexOf('YOUR_')!==0}
 function fmtWhen(ts){const d=new Date(ts);let h=d.getHours();const ap=h>=12?'PM':'AM';h=h%12||12;
