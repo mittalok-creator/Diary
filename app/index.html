@@ -1000,13 +1000,19 @@ async function fetchGProfile(){try{
   S.profile.google={name:j.name||'',email:j.email||'',pic:j.picture||''};
   if(!S.profile.name)S.profile.name=j.given_name||j.name||'';
   save();renderHeader()}catch(e){}}
-function setSyncStatus(t){const el=document.getElementById('syncStatus');if(el)el.textContent=t}
+let syncMsg='';
+function setSyncStatus(t){syncMsg=t;const el=document.getElementById('syncStatus');if(el)el.textContent=t}
 function cloudPushSoon(){if(!S.profile.google)return;clearTimeout(pushT);pushT=setTimeout(()=>cloudSync(),20000)}
+async function driveErr(r){let t='';try{t=await r.text()}catch(e){}
+  if(r.status===403&&t.indexOf('accessNotConfigured')>-1)throw new Error('DRIVE_OFF');
+  if(r.status===403&&(t.indexOf('insufficient')>-1||t.indexOf('PERMISSION')>-1))throw new Error('NO_SCOPE');
+  if(r.status===401)throw new Error('NO_SCOPE');
+  throw new Error('HTTP'+r.status)}
 async function driveFind(){const r=await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id,appProperties)&q=name%3D'alokos-sync.json'",
-  {headers:{Authorization:'Bearer '+gToken}});if(!r.ok)throw 0;
+  {headers:{Authorization:'Bearer '+gToken}});if(!r.ok)await driveErr(r);
   const j=await r.json();return (j.files&&j.files[0])||null}
 async function driveDownload(id){const r=await fetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',
-  {headers:{Authorization:'Bearer '+gToken}});if(!r.ok)throw 0;return r.json()}
+  {headers:{Authorization:'Bearer '+gToken}});if(!r.ok)await driveErr(r);return r.json()}
 async function drivePush(fileId){setSyncStatus('Uploading to your Drive…');
   const files={};for(const id of allAttIds()){const d=await fileGet(id);if(d)files[id]=d}
   const body=JSON.stringify({state:S,files,savedAt:Date.now()});
@@ -1017,7 +1023,7 @@ async function drivePush(fileId){setSyncStatus('Uploading to your Drive…');
     +'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
   const r=await fetch('https://www.googleapis.com/upload/drive/v3/files'+(fileId?'/'+fileId:'')+'?uploadType=multipart',
     {method:fileId?'PATCH':'POST',headers:{Authorization:'Bearer '+gToken,'Content-Type':'multipart/related; boundary='+b},body:mp});
-  if(!r.ok)throw 0}
+  if(!r.ok)await driveErr(r)}
 async function cloudSync(manual){
   if(!S.profile.google&&!manual)return;
   if(!gToken||Date.now()>gTokenExp){if(tokenClient)tokenClient.requestAccessToken({prompt:manual?undefined:''});return}
@@ -1035,7 +1041,11 @@ async function cloudSync(manual){
           applyTheme();renderAll();toast('☁ Updated from your Google Drive')}}
       else if(localU>cloudU){await drivePush(meta.id);toast('☁ Saved to your Google Drive')}}
     S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync))}
-  catch(e){setSyncStatus('Sync failed — will retry automatically')}
+  catch(e){const m=String(e&&e.message||e);
+    if(m==='DRIVE_OFF')setSyncStatus('Google Drive API is disabled in your Cloud project — enable it, then tap Sync now');
+    else if(m==='NO_SCOPE'){setSyncStatus('Drive permission missing — tap Sync now and Allow Drive access');
+      if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent'})}
+    else setSyncStatus('Sync failed ('+m+') — check internet, then Sync now')}
   syncBusy=false;renderSettings()}
 function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
   if(!gConfigured()){el.innerHTML='<div class="set-row"><div><div class="set-name">Google Drive sync</div><div class="set-sub">Setup pending — create a free Google Client ID and paste it in index.html (see GOOGLE_SETUP guide)</div></div></div>';return}
@@ -1044,7 +1054,7 @@ function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
   el.innerHTML='<div class="set-row"><div style="display:flex;gap:12px;align-items:center;min-width:0">'
    +(g.pic?'<img src="'+g.pic+'" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--gold);flex-shrink:0">':'')
    +'<div style="min-width:0"><div class="set-name">'+esc(g.name)+'</div><div class="set-sub" style="overflow:hidden;text-overflow:ellipsis">'+esc(g.email)+'</div></div></div></div>'
-   +'<div class="set-row"><div><div class="set-name">Drive sync</div><div class="set-sub" id="syncStatus">'+(S.lastSync?'Up to date · '+fmtWhen(S.lastSync):'Not synced yet')+'</div></div>'
+   +'<div class="set-row"><div><div class="set-name">Drive sync</div><div class="set-sub" id="syncStatus">'+(syncMsg||(S.lastSync?'Up to date · '+fmtWhen(S.lastSync):'Not synced yet'))+'</div></div>'
    +'<div style="display:flex;gap:8px;flex-shrink:0"><button class="btn btn-ghost btn-sm" onclick="cloudSync(true)">Sync now</button>'
    +'<button class="btn btn-ghost btn-sm" onclick="gSignOut()">Sign out</button></div></div>'}
 /* ============ SETTINGS ============ */
