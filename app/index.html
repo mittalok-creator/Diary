@@ -208,6 +208,14 @@ select.inp{appearance:none;-webkit-appearance:none}
 .lk-key.ghost{border:none;background:none;font-size:22px;color:var(--gold)}
 .shake{animation:shk .4s}
 @keyframes shk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.bars{display:flex;align-items:flex-end;gap:10px;height:110px}
+.bar{background:linear-gradient(180deg,var(--goldb),var(--gold));border-radius:6px 6px 2px 2px;min-height:4px;transition:height 1s cubic-bezier(.22,1,.36,1)}
+.bar-l{font-size:10px;color:var(--lo);text-align:center;margin-top:6px}
+.cbar{margin-top:10px}
+.dotstrip{display:flex;gap:5px;flex-wrap:wrap}
+.dot14{width:13px;height:13px;border-radius:4px;background:var(--hair)}
+.dot14.on{background:linear-gradient(135deg,var(--gold),var(--goldb))}
+.inc{color:var(--good)!important;font-weight:700}
 </style>
 </head>
 <body>
@@ -264,7 +272,7 @@ select.inp{appearance:none;-webkit-appearance:none}
       <div class="card" id="waterCard" onclick="addWater()">
         <div class="stat-label">💧 Water</div>
         <div class="stat-num"><span id="gWater">0</span><span style="font-size:16px;color:var(--lo)">/8</span></div>
-        <div class="stat-sub">tap to log a glass</div>
+        <div class="stat-sub" id="waterSub">tap to log a glass</div>
         <div class="hairbar"><i id="waterBar" style="width:0%"></i></div>
       </div>
       <div class="card" onclick="go('life');lifeTab('shopping')">
@@ -286,7 +294,7 @@ select.inp{appearance:none;-webkit-appearance:none}
     <button data-t="notes" onclick="lifeTab('notes')">Notes</button>
     <button data-t="shopping" onclick="lifeTab('shopping')">Shopping</button>
     <button data-t="money" onclick="lifeTab('money')">Money</button>
-    <button data-t="water" onclick="lifeTab('water')">Water</button>
+    <button data-t="health" onclick="lifeTab('health')">Health</button>
     <button data-t="docs" onclick="lifeTab('docs')">Docs</button>
   </div>
 
@@ -325,11 +333,27 @@ select.inp{appearance:none;-webkit-appearance:none}
         <div><div class="stat-label">Spent today</div><div class="stat-num" id="mToday">₹0</div></div>
         <div style="text-align:right"><div class="stat-label">This month</div><div class="stat-num" style="font-size:22px" id="mMonth">₹0</div></div>
       </div>
+      <div class="hairbar" style="margin-top:14px"><i id="budBar" style="width:0%"></i></div>
+      <div class="stat-sub" id="budTxt" style="margin-top:6px"></div>
+      <div class="stat-sub" id="incTxt" style="margin-top:2px"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <input type="number" inputmode="numeric" class="inp" id="budIn" placeholder="Monthly budget ₹" style="padding:9px 12px;font-size:13px">
+        <button class="btn btn-ghost btn-sm" onclick="setBudget()">Set</button>
+      </div>
     </div>
     <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px" onclick="exportExpenses()">⬇ Export to Excel (CSV)</button>
-    <div class="addbar" style="margin-top:14px">
+
+    <div class="eyebrow">Trends · last 6 months</div>
+    <div class="card"><div id="mChart"></div><div id="catBars" style="margin-top:16px"></div></div>
+
+    <div class="eyebrow">Add entry</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px" id="typeChips">
+      <span class="chip on" data-d="out" onclick="pickType(this)">Expense</span>
+      <span class="chip" data-d="in" onclick="pickType(this)">Income</span>
+    </div>
+    <div class="addbar" style="margin-top:0">
       <input class="inp" id="exAmt" type="number" inputmode="numeric" placeholder="₹ Amount" style="flex:0 0 118px">
-      <input class="inp" id="exNote" placeholder="What for?" onkeydown="if(event.key==='Enter')addExpense()">
+      <input class="inp" id="exNote" placeholder="What for?" onkeydown="if(event.key==='Enter')addMoneyEntry()">
     </div>
     <div class="dtrow"><input type="date" class="inp" id="exDate" title="Backdate this entry (optional)"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px" id="catChips">
@@ -340,15 +364,24 @@ select.inp{appearance:none;-webkit-appearance:none}
       <span class="chip" data-c="Health" onclick="pickCat(this)">Health</span>
     </div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-ghost" title="Attach receipt" onclick="pickFiles(fs=>{pend.exp.push(...fs);drawPend('exp')})">📎</button>
-      <button class="btn btn-gold" style="flex:1" onclick="addExpense()">Add expense</button>
+      <button class="btn btn-ghost" id="exAtt" title="Attach receipt" onclick="pickFiles(fs=>{pend.exp.push(...fs);drawPend('exp')})">📎</button>
+      <button class="btn btn-gold" id="addMoneyBtn" style="flex:1" onclick="addMoneyEntry()">Add expense</button>
     </div>
     <div id="pendExp"></div>
+
+    <div class="eyebrow">Savings goals</div>
+    <div class="addbar" style="margin:0 0 12px">
+      <input class="inp" id="goalName" placeholder="Goal (Emergency fund…)">
+      <input class="inp" type="number" inputmode="numeric" id="goalTarget" placeholder="Target ₹" style="flex:0 0 120px">
+      <button class="btn btn-gold" onclick="addGoal()">＋</button>
+    </div>
+    <div id="goalList" style="display:flex;flex-direction:column;gap:10px"></div>
+
     <div class="eyebrow">Recent</div>
     <div class="card" id="exList" style="padding:6px 18px"></div>
   </div>
 
-  <div class="ltab" id="lt-water" style="display:none">
+  <div class="ltab" id="lt-health" style="display:none">
     <div class="card" style="text-align:center;padding:28px">
       <div class="stat-label">Water today</div>
       <div class="stat-num" style="font-size:46px"><span id="wBig">0</span><span style="font-size:20px;color:var(--lo)"> / 8 glasses</span></div>
@@ -358,7 +391,23 @@ select.inp{appearance:none;-webkit-appearance:none}
         <button class="btn btn-gold" style="flex:1;max-width:200px" onclick="addWater()">＋ Log a glass</button>
       </div>
     </div>
+
+    <div class="eyebrow">💊 Medicines</div>
+    <input class="inp" id="medName" placeholder="Medicine name (e.g. Telma 40)">
+    <div class="dtrow"><input type="time" class="inp" id="medT1" title="Dose 1 time"><input type="time" class="inp" id="medT2" title="Dose 2 time (optional)"><input type="number" class="inp" id="medDays" placeholder="Days" title="Course length (blank = daily)" style="flex:0 0 86px"></div>
+    <button class="btn btn-gold" style="width:100%" onclick="addMed()">Add medicine reminder</button>
+    <div id="medList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+
+    <div class="eyebrow">🔥 Habits</div>
+    <div class="addbar" style="margin:0 0 12px"><input class="inp" id="habName" placeholder="New habit (morning walk, reading…)" onkeydown="if(event.key==='Enter')addHabit()"><button class="btn btn-gold" onclick="addHabit()">＋</button></div>
+    <div id="habList" style="display:flex;flex-direction:column;gap:10px"></div>
+
+    <div class="eyebrow">🩺 Vitals</div>
+    <div class="dtrow" style="margin:0 0 8px"><input type="number" step="0.1" class="inp" id="wtIn" placeholder="Weight (kg)"><button class="btn btn-ghost" onclick="addWeight()">Log</button></div>
+    <div class="dtrow" style="margin:0 0 12px"><input type="number" class="inp" id="bpS" placeholder="BP systolic"><input type="number" class="inp" id="bpD" placeholder="BP diastolic"><button class="btn btn-ghost" onclick="addBP()">Log</button></div>
+    <div class="card" id="vitList" style="padding:6px 18px"></div>
   </div>
+
   <div class="ltab" id="lt-docs" style="display:none">
     <input class="inp" id="docName" placeholder="Document name (PAN, RC, Policy, Warranty…)">
     <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addDoc()">📎 Choose image / PDF & save</button>
@@ -606,7 +655,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 function save(skipTouch){if(!skipTouch){S.updatedAt=Date.now();cloudPushSoon()}
@@ -688,6 +737,7 @@ function renderToday(){renderHeader();
   if(S.water.date!==t){S.water={date:t,count:0};save()}
   gWater.textContent=S.water.count; waterBar.style.width=Math.min(100,S.water.count/8*100)+'%';
   countUp(gShop,S.shopping.filter(s=>!s.done).length);
+  const md=medsDueToday();const ws=document.getElementById('waterSub');if(ws)ws.textContent=md?('💊 '+md+' dose'+(md>1?'s':'')+' pending today'):'tap to log a glass';
   const pins=S.notes.filter(n=>n.pinned);
   pinList.innerHTML=pins.length?pins.map(n=>'<div class="row"><div class="row-body"><div class="row-title">📌 '+esc(n.title)+'</div><div class="row-meta">'+esc((n.body||'').slice(0,60))+'</div></div></div>').join('')
     :'<div class="empty" style="padding:20px">Pin a note to see it here</div>'}
@@ -785,6 +835,129 @@ function checkMeetRem(){const now=new Date(),t=today();
     const diff=(st-now)/60000;
     if(diff<=m.rem&&diff>-2){m.notified=true;save();
       notify('🔔 '+m.title,diff>0?'Starts in '+Math.round(diff)+' min':'Starting now')}})}
+/* ============ MONEY 2.0: income, budget, charts, goals ============ */
+let entryType='out';
+function pickType(el){document.querySelectorAll('#typeChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');entryType=el.dataset.d;
+  document.getElementById('catChips').style.display=entryType==='out'?'flex':'none';
+  document.getElementById('exAtt').style.display=entryType==='out'?'block':'none';
+  exNote.placeholder=entryType==='out'?'What for?':'Source (salary, rent, interest…)';
+  document.getElementById('addMoneyBtn').textContent=entryType==='out'?'Add expense':'Add income'}
+function addMoneyEntry(){entryType==='out'?addExpense():addIncome()}
+function addIncome(){const a=Number(exAmt.value);if(!a||a<=0){toast('Enter an amount');return}
+  const when=exDate.value?new Date(exDate.value+'T12:00:00').toISOString():new Date().toISOString();
+  S.income.unshift({id:uid(),amount:a,source:exNote.value.trim()||'Income',at:when});
+  exAmt.value='';exNote.value='';exDate.value='';save();renderLife();toast('+'+fmtR(a)+' income logged')}
+function delInc(id){S.income=S.income.filter(i=>i.id!==id);save();renderLife()}
+function setBudget(){const v=Number(document.getElementById('budIn').value)||0;
+  S.money=S.money||{};S.money.budget=v;document.getElementById('budIn').value='';
+  save();renderLife();toast(v?'Monthly budget set — '+fmtR(v):'Budget cleared')}
+function addGoal(){const n=goalName.value.trim(),t=Number(goalTarget.value);
+  if(!n||!t){toast('Goal name and target ₹ needed');return}
+  S.goals.unshift({id:uid(),name:n,target:t,saved:0});
+  goalName.value='';goalTarget.value='';save();renderLife();toast('Goal created ✦')}
+function goalAdd(id){const inp=document.getElementById('ga_'+id);const v=Number(inp.value);if(!v)return;
+  const g=S.goals.find(x=>x.id===id);g.saved=(g.saved||0)+v;inp.value='';save();renderLife();
+  toast(g.saved>=g.target?'🏆 '+g.name+' complete!':fmtR(v)+' saved toward '+g.name)}
+function delGoal(id){S.goals=S.goals.filter(g=>g.id!==id);save();renderLife()}
+function monthKey(d){return String(d).slice(0,7)}
+function renderMoney2(){if(!document.getElementById('budBar'))return;
+  const t=today(),mk=t.slice(0,7);
+  const spentM=S.expenses.filter(e=>monthKey(e.at)===mk).reduce((a,b)=>a+b.amount,0);
+  const incM=S.income.filter(i=>monthKey(i.at)===mk).reduce((a,b)=>a+b.amount,0);
+  const b=(S.money&&S.money.budget)||0,el=document.getElementById('budBar'),tx=document.getElementById('budTxt');
+  if(b>0){const p=Math.min(100,spentM/b*100);el.style.width=p+'%';
+    el.style.background=p>=100?'var(--risk)':p>=80?'var(--warn)':'linear-gradient(90deg,var(--gold),var(--goldb))';
+    tx.innerHTML='Budget '+fmtR(b)+' · '+Math.round(spentM/b*100)+'% used · '+(spentM<=b?fmtR(b-spentM)+' left':'<span style="color:var(--risk)">'+fmtR(spentM-b)+' over</span>')}
+  else{el.style.width='0%';tx.textContent='Set a monthly budget to track burn'}
+  const iv=document.getElementById('incTxt');
+  if(iv)iv.innerHTML=incM?('Income this month <span class="inc">+'+fmtR(incM)+'</span> · Net '+((incM-spentM)>=0?'<span class="inc">+':'<span style="color:var(--risk)">')+fmtR(Math.abs(incM-spentM))+'</span>'):'';
+  const wrap=document.getElementById('mChart');
+  if(wrap){const vals=[];
+    for(let k=5;k>=0;k--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-k);
+      const key=d.toISOString().slice(0,7);
+      vals.push({lbl:d.toLocaleDateString('en-IN',{month:'short'}),v:S.expenses.filter(e=>monthKey(e.at)===key).reduce((a,b)=>a+b.amount,0)})}
+    const mx=Math.max(1,...vals.map(v=>v.v));
+    wrap.innerHTML='<div class="bars">'+vals.map(v=>'<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div class="bar" data-h="'+(v.v/mx*100)+'" style="height:4px" title="'+fmtR(v.v)+'"></div></div>').join('')+'</div>'
+      +'<div style="display:flex;gap:10px">'+vals.map(v=>'<div class="bar-l" style="flex:1">'+v.lbl+'</div>').join('')+'</div>';
+    setTimeout(()=>wrap.querySelectorAll('.bar').forEach(x=>x.style.height=Math.max(4,+x.dataset.h)+'%'),60)}
+  const cb=document.getElementById('catBars');
+  if(cb){const cats={};S.expenses.filter(e=>monthKey(e.at)===mk).forEach(e=>cats[e.cat]=(cats[e.cat]||0)+e.amount);
+    const top=Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    cb.innerHTML=top.length?top.map(p=>'<div class="cbar"><div style="display:flex;justify-content:space-between;font-size:12.5px"><span>'+esc(p[0])+'</span><b>'+fmtR(p[1])+'</b></div><div class="hairbar"><i style="width:0%" data-w="'+(p[1]/top[0][1]*100)+'"></i></div></div>').join('')
+      :'<div class="empty" style="padding:12px">Log expenses to see category breakdown</div>';
+    setTimeout(()=>cb.querySelectorAll('.hairbar i').forEach(x=>x.style.width=x.dataset.w+'%'),90)}
+  const led=[...S.expenses.map(e=>({id:e.id,at:e.at,note:e.note,cat:e.cat,amount:e.amount,att:e.att,dir:'out'})),
+    ...S.income.map(i=>({id:i.id,at:i.at,note:i.source,cat:'Income',amount:i.amount,dir:'in'}))]
+    .sort((a,b)=>a.at<b.at?1:-1).slice(0,30);
+  const ll=document.getElementById('exList');
+  ll.innerHTML=led.length?led.map(e=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(e.note)+'</div><div class="row-meta">'+esc(e.cat)+' · '+fmtD(e.at)+'</div>'+attChips(e.att)+'</div><div style="font-weight:700;font-variant-numeric:tabular-nums" class="'+(e.dir==='in'?'inc':'')+'">'+(e.dir==='in'?'+':'')+fmtR(e.amount)+'</div><button class="del" onclick="'+(e.dir==='in'?'delInc':'delExp')+'(\''+e.id+'\')">✕</button></div>').join('')
+    :'<div class="empty"><div class="em-ring">₹</div>No entries yet — add your first expense or income.</div>';
+  const gl=document.getElementById('goalList');
+  gl.innerHTML=S.goals.map(g=>{const p=Math.min(100,(g.saved||0)/g.target*100);
+    return '<div class="card"><div style="display:flex;justify-content:space-between"><div class="row-title">'+esc(g.name)+'</div><button class="del" onclick="delGoal(\''+g.id+'\')">✕</button></div>'
+    +'<div class="row-meta" style="margin-top:3px">'+fmtR(g.saved||0)+' of '+fmtR(g.target)+' · '+Math.round(p)+'%'+(p>=100?' 🏆':'')+'</div>'
+    +'<div class="hairbar" style="margin-top:8px"><i style="width:'+p+'%"></i></div>'
+    +'<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" type="number" inputmode="numeric" placeholder="₹ add savings" id="ga_'+g.id+'" style="padding:9px 12px;font-size:13px"><button class="btn btn-gold btn-sm" onclick="goalAdd(\''+g.id+'\')">＋ Save</button></div></div>'}).join('')
+    ||'<div class="empty" style="padding:14px">Create a goal — emergency fund, new phone, Goa trip…</div>'}
+/* ============ HEALTH: medicines, habits, vitals ============ */
+function medActive(m,t){if(m.start>t)return false;if(!m.days||m.days<=0)return true;
+  return Math.round((new Date(t+'T00:00')-new Date(m.start+'T00:00'))/864e5)<m.days}
+function addMed(){const n=medName.value.trim();if(!n){toast('Medicine name?');return}
+  const ts=[medT1.value,medT2.value].filter(Boolean);if(!ts.length){toast('Set at least one dose time');return}
+  S.meds.unshift({id:uid(),name:n,times:ts,days:Number(medDays.value)||0,start:today(),taken:{},notified:{}});
+  medName.value='';medT1.value='';medT2.value='';medDays.value='';
+  save();renderLife();renderToday();toast('💊 Reminders set — '+ts.map(fmtTime).join(', '))}
+function delMed(id){S.meds=S.meds.filter(m=>m.id!==id);save();renderLife();renderToday()}
+function medToggle(id,tm){const m=S.meds.find(x=>x.id===id);const t=today();m.taken=m.taken||{};
+  const arr=m.taken[t]=m.taken[t]||[];const i=arr.indexOf(tm);
+  if(i>-1)arr.splice(i,1);else{arr.push(tm);toast('💊 Dose logged')}
+  save();renderLife();renderToday()}
+function medsDueToday(){const t=today();let n=0;S.meds.forEach(m=>{if(!medActive(m,t))return;
+  (m.times||[]).forEach(tm=>{if(!(((m.taken||{})[t])||[]).includes(tm))n++})});return n}
+function medCard(m){const t=today();const act=medActive(m,t);
+  const dayIdx=Math.round((new Date(t+'T00:00')-new Date(m.start+'T00:00'))/864e5)+1;
+  return '<div class="card" style="'+(act?'':'opacity:.55')+'">'
+  +'<div style="display:flex;justify-content:space-between"><div class="row-title">💊 '+esc(m.name)+'</div><button class="del" onclick="delMed(\''+m.id+'\')">✕</button></div>'
+  +'<div class="row-meta" style="margin-top:3px">'+(m.days?(act?('Day '+Math.min(dayIdx,m.days)+' of '+m.days):'Course completed ✓'):'Daily')+'</div>'
+  +(act?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+m.times.map(tm=>{const on=(((m.taken||{})[t])||[]).includes(tm);
+    return '<span class="chip '+(on?'on':'')+'" onclick="medToggle(\''+m.id+'\',\''+tm+'\')">'+(on?'✓ ':'')+fmtTime(tm)+'</span>'}).join('')+'</div>':'')
+  +'</div>'}
+function checkMedRem(){const t=today();S.meds.forEach(m=>{if(!medActive(m,t))return;m.notified=m.notified||{};
+  (m.times||[]).forEach(tm=>{const key=t+'_'+tm;if(m.notified[key])return;
+    if((((m.taken||{})[t])||[]).includes(tm))return;
+    const diff=(new Date(t+'T'+tm).getTime()-Date.now())/60000;
+    if(diff<=0&&diff>-30){m.notified[key]=1;save(true);notify('💊 '+m.name,'Dose time — '+fmtTime(tm))}})})}
+function addHabit(){const n=habName.value.trim();if(!n)return;
+  S.habits.unshift({id:uid(),name:n,done:{}});habName.value='';save();renderLife();toast('🔥 Habit added')}
+function delHabit(id){S.habits=S.habits.filter(h=>h.id!==id);save();renderLife()}
+function habitStreak(h){let n=0;const d=new Date();h.done=h.done||{};
+  if(!h.done[today()])d.setDate(d.getDate()-1);
+  while(h.done[d.toISOString().slice(0,10)]){n++;d.setDate(d.getDate()-1)}return n}
+function habitToggle(id){const h=S.habits.find(x=>x.id===id);const t=today();h.done=h.done||{};
+  if(h.done[t])delete h.done[t];else h.done[t]=true;
+  save();renderLife();
+  if(h.done[t])toast('🔥 '+habitStreak(h)+' day streak — '+h.name)}
+function habitCard(h){const t=today();const days=[];const d=new Date();d.setDate(d.getDate()-13);
+  for(let i=0;i<14;i++){const k=d.toISOString().slice(0,10);
+    days.push('<div class="dot14 '+((h.done||{})[k]?'on':'')+'"></div>');d.setDate(d.getDate()+1)}
+  const on=(h.done||{})[t];
+  return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
+  +'<div class="chk '+(on?'on':'')+'" onclick="habitToggle(\''+h.id+'\')" style="width:28px;height:28px;border-radius:9px"></div>'
+  +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(h.name)+'</div><div class="row-meta">🔥 '+habitStreak(h)+' day streak</div></div>'
+  +'<button class="del" onclick="delHabit(\''+h.id+'\')">✕</button></div>'
+  +'<div class="dotstrip" style="margin-top:12px">'+days.join('')+'</div></div>'}
+function addWeight(){const v=Number(wtIn.value);if(!v)return;
+  S.vitals.unshift({id:uid(),kind:'weight',v1:v,at:new Date().toISOString()});
+  wtIn.value='';save();renderLife();toast('⚖ '+v+' kg logged')}
+function addBP(){const a=Number(bpS.value),b2=Number(bpD.value);if(!a||!b2)return;
+  S.vitals.unshift({id:uid(),kind:'bp',v1:a,v2:b2,at:new Date().toISOString()});
+  bpS.value='';bpD.value='';save();renderLife();toast('🩺 '+a+'/'+b2+' logged')}
+function delVital(id){S.vitals=S.vitals.filter(v=>v.id!==id);save();renderLife()}
+function renderHealth(){if(!document.getElementById('medList'))return;
+  medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
+  habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
+  vitList.innerHTML=S.vitals.slice(0,6).map(v=>'<div class="row"><div class="row-body"><div class="row-title">'+(v.kind==='weight'?'⚖ '+v.v1+' kg':'🩺 '+v.v1+'/'+v.v2)+'</div><div class="row-meta">'+fmtD(v.at)+'</div></div><button class="del" onclick="delVital(\''+v.id+'\')">✕</button></div>').join('')||'<div class="empty" style="padding:12px">Log weight or BP to build history</div>'}
 /* ============ ATTACHMENTS (image + PDF) ============ */
 let pend={note:[],onote:[],exp:[],meet:[]};
 const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet'};
@@ -847,13 +1020,13 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
   +'<button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
-function renderLife(){renderDocs();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
+function renderLife(){renderDocs();renderMoney2();renderHealth();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
   mToday&&countUp(mToday,S.expenses.filter(e=>e.at.slice(0,10)===t).reduce((a,b)=>a+b.amount,0),'₹');
   mMonth&&countUp(mMonth,S.expenses.filter(e=>e.at.slice(0,7)===m).reduce((a,b)=>a+b.amount,0),'₹');
-  listOr(exList,S.expenses.slice(0,25),e=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(e.note)+'</div><div class="row-meta">'+esc(e.cat)+' · '+fmtD(e.at)+'</div>'+attChips(e.att)+'</div><div style="font-weight:700;font-variant-numeric:tabular-nums">'+fmtR(e.amount)+'</div><button class="del" onclick="delExp(\''+e.id+'\')">✕</button></div>','No expenses logged yet.');
+  
   wBig&&(wBig.textContent=S.water.count);wBigBar&&(wBigBar.style.width=Math.min(100,S.water.count/8*100)+'%')}
 function renderDocs(){const el=document.getElementById('docList');if(!el)return;
   el.innerHTML=S.docs.map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>PAN, RC, policy, warranty —<br>keep them all safe here (image or PDF)</div>'}
@@ -871,6 +1044,8 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Tasks',S.tasks.filter(t=>hit(t.title)).map(taskRow)],
    ['Notes',S.notes.filter(n=>hit(n.title)||hit(n.body)).map(noteCard)],
    ['Expenses',S.expenses.filter(e=>hit(e.note)||hit(e.cat)).map(e=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(e.note)+'</div><div class="row-meta">'+esc(e.cat)+'</div></div><div style="font-weight:700">'+fmtR(e.amount)+'</div></div>')],
+   ['Income',S.income.filter(i=>hit(i.source)).map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div><div class="row-meta">'+fmtD(i.at)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>')],
+   ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
    ['Circulars',S.circulars.filter(c=>hit(c.name)||hit(c.type)).map(circCard)],
    ['Documents',S.docs.filter(d=>hit(d.name)).map(docCard)],
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
@@ -953,15 +1128,16 @@ function circCard(c){const vs=c.versions.slice().sort((a,b)=>a.date<b.date?1:-1)
     +'</div></div>':'')
   +'</div>'}
 /* ============ EXCEL EXPORT ============ */
-function exportExpenses(){if(!S.expenses.length){toast('No expenses to export yet');return}
+function exportExpenses(){if(!S.expenses.length&&!S.income.length){toast('Nothing to export yet');return}
   const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
-  let csv='\ufeffDate,Category,Description,Amount (INR)\n';
-  S.expenses.slice().sort((a,b)=>a.at<b.at?-1:1).forEach(e=>{
-    csv+=fmtD(e.at)+','+q(e.cat)+','+q(e.note)+','+e.amount+'\n'});
-  csv+=',,Total,'+S.expenses.reduce((a,b)=>a+b.amount,0)+'\n';
-  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download='alokos-expenses-'+fmtD(new Date())+'.csv';a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),3000);toast('Excel file downloaded — open to analyse')}
+  let csv='\ufeffDate,Type,Category/Source,Description,Amount (INR)\n';
+  const rows=[...S.expenses.map(e=>({at:e.at,ty:'Expense',c:e.cat,n:e.note,a:-e.amount})),
+    ...S.income.map(i=>({at:i.at,ty:'Income',c:'Income',n:i.source,a:i.amount}))].sort((x,y)=>x.at<y.at?-1:1);
+  rows.forEach(r=>{csv+=fmtD(r.at)+','+r.ty+','+q(r.c)+','+q(r.n)+','+r.a+'\n'});
+  csv+=',,,Net,'+rows.reduce((s2,r)=>s2+r.a,0)+'\n';
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a2=document.createElement('a');
+  a2.href=URL.createObjectURL(blob);a2.download='alokos-money-'+fmtD(new Date())+'.csv';a2.click();
+  setTimeout(()=>URL.revokeObjectURL(a2.href),3000);toast('Excel file downloaded — open to analyse')}
 /* ============ NOTIFICATIONS ============ */
 function notify(title,body){toast(title+(body?' — '+body:''));
   if(!('Notification' in window)||Notification.permission!=='granted')return;
@@ -984,7 +1160,7 @@ function checkTaskRem(){const now=Date.now(),t=today();
     const ts=new Date(t+'T'+x.time).getTime();const diff=(ts-now)/60000;
     if(diff<=10&&diff>-2){x.notified=true;save();
       notify('⏰ '+x.title,diff>0?'Due in '+Math.round(diff)+' min':'Due now')}})}
-function checkReminders(){checkMeetRem();checkTaskRem()}
+function checkReminders(){checkMeetRem();checkTaskRem();checkMedRem()}
 /* ============ CALENDAR ============ */
 function calShift(n){const el=document.getElementById('calDate');
   const d=new Date((el.value||today())+'T12:00:00');d.setDate(d.getDate()+n);
@@ -1001,6 +1177,9 @@ function renderCal(){const d=document.getElementById('calDate').value||today();
   const ex=S.expenses.filter(e=>onDay(e.at));
   if(ex.length){const tot=ex.reduce((a,b)=>a+b.amount,0);
     secs.push(['Expenses · '+fmtR(tot),'<div class="card" style="padding:6px 18px">'+ex.map(e=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(e.note)+'</div><div class="row-meta">'+esc(e.cat)+'</div></div><div style="font-weight:700;font-variant-numeric:tabular-nums">'+fmtR(e.amount)+'</div></div>').join('')+'</div>'])}
+  const inc=S.income.filter(i=>onDay(i.at));
+  if(inc.length){const tot=inc.reduce((a,b)=>a+b.amount,0);
+    secs.push(['Income · +'+fmtR(tot),'<div class="card" style="padding:6px 18px">'+inc.map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>').join('')+'</div>'])}
   const nt=S.notes.filter(n=>onDay(n.at));
   if(nt.length)secs.push(['Notes · '+nt.length,'<div style="display:flex;flex-direction:column;gap:10px">'+nt.map(noteCard).join('')+'</div>']);
   const cc=S.circulars.filter(c=>(c.versions||[]).some(v=>v.date===d));
