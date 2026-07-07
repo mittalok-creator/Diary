@@ -1076,7 +1076,13 @@ function initGoogle(){if(!gConfigured()||typeof google==='undefined'||!google.ac
     callback:async r=>{if(!r||!r.access_token)return;
       gToken=r.access_token;gTokenExp=Date.now()+((r.expires_in||3600)-90)*1000;
       S.gAuth={t:gToken,exp:gTokenExp};save(true);
-      if(!S.profile.google)await fetchGProfile();
+      const prevOwner=S.owner||null;
+      await fetchGProfile();
+      const email=(S.profile.google&&S.profile.google.email)||null;
+      if(email){
+        if(prevOwner&&prevOwner!==email)await switchAccount(email);
+        else if(!prevOwner){S.owner=email;S.updatedAt=0;save(true)}
+      }
       hideLogin();renderSettings();cloudSync()}});
   if(S.gAuth&&Date.now()<S.gAuth.exp){gToken=S.gAuth.t;gTokenExp=S.gAuth.exp;cloudSync()}
   else if(S.profile.google)setSyncStatus('Session expired — tap Sync now to reconnect');}
@@ -1096,8 +1102,15 @@ async function fetchGProfile(){try{
   if(!r.ok)return;const j=await r.json();
   S.profile.google={name:j.name||'',email:j.email||'',pic:j.picture||''};
   if(!S.profile.name)S.profile.name=j.given_name||j.name||'';
-  save();renderHeader()}catch(e){}}
+  save(true);renderHeader()}catch(e){}}
 let syncMsg='';
+async function switchAccount(email){
+  toast('Switching account — loading '+email+"'s data…");
+  try{allAttIds().forEach(id=>fileDel(id))}catch(e){}
+  const keepA=S.gAuth,g=S.profile.google,keepSkip=S.loginSkipped;
+  S=blank();S.owner=email;S.gAuth=keepA;S.profile.google=g;S.loginSkipped=keepSkip;
+  S.updatedAt=0; /* ensures this account's cloud data wins on next sync */
+  save(true);applyTheme();renderAll()}
 function setSyncStatus(t){syncMsg=t;const el=document.getElementById('syncStatus');if(el)el.textContent=t}
 function cloudPushSoon(){if(!S.profile.google)return;clearTimeout(pushT);pushT=setTimeout(()=>cloudSync(),20000)}
 async function driveErr(r){let t='';try{t=await r.text()}catch(e){}
@@ -1134,7 +1147,7 @@ async function cloudSync(manual){
         if(snap&&snap.state){const keepG=S.profile.google,keepA=S.gAuth;
           S={...blank(),...snap.state};if(keepG)S.profile.google=keepG;if(keepA)S.gAuth=keepA;migrate();
           for(const id in (snap.files||{}))await fileSave(id,snap.files[id]);
-          S.updatedAt=cloudU;S.lastSync=Date.now();save(true);
+          S.owner=(keepG&&keepG.email)||S.owner;S.updatedAt=cloudU;S.lastSync=Date.now();save(true);
           applyTheme();renderAll();toast('☁ Updated from your Google Drive')}}
       else if(localU>cloudU){await drivePush(meta.id);toast('☁ Saved to your Google Drive')}}
     S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync))}
