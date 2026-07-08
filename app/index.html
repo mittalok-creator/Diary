@@ -227,6 +227,32 @@ select.inp{appearance:none;-webkit-appearance:none}
   display:flex;align-items:center;justify-content:center;font-size:30px}
 .gal-cap{font-size:10.5px;color:var(--lo);margin-top:5px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(min-width:1000px){.gal-grid{grid-template-columns:repeat(6,1fr)}}
+.qadd{display:flex;gap:8px;margin-top:8px}
+.qchips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
+.qchips .chip{font-size:11.5px;padding:6px 11px}
+.tl{position:relative;padding-left:4px}
+.tl::before{content:'';position:absolute;left:63px;top:8px;bottom:8px;width:1.5px;background:var(--hair)}
+.tl-plain::before{display:none}
+.tl-row{display:flex;align-items:flex-start;gap:12px;padding:11px 0;cursor:pointer;position:relative;transition:opacity .2s}
+.tl-row.past{opacity:.42}
+.tl-row.tl-done .row-title{text-decoration:line-through;text-decoration-color:var(--gold);color:var(--lo)}
+.tl-time{width:52px;flex-shrink:0;font-size:11.5px;font-weight:700;color:var(--lo);
+  font-variant-numeric:tabular-nums;padding-top:3px;text-align:right}
+.tl-dot{width:11px;height:11px;border-radius:50%;border:1.5px solid var(--gold);background:var(--ink1);
+  flex-shrink:0;margin-top:5px;z-index:1}
+.tl-dot.on{background:linear-gradient(135deg,var(--gold),var(--goldb))}
+.tl-body{flex:1;min-width:0}
+.tl-now{display:flex;align-items:center;gap:10px;margin:6px 0 6px 64px;position:relative}
+.tl-now::before{content:'';position:absolute;left:-6px;width:9px;height:9px;border-radius:50%;
+  background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.tl-now::after{content:'';flex:1;height:1.5px;background:linear-gradient(90deg,var(--gold),transparent)}
+.tl-now span{font-size:9.5px;font-weight:700;letter-spacing:.13em;color:var(--gold);margin-left:12px;white-space:nowrap}
+.dash-cols{display:block}
+@media(min-width:1000px){
+  .dash-cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+  .dash-col .grid2{grid-template-columns:1fr 1fr}
+  #dashSeg{max-width:420px}
+}
 </style>
 </head>
 <body>
@@ -243,61 +269,96 @@ select.inp{appearance:none;-webkit-appearance:none}
 
 <!-- ================= TODAY ================= -->
 <section class="view active" id="v-today">
-  <div class="cascade">
-    <div class="card" style="margin-top:8px">
-      <div class="ringwrap">
-        <svg class="ring" width="84" height="84" viewBox="0 0 84 84">
-          <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#D9A85C"/><stop offset="1" stop-color="#F0C27B"/>
-          </linearGradient></defs>
-          <circle class="bg" cx="42" cy="42" r="36" stroke-width="6" fill="none"/>
-          <circle class="fg" id="scoreRing" cx="42" cy="42" r="36" stroke-width="6" fill="none"
-            stroke-dasharray="226" stroke-dashoffset="226"/>
-        </svg>
-        <div>
-          <div class="stat-label">Today's Progress</div>
-          <div class="ring-num"><span id="scoreTxt">0</span>%</div>
-          <div class="stat-sub" id="scoreSub"></div>
+  <div class="qadd">
+    <input class="inp" id="qaIn" placeholder="Quick add… (e.g. 250 lunch, or Call branch)" onkeydown="if(event.key==='Enter')quickAdd()">
+    <button class="btn btn-gold" onclick="quickAdd()">＋</button>
+  </div>
+  <div class="qchips" id="qaChips">
+    <span class="chip on" data-q="task" onclick="pickQA(this)">● Task</span>
+    <span class="chip" data-q="otask" onclick="pickQA(this)">💼 Office task</span>
+    <span class="chip" data-q="exp" onclick="pickQA(this)">₹ Expense</span>
+    <span class="chip" data-q="shop" onclick="pickQA(this)">🛒 Shopping</span>
+    <span class="chip" data-q="note" onclick="pickQA(this)">🗒 Note</span>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="ringwrap">
+      <svg class="ring" width="84" height="84" viewBox="0 0 84 84">
+        <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#D9A85C"/><stop offset="1" stop-color="#F0C27B"/>
+        </linearGradient></defs>
+        <circle class="bg" cx="42" cy="42" r="36" stroke-width="6" fill="none"/>
+        <circle class="fg" id="scoreRing" cx="42" cy="42" r="36" stroke-width="6" fill="none"
+          stroke-dasharray="226" stroke-dashoffset="226"/>
+      </svg>
+      <div>
+        <div class="stat-label">Today's Score</div>
+        <div class="ring-num"><span id="scoreTxt">0</span>%</div>
+        <div class="stat-sub" id="scoreSub"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="seg" id="dashSeg" style="margin-top:16px">
+    <button data-f="all" class="on" onclick="setDashFilter('all')">All</button>
+    <button data-f="life" onclick="setDashFilter('life')">Life</button>
+    <button data-f="work" onclick="setDashFilter('work')">Work</button>
+  </div>
+
+  <div class="eyebrow">✦ Your day</div>
+  <div class="card" id="timelineCard"></div>
+
+  <div class="dash-cols">
+    <div class="dash-col" id="colLife">
+      <div class="eyebrow">Life</div>
+      <div class="grid2">
+        <div class="card" onclick="go('life');lifeTab('money')">
+          <div class="stat-label">Money · Today</div>
+          <div class="stat-num" id="gSpend">₹0</div>
+          <div class="stat-sub" id="gSpendM"></div>
+        </div>
+        <div class="card" id="waterCard" onclick="addWater()">
+          <div class="stat-label">💧 Water</div>
+          <div class="stat-num"><span id="gWater">0</span><span style="font-size:16px;color:var(--lo)">/8</span></div>
+          <div class="stat-sub" id="waterSub">tap to log a glass</div>
+          <div class="hairbar"><i id="waterBar" style="width:0%"></i></div>
+        </div>
+        <div class="card" onclick="go('life');lifeTab('shopping')">
+          <div class="stat-label">🛒 Shopping</div>
+          <div class="stat-num" id="gShop">0</div>
+          <div class="stat-sub">items needed</div>
+        </div>
+        <div class="card" onclick="go('life');lifeTab('health')">
+          <div class="stat-label">🔥 Habits</div>
+          <div class="stat-num" id="gHabit">0</div>
+          <div class="stat-sub" id="gHabitSub">done today</div>
         </div>
       </div>
+      <div class="eyebrow">🛡 Upcoming</div>
+      <div class="card" id="renewToday" style="padding:6px 18px"></div>
+      <div class="eyebrow">Pinned notes</div>
+      <div class="card" id="pinList" style="padding:6px 18px"></div>
     </div>
 
-    <div class="eyebrow">✦ Today's Focus</div>
-    <div class="card" id="focusList" style="padding:6px 18px"></div>
-
-    <div class="eyebrow">Today's Meetings</div>
-    <div class="card" id="meetToday" style="padding:6px 18px"></div>
-
-    <div class="eyebrow">At a glance</div>
-    <div class="grid2">
-      <div class="card" onclick="go('life');lifeTab('money')">
-        <div class="stat-label">Money · Today</div>
-        <div class="stat-num" id="gSpend">₹0</div>
-        <div class="stat-sub" id="gSpendM"></div>
+    <div class="dash-col" id="colWork">
+      <div class="eyebrow">Work</div>
+      <div class="grid2">
+        <div class="card" onclick="go('work')">
+          <div class="stat-label">Office Pending</div>
+          <div class="stat-num" id="gOffice">0</div>
+          <div class="stat-sub" id="gFollow"></div>
+        </div>
+        <div class="card" onclick="go('work');workTab('circ')">
+          <div class="stat-label">📑 Circulars</div>
+          <div class="stat-num" id="gCirc">0</div>
+          <div class="stat-sub">saved</div>
+        </div>
       </div>
-      <div class="card" onclick="go('work')">
-        <div class="stat-label">Office Pending</div>
-        <div class="stat-num" id="gOffice">0</div>
-        <div class="stat-sub" id="gFollow"></div>
-      </div>
-      <div class="card" id="waterCard" onclick="addWater()">
-        <div class="stat-label">💧 Water</div>
-        <div class="stat-num"><span id="gWater">0</span><span style="font-size:16px;color:var(--lo)">/8</span></div>
-        <div class="stat-sub" id="waterSub">tap to log a glass</div>
-        <div class="hairbar"><i id="waterBar" style="width:0%"></i></div>
-      </div>
-      <div class="card" onclick="go('life');lifeTab('shopping')">
-        <div class="stat-label">🛒 Shopping</div>
-        <div class="stat-num" id="gShop">0</div>
-        <div class="stat-sub">items needed</div>
-      </div>
+      <div class="eyebrow">Today's Meetings</div>
+      <div class="card" id="meetToday" style="padding:6px 18px"></div>
+      <div class="eyebrow">Follow-ups due</div>
+      <div class="card" id="fuToday" style="padding:6px 18px"></div>
     </div>
-
-    <div class="eyebrow">🛡 Upcoming</div>
-    <div class="card" id="renewToday" style="padding:6px 18px"></div>
-
-    <div class="eyebrow">Pinned notes</div>
-    <div class="card" id="pinList" style="padding:6px 18px"></div>
   </div>
 </section>
 
@@ -801,6 +862,9 @@ function cdFmt(ms){const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),
   return (h?h+'h ':'')+m+'m '+ss+'s'}
 function tick(){const d=new Date();let h=d.getHours();const ap=h>=12?'PM':'AM';h=h%12||12;
   const el=document.getElementById('hTime');if(el)el.textContent=h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap;
+  const nm=nowHM();
+  if(tick._m!==nm){tick._m=nm;
+    if(document.getElementById('v-today').classList.contains('active'))renderTimeline()}
   document.querySelectorAll('.cd').forEach(c=>{const r=+c.dataset.ts-Date.now();
     if(r>0){c.textContent='⏳ '+cdFmt(r)+' left';c.style.color=r<3600000?'var(--warn)':'var(--gold)'}
     else{c.textContent='⏳ time over';c.style.color='var(--risk)'}})}
@@ -838,47 +902,137 @@ function dueLabel(d){if(!d)return'';const t=today();
   if(d===t)return'<span class="due-warn">today</span>';
   return fmtD(d)}
 function renderToday(){renderHeader();
-  const all=S.tasks, done=all.filter(t=>t.done).length, tot=all.length;
-  const pct=tot?Math.round(done/tot*100):0;
-  scoreRing.style.strokeDashoffset=226-226*pct/100;
-  countUp(scoreTxt,pct); scoreSub.textContent=done+' of '+tot+' tasks done';
-  // focus: overdue+today, undone, both spaces + due follow-ups
   const t=today();
-  const focus=[...all.filter(x=>!x.done&&x.due&&x.due<=t).map(x=>({icon:x.space==='office'?'💼':'●',title:x.title,meta:(x.space==='office'?'Office':'Personal')+' · ',due:x.due,time:x.time||null})),
-    ...S.followups.filter(f=>!f.done&&f.due<=t).map(f=>({icon:'↺',title:f.person+' — '+f.topic,meta:'Follow-up · ',due:f.due,time:null}))]
-    .sort((a,b)=>{const ka=(a.due||'')+'T'+(a.time||'23:59'),kb=(b.due||'')+'T'+(b.time||'23:59');return ka<kb?-1:1});
-  focusList.innerHTML=focus.length?focus.map((f,i)=>'<div class="row"><div style="width:24px;text-align:center;color:var(--gold);font-family:Fraunces,serif">'+(i+1)+'</div><div class="row-body"><div class="row-title">'+esc(f.icon+' '+f.title)+'</div><div class="row-meta">'+f.meta+dueLabel(f.due)+(f.time?' · <b style="color:var(--gold)">'+fmtTime(f.time)+'</b>'+(f.due===t?' · <span class="cd" data-ts="'+new Date(t+'T'+f.time).getTime()+'"></span>':''):'')+'</div></div></div>').join('')
-    :'<div class="empty"><div class="em-ring">✦</div>Nothing urgent today.<br>Clear runway ahead.</div>';
-  const mts=S.meetings.filter(m=>m.date===t&&!m.done).sort((a,b)=>(a.time||'')<(b.time||'')?-1:1);
-  meetToday.innerHTML=mts.length?mts.map(m=>'<div class="row" style="cursor:pointer" onclick="joinMeet(\''+m.id+'\')"><div class="row-body"><div class="row-title">'+esc(m.title)+'</div>'+(m.time?'<div class="row-meta"><span class="cd" data-ts="'+new Date(t+'T'+m.time).getTime()+'"></span></div>':'')+'</div><div style="color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums">'+(m.time?fmtTime(m.time):'—')+'</div></div>').join('')
-    :'<div class="empty" style="padding:20px">No meetings today</div>';
-  // money
-  const m=today().slice(0,7);
+  /* --- Today's Score: only what is actually due today (tasks due<=today, habits, medicine doses) --- */
+  const dueT=S.tasks.filter(x=>x.due&&x.due<=t);
+  const doneT=dueT.filter(x=>x.done).length;
+  const habT=S.habits.length, habD=S.habits.filter(h=>(h.done||{})[t]).length;
+  let dosT=0,dosD=0;
+  S.meds.forEach(m=>{if(!medActive(m,t))return;(m.times||[]).forEach(tm=>{dosT++;
+    if((((m.taken||{})[t])||[]).includes(tm))dosD++})});
+  const tot=dueT.length+habT+dosT, don=doneT+habD+dosD;
+  const pct=tot?Math.round(don/tot*100):0;
+  scoreRing.style.strokeDashoffset=226-226*pct/100;
+  countUp(scoreTxt,pct);
+  scoreSub.textContent=tot?(don+' of '+tot+' done today'):'Nothing due today';
+
+  renderTimeline();
+
+  /* --- Life column --- */
+  const mk=t.slice(0,7);
   const sT=S.expenses.filter(e=>e.at.slice(0,10)===t).reduce((a,b)=>a+b.amount,0);
-  const sM=S.expenses.filter(e=>e.at.slice(0,7)===m).reduce((a,b)=>a+b.amount,0);
-  countUp(gSpend,sT,'₹'); gSpendM.textContent=fmtR(sM)+' this month';
-  const oPend=S.tasks.filter(x=>x.space==='office'&&!x.done).length;
-  countUp(gOffice,oPend); gFollow.textContent=S.followups.filter(f=>!f.done).length+' follow-ups open';
-  // water
+  const sM=S.expenses.filter(e=>e.at.slice(0,7)===mk).reduce((a,b)=>a+b.amount,0);
+  countUp(gSpend,sT,'₹');
+  const bud=(S.money&&S.money.budget)||0;
+  gSpendM.innerHTML=bud?(fmtR(sM)+' / '+fmtR(bud)+(sM>bud?' <span style="color:var(--risk)">over</span>':'')):(fmtR(sM)+' this month');
   if(S.water.date!==t){S.water={date:t,count:0};save()}
   gWater.textContent=S.water.count; waterBar.style.width=Math.min(100,S.water.count/8*100)+'%';
+  const md=medsDueToday();const ws=document.getElementById('waterSub');
+  if(ws)ws.textContent=md?('💊 '+md+' dose'+(md>1?'s':'')+' pending'):'tap to log a glass';
   countUp(gShop,S.shopping.filter(s=>!s.done).length);
-  const md=medsDueToday();const ws=document.getElementById('waterSub');if(ws)ws.textContent=md?('💊 '+md+' dose'+(md>1?'s':'')+' pending today'):'tap to log a glass';
+  countUp(gHabit,habD);
+  document.getElementById('gHabitSub').textContent=habT?('of '+habT+' today'):'add a habit';
+
   const up=S.renewals.map(r=>({r,n:daysTo(r.expiry)})).filter(x=>x.n<=60).sort((a,b)=>a.n-b.n).slice(0,4);
   const ns2=nextService();if(ns2&&daysTo(ns2.next)<=60)up.push({r:{name:'Car service',kind:'Service',expiry:ns2.next},n:daysTo(ns2.next)});
   S.events.forEach(e=>{const occ=nextOcc(e.date),n2=daysTo(occ);
     if(n2<=30)up.push({r:{name:(e.kind==='Birthday'?'🎂 ':'💍 ')+e.name,kind:e.kind,expiry:occ},n:n2})});
   up.sort((a,b)=>a.n-b.n);
-  renewToday.innerHTML=up.length?up.map(x=>'<div class="row" style="cursor:pointer" onclick="go(\'life\');lifeTab(\'renew\')"><div class="row-body"><div class="row-title">'+esc(x.r.name)+'</div><div class="row-meta">'+esc(x.r.kind)+' · '+fmtD(x.r.expiry)+'</div></div><b style="color:'+rnColor(x.n)+';font-size:12.5px;white-space:nowrap">'+rnLabel(x.n)+'</b></div>').join('')
+  renewToday.innerHTML=up.length?up.slice(0,6).map(x=>'<div class="row" style="cursor:pointer" onclick="go(\'life\');lifeTab(\''+(x.r.kind==='Birthday'||x.r.kind==='Anniversary'?'bday':'renew')+'\')"><div class="row-body"><div class="row-title">'+esc(x.r.name)+'</div><div class="row-meta">'+esc(x.r.kind)+' · '+fmtD(x.r.expiry)+'</div></div><b style="color:'+rnColor(x.n)+';font-size:12.5px;white-space:nowrap">'+rnLabel(x.n)+'</b></div>').join('')
     :'<div class="empty" style="padding:20px">Nothing expiring in the next 60 days</div>';
+
   const pins=S.notes.filter(n=>n.pinned);
   pinList.innerHTML=pins.length?pins.map(n=>'<div class="row"><div class="row-body"><div class="row-title">📌 '+esc(n.title)+'</div><div class="row-meta">'+esc((n.body||'').slice(0,60))+'</div></div></div>').join('')
-    :'<div class="empty" style="padding:20px">Pin a note to see it here</div>'}
+    :'<div class="empty" style="padding:20px">Pin a note to see it here</div>';
+
+  /* --- Work column --- */
+  const oPend=S.tasks.filter(x=>x.space==='office'&&!x.done).length;
+  countUp(gOffice,oPend);
+  const fuDue=S.followups.filter(f=>!f.done&&f.due<=t);
+  gFollow.textContent=S.followups.filter(f=>!f.done).length+' follow-ups open';
+  countUp(gCirc,S.circulars.length);
+  const mts=S.meetings.filter(m=>m.date===t&&!m.done).sort((a,b)=>(a.time||'')<(b.time||'')?-1:1);
+  meetToday.innerHTML=mts.length?mts.map(m=>'<div class="row" style="cursor:pointer" onclick="joinMeet(\''+m.id+'\')"><div class="row-body"><div class="row-title">'+esc(m.title)+'</div>'+(m.time?'<div class="row-meta"><span class="cd" data-ts="'+new Date(t+'T'+m.time).getTime()+'"></span></div>':'')+'</div><div style="color:var(--gold);font-weight:700;font-variant-numeric:tabular-nums">'+(m.time?fmtTime(m.time):'—')+'</div></div>').join('')
+    :'<div class="empty" style="padding:20px">No meetings today</div>';
+  fuToday.innerHTML=fuDue.length?fuDue.slice(0,6).map(f=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(f.person)+' — '+esc(f.topic)+'</div><div class="row-meta">'+dueLabel(f.due)+'</div></div><button class="btn btn-gold btn-sm" onclick="fuDone(\''+f.id+'\')">✓</button></div>').join('')
+    :'<div class="empty" style="padding:20px">No follow-ups due</div>';
+  applyDashFilter()}
+
+/* ============ TIMELINE DAY VIEW ============ */
+let dashFilter='all';
+function setDashFilter(f){dashFilter=f;
+  document.querySelectorAll('#dashSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
+  renderTimeline();applyDashFilter()}
+function applyDashFilter(){
+  const l=document.getElementById('colLife'),w=document.getElementById('colWork');
+  if(!l||!w)return;
+  l.style.display=(dashFilter==='work')?'none':'';
+  w.style.display=(dashFilter==='life')?'none':''}
+function nowHM(){const d=new Date();return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}
+function timelineItems(){const t=today();const out=[];
+  S.meetings.filter(m=>m.date===t&&!m.done).forEach(m=>out.push({time:m.time||'',icon:'🎥',title:m.title,
+    meta:(m.host?esc(m.host):'Meeting')+(m.link?' · tap to join':''),space:'work',act:'joinMeet(\''+m.id+'\')',done:false}));
+  S.tasks.filter(x=>!x.done&&x.due&&x.due<=t).forEach(x=>out.push({time:x.time||'',icon:x.space==='office'?'💼':'●',
+    title:x.title,meta:(x.due<t?'<span style="color:var(--risk)">overdue</span>':'task'),
+    space:x.space==='office'?'work':'life',act:'tglTask(\''+x.id+'\')',done:false}));
+  S.followups.filter(f=>!f.done&&f.due<=t).forEach(f=>out.push({time:'',icon:'↺',title:f.person+' — '+f.topic,
+    meta:'Follow-up',space:'work',act:'fuDone(\''+f.id+'\')',done:false}));
+  S.meds.forEach(m=>{if(!medActive(m,t))return;(m.times||[]).forEach(tm=>{
+    const taken=(((m.taken||{})[t])||[]).includes(tm);
+    out.push({time:tm,icon:'💊',title:m.name,meta:taken?'taken ✓':'dose due',space:'life',
+      act:'medToggle(\''+m.id+'\',\''+tm+'\')',done:taken})})});
+  return out.filter(i=>dashFilter==='all'||i.space===dashFilter)}
+function tlRow(i,past){return '<div class="tl-row'+(past?' past':'')+(i.done?' tl-done':'')+'" onclick="'+i.act+'">'
+  +'<div class="tl-time">'+(i.time?fmtTime(i.time):'—')+'</div>'
+  +'<div class="tl-dot'+(i.done?' on':'')+'"></div>'
+  +'<div class="tl-body"><div class="row-title">'+i.icon+' '+esc(i.title)+'</div>'
+  +'<div class="row-meta">'+i.meta+(i.time&&!past&&!i.done?' · <span class="cd" data-ts="'+new Date(today()+'T'+i.time).getTime()+'"></span>':'')+'</div></div></div>'}
+function renderTimeline(){const el=document.getElementById('timelineCard');if(!el)return;
+  const items=timelineItems();
+  const timed=items.filter(i=>i.time).sort((a,b)=>a.time<b.time?-1:1);
+  const anytime=items.filter(i=>!i.time);
+  if(!items.length){el.innerHTML='<div class="empty"><div class="em-ring">✦</div>Nothing scheduled today.<br>Clear runway ahead.</div>';return}
+  const now=nowHM();let html='<div class="tl">',placed=false;
+  timed.forEach(i=>{
+    if(!placed&&i.time>now){html+='<div class="tl-now"><span>NOW · '+fmtTime(now)+'</span></div>';placed=true}
+    html+=tlRow(i,i.time<now)});
+  if(!placed&&timed.length)html+='<div class="tl-now"><span>NOW · '+fmtTime(now)+'</span></div>';
+  html+='</div>';
+  if(anytime.length)html+='<div class="stat-label" style="margin:14px 0 4px">Anytime today</div><div class="tl tl-plain">'
+    +anytime.map(i=>tlRow(i,false)).join('')+'</div>';
+  el.innerHTML=html}
 function addWater(d=1){const t=today();if(S.water.date!==t)S.water={date:t,count:0};
   S.water.count=Math.max(0,S.water.count+d);save();
   if(d>0)toast('💧 '+S.water.count+' of 8 glasses');
   gWater&&(gWater.textContent=S.water.count);waterBar&&(waterBar.style.width=Math.min(100,S.water.count/8*100)+'%');
   wBig&&(wBig.textContent=S.water.count);wBigBar&&(wBigBar.style.width=Math.min(100,S.water.count/8*100)+'%')}
+/* ============ QUICK ADD ============ */
+let qaMode='task';
+function pickQA(el){document.querySelectorAll('#qaChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');qaMode=el.dataset.q;
+  const p={task:'Add a personal task…',otask:'Add an office task…',exp:'e.g. 250 lunch',
+    shop:'e.g. milk, eggs',note:'Quick note…'};
+  document.getElementById('qaIn').placeholder=p[qaMode]||'Quick add…';
+  document.getElementById('qaIn').focus()}
+function quickAdd(){const el=document.getElementById('qaIn');const v=el.value.trim();if(!v)return;
+  if(qaMode==='task'||qaMode==='otask'){
+    S.tasks.unshift({id:uid(),title:v,space:qaMode==='otask'?'office':'personal',due:today(),time:null,rep:null,done:false,at:new Date().toISOString()});
+    toast('Task added for today')}
+  else if(qaMode==='exp'){const m=v.match(/(\d[\d,]*(?:\.\d+)?)/);
+    if(!m){toast('Start with the amount — e.g. 250 lunch');return}
+    const amt=Number(m[1].replace(/,/g,''));
+    const note=v.replace(m[1],'').replace(/^[\s₹rs.\-]+/i,'').trim()||'General';
+    const cat=/petrol|fuel|diesel/i.test(note)?'Fuel':/lunch|dinner|food|swiggy|zomato|tea/i.test(note)?'Food':
+      /medic|doctor|pharma/i.test(note)?'Health':/car|service|toll/i.test(note)?'Car':'General';
+    S.expenses.unshift({id:uid(),amount:amt,note,cat,att:[],at:new Date().toISOString()});
+    toast(fmtR(amt)+' logged in '+cat)}
+  else if(qaMode==='shop'){v.split(/,| and /i).map(s=>s.trim()).filter(Boolean)
+      .forEach(n=>S.shopping.unshift({id:uid(),name:n,done:false}));
+    toast('🛒 Added to shopping')}
+  else if(qaMode==='note'){const parts=v.split(' — ');
+    S.notes.unshift({id:uid(),title:parts[0]||'Untitled',body:parts.slice(1).join(' — '),space:'personal',pinned:false,att:[],at:new Date().toISOString()});
+    toast('Note saved')}
+  el.value='';save();renderToday();renderLife();renderWork()}
 /* ============ TASKS ============ */
 function addTask(space,inputId,title,due,time){const inp=inputId?document.getElementById(inputId):null;
   const t=(title??inp.value).trim();if(!t)return;let tm=time||null;
