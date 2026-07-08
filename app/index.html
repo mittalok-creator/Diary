@@ -220,6 +220,13 @@ select.inp{appearance:none;-webkit-appearance:none}
   background:var(--ink2);cursor:pointer;flex-shrink:0;display:block}
 .thumb-ph{width:48px;height:48px;border-radius:11px;border:1px solid var(--hair);background:var(--ink2);
   display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.gal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.gal-cell{cursor:pointer}
+.gal-img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:14px;border:1px solid var(--hair);background:var(--ink2);display:block}
+.gal-ph{width:100%;aspect-ratio:1;border-radius:14px;border:1px solid var(--hair);background:var(--ink2);
+  display:flex;align-items:center;justify-content:center;font-size:30px}
+.gal-cap{font-size:10.5px;color:var(--lo);margin-top:5px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(min-width:1000px){.gal-grid{grid-template-columns:repeat(6,1fr)}}
 </style>
 </head>
 <body>
@@ -597,6 +604,7 @@ select.inp{appearance:none;-webkit-appearance:none}
 <!-- ================= SEARCH ================= -->
 <section class="view" id="v-search">
   <input class="inp" id="qIn" placeholder="Search tasks, notes, expenses, follow-ups…" oninput="runSearch()" style="margin-top:8px">
+<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px" onclick="galleryOpen()">🖼 View all attachments</button>
   <div id="qOut" style="margin-top:8px"></div>
 </section>
 
@@ -1281,6 +1289,44 @@ function checkEventRem(){const t=today();
 function renderEvents(){const el=document.getElementById('bdList');if(!el)return;
   el.innerHTML=S.events.slice().sort((a,b)=>daysTo(nextOcc(a.date))-daysTo(nextOcc(b.date))).map(evCard).join('')
     ||'<div class="empty"><div class="em-ring">🎂</div>Add birthdays and anniversaries —<br>they repeat every year, with a reminder</div>'}
+/* ============ ATTACHMENT GALLERY (all docs & photos, one grid) ============ */
+function galleryItems(){const out=[];
+  const push=(a,label,sub,kind,openFn)=>{if(!a)return;out.push({a,label,sub,kind,openFn,at:0})};
+  S.docs.forEach(d=>push(d.att,d.name,(d.space==='office'?'Office Doc':'Document'),'doc',
+    "openAtt('"+d.att.id+"','"+d.att.type+"')"));
+  S.circulars.forEach(c=>(c.versions||[]).forEach(v=>push(v.att,c.name,'Circular · '+fmtD(v.date),'circular',
+    "openAtt('"+v.att.id+"','"+v.att.type+"')")));
+  S.notes.forEach(n=>(n.att||[]).forEach(a=>push(a,n.title,'Note','note',"openAtt('"+a.id+"','"+a.type+"')")));
+  S.expenses.forEach(e=>(e.att||[]).forEach(a=>push(a,e.note,'Receipt · '+fmtR(e.amount),'expense',"openAtt('"+a.id+"','"+a.type+"')")));
+  S.meetings.forEach(m=>(m.att||[]).forEach(a=>push(a,m.title,'Meeting','meeting',"openAtt('"+a.id+"','"+a.type+"')")));
+  S.renewals.forEach(r=>(r.att||[]).forEach(a=>push(a,r.name,'Policy','renewal',"openAtt('"+a.id+"','"+a.type+"')")));
+  S.service.forEach(s=>(s.att||[]).forEach(a=>push(a,s.work,'Service bill','service',"openAtt('"+a.id+"','"+a.type+"')")));
+  return out}
+function galleryOpen(){go('search');document.getElementById('qIn').style.display='none';
+  document.getElementById('qOut').innerHTML='<div class="eyebrow" style="margin-top:8px">All attachments</div><div id="galGrid" class="gal-grid"></div>'
+    +'<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:16px" onclick="galClose()">← Back to search</button>';
+  const items=galleryItems();
+  const grid=document.getElementById('galGrid');
+  grid.innerHTML=items.length?items.map(it=>
+    (it.a.type==='img'?'<div class="gal-cell" onclick="'+it.openFn+'"><img class="gal-img" data-fid="'+it.a.id+'" alt=""><div class="gal-cap">'+esc(it.label)+'</div></div>'
+     :'<div class="gal-cell" onclick="'+it.openFn+'"><div class="gal-ph">📄</div><div class="gal-cap">'+esc(it.label)+'</div></div>')
+  ).join('') : '<div class="empty" style="grid-column:1/-1"><div class="em-ring">🖼</div>No attachments yet — photos and PDFs you save<br>across the app will all appear here</div>';
+  setTimeout(()=>document.querySelectorAll('img.gal-img[data-fid]').forEach(async im=>{
+    const d=await fileGet(im.dataset.fid);if(d)im.src=d}),0)}
+function galClose(){document.getElementById('qIn').style.display='';qIn.value='';runSearch()}
+/* ============ SHARE (Web Share API, WhatsApp-ready) ============ */
+async function shareAtt(id,type,label){
+  try{const d=await fileGet(id);if(!d){toast('File not found');return}
+    const bin=atob(d.split(',')[1]);const arr=new Uint8Array(bin.length);
+    for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+    const mime=type==='pdf'?'application/pdf':'image/jpeg';
+    const ext=type==='pdf'?'.pdf':'.jpg';
+    const file=new File([arr],(label||'ALOK OS file').replace(/[^\w\- ]+/g,'').trim()+ext,{type:mime});
+    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:label||'ALOK OS'});return}
+    const a=document.createElement('a');a.href=d;a.download=file.name;a.click();
+    toast('Sharing not supported here — file downloaded instead')}
+  catch(e){if(e&&e.name!=='AbortError')toast('Could not share this file')}}
 /* ============ ATTACHMENTS (image + PDF) ============ */
 let pend={note:[],onote:[],exp:[],meet:[],ren:[],svc:[]};
 const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet',ren:'pendRen',svc:'pendSvc'};
@@ -1341,7 +1387,8 @@ function loadThumbs(){document.querySelectorAll('img.thumb[data-fid]').forEach(a
 function attChips(att,pk){if(!att||!att.length)return'';
   return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+att.map(a=>
    '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">'+(a.type==='pdf'?'📄':'🖼️')+' '+esc(a.name)
-   +(pk?'<b style="margin-left:6px;color:var(--risk)" onclick="event.stopPropagation();removePend(\''+pk+'\',\''+a.id+'\')">✕</b>':'')
+   +(pk?'<b style="margin-left:6px;color:var(--risk)" onclick="event.stopPropagation();removePend(\''+pk+'\',\''+a.id+'\')">✕</b>'
+        :'<b style="margin-left:6px;color:var(--gold)" onclick="event.stopPropagation();shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(a.name).replace(/'/g,"\\'")+'\')" title="Share">↗</b>')
    +'</span>').join('')+'</div>'}
 function drawPend(k){const el=document.getElementById(pendEl[k]);if(el)el.innerHTML=attChips(pend[k],k)}
 function removePend(k,id){const i=pend[k].findIndex(a=>a.id===id);
@@ -1378,6 +1425,7 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +(a.type==='img'?'<img class="thumb" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\')">':'<div class="thumb-ph">📄</div>')
   +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(d.name)+'</div><div class="row-meta">'+(d.space==='office'?'💼 Office · ':'')+fmtD(d.at)+'</div></div>'
   +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
+  +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
   +'<button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
 function renderLife(){renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
@@ -1476,6 +1524,7 @@ function verRow(c,v,latest){return '<div class="row">'
   +'<div class="row-body"><div class="row-title" style="font-size:14px">'+(latest?'<span style="color:var(--gold)">● Latest</span> · ':'')+fmtD(v.date)+'</div>'
   +'<div class="row-meta">'+(v.att.type==='pdf'?'📄 PDF':'🖼️ Image')+'</div></div>'
   +'<button class="btn btn-gold btn-sm" onclick="openAtt(\''+v.att.id+'\',\''+v.att.type+'\')">Read</button>'
+  +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+v.att.id+'\',\''+v.att.type+'\',\''+esc(c.name)+'\')" title="Share">↗</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="downloadCircV(\''+c.id+'\',\''+v.id+'\')">⬇</button>'
   +'<button class="del" onclick="delCircVer(\''+c.id+'\',\''+v.id+'\')">✕</button>'
   +'</div>'}
@@ -1849,7 +1898,13 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
     navigator.serviceWorker.register('./sw.js').catch(()=>{})}
   if(S.lock&&S.lock.pinHash)showLock('verify');
   showLoginIfNeeded();
-  if(!S.profile.name&&!document.getElementById('loginOv').classList.contains('open'))setTimeout(()=>{go('settings');toast('Set your name & photo to begin ✦')},600)})();
+  if(!S.profile.name&&!document.getElementById('loginOv').classList.contains('open'))setTimeout(()=>{go('settings');toast('Set your name & photo to begin ✦')},600);
+  const qp=new URLSearchParams(location.search).get('action');
+  if(qp){setTimeout(()=>{
+    if(qp==='addtask'){go('life');lifeTab('tasks');document.getElementById('ptIn').focus()}
+    else if(qp==='addexpense'){go('life');lifeTab('money');pickType(document.querySelector('#typeChips .chip[data-d="out"]'));document.getElementById('exAmt').focus()}
+    else if(qp==='search'){go('search')}
+    history.replaceState(null,'','./')},350)}})();
 </script>
 </body>
 </html>
