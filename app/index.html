@@ -216,6 +216,10 @@ select.inp{appearance:none;-webkit-appearance:none}
 .dot14{width:13px;height:13px;border-radius:4px;background:var(--hair)}
 .dot14.on{background:linear-gradient(135deg,var(--gold),var(--goldb))}
 .inc{color:var(--good)!important;font-weight:700}
+.thumb{width:48px;height:48px;border-radius:11px;object-fit:cover;border:1px solid var(--hair);
+  background:var(--ink2);cursor:pointer;flex-shrink:0;display:block}
+.thumb-ph{width:48px;height:48px;border-radius:11px;border:1px solid var(--hair);background:var(--ink2);
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -410,7 +414,10 @@ select.inp{appearance:none;-webkit-appearance:none}
 
   <div class="ltab" id="lt-docs" style="display:none">
     <input class="inp" id="docName" placeholder="Document name (PAN, RC, Policy, Warranty…)">
-    <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addDoc()">📎 Choose image / PDF & save</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-gold" style="flex:1" onclick="addDoc()">📎 Choose image / PDF</button>
+      <button class="btn btn-ghost" onclick="addDoc(true)">📷 Camera</button>
+    </div>
     <div id="docList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 </section>
@@ -474,13 +481,19 @@ select.inp{appearance:none;-webkit-appearance:none}
       </select>
     </div>
     <div id="circBanner" class="card" style="display:none;padding:12px 14px;font-size:13px;margin-bottom:10px"></div>
-    <button class="btn btn-gold" id="circBtn" style="width:100%" onclick="addCircular()">📎 Attach file & save circular</button>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-gold" id="circBtn" style="flex:1" onclick="addCircular()">📎 Attach file & save circular</button>
+      <button class="btn btn-ghost" onclick="addCircular(true)">📷</button>
+    </div>
     <div id="circList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
   <div class="wtab" id="wt-odoc" style="display:none">
     <input class="inp" id="odocName" placeholder="Document name (Sanction letter, Audit report…)">
-    <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addOfficeDoc()">📎 Choose image / PDF & save</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-gold" style="flex:1" onclick="addOfficeDoc()">📎 Choose image / PDF</button>
+      <button class="btn btn-ghost" onclick="addOfficeDoc(true)">📷 Camera</button>
+    </div>
     <div id="odocList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
@@ -1011,8 +1024,10 @@ async function makeAtt(f){try{
   if(ok===false)return null;
   return {id,name:f.name.length>26?f.name.slice(0,23)+'…':f.name,type:isPdf?'pdf':'img',size:d.length}}
   catch(e){toast('Could not read '+f.name);return null}}
-function pickFiles(cb){const i=document.createElement('input');i.type='file';
-  i.accept='image/*,application/pdf';i.multiple=true;i.style.display='none';
+function pickFiles(cb,opt){opt=opt||{};const i=document.createElement('input');i.type='file';
+  i.accept=opt.accept||'image/*,application/pdf';i.multiple=!opt.capture;
+  if(opt.capture)i.capture='environment';
+  i.style.display='none';
   document.body.appendChild(i);
   i.onchange=async()=>{const out=[];
     try{for(const f of i.files){const a=await makeAtt(f);if(a)out.push(a)}}
@@ -1021,6 +1036,9 @@ function pickFiles(cb){const i=document.createElement('input');i.type='file';
     if(out.length)toast('📎 '+out.length+' file attached');
     cb(out)};
   i.click()}
+function loadThumbs(){document.querySelectorAll('img.thumb[data-fid]').forEach(async im=>{
+  if(im.dataset.done)return;im.dataset.done='1';
+  const d=await fileGet(im.dataset.fid);if(d)im.src=d})}
 function attChips(att,pk){if(!att||!att.length)return'';
   return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+att.map(a=>
    '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">'+(a.type==='pdf'?'📄':'🖼️')+' '+esc(a.name)
@@ -1045,17 +1063,18 @@ function attBytes(){let b=0;const add=a=>b+=(a&&a.size)||0;
   S.notes.forEach(n=>(n.att||[]).forEach(add));S.expenses.forEach(e=>(e.att||[]).forEach(add));
   S.meetings.forEach(m=>(m.att||[]).forEach(add));S.docs.forEach(d=>add(d.att));S.circulars.forEach(c=>(c.versions||[]).forEach(v=>add(v.att)));return b}
 /* ============ DOCUMENTS VAULT ============ */
-function addDoc(){addDocIn('personal','docName')}
-function addOfficeDoc(){addDocIn('office','odocName')}
-function addDocIn(space,inputId){const el=document.getElementById(inputId);const n=el.value.trim();
+function addDoc(cam){addDocIn('personal','docName',cam)}
+function addOfficeDoc(cam){addDocIn('office','odocName',cam)}
+function addDocIn(space,inputId,cam){const el=document.getElementById(inputId);const n=el.value.trim();
   if(!n){toast('Enter a document title first — it makes search easy');el.focus();return}
   pickFiles(fs=>{if(!fs.length)return;
     fs.forEach((a,i)=>S.docs.unshift({id:uid(),name:fs.length>1?n+' ('+(i+1)+')':n,space,att:a,at:new Date().toISOString()}));
-    el.value='';save();renderLife();renderWork();toast(fs.length+' document saved 🔒')})}
+    el.value='';save();renderLife();renderWork();toast(fs.length+' document saved 🔒')},
+    cam?{capture:true,accept:'image/*'}:null)}
 function delDoc(id){const d=S.docs.find(x=>x.id===id);if(d)fileDel(d.att.id);
   S.docs=S.docs.filter(x=>x.id!==id);save();renderLife();renderWork()}
 function docCard(d){const a=d.att;return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
-  +'<div style="font-size:24px">'+(a.type==='pdf'?'📄':'🖼️')+'</div>'
+  +(a.type==='img'?'<img class="thumb" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\')">':'<div class="thumb-ph">📄</div>')
   +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(d.name)+'</div><div class="row-meta">'+(d.space==='office'?'💼 Office · ':'')+fmtD(d.at)+'</div></div>'
   +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
   +'<button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
@@ -1068,14 +1087,14 @@ function renderLife(){renderDocs();renderMoney2();renderHealth();listOr(ptList,S
   mMonth&&countUp(mMonth,S.expenses.filter(e=>e.at.slice(0,7)===m).reduce((a,b)=>a+b.amount,0),'₹');
   
   wBig&&(wBig.textContent=S.water.count);wBigBar&&(wBigBar.style.width=Math.min(100,S.water.count/8*100)+'%')}
-function renderDocs(){const el=document.getElementById('docList');
+function renderDocs(){setTimeout(loadThumbs,0);const el=document.getElementById('docList');
   if(el)el.innerHTML=S.docs.filter(d=>d.space!=='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>PAN, RC, policy, warranty —<br>keep them all safe here (image or PDF)</div>';
   const oe=document.getElementById('odocList');
   if(oe)oe.innerHTML=S.docs.filter(d=>d.space==='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>Sanction letters, audit reports, statements —<br>save any office document by name</div>'}
 function renderWork(){listOr(otList,S.tasks.filter(t=>t.space==='office').sort(taskSort),taskRow,'No office tasks. Enjoy it while it lasts.');
   fuList.innerHTML=S.followups.filter(f=>!f.done).map(fuCard).join('')+S.followups.filter(f=>f.done).slice(0,3).map(fuCard).join('')||'<div class="empty"><div class="em-ring">↺</div>No follow-ups. Add the first one above.</div>';
   if(document.getElementById('mtList'))mtList.innerHTML=S.meetings.slice().sort((a,b)=>((a.date||'')+'T'+(a.time||''))<((b.date||'')+'T'+(b.time||''))?-1:1).map(meetCard).join('')||'<div class="empty"><div class="em-ring">🎥</div>Add your first meeting above —<br>its name and time will show on the dashboard</div>';
-  renderDocs();
+  renderDocs();setTimeout(loadThumbs,0);
   if(document.getElementById('circList'))circList.innerHTML=S.circulars.slice().sort((a,b)=>circLatest(a).date<circLatest(b).date?1:-1).map(circCard).join('')||'<div class="empty"><div class="em-ring">📑</div>Store every circular here by name, date and type —<br>read in-app or download anytime</div>';
   onList.innerHTML=S.notes.filter(n=>n.space==='office').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Call gists & meeting points live here</div>'}
 /* ============ SEARCH ============ */
@@ -1096,7 +1115,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
    ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
   let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
-  qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>'}
+  qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>';setTimeout(loadThumbs,0)}
 /* ============ CIRCULARS (with version history) ============ */
 let circVerTarget=null;let circOpen=null;
 function circToggle(id){circOpen=(circOpen===id)?null:id;renderWork();
@@ -1118,14 +1137,14 @@ function circVerCancel(){circVerTarget=null;
   document.getElementById('circType').disabled=false;
   document.getElementById('circBanner').style.display='none';
   document.getElementById('circBtn').textContent='📎 Attach file & save circular'}
-function addCircular(){
+function addCircular(cam){const copt=cam?{capture:true,accept:'image/*'}:null;
   if(circVerTarget){const c=S.circulars.find(x=>x.id===circVerTarget);if(!c){circVerCancel();return}
     pickFiles(fs=>{if(!fs.length){toast('Attach the updated file (image or PDF)');return}
       const d=document.getElementById('circDate').value||today();
       c.versions.push({id:uid(),date:d,att:fs[0],at:new Date().toISOString()});
       fs.slice(1).forEach(a=>fileDel(a.id));
       document.getElementById('circDate').value='';circVerCancel();
-      circOpen=c.id;save();renderWork();toast('New version added — full history kept')});return}
+      circOpen=c.id;save();renderWork();toast('New version added — full history kept')},copt);return}
   const n=document.getElementById('circName').value.trim();
   if(!n){toast('Enter the circular name first');document.getElementById('circName').focus();return}
   pickFiles(fs=>{if(!fs.length){toast('Attach the circular file (image or PDF)');return}
@@ -1134,7 +1153,7 @@ function addCircular(){
     const nid=uid();circOpen=nid;S.circulars.unshift({id:nid,name:n,type:ty,versions:[{id:uid(),date:d,att:fs[0],at:new Date().toISOString()}],at:new Date().toISOString()});
     fs.slice(1).forEach(a=>fileDel(a.id));
     document.getElementById('circName').value='';document.getElementById('circDate').value='';
-    save();renderWork();toast('Circular saved')})}
+    save();renderWork();toast('Circular saved')},copt)}
 function delCirc(id){const c=S.circulars.find(x=>x.id===id);
   if(c)(c.versions||[]).forEach(v=>v.att&&fileDel(v.att.id));
   S.circulars=S.circulars.filter(x=>x.id!==id);if(circOpen===id)circOpen=null;save();renderWork()}
@@ -1150,6 +1169,7 @@ function downloadCircV(cid,vid){const c=S.circulars.find(x=>x.id===cid);if(!c)re
     a.download=((c.name+' '+fmtD(v.date)).replace(/[^\w\- ]+/g,'').trim()||'circular')+(v.att.type==='pdf'?'.pdf':'.jpg');
     a.click();toast('Downloading…')})}
 function verRow(c,v,latest){return '<div class="row">'
+  +(v.att.type==='img'?'<img class="thumb" style="width:40px;height:40px" data-fid="'+v.att.id+'" alt="" onclick="openAtt(\''+v.att.id+'\',\'img\')">':'<div class="thumb-ph" style="width:40px;height:40px;font-size:18px">📄</div>')
   +'<div class="row-body"><div class="row-title" style="font-size:14px">'+(latest?'<span style="color:var(--gold)">● Latest</span> · ':'')+fmtD(v.date)+'</div>'
   +'<div class="row-meta">'+(v.att.type==='pdf'?'📄 PDF':'🖼️ Image')+'</div></div>'
   +'<button class="btn btn-gold btn-sm" onclick="openAtt(\''+v.att.id+'\',\''+v.att.type+'\')">Read</button>'
@@ -1233,7 +1253,8 @@ function renderCal(){const d=document.getElementById('calDate').value||today();
   const label=new Date(d+'T00:00').toLocaleDateString('en-IN',{weekday:'long'})+' · '+fmtD(d);
   document.getElementById('calOut').innerHTML='<div class="eyebrow" style="margin-top:18px">'+label+'</div>'+
     (secs.length?secs.map(s=>'<div class="eyebrow">'+s[0]+'</div>'+s[1]).join('')
-     :'<div class="empty"><div class="em-ring">📅</div>Nothing recorded on this date.<br>Past & future entries — Life and Work — will all appear here.</div>')}
+     :'<div class="empty"><div class="em-ring">📅</div>Nothing recorded on this date.<br>Past & future entries — Life and Work — will all appear here.</div>');
+  setTimeout(loadThumbs,0)}
 /* ============ APP LOCK: PIN + BIOMETRIC ============ */
 let lkMode='verify',lkBuf='',lkFirst='',lkAfter=null,hiddenAt=0;
 async function hashPin(pin,salt){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));
