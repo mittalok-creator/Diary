@@ -37,7 +37,7 @@ body{
   font-family:'Space Grotesk',system-ui,sans-serif; font-size:15px;
   overflow:hidden; transition:background .3s,color .3s;
 }
-#app{max-width:520px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;position:relative}
+#app{max-width:520px;margin:0 auto;height:100vh;height:100dvh;height:calc(var(--app-h, 100vh));display:flex;flex-direction:column;position:relative;overflow:hidden}
 /* ---------- header ---------- */
 header{padding:calc(env(safe-area-inset-top) + 18px) 20px 6px;display:flex;align-items:flex-start;justify-content:space-between}
 .h-date{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
@@ -1903,6 +1903,17 @@ function clearAll(){if(!clearArm){clearArm=true;toast('Tap Clear again to erase 
 function migrate(){(S.circulars||[]).forEach(c=>{if(!c.versions){c.versions=[{id:uid(),date:c.date||today(),att:c.att,at:c.at||new Date().toISOString()}];delete c.att;delete c.date}})}
 function applyTheme(){document.documentElement.dataset.theme=S.profile.theme||'dark'}
 function renderAll(){renderHeader();renderToday();renderLife();renderWork();renderSettings()}
+(function viewportFix(){
+  const set=()=>{const h=(window.visualViewport&&window.visualViewport.height)||window.innerHeight;
+    document.documentElement.style.setProperty('--app-h',h+'px')};
+  set();
+  addEventListener('resize',set);
+  addEventListener('orientationchange',()=>{set();setTimeout(set,120);setTimeout(set,400)});
+  if(window.visualViewport){visualViewport.addEventListener('resize',set);visualViewport.addEventListener('scroll',set)}
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){set();setTimeout(set,150)}});
+  window.addEventListener('pageshow',set);
+  setInterval(set,2000); /* cheap watchdog for the rare webview that misses every event above */
+})();
 (async function boot(){const raw=await store.get();
   if(raw){try{S={...blank(),...JSON.parse(raw)}}catch(e){}}
   migrate();trashAutoPurge();
