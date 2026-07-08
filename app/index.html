@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
 <title>ALOK OS</title>
-<meta name="theme-color" content="#0E1116">
+<meta name="theme-color" content="#0B0E13">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
@@ -18,30 +18,51 @@
 <style>
 :root{
   color-scheme:dark;
-  --ink0:#0E1116; --ink1:#151A22; --ink2:#1D242F; --hair:#2A3340;
+  --ink0:#0B0E13; --ink1:#12161E; --ink2:#1A2029; --hair:#262F3C;
   --gold:#D9A85C; --goldb:#F0C27B; --plat:#C9B896;
   --hi:#F3EFE6; --lo:#8A93A3;
   --good:#5FBF8A; --warn:#E0A448; --risk:#D96C6C;
   --r-s:12px; --r-m:20px; --r-l:28px;
+  --amb:radial-gradient(900px 620px at 50% -14%,#1b2331 0%,transparent 60%),
+        radial-gradient(760px 520px at 108% 104%,#16202c 0%,transparent 58%);
+  --shadow:inset 0 1px 0 rgba(217,168,92,.07), 0 1px 2px rgba(0,0,0,.32);
+  --shadow-hi:inset 0 1px 0 rgba(217,168,92,.14), 0 10px 32px rgba(0,0,0,.42);
+  --glass:rgba(11,14,19,.74);
+  --focus:rgba(217,168,92,.16);
+  --grain:.045;
 }
 html[data-theme="light"]{
   color-scheme:light;
-  --ink0:#F7F4EE; --ink1:#FFFFFF; --ink2:#F0EBE1; --hair:#E2DACB;
-  --gold:#B8863B; --goldb:#D9A85C; --plat:#8F7B4F;
-  --hi:#1C222B; --lo:#6B7280;
+  --ink0:#F6F3EC; --ink1:#FFFFFF; --ink2:#F1ECE1; --hair:#E4DCCC;
+  --gold:#946420; --goldb:#B98A44; --plat:#7E6B42;
+  --hi:#171C24; --lo:#5C636F;
+  --good:#2F855A; --warn:#B7791F; --risk:#C0392B;
+  --amb:radial-gradient(900px 620px at 50% -14%,#FFFDF8 0%,transparent 62%),
+        radial-gradient(760px 520px at 0% 104%,#EFE8D9 0%,transparent 60%);
+  --shadow:0 1px 2px rgba(23,28,36,.05), 0 8px 26px rgba(23,28,36,.055);
+  --shadow-hi:0 2px 4px rgba(23,28,36,.07), 0 16px 40px rgba(23,28,36,.10);
+  --glass:rgba(246,243,236,.78);
+  --focus:rgba(169,118,47,.14);
+  --grain:.02;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{
-  background:var(--ink0); color:var(--hi);
+  background:var(--ink0); background-image:var(--amb); background-attachment:fixed;
+  color:var(--hi);
   font-family:'Space Grotesk',system-ui,sans-serif; font-size:15px;
-  overflow:hidden; transition:background .3s,color .3s;
+  overflow:hidden; transition:background-color .35s,color .35s;
 }
+::selection{background:var(--gold);color:#12151b}
+#app::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:200;opacity:var(--grain);
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E")}
 #app{max-width:520px;margin:0 auto;height:100vh;height:100dvh;height:calc(var(--app-h, 100vh));display:flex;flex-direction:column;position:relative;overflow:hidden}
 /* ---------- header ---------- */
 header{padding:calc(env(safe-area-inset-top) + 18px) 20px 6px;display:flex;align-items:flex-start;justify-content:space-between}
 .h-date{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
-.h-greet{font-family:'Fraunces',serif;font-size:27px;font-weight:500;margin-top:4px;line-height:1.15}
+.h-greet{font-family:'Fraunces',serif;font-size:27px;font-weight:500;margin-top:4px;line-height:1.15;
+  background:linear-gradient(100deg,var(--hi) 40%,var(--gold) 130%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .avatar{width:42px;height:42px;border-radius:50%;border:1.5px solid var(--gold);background:var(--ink1);
   display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:15px;color:var(--gold);
   overflow:hidden;cursor:pointer;flex-shrink:0;transition:transform .18s}
@@ -57,7 +78,10 @@ main::-webkit-scrollbar{display:none}
 .eyebrow::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--hair),transparent)}
 /* ---------- cards ---------- */
 .card{background:var(--ink1);border:1px solid var(--hair);border-radius:var(--r-m);padding:18px;position:relative;
-  box-shadow:inset 0 1px 0 rgba(217,168,92,.07)}
+  box-shadow:var(--shadow);transition:border-color .25s,box-shadow .25s,transform .25s}
+@media(hover:hover) and (min-width:1000px){
+  .card[onclick]:hover{border-color:rgba(217,168,92,.4);box-shadow:var(--shadow-hi);transform:translateY(-2px)}
+}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .stat-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--lo)}
 .stat-num{font-family:'Fraunces',serif;font-size:30px;font-weight:600;margin-top:6px;font-variant-numeric:tabular-nums}
@@ -83,7 +107,7 @@ main::-webkit-scrollbar{display:none}
 /* ---------- inputs & buttons ---------- */
 .inp{width:100%;background:var(--ink2);border:1px solid var(--hair);border-radius:14px;color:var(--hi);
   padding:13px 15px;font-family:inherit;font-size:15px;outline:none;transition:border-color .2s}
-.inp:focus{border-color:var(--gold)}
+.inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px var(--focus)}
 .inp::placeholder{color:var(--lo)}
 textarea.inp{resize:none;min-height:76px}
 .btn{border:none;border-radius:14px;padding:13px 18px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;transition:transform .15s,opacity .2s}
@@ -111,7 +135,7 @@ textarea.inp{resize:none;min-height:76px}
 /* ---------- bottom nav & orb ---------- */
 nav{position:absolute;left:0;right:0;bottom:0;padding:10px 14px calc(env(safe-area-inset-bottom) + 12px);
   display:flex;justify-content:space-around;align-items:center;
-  background:color-mix(in srgb,var(--ink0) 78%,transparent);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  background:var(--glass);backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);
   border-top:1px solid var(--hair);z-index:40}
 nav button{border:none;background:none;color:var(--lo);font-family:inherit;font-size:10.5px;font-weight:600;
   display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 10px;letter-spacing:.04em;transition:color .2s}
@@ -152,9 +176,20 @@ select.inp{appearance:none;-webkit-appearance:none}
 #imgView img{max-width:100%;max-height:90%;border-radius:14px;border:1px solid var(--hair)}
 .cd{font-variant-numeric:tabular-nums;font-weight:700;color:var(--gold)}
 @media(min-width:760px){
-  body{background:radial-gradient(1200px 700px at 50% -10%,#161c26,var(--ink0) 62%)}
-  #app{max-width:560px;border-left:1px solid var(--hair);border-right:1px solid var(--hair);
-    box-shadow:0 0 80px rgba(0,0,0,.45)}
+  #app{max-width:560px;background:color-mix(in srgb,var(--ink0) 92%,transparent);
+    border-left:1px solid var(--hair);border-right:1px solid var(--hair);
+    box-shadow:0 0 90px rgba(0,0,0,.35)}
+}
+@media(min-width:1000px){
+  main::-webkit-scrollbar{display:block;width:9px}
+  main::-webkit-scrollbar-thumb{background:var(--hair);border-radius:5px;border:2px solid transparent;background-clip:content-box}
+  main::-webkit-scrollbar-thumb:hover{background:var(--gold);background-clip:content-box}
+  main{scrollbar-width:thin;scrollbar-color:var(--hair) transparent}
+  @media(hover:hover){
+    nav button:hover{color:var(--hi);background:color-mix(in srgb,var(--ink1) 70%,transparent)}
+    .btn:hover{filter:brightness(1.06)}
+    .chip:hover{border-color:var(--gold)}
+  }
 }
 #loginOv{position:absolute;inset:0;z-index:98;display:none;flex-direction:column;align-items:center;justify-content:center;
   background:radial-gradient(700px 500px at 50% 20%,#161c26,var(--ink0) 70%);padding:32px;text-align:center}
@@ -244,7 +279,8 @@ select.inp{appearance:none;-webkit-appearance:none}
 .tl-body{flex:1;min-width:0}
 .tl-now{display:flex;align-items:center;gap:10px;margin:6px 0 6px 64px;position:relative}
 .tl-now::before{content:'';position:absolute;left:-6px;width:9px;height:9px;border-radius:50%;
-  background:var(--gold);box-shadow:0 0 10px var(--gold)}
+  background:var(--gold);box-shadow:0 0 10px var(--gold);animation:nowPulse 2.6s ease-in-out infinite}
+@keyframes nowPulse{0%,100%{box-shadow:0 0 0 0 rgba(217,168,92,.45)}50%{box-shadow:0 0 0 7px rgba(217,168,92,0)}}
 .tl-now::after{content:'';flex:1;height:1.5px;background:linear-gradient(90deg,var(--gold),transparent)}
 .tl-now span{font-size:9.5px;font-weight:700;letter-spacing:.13em;color:var(--gold);margin-left:12px;white-space:nowrap}
 .dash-cols{display:block}
@@ -702,9 +738,13 @@ select.inp{appearance:none;-webkit-appearance:none}
 
   <div class="eyebrow">Appearance</div>
   <div class="card">
-    <div class="set-row">
-      <div><div class="set-name">Light mode</div><div class="set-sub">Paper & Gold theme</div></div>
-      <div class="toggle" id="themeTgl" onclick="toggleTheme()"></div>
+    <div class="set-row" style="flex-wrap:wrap">
+      <div><div class="set-name">Theme</div><div class="set-sub" id="themeSub">Ink & Gold</div></div>
+      <div style="display:flex;gap:7px;flex-shrink:0" id="themeChips">
+        <span class="chip" data-t="dark" onclick="setTheme('dark')">🌙 Dark</span>
+        <span class="chip" data-t="light" onclick="setTheme('light')">☀️ Light</span>
+        <span class="chip" data-t="auto" onclick="setTheme('auto')">◐ Auto</span>
+      </div>
     </div>
   </div>
 
@@ -1991,7 +2031,10 @@ function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
    +'<button class="btn btn-ghost btn-sm" onclick="gSignOut()">Sign out</button></div></div>'}
 /* ============ SETTINGS ============ */
 function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();
-  themeTgl.classList.toggle('on',S.profile.theme==='light');
+  const tm=S.profile.theme||'dark';
+  document.querySelectorAll('#themeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.t===tm));
+  const tsub=document.getElementById('themeSub');
+  if(tsub)tsub.textContent=tm==='auto'?('Following device · '+(sysDark()?'Dark':'Light')):(tm==='light'?'Paper & Gold':'Ink & Gold');
   const ns=document.getElementById('notifStatus');
   if(ns)ns.textContent=location.protocol==='file:'?'Open the hosted app (https://alokmittal.net/app) — local files can\'t show system alerts'
     :!('Notification' in window)?'Not supported in this browser'
@@ -2033,9 +2076,8 @@ function cropSave(){const s=crop.base*crop.scale,sz=256;
   document.getElementById('cropOv').classList.remove('open');toast('Photo updated ✦')}
 function cropCancel(){document.getElementById('cropOv').classList.remove('open')}
 function removePhoto(){S.profile.photo=null;save();renderHeader();toast('Photo removed')}
-function toggleTheme(){S.profile.theme=S.profile.theme==='light'?'dark':'light';
-  document.documentElement.dataset.theme=S.profile.theme;
-  themeTgl.classList.toggle('on',S.profile.theme==='light');save()}
+function setTheme(m){S.profile.theme=m;applyTheme();renderSettings();save();
+  toast(m==='auto'?'Following your device theme':(m==='light'?'Paper & Gold':'Ink & Gold'))}
 async function backup(){toast('Preparing backup…');const files={};
   for(const id of allAttIds()){const d=await fileGet(id);if(d)files[id]=d}
   const data=JSON.stringify({app:'ALOK OS',version:2,exported:new Date().toISOString(),state:S,files});
@@ -2055,7 +2097,12 @@ function clearAll(){if(!clearArm){clearArm=true;toast('Tap Clear again to erase 
   clearArm=false;allAttIds().forEach(id=>fileDel(id));S=blank();store.del();save();applyTheme();renderAll();go('today');toast('All data cleared')}
 /* ============ BOOT ============ */
 function migrate(){(S.circulars||[]).forEach(c=>{if(!c.versions){c.versions=[{id:uid(),date:c.date||today(),att:c.att,at:c.at||new Date().toISOString()}];delete c.att;delete c.date}})}
-function applyTheme(){document.documentElement.dataset.theme=S.profile.theme||'dark'}
+function sysDark(){return !window.matchMedia||window.matchMedia('(prefers-color-scheme: dark)').matches}
+function applyTheme(){const m=S.profile.theme||'dark';
+  const eff=(m==='auto')?(sysDark()?'dark':'light'):m;
+  document.documentElement.dataset.theme=eff;
+  const mt=document.querySelector('meta[name="theme-color"]');
+  if(mt)mt.setAttribute('content',eff==='dark'?'#0B0E13':'#F6F3EC')}
 function renderAll(){renderHeader();renderToday();renderLife();renderWork();renderSettings()}
 (function viewportFix(){
   const set=()=>{const h=(window.visualViewport&&window.visualViewport.height)||window.innerHeight;
@@ -2073,6 +2120,9 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   migrate();trashAutoPurge();
   if(S.water.date!==today())S.water={date:today(),count:0};
   applyTheme();renderAll();initCrop();
+  if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');
+    const onSys=()=>{if((S.profile.theme||'dark')==='auto'){applyTheme();renderSettings()}};
+    mq.addEventListener?mq.addEventListener('change',onSys):mq.addListener(onSys)}
   tick();setInterval(tick,1000);
   checkReminders();setInterval(checkReminders,30000);
   document.addEventListener('visibilitychange',()=>{
