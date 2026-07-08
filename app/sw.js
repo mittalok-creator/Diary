@@ -1,6 +1,7 @@
 /* ALOK OS service worker — offline shell + system notifications */
-const CACHE = 'alokos-v1.7.0';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const CACHE = 'alokos-v4.1.0';
+const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
+  './vendor/pdf.min.js', './vendor/pdf.worker.min.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

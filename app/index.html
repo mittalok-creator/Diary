@@ -171,9 +171,6 @@ select.inp{appearance:none;-webkit-appearance:none}
 #cropView{width:260px;height:260px;border-radius:50%;overflow:hidden;border:2px solid var(--gold);position:relative;touch-action:none;background:#000;cursor:grab}
 #cropImg{position:absolute;left:0;top:0;transform-origin:0 0;user-select:none;pointer-events:none;max-width:none}
 #cropZoom{width:260px;margin-top:20px;accent-color:#D9A85C}
-#imgView{position:absolute;inset:0;background:rgba(8,10,14,.95);z-index:96;display:none;align-items:center;justify-content:center;padding:16px}
-#imgView.open{display:flex}
-#imgView img{max-width:100%;max-height:90%;border-radius:14px;border:1px solid var(--hair)}
 .cd{font-variant-numeric:tabular-nums;font-weight:700;color:var(--gold)}
 @media(min-width:760px){
   #app{max-width:560px;background:color-mix(in srgb,var(--ink0) 92%,transparent);
@@ -296,6 +293,25 @@ select.inp{appearance:none;-webkit-appearance:none}
   background:rgba(8,10,14,.9);backdrop-filter:blur(8px);padding:26px}
 .cfov.open{display:flex}
 .cfbox{max-width:380px;width:100%;text-align:center}
+#pvOv{position:absolute;inset:0;z-index:130;display:none;flex-direction:column;background:var(--ink0)}
+#pvOv.open{display:flex}
+.pv-bar{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+  border-bottom:1px solid var(--hair);background:var(--glass);backdrop-filter:blur(20px);flex-shrink:0}
+.pv-btn{width:38px;height:38px;border-radius:11px;border:1px solid var(--hair);background:var(--ink1);
+  color:var(--gold);font-size:16px;font-family:inherit;cursor:pointer;flex-shrink:0;transition:transform .15s,border-color .2s}
+.pv-btn:active{transform:scale(.9)}
+.pv-btn:hover{border-color:var(--gold)}
+.pv-meta{flex:1;min-width:0;padding:0 4px}
+.pv-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv-sub{font-size:11px;color:var(--lo)}
+.pv-zoom{font-size:11.5px;font-weight:700;color:var(--lo);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.pv-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;
+  padding:14px 8px calc(env(safe-area-inset-bottom) + 20px);background:#08090c}
+.pv-stage{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:min-content;margin:0 auto}
+.pv-page{border-radius:6px;box-shadow:0 6px 26px rgba(0,0,0,.5);background:#fff;max-width:none;display:block}
+.pv-img{border-radius:10px;box-shadow:0 6px 26px rgba(0,0,0,.5);display:block;max-width:none}
+.pv-load{color:var(--lo);font-size:13.5px;text-align:center;padding:60px 20px}
+@media(min-width:1000px){.pv-body{padding:24px}}
 </style>
 </head>
 <body>
@@ -878,7 +894,18 @@ select.inp{appearance:none;-webkit-appearance:none}
   <button id="loginSkip" onclick="loginSkip()">Continue without account (this device only)</button>
 </div>
 
-<div id="imgView" onclick="this.classList.remove('open')"><img id="imgViewImg" alt=""></div>
+<div id="pvOv">
+  <div class="pv-bar">
+    <button class="pv-btn" onclick="pvClose()" aria-label="Close">✕</button>
+    <div class="pv-meta"><div class="pv-title" id="pvTitle">Document</div><div class="pv-sub" id="pvPages"></div></div>
+    <button class="pv-btn" onclick="pvZoomBy(1/1.25)" aria-label="Zoom out">−</button>
+    <div class="pv-zoom" id="pvZoom">100%</div>
+    <button class="pv-btn" onclick="pvZoomBy(1.25)" aria-label="Zoom in">＋</button>
+    <button class="pv-btn" onclick="pvShare()" aria-label="Share">↗</button>
+    <button class="pv-btn" onclick="pvDownload()" aria-label="Download">⬇</button>
+  </div>
+  <div class="pv-body" id="pvBody"><div class="pv-stage" id="pvStage"></div></div>
+</div>
 
 <div id="cropOv">
   <div style="font-family:Fraunces,serif;font-size:19px;margin-bottom:16px">Adjust your photo</div>
@@ -1624,21 +1651,101 @@ function loadThumbs(){document.querySelectorAll('img.thumb[data-fid]').forEach(a
   const d=await fileGet(im.dataset.fid);if(d)im.src=d})}
 function attChips(att,pk){if(!att||!att.length)return'';
   return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+att.map(a=>
-   '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">'+(a.type==='pdf'?'📄':'🖼️')+' '+esc(a.name)
+   '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(a.name).replace(/'/g,"\\'")+'\')">'+(a.type==='pdf'?'📄':'🖼️')+' '+esc(a.name)
    +(pk?'<b style="margin-left:6px;color:var(--risk)" onclick="event.stopPropagation();removePend(\''+pk+'\',\''+a.id+'\')">✕</b>'
         :'<b style="margin-left:6px;color:var(--gold)" onclick="event.stopPropagation();shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(a.name).replace(/'/g,"\\'")+'\')" title="Share">↗</b>')
    +'</span>').join('')+'</div>'}
 function drawPend(k){const el=document.getElementById(pendEl[k]);if(el)el.innerHTML=attChips(pend[k],k)}
 function removePend(k,id){const i=pend[k].findIndex(a=>a.id===id);
   if(i>-1){fileDel(pend[k][i].id);pend[k].splice(i,1)}drawPend(k)}
-async function openAtt(id,type){const d=await fileGet(id);if(!d){toast('File not found');return}
-  if(type==='img'){document.getElementById('imgViewImg').src=d;document.getElementById('imgView').classList.add('open')}
-  else{try{const bin=atob(d.split(',')[1]);const arr=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-    const url=URL.createObjectURL(new Blob([arr],{type:'application/pdf'}));
-    const w=window.open(url,'_blank');
-    if(!w){const a=document.createElement('a');a.href=url;a.download='document.pdf';a.click()}}
-    catch(e){toast('Could not open the PDF')}}}
+/* ============ IN-APP VIEWER: PDF (pdf.js) + images, pinch-zoom & scroll ============ */
+let pv={scale:1,base:1,type:null,id:null,name:'',pdf:null,dpr:Math.min(2,window.devicePixelRatio||1)};
+let pdfjsReady=null;
+function loadPdfJs(){if(pdfjsReady)return pdfjsReady;
+  pdfjsReady=new Promise((res,rej)=>{
+    const s=document.createElement('script');s.src='./vendor/pdf.min.js';
+    s.onload=()=>{try{window.pdfjsLib.GlobalWorkerOptions.workerSrc='./vendor/pdf.worker.min.js';res(window.pdfjsLib)}
+      catch(e){rej(e)}};
+    s.onerror=()=>rej(new Error('pdfjs'));document.head.appendChild(s)});
+  return pdfjsReady}
+function b64ToBytes(dataUrl){const b=atob(dataUrl.split(',')[1]);const a=new Uint8Array(b.length);
+  for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
+async function openAtt(id,type,name){
+  const d=await fileGet(id);if(!d){toast('File not found');return}
+  pv.id=id;pv.type=type;pv.name=name||'Document';pv.scale=1;
+  document.getElementById('pvTitle').textContent=pv.name;
+  document.getElementById('pvPages').textContent='';
+  const stage=document.getElementById('pvStage');stage.innerHTML='';
+  document.getElementById('pvOv').classList.add('open');
+  document.getElementById('pvZoom').textContent='100%';
+  if(type==='img'){
+    const img=document.createElement('img');img.className='pv-img';img.src=d;img.alt='';
+    img.onload=()=>{pv.base=img.naturalWidth;pvApplyZoom()};
+    stage.appendChild(img);return}
+  stage.innerHTML='<div class="pv-load">Opening document…</div>';
+  try{const lib=await loadPdfJs();
+    const doc=await lib.getDocument({data:b64ToBytes(d)}).promise;
+    pv.pdf=doc;stage.innerHTML='';
+    document.getElementById('pvPages').textContent=doc.numPages+(doc.numPages>1?' pages':' page');
+    const w=Math.min(stage.clientWidth-8,900);
+    for(let p=1;p<=doc.numPages;p++){
+      const page=await doc.getPage(p);
+      const v1=page.getViewport({scale:1});
+      const fit=w/v1.width;
+      const vp=page.getViewport({scale:fit*pv.dpr});
+      const c=document.createElement('canvas');c.className='pv-page';
+      c.width=vp.width;c.height=vp.height;
+      c.style.width=(vp.width/pv.dpr)+'px';
+      stage.appendChild(c);
+      await page.render({canvasContext:c.getContext('2d',{alpha:false}),viewport:vp}).promise;
+      if(p===1)pv.base=vp.width/pv.dpr;}
+    pvApplyZoom()}
+  catch(e){stage.innerHTML='<div class="pv-load">Could not render this PDF.<br><button class="btn btn-ghost btn-sm" style="margin-top:14px" onclick="pvDownload()">Download instead</button></div>'}}
+function pvApplyZoom(){const z=pv.scale;
+  document.getElementById('pvZoom').textContent=Math.round(z*100)+'%';
+  const stage=document.getElementById('pvStage');
+  if(pv.type==='img'){const im=stage.querySelector('img');if(im)im.style.width=(pv.base*z)+'px'}
+  else stage.querySelectorAll('canvas').forEach(c=>{c.style.width=(pv.base*z)+'px'})}
+function pvZoomBy(f,cx,cy){const body=document.getElementById('pvBody');
+  const old=pv.scale;pv.scale=Math.max(.4,Math.min(6,pv.scale*f));
+  const r=pv.scale/old;
+  const px=(cx!==undefined?cx:body.clientWidth/2), py=(cy!==undefined?cy:body.clientHeight/2);
+  const sl=body.scrollLeft,st=body.scrollTop;
+  pvApplyZoom();
+  body.scrollLeft=(sl+px)*r-px; body.scrollTop=(st+py)*r-py}
+function pvClose(){document.getElementById('pvOv').classList.remove('open');
+  document.getElementById('pvStage').innerHTML='';
+  if(pv.pdf){try{pv.pdf.destroy()}catch(e){}pv.pdf=null}}
+function pvShare(){shareAtt(pv.id,pv.type,pv.name)}
+async function pvDownload(){const d=await fileGet(pv.id);if(!d)return;
+  const a=document.createElement('a');a.href=d;
+  a.download=(pv.name||'file').replace(/[^\w\- ]+/g,'').trim()+(pv.type==='pdf'?'.pdf':'.jpg');a.click()}
+function initViewer(){const body=document.getElementById('pvBody');
+  const pts=new Map();let d0=0,s0=1,mid={x:0,y:0};
+  body.addEventListener('pointerdown',e=>{pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2){const p=[...pts.values()];
+      d0=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);s0=pv.scale;
+      const r=body.getBoundingClientRect();
+      mid={x:(p[0].x+p[1].x)/2-r.left,y:(p[0].y+p[1].y)/2-r.top}}});
+  body.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;
+    pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2&&d0){e.preventDefault();
+      const p=[...pts.values()];const d=Math.hypot(p[0].x-p[1].x,p[0].y-p[1].y);
+      const target=Math.max(.4,Math.min(6,s0*(d/d0)));
+      pvZoomBy(target/pv.scale,mid.x,mid.y)}},{passive:false});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>body.addEventListener(ev,e=>{pts.delete(e.pointerId);if(pts.size<2)d0=0}));
+  body.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();
+    const r=body.getBoundingClientRect();
+    pvZoomBy(e.deltaY<0?1.12:1/1.12,e.clientX-r.left,e.clientY-r.top)},{passive:false});
+  let lastTap=0;
+  body.addEventListener('click',e=>{const now=Date.now();
+    if(now-lastTap<300){const r=body.getBoundingClientRect();
+      pvZoomBy(pv.scale>1.2?(1/pv.scale):2,e.clientX-r.left,e.clientY-r.top)}
+    lastTap=now});
+  addEventListener('keydown',e=>{if(!document.getElementById('pvOv').classList.contains('open'))return;
+    if(e.key==='Escape')pvClose();
+    if(e.key==='+'||e.key==='=')pvZoomBy(1.2);
+    if(e.key==='-')pvZoomBy(1/1.2)})}
 function allAttIds(){const ids=[];S.notes.forEach(n=>(n.att||[]).forEach(a=>ids.push(a.id)));
   S.expenses.forEach(e=>(e.att||[]).forEach(a=>ids.push(a.id)));
   S.meetings.forEach(m=>(m.att||[]).forEach(a=>ids.push(a.id)));
@@ -1662,7 +1769,7 @@ function delDoc(id){const d=S.docs.find(x=>x.id===id);trashPush('doc',d,d&&d.nam
 function docCard(d){const a=d.att;return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
   +(a.type==='img'?'<img class="thumb" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\')">':'<div class="thumb-ph">📄</div>')
   +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(d.name)+'</div><div class="row-meta">'+(d.space==='office'?'💼 Office · ':'')+fmtD(d.at)+'</div></div>'
-  +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
+  +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')">Open</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
   +'<button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
@@ -1762,7 +1869,7 @@ function verRow(c,v,latest){return '<div class="row">'
   +(v.att.type==='img'?'<img class="thumb" style="width:40px;height:40px" data-fid="'+v.att.id+'" alt="" onclick="openAtt(\''+v.att.id+'\',\'img\')">':'<div class="thumb-ph" style="width:40px;height:40px;font-size:18px">📄</div>')
   +'<div class="row-body"><div class="row-title" style="font-size:14px">'+(latest?'<span style="color:var(--gold)">● Latest</span> · ':'')+fmtD(v.date)+'</div>'
   +'<div class="row-meta">'+(v.att.type==='pdf'?'📄 PDF':'🖼️ Image')+'</div></div>'
-  +'<button class="btn btn-gold btn-sm" onclick="openAtt(\''+v.att.id+'\',\''+v.att.type+'\')">Read</button>'
+  +'<button class="btn btn-gold btn-sm" onclick="openAtt(\''+v.att.id+'\',\''+v.att.type+'\',\''+esc(c.name)+'\')">Read</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+v.att.id+'\',\''+v.att.type+'\',\''+esc(c.name)+'\')" title="Share">↗</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="downloadCircV(\''+c.id+'\',\''+v.id+'\')">⬇</button>'
   +'<button class="del" onclick="delCircVer(\''+c.id+'\',\''+v.id+'\')">✕</button>'
@@ -2225,7 +2332,7 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   migrate();trashAutoPurge();
   if(!S.deviceId){S.deviceId=uid();save(true)}
   if(S.water.date!==today())S.water={date:today(),count:0};
-  applyTheme();renderAll();initCrop();
+  applyTheme();renderAll();initCrop();initViewer();
   if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');
     const onSys=()=>{if((S.profile.theme||'dark')==='auto'){applyTheme();renderSettings()}};
     mq.addEventListener?mq.addEventListener('change',onSys):mq.addListener(onSys)}
