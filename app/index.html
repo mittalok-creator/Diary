@@ -422,6 +422,7 @@ select.inp{appearance:none;-webkit-appearance:none}
     <button data-t="follow" onclick="workTab('follow')">Follow-ups</button>
     <button data-t="meet" onclick="workTab('meet')">Meetings</button>
     <button data-t="circ" onclick="workTab('circ')">Circulars</button>
+    <button data-t="odoc" onclick="workTab('odoc')">Docs</button>
     <button data-t="notes" onclick="workTab('notes')">Quick Notes</button>
   </div>
 
@@ -475,6 +476,12 @@ select.inp{appearance:none;-webkit-appearance:none}
     <div id="circBanner" class="card" style="display:none;padding:12px 14px;font-size:13px;margin-bottom:10px"></div>
     <button class="btn btn-gold" id="circBtn" style="width:100%" onclick="addCircular()">📎 Attach file & save circular</button>
     <div id="circList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+
+  <div class="wtab" id="wt-odoc" style="display:none">
+    <input class="inp" id="odocName" placeholder="Document name (Sanction letter, Audit report…)">
+    <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addOfficeDoc()">📎 Choose image / PDF & save</button>
+    <div id="odocList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
   <div class="wtab" id="wt-notes" style="display:none">
@@ -1038,16 +1045,18 @@ function attBytes(){let b=0;const add=a=>b+=(a&&a.size)||0;
   S.notes.forEach(n=>(n.att||[]).forEach(add));S.expenses.forEach(e=>(e.att||[]).forEach(add));
   S.meetings.forEach(m=>(m.att||[]).forEach(add));S.docs.forEach(d=>add(d.att));S.circulars.forEach(c=>(c.versions||[]).forEach(v=>add(v.att)));return b}
 /* ============ DOCUMENTS VAULT ============ */
-function addDoc(){const n=document.getElementById('docName').value.trim();
-  if(!n){toast('Enter a document title first — it makes search easy');document.getElementById('docName').focus();return}
+function addDoc(){addDocIn('personal','docName')}
+function addOfficeDoc(){addDocIn('office','odocName')}
+function addDocIn(space,inputId){const el=document.getElementById(inputId);const n=el.value.trim();
+  if(!n){toast('Enter a document title first — it makes search easy');el.focus();return}
   pickFiles(fs=>{if(!fs.length)return;
-    fs.forEach((a,i)=>S.docs.unshift({id:uid(),name:fs.length>1?n+' ('+(i+1)+')':n,att:a,at:new Date().toISOString()}));
-    document.getElementById('docName').value='';save();renderLife();toast(fs.length+' document saved 🔒')})}
+    fs.forEach((a,i)=>S.docs.unshift({id:uid(),name:fs.length>1?n+' ('+(i+1)+')':n,space,att:a,at:new Date().toISOString()}));
+    el.value='';save();renderLife();renderWork();toast(fs.length+' document saved 🔒')})}
 function delDoc(id){const d=S.docs.find(x=>x.id===id);if(d)fileDel(d.att.id);
-  S.docs=S.docs.filter(x=>x.id!==id);save();renderLife()}
+  S.docs=S.docs.filter(x=>x.id!==id);save();renderLife();renderWork()}
 function docCard(d){const a=d.att;return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
   +'<div style="font-size:24px">'+(a.type==='pdf'?'📄':'🖼️')+'</div>'
-  +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(d.name)+'</div><div class="row-meta">'+fmtD(d.at)+'</div></div>'
+  +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(d.name)+'</div><div class="row-meta">'+(d.space==='office'?'💼 Office · ':'')+fmtD(d.at)+'</div></div>'
   +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
   +'<button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
@@ -1059,11 +1068,14 @@ function renderLife(){renderDocs();renderMoney2();renderHealth();listOr(ptList,S
   mMonth&&countUp(mMonth,S.expenses.filter(e=>e.at.slice(0,7)===m).reduce((a,b)=>a+b.amount,0),'₹');
   
   wBig&&(wBig.textContent=S.water.count);wBigBar&&(wBigBar.style.width=Math.min(100,S.water.count/8*100)+'%')}
-function renderDocs(){const el=document.getElementById('docList');if(!el)return;
-  el.innerHTML=S.docs.map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>PAN, RC, policy, warranty —<br>keep them all safe here (image or PDF)</div>'}
+function renderDocs(){const el=document.getElementById('docList');
+  if(el)el.innerHTML=S.docs.filter(d=>d.space!=='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>PAN, RC, policy, warranty —<br>keep them all safe here (image or PDF)</div>';
+  const oe=document.getElementById('odocList');
+  if(oe)oe.innerHTML=S.docs.filter(d=>d.space==='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>Sanction letters, audit reports, statements —<br>save any office document by name</div>'}
 function renderWork(){listOr(otList,S.tasks.filter(t=>t.space==='office').sort(taskSort),taskRow,'No office tasks. Enjoy it while it lasts.');
   fuList.innerHTML=S.followups.filter(f=>!f.done).map(fuCard).join('')+S.followups.filter(f=>f.done).slice(0,3).map(fuCard).join('')||'<div class="empty"><div class="em-ring">↺</div>No follow-ups. Add the first one above.</div>';
   if(document.getElementById('mtList'))mtList.innerHTML=S.meetings.slice().sort((a,b)=>((a.date||'')+'T'+(a.time||''))<((b.date||'')+'T'+(b.time||''))?-1:1).map(meetCard).join('')||'<div class="empty"><div class="em-ring">🎥</div>Add your first meeting above —<br>its name and time will show on the dashboard</div>';
+  renderDocs();
   if(document.getElementById('circList'))circList.innerHTML=S.circulars.slice().sort((a,b)=>circLatest(a).date<circLatest(b).date?1:-1).map(circCard).join('')||'<div class="empty"><div class="em-ring">📑</div>Store every circular here by name, date and type —<br>read in-app or download anytime</div>';
   onList.innerHTML=S.notes.filter(n=>n.space==='office').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Call gists & meeting points live here</div>'}
 /* ============ SEARCH ============ */
@@ -1078,11 +1090,12 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Income',S.income.filter(i=>hit(i.source)).map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div><div class="row-meta">'+fmtD(i.at)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>')],
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
    ['Circulars',S.circulars.filter(c=>hit(c.name)||hit(c.type)).map(circCard)],
-   ['Documents',S.docs.filter(d=>hit(d.name)).map(docCard)],
+   ['Documents',S.docs.filter(d=>d.space!=='office'&&hit(d.name)).map(docCard)],
+   ['Office documents',S.docs.filter(d=>d.space==='office'&&hit(d.name)).map(docCard)],
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
    ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
-  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Circulars'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
+  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
   qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>'}
 /* ============ CIRCULARS (with version history) ============ */
 let circVerTarget=null;let circOpen=null;
