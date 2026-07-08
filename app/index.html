@@ -299,7 +299,9 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   #dashSeg{max-width:420px}
 }
 .cfov{position:absolute;inset:0;z-index:110;display:none;align-items:center;justify-content:center;
-  background:rgba(8,10,14,.9);backdrop-filter:blur(8px);padding:26px}
+  background:color-mix(in srgb,var(--ink0) 94%,transparent);backdrop-filter:blur(10px);padding:26px}
+.cfov h2{color:var(--hi)}
+.cfov p{color:var(--lo)}
 .cfov.open{display:flex}
 .cfbox{max-width:380px;width:100%;text-align:center}
 #pvOv{position:absolute;inset:0;z-index:130;display:none;flex-direction:column;background:var(--ink0)}
@@ -2338,8 +2340,11 @@ async function cloudSync(manual,_retry){
     if(!snap){await pushAll(null,files)}
     else{
       const cloudU=+((snap.appProperties&&snap.appProperties.updatedAt)||0);
-      if(cloudU<=base){ if(localU>base)await pushAll(snap.id,files); }
-      else if(localU<=base||isEmptyState()){ await pullAll(snap,files) }
+      const fromMe=(snap.appProperties&&snap.appProperties.device)===S.deviceId;
+      const base2=fromMe?Math.max(base,cloudU):base;   /* our own push is never a conflict */
+      if(fromMe&&base2!==base){S.baseRev=base2;save(true)}
+      if(cloudU<=base2){ if(localU>base2)await pushAll(snap.id,files); }
+      else if(localU<=base2||isEmptyState()){ await pullAll(snap,files) }
       else { syncBusy=false; showConflict(snap,files,cloudU); renderSettings(); return }
     }
     S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync))}
@@ -2435,7 +2440,10 @@ function clearAll(){if(!clearArm){clearArm=true;toast('Tap Clear again to erase 
     setTimeout(()=>clearArm=false,4000);return}
   clearArm=false;allAttIds().forEach(id=>fileDel(id));S=blank();store.del();save();applyTheme();renderAll();go('today');toast('All data cleared')}
 /* ============ BOOT ============ */
-function migrate(){(S.circulars||[]).forEach(c=>{if(!c.versions){c.versions=[{id:uid(),date:c.date||today(),att:c.att,at:c.at||new Date().toISOString()}];delete c.att;delete c.date}})}
+function migrate(){(S.circulars||[]).forEach(c=>{if(!c.versions){c.versions=[{id:uid(),date:c.date||today(),att:c.att,at:c.at||new Date().toISOString()}];delete c.att;delete c.date}});
+  /* upgrades from before the conflict guard: adopt the last successful sync as the baseline,
+     otherwise the very first sync would look like a divergence */
+  if(S.baseRev===undefined||S.baseRev===null)S.baseRev=S.lastSync||0}
 function sysDark(){return !window.matchMedia||window.matchMedia('(prefers-color-scheme: dark)').matches}
 function applyTheme(){const m=S.profile.theme||'dark';
   const eff=(m==='auto')?(sysDark()?'dark':'light'):m;
