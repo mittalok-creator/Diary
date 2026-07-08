@@ -286,6 +286,9 @@ select.inp{appearance:none;-webkit-appearance:none}
       </div>
     </div>
 
+    <div class="eyebrow">🛡 Upcoming renewals</div>
+    <div class="card" id="renewToday" style="padding:6px 18px"></div>
+
     <div class="eyebrow">Pinned notes</div>
     <div class="card" id="pinList" style="padding:6px 18px"></div>
   </div>
@@ -299,6 +302,8 @@ select.inp{appearance:none;-webkit-appearance:none}
     <button data-t="shopping" onclick="lifeTab('shopping')">Shopping</button>
     <button data-t="money" onclick="lifeTab('money')">Money</button>
     <button data-t="health" onclick="lifeTab('health')">Health</button>
+    <button data-t="car" onclick="lifeTab('car')">Car</button>
+    <button data-t="renew" onclick="lifeTab('renew')">Renewals</button>
     <button data-t="docs" onclick="lifeTab('docs')">Docs</button>
   </div>
 
@@ -366,6 +371,7 @@ select.inp{appearance:none;-webkit-appearance:none}
       <span class="chip" data-c="Fuel" onclick="pickCat(this)">Fuel</span>
       <span class="chip" data-c="Home" onclick="pickCat(this)">Home</span>
       <span class="chip" data-c="Health" onclick="pickCat(this)">Health</span>
+      <span class="chip" data-c="Car" onclick="pickCat(this)">Car</span>
     </div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost" id="exAtt" title="Attach receipt" onclick="pickFiles(fs=>{pend.exp.push(...fs);drawPend('exp')})">📎</button>
@@ -410,6 +416,62 @@ select.inp{appearance:none;-webkit-appearance:none}
     <div class="dtrow" style="margin:0 0 8px"><input type="number" step="0.1" class="inp" id="wtIn" placeholder="Weight (kg)"><button class="btn btn-ghost" onclick="addWeight()">Log</button></div>
     <div class="dtrow" style="margin:0 0 12px"><input type="number" class="inp" id="bpS" placeholder="BP systolic"><input type="number" class="inp" id="bpD" placeholder="BP diastolic"><button class="btn btn-ghost" onclick="addBP()">Log</button></div>
     <div class="card" id="vitList" style="padding:6px 18px"></div>
+  </div>
+
+  <div class="ltab" id="lt-car" style="display:none">
+    <div class="card" id="carSummary"></div>
+    <div class="eyebrow">⛽ Fuel log</div>
+    <div class="dtrow" style="margin-top:0">
+      <input type="date" class="inp" id="flDate" title="Date">
+      <input type="number" inputmode="numeric" class="inp" id="flAmt" placeholder="₹ Amount">
+    </div>
+    <div class="dtrow">
+      <input type="number" step="0.01" inputmode="decimal" class="inp" id="flLit" placeholder="Litres">
+      <input type="number" inputmode="numeric" class="inp" id="flOdo" placeholder="Odometer km">
+    </div>
+    <button class="btn btn-gold" style="width:100%" onclick="addFuel()">Add fuel entry</button>
+    <div class="stat-sub" style="margin-top:8px">Fill the tank fully each time for accurate mileage. Logged as a Fuel expense automatically.</div>
+    <div id="flList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+
+    <div class="eyebrow">🔧 Service history</div>
+    <div class="dtrow" style="margin-top:0"><input type="date" class="inp" id="svDate" title="Service date"><input type="number" inputmode="numeric" class="inp" id="svOdo" placeholder="Odometer km"></div>
+    <input class="inp" id="svWork" placeholder="Work done (oil change, brakes…)">
+    <div class="dtrow"><input type="number" inputmode="numeric" class="inp" id="svCost" placeholder="₹ Cost"><input class="inp" id="svGarage" placeholder="Garage"></div>
+    <div class="dtrow"><input type="date" class="inp" id="svNext" title="Next service due"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" title="Attach bill" onclick="pickFiles(fs=>{pend.svc.push(...fs);drawPend('svc')})">📎</button>
+      <button class="btn btn-gold" style="flex:1" onclick="addService()">Add service record</button>
+    </div>
+    <div id="pendSvc"></div>
+    <div id="svList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+
+  <div class="ltab" id="lt-renew" style="display:none">
+    <input class="inp" id="rnName" placeholder="Policy / renewal name (e.g. Swift insurance)">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:10px 0" id="rnChips">
+      <span class="chip on" data-k="Car insurance" onclick="pickKind(this)">🚗 Car insurance</span>
+      <span class="chip" data-k="Life insurance" onclick="pickKind(this)">🛡 Life insurance</span>
+      <span class="chip" data-k="Health insurance" onclick="pickKind(this)">🏥 Health insurance</span>
+      <span class="chip" data-k="PUC" onclick="pickKind(this)">💨 PUC</span>
+      <span class="chip" data-k="FASTag" onclick="pickKind(this)">🎫 FASTag</span>
+      <span class="chip" data-k="Subscription" onclick="pickKind(this)">🔁 Subscription</span>
+      <span class="chip" data-k="AMC / Warranty" onclick="pickKind(this)">🔧 AMC / Warranty</span>
+      <span class="chip" data-k="Other" onclick="pickKind(this)">✦ Other</span>
+    </div>
+    <div class="dtrow" style="margin-top:0"><input class="inp" id="rnProv" placeholder="Provider (LIC, HDFC Ergo…)"><input class="inp" id="rnNo" placeholder="Policy number"></div>
+    <div class="dtrow"><input type="number" inputmode="numeric" class="inp" id="rnPrem" placeholder="Premium ₹"><input type="date" class="inp" id="rnExp" title="Expiry / renewal date"></div>
+    <select class="inp" id="rnRem">
+      <option value="60">Remind 60 days before</option>
+      <option value="30" selected>Remind 30 days before</option>
+      <option value="15">Remind 15 days before</option>
+      <option value="7">Remind 7 days before</option>
+    </select>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-ghost" title="Attach policy copy" onclick="pickFiles(fs=>{pend.ren.push(...fs);drawPend('ren')})">📎</button>
+      <button class="btn btn-gold" style="flex:1" onclick="addRenewal()">Add policy / renewal</button>
+    </div>
+    <div id="pendRen"></div>
+    <div id="rnList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
   <div class="ltab" id="lt-docs" style="display:none">
@@ -675,7 +737,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -762,6 +824,11 @@ function renderToday(){renderHeader();
   gWater.textContent=S.water.count; waterBar.style.width=Math.min(100,S.water.count/8*100)+'%';
   countUp(gShop,S.shopping.filter(s=>!s.done).length);
   const md=medsDueToday();const ws=document.getElementById('waterSub');if(ws)ws.textContent=md?('💊 '+md+' dose'+(md>1?'s':'')+' pending today'):'tap to log a glass';
+  const up=S.renewals.map(r=>({r,n:daysTo(r.expiry)})).filter(x=>x.n<=60).sort((a,b)=>a.n-b.n).slice(0,4);
+  const ns2=nextService();if(ns2&&daysTo(ns2.next)<=60)up.push({r:{name:'Car service',kind:'Service',expiry:ns2.next},n:daysTo(ns2.next)});
+  up.sort((a,b)=>a.n-b.n);
+  renewToday.innerHTML=up.length?up.map(x=>'<div class="row" style="cursor:pointer" onclick="go(\'life\');lifeTab(\'renew\')"><div class="row-body"><div class="row-title">'+esc(x.r.name)+'</div><div class="row-meta">'+esc(x.r.kind)+' · '+fmtD(x.r.expiry)+'</div></div><b style="color:'+rnColor(x.n)+';font-size:12.5px;white-space:nowrap">'+rnLabel(x.n)+'</b></div>').join('')
+    :'<div class="empty" style="padding:20px">Nothing expiring in the next 60 days</div>';
   const pins=S.notes.filter(n=>n.pinned);
   pinList.innerHTML=pins.length?pins.map(n=>'<div class="row"><div class="row-body"><div class="row-title">📌 '+esc(n.title)+'</div><div class="row-meta">'+esc((n.body||'').slice(0,60))+'</div></div></div>').join('')
     :'<div class="empty" style="padding:20px">Pin a note to see it here</div>'}
@@ -982,9 +1049,110 @@ function renderHealth(){if(!document.getElementById('medList'))return;
   medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
   habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
   vitList.innerHTML=S.vitals.slice(0,6).map(v=>'<div class="row"><div class="row-body"><div class="row-title">'+(v.kind==='weight'?'⚖ '+v.v1+' kg':'🩺 '+v.v1+'/'+v.v2)+'</div><div class="row-meta">'+fmtD(v.at)+'</div></div><button class="del" onclick="delVital(\''+v.id+'\')">✕</button></div>').join('')||'<div class="empty" style="padding:12px">Log weight or BP to build history</div>'}
+/* ============ RENEWALS & POLICIES ============ */
+let curKind='Car insurance';
+function pickKind(el){document.querySelectorAll('#rnChips .chip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');curKind=el.dataset.k}
+function daysTo(d){return Math.ceil((new Date(d+'T00:00')-new Date(today()+'T00:00'))/864e5)}
+function rnColor(n){return n<0?'var(--risk)':n<=7?'var(--risk)':n<=30?'var(--warn)':'var(--gold)'}
+function rnLabel(n){return n<0?(Math.abs(n)+' day'+(Math.abs(n)>1?'s':'')+' overdue'):n===0?'expires today':('expires in '+n+' day'+(n>1?'s':''))}
+function addRenewal(){const n=rnName.value.trim();
+  if(!n){toast('Give the policy a name');rnName.focus();return}
+  if(!rnExp.value){toast('Pick the expiry / renewal date');rnExp.focus();return}
+  S.renewals.unshift({id:uid(),name:n,kind:curKind,provider:rnProv.value.trim(),polno:rnNo.value.trim(),
+    premium:Number(rnPrem.value)||0,expiry:rnExp.value,remind:+rnRem.value,att:pend.ren.splice(0),notified:{}});
+  ['rnName','rnProv','rnNo','rnPrem','rnExp'].forEach(i=>document.getElementById(i).value='');
+  drawPend('ren');save();renderLife();renderToday();toast('🛡 Renewal tracked — '+rnLabel(daysTo(S.renewals[0].expiry)))}
+function delRenewal(id){const r=S.renewals.find(x=>x.id===id);((r&&r.att)||[]).forEach(a=>fileDel(a.id));
+  S.renewals=S.renewals.filter(x=>x.id!==id);save();renderLife();renderToday()}
+function renewPlus(id){const r=S.renewals.find(x=>x.id===id);if(!r)return;
+  const d=new Date(r.expiry+'T00:00');d.setFullYear(d.getFullYear()+1);
+  r.expiry=d.toISOString().slice(0,10);r.notified={};
+  save();renderLife();renderToday();toast('Renewed — next due '+fmtD(r.expiry))}
+function rnCard(r){const n=daysTo(r.expiry),c=rnColor(n);
+  return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
+  +'<div class="row-title" style="font-family:Fraunces,serif;font-size:16.5px">'+esc(r.name)+'</div>'
+  +'<button class="del" onclick="delRenewal(\''+r.id+'\')">✕</button></div>'
+  +'<div class="row-meta" style="margin-top:5px"><span class="chip" style="padding:3px 10px;font-size:11px;cursor:default">'+esc(r.kind)+'</span>'
+  +'&nbsp; <b style="color:'+c+'">'+rnLabel(n)+'</b> · '+fmtD(r.expiry)+'</div>'
+  +((r.provider||r.polno)?'<div class="row-meta" style="margin-top:4px">'+(r.provider?esc(r.provider):'')+(r.provider&&r.polno?' · ':'')+(r.polno?'No. <b style="color:var(--hi)">'+esc(r.polno)+'</b>':'')+'</div>':'')
+  +(r.premium?'<div class="row-meta" style="margin-top:2px">Premium '+fmtR(r.premium)+'</div>':'')
+  +attChips(r.att)
+  +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-gold btn-sm" onclick="renewPlus(\''+r.id+'\')">✓ Renewed · +1 year</button></div>'
+  +'</div>'}
+function checkRenewRem(){const t=today();
+  S.renewals.forEach(r=>{const n=daysTo(r.expiry);r.notified=r.notified||{};
+    if(n>r.remind||n<-30||r.notified[t])return;
+    r.notified[t]=1;save(true);notify('🛡 '+r.name,rnLabel(n)+' — '+r.kind)})}
+/* ============ CAR HUB: fuel + service ============ */
+function fuelStats(){const l=S.fuel.slice().sort((a,b)=>a.odo-b.odo);
+  l.forEach((f,i)=>{const p=l[i-1];
+    if(p&&f.odo>p.odo&&f.litres>0){f._km=f.odo-p.odo;f._kmpl=f._km/f.litres;f._rpk=f.amount/f._km}
+    else{f._km=null;f._kmpl=null;f._rpk=null}});
+  return l}
+function addFuel(){const a=Number(flAmt.value),l=Number(flLit.value),o=Number(flOdo.value);
+  if(!a||!o){toast('Amount and odometer are needed');return}
+  const d=flDate.value||today();
+  const id=uid();
+  S.fuel.unshift({id,date:d,amount:a,litres:l||0,odo:o});
+  S.expenses.unshift({id:uid(),amount:a,note:'Fuel · '+o.toLocaleString('en-IN')+' km',cat:'Fuel',att:[],
+    at:new Date(d+'T12:00:00').toISOString(),src:'fuel:'+id});
+  ['flAmt','flLit','flOdo','flDate'].forEach(i=>document.getElementById(i).value='');
+  save();renderLife();
+  const f=fuelStats().find(x=>x.id===id);
+  toast(f&&f._kmpl?('⛽ '+f._kmpl.toFixed(1)+' km/l · ₹'+f._rpk.toFixed(1)+'/km'):'⛽ Fuel logged — add one more fill to see mileage')}
+function delFuel(id){S.fuel=S.fuel.filter(f=>f.id!==id);
+  S.expenses=S.expenses.filter(e=>e.src!=='fuel:'+id);save();renderLife()}
+function fuelCard(f,prevKmpl){
+  const trend=(f._kmpl&&prevKmpl)?(f._kmpl>prevKmpl?'<span style="color:var(--good)">↑</span>':f._kmpl<prevKmpl?'<span style="color:var(--risk)">↓</span>':''):'';
+  return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
+  +'<div><div class="row-title">'+fmtR(f.amount)+(f.litres?' · '+f.litres+' L':'')+'</div>'
+  +'<div class="row-meta">'+fmtD(f.date)+' · '+f.odo.toLocaleString('en-IN')+' km</div></div>'
+  +'<div style="text-align:right"><div class="row-title" style="color:var(--gold)">'+(f._kmpl?f._kmpl.toFixed(1)+' km/l '+trend:'—')+'</div>'
+  +'<div class="row-meta">'+(f._rpk?'₹'+f._rpk.toFixed(1)+'/km':'first fill')+'</div></div>'
+  +'<button class="del" onclick="delFuel(\''+f.id+'\')">✕</button></div></div>'}
+function addService(){const w=svWork.value.trim();if(!w){toast('What work was done?');svWork.focus();return}
+  const d=svDate.value||today(),cost=Number(svCost.value)||0,id=uid();
+  S.service.unshift({id,date:d,odo:Number(svOdo.value)||0,work:w,cost,garage:svGarage.value.trim(),
+    next:svNext.value||'',att:pend.svc.splice(0)});
+  if(cost)S.expenses.unshift({id:uid(),amount:cost,note:'Service · '+w,cat:'Car',att:[],
+    at:new Date(d+'T12:00:00').toISOString(),src:'svc:'+id});
+  ['svDate','svOdo','svWork','svCost','svGarage','svNext'].forEach(i=>document.getElementById(i).value='');
+  drawPend('svc');save();renderLife();toast('🔧 Service recorded')}
+function delService(id){const s=S.service.find(x=>x.id===id);((s&&s.att)||[]).forEach(a=>fileDel(a.id));
+  S.service=S.service.filter(x=>x.id!==id);S.expenses=S.expenses.filter(e=>e.src!=='svc:'+id);save();renderLife()}
+function svcCard(s){return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
+  +'<div class="row-title">🔧 '+esc(s.work)+'</div><button class="del" onclick="delService(\''+s.id+'\')">✕</button></div>'
+  +'<div class="row-meta" style="margin-top:4px">'+fmtD(s.date)+(s.odo?' · '+s.odo.toLocaleString('en-IN')+' km':'')+(s.garage?' · '+esc(s.garage):'')+(s.cost?' · '+fmtR(s.cost):'')+'</div>'
+  +(s.next?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(s.next))+'">Next service '+rnLabel(daysTo(s.next))+'</div>':'')
+  +attChips(s.att)+'</div>'}
+function nextService(){const w=S.service.filter(s=>s.next).sort((a,b)=>a.next<b.next?-1:1);return w[0]||null}
+function renderCar(){if(!document.getElementById('flList'))return;
+  const l=fuelStats(),desc=l.slice().reverse();
+  const withKm=l.filter(f=>f._kmpl);
+  const avg=withKm.length?withKm.slice(-3).reduce((a,b)=>a+b._kmpl,0)/Math.min(3,withKm.length):0;
+  const mk=today().slice(0,7);
+  const carSpend=S.expenses.filter(e=>(e.cat==='Fuel'||e.cat==='Car')&&e.at.slice(0,7)===mk).reduce((a,b)=>a+b.amount,0);
+  const lastOdo=l.length?l[l.length-1].odo:0;
+  const ns=nextService();
+  const carRen=S.renewals.filter(r=>['Car insurance','PUC','FASTag'].includes(r.kind)).sort((a,b)=>a.expiry<b.expiry?-1:1)[0];
+  document.getElementById('carSummary').innerHTML=
+    '<div class="grid2" style="gap:14px">'
+    +'<div><div class="stat-label">Avg mileage</div><div class="stat-num">'+(avg?avg.toFixed(1):'—')+'<span style="font-size:14px;color:var(--lo)"> km/l</span></div></div>'
+    +'<div><div class="stat-label">Car spend · month</div><div class="stat-num">'+fmtR(carSpend)+'</div></div></div>'
+    +'<div class="row-meta" style="margin-top:12px">'+(lastOdo?'Odometer '+lastOdo.toLocaleString('en-IN')+' km':'No odometer reading yet')+'</div>'
+    +(ns?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(ns.next))+'">🔧 Next service '+rnLabel(daysTo(ns.next))+'</div>':'')
+    +(carRen?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(carRen.expiry))+'">🛡 '+esc(carRen.name)+' '+rnLabel(daysTo(carRen.expiry))+'</div>':'');
+  document.getElementById('flList').innerHTML=desc.map((f,i)=>fuelCard(f,desc[i+1]&&desc[i+1]._kmpl)).join('')
+    ||'<div class="empty" style="padding:14px">Log a fill-up — mileage and ₹/km appear from the second entry</div>';
+  document.getElementById('svList').innerHTML=S.service.slice().sort((a,b)=>a.date<b.date?1:-1).map(svcCard).join('')
+    ||'<div class="empty" style="padding:14px">Oil change, brakes, insurance work — keep the full history with bills</div>';
+  document.getElementById('rnList').innerHTML=S.renewals.slice().sort((a,b)=>a.expiry<b.expiry?-1:1).map(rnCard).join('')
+    ||'<div class="empty"><div class="em-ring">🛡</div>Car, life, health, PUC, FASTag —<br>never miss a renewal again</div>';
+  setTimeout(loadThumbs,0)}
 /* ============ ATTACHMENTS (image + PDF) ============ */
-let pend={note:[],onote:[],exp:[],meet:[]};
-const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet'};
+let pend={note:[],onote:[],exp:[],meet:[],ren:[],svc:[]};
+const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet',ren:'pendRen',svc:'pendSvc'};
 let _idb=null;
 function idbOpen(){return new Promise(res=>{
   if(_idb)return res(_idb);
@@ -1058,10 +1226,12 @@ async function openAtt(id,type){const d=await fileGet(id);if(!d){toast('File not
 function allAttIds(){const ids=[];S.notes.forEach(n=>(n.att||[]).forEach(a=>ids.push(a.id)));
   S.expenses.forEach(e=>(e.att||[]).forEach(a=>ids.push(a.id)));
   S.meetings.forEach(m=>(m.att||[]).forEach(a=>ids.push(a.id)));
-  S.docs.forEach(d=>{if(d.att)ids.push(d.att.id)});S.circulars.forEach(c=>(c.versions||[]).forEach(v=>{if(v.att)ids.push(v.att.id)}));return ids}
+  S.docs.forEach(d=>{if(d.att)ids.push(d.att.id)});S.circulars.forEach(c=>(c.versions||[]).forEach(v=>{if(v.att)ids.push(v.att.id)}));
+  S.renewals.forEach(r=>(r.att||[]).forEach(a=>ids.push(a.id)));S.service.forEach(s=>(s.att||[]).forEach(a=>ids.push(a.id)));return ids}
 function attBytes(){let b=0;const add=a=>b+=(a&&a.size)||0;
   S.notes.forEach(n=>(n.att||[]).forEach(add));S.expenses.forEach(e=>(e.att||[]).forEach(add));
-  S.meetings.forEach(m=>(m.att||[]).forEach(add));S.docs.forEach(d=>add(d.att));S.circulars.forEach(c=>(c.versions||[]).forEach(v=>add(v.att)));return b}
+  S.meetings.forEach(m=>(m.att||[]).forEach(add));S.docs.forEach(d=>add(d.att));S.circulars.forEach(c=>(c.versions||[]).forEach(v=>add(v.att)));
+  S.renewals.forEach(r=>(r.att||[]).forEach(add));S.service.forEach(s=>(s.att||[]).forEach(add));return b}
 /* ============ DOCUMENTS VAULT ============ */
 function addDoc(cam){addDocIn('personal','docName',cam)}
 function addOfficeDoc(cam){addDocIn('office','odocName',cam)}
@@ -1079,7 +1249,7 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
   +'<button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
-function renderLife(){renderDocs();renderMoney2();renderHealth();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
+function renderLife(){renderDocs();renderMoney2();renderHealth();renderCar();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
@@ -1108,13 +1278,15 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Expenses',S.expenses.filter(e=>hit(e.note)||hit(e.cat)).map(e=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(e.note)+'</div><div class="row-meta">'+esc(e.cat)+'</div></div><div style="font-weight:700">'+fmtR(e.amount)+'</div></div>')],
    ['Income',S.income.filter(i=>hit(i.source)).map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div><div class="row-meta">'+fmtD(i.at)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>')],
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
+   ['Renewals',S.renewals.filter(r=>hit(r.name)||hit(r.kind)||hit(r.provider)||hit(r.polno)).map(rnCard)],
+   ['Car',[...S.fuel.filter(x=>hit('fuel')||hit(String(x.odo))).map(x=>'<div class="row"><div class="row-body"><div class="row-title">⛽ '+fmtR(x.amount)+'</div><div class="row-meta">'+fmtD(x.date)+' · '+x.odo+' km</div></div></div>'),...S.service.filter(s=>hit(s.work)||hit(s.garage)).map(svcCard)]],
    ['Circulars',S.circulars.filter(c=>hit(c.name)||hit(c.type)).map(circCard)],
    ['Documents',S.docs.filter(d=>d.space!=='office'&&hit(d.name)).map(docCard)],
    ['Office documents',S.docs.filter(d=>d.space==='office'&&hit(d.name)).map(docCard)],
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
    ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
-  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
+  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
   qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>';setTimeout(loadThumbs,0)}
 /* ============ CIRCULARS (with version history) ============ */
 let circVerTarget=null;let circOpen=null;
@@ -1224,7 +1396,7 @@ function checkTaskRem(){const now=Date.now(),t=today();
     const ts=new Date(t+'T'+x.time).getTime();const diff=(ts-now)/60000;
     if(diff<=10&&diff>-2){x.notified=true;save();
       notify('⏰ '+x.title,diff>0?'Due in '+Math.round(diff)+' min':'Due now')}})}
-function checkReminders(){checkMeetRem();checkTaskRem();checkMedRem()}
+function checkReminders(){checkMeetRem();checkTaskRem();checkMedRem();checkRenewRem()}
 /* ============ CALENDAR ============ */
 function calShift(n){const el=document.getElementById('calDate');
   const d=new Date((el.value||today())+'T12:00:00');d.setDate(d.getDate()+n);
@@ -1244,6 +1416,10 @@ function renderCal(){const d=document.getElementById('calDate').value||today();
   const inc=S.income.filter(i=>onDay(i.at));
   if(inc.length){const tot=inc.reduce((a,b)=>a+b.amount,0);
     secs.push(['Income · +'+fmtR(tot),'<div class="card" style="padding:6px 18px">'+inc.map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>').join('')+'</div>'])}
+  const rn=S.renewals.filter(r=>r.expiry===d);
+  if(rn.length)secs.push(['Renewals due · '+rn.length,'<div style="display:flex;flex-direction:column;gap:10px">'+rn.map(rnCard).join('')+'</div>']);
+  const sv=S.service.filter(s=>s.date===d);
+  if(sv.length)secs.push(['Car service · '+sv.length,'<div style="display:flex;flex-direction:column;gap:10px">'+sv.map(svcCard).join('')+'</div>']);
   const nt=S.notes.filter(n=>onDay(n.at));
   if(nt.length)secs.push(['Notes · '+nt.length,'<div style="display:flex;flex-direction:column;gap:10px">'+nt.map(noteCard).join('')+'</div>']);
   const cc=S.circulars.filter(c=>(c.versions||[]).some(v=>v.date===d));
