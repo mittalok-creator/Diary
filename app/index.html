@@ -583,18 +583,19 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   </div>
 
   <div class="ltab" id="lt-car" style="display:none">
-    <div class="card" id="carSummary"></div>
+    <div class="card" id="carSummary" onclick="carEdit()" style="cursor:pointer"></div>
     <div class="eyebrow">⛽ Fuel log</div>
     <div class="dtrow" style="margin-top:0">
       <label class="fld"><span>Fill date</span><input type="date" class="inp" id="flDate"></label>
-      <label class="fld"><span>Amount</span><input type="number" inputmode="numeric" class="inp" id="flAmt" placeholder="₹ 2,000"></label>
+      <label class="fld"><span>Amount ₹</span><input type="number" inputmode="numeric" class="inp" id="flAmt" placeholder="2,000" oninput="flCalc()"></label>
     </div>
-    <div class="dtrow">
-      <input type="number" step="0.01" inputmode="decimal" class="inp" id="flLit" placeholder="Litres">
-      <input type="number" inputmode="numeric" class="inp" id="flOdo" placeholder="Odometer km">
+    <div class="dtrow" style="margin-top:0">
+      <label class="fld"><span>Price ₹/litre</span><input type="number" step="0.01" inputmode="decimal" class="inp" id="flRate" placeholder="e.g. 106.50" oninput="flCalc()"></label>
+      <label class="fld"><span>Odometer km</span><input type="number" inputmode="numeric" class="inp" id="flOdo" placeholder="current reading"></label>
     </div>
+    <div class="stat-sub" id="flCalcOut" style="margin:2px 0 8px;min-height:16px"></div>
     <button class="btn btn-gold" style="width:100%" onclick="addFuel()">Add fuel entry</button>
-    <div class="stat-sub" style="margin-top:8px">Fill the tank fully each time for accurate mileage. Logged as a Fuel expense automatically.</div>
+    <div class="stat-sub" style="margin-top:8px">Enter amount + price — litres are worked out for you. Fill the tank fully each time for accurate mileage. Logged as a Fuel expense automatically.</div>
     <div id="flList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
 
     <div class="eyebrow">🔧 Service history</div>
@@ -604,7 +605,10 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     </div>
     <input class="inp" id="svWork" placeholder="Work done (oil change, brakes…)">
     <div class="dtrow"><input type="number" inputmode="numeric" class="inp" id="svCost" placeholder="₹ Cost"><input class="inp" id="svGarage" placeholder="Garage"></div>
-    <div class="dtrow"><label class="fld"><span>Next service due (optional)</span><input type="date" class="inp" id="svNext"></label></div>
+    <div class="dtrow">
+      <label class="fld"><span>Next service — date (optional)</span><input type="date" class="inp" id="svNext"></label>
+      <label class="fld"><span>…or after km (optional)</span><input type="number" inputmode="numeric" class="inp" id="svNextKm" placeholder="e.g. 45000"></label>
+    </div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost" title="Attach bill" onclick="pickFiles(fs=>{pend.svc.push(...fs);drawPend('svc')})">📎</button>
       <button class="btn btn-gold" style="flex:1" onclick="addService()">Add service record</button>
@@ -941,6 +945,27 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   <button id="loginSkip" onclick="loginSkip()">Continue without account (this device only)</button>
 </div>
 
+<div id="carOv" class="cfov">
+  <div class="cfbox" style="text-align:left">
+    <div style="text-align:center;margin-bottom:18px">
+      <div id="carPicWrap" onclick="carPickPic()" style="cursor:pointer;display:inline-block">
+        <div id="carPicEmpty" class="thumb-ph" style="width:96px;height:96px;font-size:38px;margin:0 auto;border-radius:22px">🚗</div>
+        <img id="carPicImg" alt="" style="display:none;width:96px;height:96px;object-fit:cover;border-radius:22px;border:1.5px solid var(--gold)">
+        <div class="stat-sub" style="margin-top:6px">Tap to add a photo</div>
+      </div>
+    </div>
+    <label class="fld" style="width:100%"><span>Vehicle name</span>
+      <input class="inp" id="carName" placeholder="Swift VXI · MP09 CX 1234"></label>
+    <div class="dtrow" style="margin-top:12px">
+      <label class="fld"><span>Service every (km)</span><input type="number" inputmode="numeric" class="inp" id="carSvcEvery" placeholder="10000"></label>
+      <label class="fld"><span>Last service odo</span><input type="number" inputmode="numeric" class="inp" id="carSvcKm" placeholder="km"></label>
+    </div>
+    <div class="stat-sub" style="margin-top:8px">If you set both, the next service counts down in km as you log fuel odometer readings.</div>
+    <button class="btn btn-gold" style="width:100%;margin-top:16px" onclick="carSaveProfile()">Save vehicle</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('carOv').classList.remove('open')">Cancel</button>
+  </div>
+</div>
+
 <div id="skOv">
   <div class="sk-bar">
     <button class="pv-btn" onclick="skClose()" aria-label="Close">✕</button>
@@ -1005,7 +1030,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],trash:[],deviceId:uid(),baseRev:0,
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],trash:[],car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -1533,17 +1558,46 @@ function fuelStats(){const l=S.fuel.slice().sort((a,b)=>a.odo-b.odo);
     if(p&&f.odo>p.odo&&f.litres>0){f._km=f.odo-p.odo;f._kmpl=f._km/f.litres;f._rpk=f.amount/f._km}
     else{f._km=null;f._kmpl=null;f._rpk=null}});
   return l}
-function addFuel(){const a=Number(flAmt.value),l=Number(flLit.value),o=Number(flOdo.value);
+function flCalc(){const a=Number(document.getElementById('flAmt').value),r=Number(document.getElementById('flRate').value);
+  const out=document.getElementById('flCalcOut');
+  if(a&&r){out.innerHTML='≈ <b style="color:var(--gold)">'+(a/r).toFixed(2)+' litres</b> at ₹'+r+'/L'}
+  else out.textContent=''}
+function addFuel(){const a=Number(flAmt.value),r=Number(flRate.value),o=Number(flOdo.value);
   if(!a||!o){toast('Amount and odometer are needed');return}
+  const l=r?a/r:0;
   const d=flDate.value||today();
   const id=uid();
-  S.fuel.unshift({id,date:d,amount:a,litres:l||0,odo:o});
+  S.fuel.unshift({id,date:d,amount:a,litres:l||0,rate:r||0,odo:o});
   S.expenses.unshift({id:uid(),amount:a,note:'Fuel · '+o.toLocaleString('en-IN')+' km',cat:'Fuel',att:[],
     at:new Date(d+'T12:00:00').toISOString(),src:'fuel:'+id});
-  ['flAmt','flLit','flOdo','flDate'].forEach(i=>document.getElementById(i).value='');
+  ['flAmt','flRate','flOdo','flDate'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('flCalcOut').textContent='';
   save();renderLife();
   const f=fuelStats().find(x=>x.id===id);
   toast(f&&f._kmpl?('⛽ '+f._kmpl.toFixed(1)+' km/l · ₹'+f._rpk.toFixed(1)+'/km'):'⛽ Fuel logged — add one more fill to see mileage')}
+/* ---- car profile ---- */
+function lastOdoNow(){const l=S.fuel.slice().sort((a,b)=>a.odo-b.odo);return l.length?l[l.length-1].odo:0}
+function carEdit(){const c=S.car||{};
+  carName.value=c.name||'';carSvcEvery.value=c.svcEvery||'';carSvcKm.value=c.svcKm||'';
+  const img=document.getElementById('carPicImg'),emp=document.getElementById('carPicEmpty');
+  if(c.pic){img.src=c.pic;img.style.display='block';emp.style.display='none'}
+  else{img.style.display='none';emp.style.display='flex'}
+  document.getElementById('carOv').classList.add('open')}
+function carPickPic(){pickFiles(fs=>{if(!fs.length)return;const a=fs[0];
+  fileGet(a.id).then(d=>{const img=document.getElementById('carPicImg'),emp=document.getElementById('carPicEmpty');
+    img.src=d;img.style.display='block';emp.style.display='none';img.dataset.fid=a.id})},
+  {capture:false,accept:'image/*'})}
+function carSaveProfile(){const img=document.getElementById('carPicImg');
+  S.car=S.car||{};
+  S.car.name=carName.value.trim();
+  S.car.svcEvery=Number(carSvcEvery.value)||0;
+  S.car.svcKm=Number(carSvcKm.value)||0;
+  if(img.dataset.fid){fileGet(img.dataset.fid).then(d=>{S.car.pic=d;save();renderLife()})}
+  document.getElementById('carOv').classList.remove('open');
+  save();renderLife();toast('🚗 Vehicle saved')}
+function serviceDueKm(){const c=S.car||{};if(!c.svcEvery||!c.svcKm)return null;
+  const due=c.svcKm+c.svcEvery;const now=lastOdoNow();
+  return {due,now,remain:due-now}}
 function delFuel(id){const f=S.fuel.find(x=>x.id===id);
   const ex=S.expenses.find(e=>e.src==='fuel:'+id);if(f&&ex)f._exp=ex;
   trashPush('fuel',f,f&&('⛽ '+fmtR(f.amount)));
@@ -1559,10 +1613,10 @@ function fuelCard(f,prevKmpl){
 function addService(){const w=svWork.value.trim();if(!w){toast('What work was done?');svWork.focus();return}
   const d=svDate.value||today(),cost=Number(svCost.value)||0,id=uid();
   S.service.unshift({id,date:d,odo:Number(svOdo.value)||0,work:w,cost,garage:svGarage.value.trim(),
-    next:svNext.value||'',att:pend.svc.splice(0)});
+    next:svNext.value||'',nextKm:Number(svNextKm.value)||0,att:pend.svc.splice(0)});
   if(cost)S.expenses.unshift({id:uid(),amount:cost,note:'Service · '+w,cat:'Car',att:[],
     at:new Date(d+'T12:00:00').toISOString(),src:'svc:'+id});
-  ['svDate','svOdo','svWork','svCost','svGarage','svNext'].forEach(i=>document.getElementById(i).value='');
+  ['svDate','svOdo','svWork','svCost','svGarage','svNext','svNextKm'].forEach(i=>document.getElementById(i).value='');
   drawPend('svc');save();renderLife();toast('🔧 Service recorded')}
 function delService(id){const s=S.service.find(x=>x.id===id);
   const ex=S.expenses.find(e=>e.src==='svc:'+id);if(s&&ex)s._exp=ex;
@@ -1583,13 +1637,20 @@ function renderCar(){if(!document.getElementById('flList'))return;
   const lastOdo=l.length?l[l.length-1].odo:0;
   const ns=nextService();
   const carRen=S.renewals.filter(r=>['Car insurance','PUC','FASTag'].includes(r.kind)).sort((a,b)=>a.expiry<b.expiry?-1:1)[0];
-  document.getElementById('carSummary').innerHTML=
-    '<div class="grid2" style="gap:14px">'
+  const c=S.car||{};const sk=serviceDueKm();
+  const hdr=(c.name||c.pic)
+    ?'<div style="display:flex;align-items:center;gap:13px;margin-bottom:14px">'
+      +(c.pic?'<img src="'+c.pic+'" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:14px;border:1px solid var(--hair)">':'<div class="thumb-ph" style="width:52px;height:52px;font-size:24px">🚗</div>')
+      +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:17px">'+esc(c.name||'My vehicle')+'</div>'
+      +'<div class="row-meta">'+(lastOdo?lastOdo.toLocaleString('en-IN')+' km on the clock':'tap to set up')+'</div></div>'
+      +'<span style="color:var(--gold);font-size:12px">✎</span></div>'
+    :'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="stat-label">🚗 Add your vehicle</div><span style="color:var(--gold);font-size:12px">Set up ›</span></div>';
+  document.getElementById('carSummary').innerHTML= hdr
+    +'<div class="grid2" style="gap:14px">'
     +'<div><div class="stat-label">Avg mileage</div><div class="stat-num">'+(avg?avg.toFixed(1):'—')+'<span style="font-size:14px;color:var(--lo)"> km/l</span></div></div>'
     +'<div><div class="stat-label">Car spend · month</div><div class="stat-num">'+fmtR(carSpend)+'</div></div></div>'
-    +'<div class="row-meta" style="margin-top:12px">'+(lastOdo?'Odometer '+lastOdo.toLocaleString('en-IN')+' km':'No odometer reading yet')+'</div>'
-    +(ns?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(ns.next))+'">🔧 Next service '+rnLabel(daysTo(ns.next))+'</div>':'')
-    +(carRen?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(carRen.expiry))+'">🛡 '+esc(carRen.name)+' '+rnLabel(daysTo(carRen.expiry))+'</div>':'');
+    +(sk?'<div class="row-meta" style="margin-top:12px;color:'+(sk.remain<0?'var(--risk)':sk.remain<=500?'var(--warn)':'var(--gold)')+'">🔧 Service '+(sk.remain<0?('overdue by '+Math.abs(sk.remain).toLocaleString('en-IN')+' km'):('in '+sk.remain.toLocaleString('en-IN')+' km'))+' · at '+sk.due.toLocaleString('en-IN')+' km</div>':(ns?'<div class="row-meta" style="margin-top:12px;color:'+rnColor(daysTo(ns.next))+'">🔧 Next service '+rnLabel(daysTo(ns.next))+'</div>':''))
+    +(carRen?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(carRen.expiry))+'">🛡 '+esc(carRen.name)+' '+rnLabel(daysTo(carRen.expiry))+'</div>':'<div class="row-meta" style="margin-top:3px">🛡 No car insurance tracked — add it under Renewals</div>');
   document.getElementById('flList').innerHTML=desc.map((f,i)=>fuelCard(f,desc[i+1]&&desc[i+1]._kmpl)).join('')
     ||'<div class="empty" style="padding:14px">Log a fill-up — mileage and ₹/km appear from the second entry</div>';
   document.getElementById('svList').innerHTML=S.service.slice().sort((a,b)=>a.date<b.date?1:-1).map(svcCard).join('')
