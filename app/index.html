@@ -263,8 +263,11 @@ select.inp{appearance:none;-webkit-appearance:none}
 .gal-cap{font-size:10.5px;color:var(--lo);margin-top:5px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(min-width:1000px){.gal-grid{grid-template-columns:repeat(6,1fr)}}
 .qadd{display:flex;gap:8px;margin-top:8px}
-.qchips{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}
-.qchips .chip{font-size:11.5px;padding:6px 11px}
+.hbtn{width:42px;height:42px;border-radius:50%;border:1px solid var(--hair);background:var(--ink1);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:border-color .2s,transform .18s}
+.hbtn:active{transform:scale(.92)}
+.hbtn:hover{border-color:var(--gold)}
+.hbtn svg{width:19px;height:19px;stroke:var(--gold);fill:none;stroke-width:1.9;stroke-linecap:round}
 .tl{position:relative;padding-left:4px}
 .tl::before{content:'';position:absolute;left:63px;top:8px;bottom:8px;width:1.5px;background:var(--hair)}
 .tl-plain::before{display:none}
@@ -298,7 +301,12 @@ select.inp{appearance:none;-webkit-appearance:none}
     <div class="h-date"><span id="hDate"></span><span id="hTime" style="color:var(--hi);margin-left:8px;font-size:12px"></span></div>
     <div class="h-greet" id="hGreet"></div>
   </div>
-  <div class="avatar" id="hAvatar" onclick="go('settings')">A</div>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="hbtn" onclick="openSearch()" aria-label="Search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
+    <div class="avatar" id="hAvatar" onclick="go('settings')">A</div>
+  </div>
 </header>
 
 <main id="main">
@@ -306,15 +314,11 @@ select.inp{appearance:none;-webkit-appearance:none}
 <!-- ================= TODAY ================= -->
 <section class="view active" id="v-today">
   <div class="qadd">
-    <input class="inp" id="qaIn" placeholder="Quick add… (e.g. 250 lunch, or Call branch)" onkeydown="if(event.key==='Enter')quickAdd()">
-    <button class="btn btn-gold" onclick="quickAdd()">＋</button>
-  </div>
-  <div class="qchips" id="qaChips">
-    <span class="chip on" data-q="task" onclick="pickQA(this)">● Task</span>
-    <span class="chip" data-q="otask" onclick="pickQA(this)">💼 Office task</span>
-    <span class="chip" data-q="exp" onclick="pickQA(this)">₹ Expense</span>
-    <span class="chip" data-q="shop" onclick="pickQA(this)">🛒 Shopping</span>
-    <span class="chip" data-q="note" onclick="pickQA(this)">🗒 Note</span>
+    <input class="inp" id="dashQ" placeholder="Search tasks, notes, money, circulars…"
+      onfocus="openSearch()" onkeydown="if(event.key==='Enter')openSearch()">
+    <button class="btn btn-gold" onclick="openSearch()" aria-label="Search">
+      <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#12151b;fill:none;stroke-width:2.2;stroke-linecap:round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    </button>
   </div>
 
   <div class="card" style="margin-top:14px">
@@ -618,6 +622,7 @@ select.inp{appearance:none;-webkit-appearance:none}
     <button data-t="meet" onclick="workTab('meet')">Meetings</button>
     <button data-t="circ" onclick="workTab('circ')">Circulars</button>
     <button data-t="odoc" onclick="workTab('odoc')">Docs</button>
+    <button data-t="link" onclick="workTab('link')">Links</button>
     <button data-t="notes" onclick="workTab('notes')">Quick Notes</button>
   </div>
 
@@ -684,6 +689,14 @@ select.inp{appearance:none;-webkit-appearance:none}
       <button class="btn btn-ghost" onclick="addOfficeDoc(true)">📷 Camera</button>
     </div>
     <div id="odocList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+
+  <div class="wtab" id="wt-link" style="display:none">
+    <input class="inp" id="lkName" placeholder="Link name (HRMS portal, CBS login, Circular site…)">
+    <input class="inp" id="lkUrl" placeholder="Paste the link (https://…)" style="margin-top:8px" onkeydown="if(event.key==='Enter')addLink()">
+    <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addLink()">＋ Save link</button>
+    <div class="stat-sub" style="margin-top:8px">The link stays hidden — only the name shows. Open or share it any time.</div>
+    <div id="lkList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
   <div class="wtab" id="wt-notes" style="display:none">
@@ -820,8 +833,6 @@ select.inp{appearance:none;-webkit-appearance:none}
     <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>Calendar</button>
   <button id="nb-work" onclick="go('work')">
     <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Work</button>
-  <button id="nb-search" onclick="go('search')">
-    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Search</button>
   <button id="nb-settings" class="desk-only" onclick="go('settings')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.2 3h-4l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg>Settings</button>
 </nav>
@@ -878,7 +889,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],trash:[],
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],trash:[],
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -1046,33 +1057,49 @@ function addWater(d=1){const t=today();if(S.water.date!==t)S.water={date:t,count
   if(d>0)toast('💧 '+S.water.count+' of 8 glasses');
   gWater&&(gWater.textContent=S.water.count);waterBar&&(waterBar.style.width=Math.min(100,S.water.count/8*100)+'%');
   wBig&&(wBig.textContent=S.water.count);wBigBar&&(wBigBar.style.width=Math.min(100,S.water.count/8*100)+'%')}
-/* ============ QUICK ADD ============ */
-let qaMode='task';
-function pickQA(el){document.querySelectorAll('#qaChips .chip').forEach(c=>c.classList.remove('on'));
-  el.classList.add('on');qaMode=el.dataset.q;
-  const p={task:'Add a personal task…',otask:'Add an office task…',exp:'e.g. 250 lunch',
-    shop:'e.g. milk, eggs',note:'Quick note…'};
-  document.getElementById('qaIn').placeholder=p[qaMode]||'Quick add…';
-  document.getElementById('qaIn').focus()}
-function quickAdd(){const el=document.getElementById('qaIn');const v=el.value.trim();if(!v)return;
-  if(qaMode==='task'||qaMode==='otask'){
-    S.tasks.unshift({id:uid(),title:v,space:qaMode==='otask'?'office':'personal',due:today(),time:null,rep:null,done:false,at:new Date().toISOString()});
-    toast('Task added for today')}
-  else if(qaMode==='exp'){const m=v.match(/(\d[\d,]*(?:\.\d+)?)/);
-    if(!m){toast('Start with the amount — e.g. 250 lunch');return}
-    const amt=Number(m[1].replace(/,/g,''));
-    const note=v.replace(m[1],'').replace(/^[\s₹rs.\-]+/i,'').trim()||'General';
-    const cat=/petrol|fuel|diesel/i.test(note)?'Fuel':/lunch|dinner|food|swiggy|zomato|tea/i.test(note)?'Food':
-      /medic|doctor|pharma/i.test(note)?'Health':/car|service|toll/i.test(note)?'Car':'General';
-    S.expenses.unshift({id:uid(),amount:amt,note,cat,att:[],at:new Date().toISOString()});
-    toast(fmtR(amt)+' logged in '+cat)}
-  else if(qaMode==='shop'){v.split(/,| and /i).map(s=>s.trim()).filter(Boolean)
-      .forEach(n=>S.shopping.unshift({id:uid(),name:n,done:false}));
-    toast('🛒 Added to shopping')}
-  else if(qaMode==='note'){const parts=v.split(' — ');
-    S.notes.unshift({id:uid(),title:parts[0]||'Untitled',body:parts.slice(1).join(' — '),space:'personal',pinned:false,att:[],at:new Date().toISOString()});
-    toast('Note saved')}
-  el.value='';save();renderToday();renderLife();renderWork()}
+/* ============ IMPORTANT LINKS ============ */
+function normUrl(u){u=String(u||'').trim();if(!u)return '';
+  if(!/^[a-z][a-z0-9+.-]*:/i.test(u))u='https://'+u;return u}
+function addLink(){const n=document.getElementById('lkName').value.trim();
+  const u=normUrl(document.getElementById('lkUrl').value);
+  if(!n){toast('Give the link a name');document.getElementById('lkName').focus();return}
+  if(!u){toast('Paste the link');document.getElementById('lkUrl').focus();return}
+  try{new URL(u)}catch(e){toast('That does not look like a valid link');return}
+  S.links.unshift({id:uid(),name:n,url:u,at:new Date().toISOString()});
+  document.getElementById('lkName').value='';document.getElementById('lkUrl').value='';
+  save();renderWork();toast('🔗 Link saved')}
+function openLink(id){const l=S.links.find(x=>x.id===id);if(!l)return;
+  const w=window.open(l.url,'_blank','noopener');
+  if(!w)copyLink(id)}
+async function shareLink(id){const l=S.links.find(x=>x.id===id);if(!l)return;
+  try{if(navigator.share){await navigator.share({title:l.name,text:l.name,url:l.url});return}}
+  catch(e){if(e&&e.name==='AbortError')return}
+  copyLink(id)}
+async function copyLink(id){const l=S.links.find(x=>x.id===id);if(!l)return;
+  try{await navigator.clipboard.writeText(l.url);toast('Link copied — paste it anywhere')}
+  catch(e){const t=document.createElement('textarea');t.value=l.url;document.body.appendChild(t);
+    t.select();try{document.execCommand('copy');toast('Link copied')}catch(e2){toast('Could not copy the link')}
+    t.remove()}}
+function delLink(id){const l=S.links.find(x=>x.id===id);trashPush('link',l,'🔗 '+(l&&l.name));
+  S.links=S.links.filter(x=>x.id!==id);save();renderWork()}
+function linkCard(l){return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
+  +'<div class="thumb-ph" style="width:42px;height:42px;font-size:19px">🔗</div>'
+  +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(l.name)+'</div>'
+  +'<div class="row-meta">Saved '+fmtD(l.at)+'</div></div></div>'
+  +'<div style="display:flex;gap:8px;margin-top:12px">'
+  +'<button class="btn btn-gold btn-sm" style="flex:1" onclick="openLink(\''+l.id+'\')">↗ Open</button>'
+  +'<button class="btn btn-ghost btn-sm" onclick="shareLink(\''+l.id+'\')">Share</button>'
+  +'<button class="btn btn-ghost btn-sm" onclick="copyLink(\''+l.id+'\')">Copy</button>'
+  +'<button class="del" onclick="delLink(\''+l.id+'\')">✕</button></div></div>'}
+function renderLinks(){const el=document.getElementById('lkList');if(!el)return;
+  el.innerHTML=S.links.map(linkCard).join('')
+    ||'<div class="empty"><div class="em-ring">🔗</div>Portals, dashboards, forms —<br>save them by name and open with one tap</div>'}
+/* ============ SEARCH ENTRY ============ */
+function openSearch(){const d=document.getElementById('dashQ');
+  const v=d?d.value.trim():'';if(d)d.value='';
+  go('search');
+  if(v){const q=document.getElementById('qIn');q.value=v;runSearch()}
+  setTimeout(()=>document.getElementById('qIn').focus(),120)}
 /* ============ TASKS ============ */
 function addTask(space,inputId,title,due,time){const inp=inputId?document.getElementById(inputId):null;
   const t=(title??inp.value).trim();if(!t)return;let tm=time||null;
@@ -1398,7 +1425,7 @@ function renderCar(){if(!document.getElementById('flList'))return;
     ||'<div class="empty"><div class="em-ring">🛡</div>Car, life, health, PUC, FASTag —<br>never miss a renewal again</div>';
   setTimeout(loadThumbs,0)}
 /* ============ TRASH · UNDO DELETE (30 days) ============ */
-const TRASH_MAP={task:'tasks',note:'notes',expense:'expenses',income:'income',shopping:'shopping',
+const TRASH_MAP={task:'tasks',note:'notes',expense:'expenses',income:'income',shopping:'shopping',link:'links',
   followup:'followups',meeting:'meetings',circular:'circulars',doc:'docs',renewal:'renewals',
   fuel:'fuel',service:'service',med:'meds',habit:'habits',goal:'goals',vital:'vitals',event:'events'};
 function itemAttIds(kind,it){const out=[];
@@ -1637,7 +1664,7 @@ function renderDocs(){setTimeout(loadThumbs,0);const el=document.getElementById(
 function renderWork(){listOr(otList,S.tasks.filter(t=>t.space==='office').sort(taskSort),taskRow,'No office tasks. Enjoy it while it lasts.');
   fuList.innerHTML=S.followups.filter(f=>!f.done).map(fuCard).join('')+S.followups.filter(f=>f.done).slice(0,3).map(fuCard).join('')||'<div class="empty"><div class="em-ring">↺</div>No follow-ups. Add the first one above.</div>';
   if(document.getElementById('mtList'))mtList.innerHTML=S.meetings.slice().sort((a,b)=>((a.date||'')+'T'+(a.time||''))<((b.date||'')+'T'+(b.time||''))?-1:1).map(meetCard).join('')||'<div class="empty"><div class="em-ring">🎥</div>Add your first meeting above —<br>its name and time will show on the dashboard</div>';
-  renderDocs();setTimeout(loadThumbs,0);
+  renderDocs();renderLinks();setTimeout(loadThumbs,0);
   if(document.getElementById('circList'))circList.innerHTML=S.circulars.slice().sort((a,b)=>circLatest(a).date<circLatest(b).date?1:-1).map(circCard).join('')||'<div class="empty"><div class="em-ring">📑</div>Store every circular here by name, date and type —<br>read in-app or download anytime</div>';
   onList.innerHTML=S.notes.filter(n=>n.space==='office').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Call gists & meeting points live here</div>'}
 /* ============ SEARCH ============ */
@@ -1651,6 +1678,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Expenses',S.expenses.filter(e=>hit(e.note)||hit(e.cat)).map(e=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(e.note)+'</div><div class="row-meta">'+esc(e.cat)+'</div></div><div style="font-weight:700">'+fmtR(e.amount)+'</div></div>')],
    ['Income',S.income.filter(i=>hit(i.source)).map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div><div class="row-meta">'+fmtD(i.at)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>')],
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
+   ['Links',S.links.filter(l=>hit(l.name)).map(linkCard)],
    ['Birthdays',S.events.filter(e=>hit(e.name)||hit(e.note)).map(evCard)],
    ['Renewals',S.renewals.filter(r=>hit(r.name)||hit(r.kind)||hit(r.provider)||hit(r.polno)).map(rnCard)],
    ['Car',[...S.fuel.filter(x=>hit('fuel')||hit(String(x.odo))).map(x=>'<div class="row"><div class="row-body"><div class="row-title">⛽ '+fmtR(x.amount)+'</div><div class="row-meta">'+fmtD(x.date)+' · '+x.odo+' km</div></div></div>'),...S.service.filter(s=>hit(s.work)||hit(s.garage)).map(svcCard)]],
@@ -1660,7 +1688,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
    ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
-  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
+  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
   qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>';setTimeout(loadThumbs,0)}
 /* ============ CIRCULARS (with version history) ============ */
 let circVerTarget=null;let circOpen=null;
