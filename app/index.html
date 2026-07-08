@@ -163,9 +163,18 @@ nav button.on{color:var(--gold)}
 .result-group{margin-bottom:6px}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 /* ---------- date/time rows, crop modal ---------- */
-.dtrow{display:flex;gap:8px;margin:8px 0 12px}
-.dtrow .inp{padding:11px 12px;font-size:13.5px;min-width:0}
-select.inp{appearance:none;-webkit-appearance:none}
+.dtrow{display:flex;gap:8px;margin:8px 0 12px;flex-wrap:wrap}
+.dtrow .inp{padding:11px 12px;font-size:13.5px;min-width:0;width:100%}
+.fld{display:flex;flex-direction:column;gap:5px;flex:1 1 132px;min-width:0}
+.fld>span{font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--lo);padding-left:3px}
+select.inp{appearance:none;-webkit-appearance:none;padding-right:34px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238A93A3' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 13px center}
+input[type="date"],input[type="time"]{min-height:44px}
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator{filter:invert(.6) sepia(1) saturate(3) hue-rotate(2deg);opacity:.7;cursor:pointer}
+html[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{filter:none;opacity:.55}
 #cropOv{position:absolute;inset:0;background:rgba(8,10,14,.88);backdrop-filter:blur(8px);z-index:95;display:none;align-items:center;justify-content:center;flex-direction:column;padding:24px}
 #cropOv.open{display:flex}
 #cropView{width:260px;height:260px;border-radius:50%;overflow:hidden;border:2px solid var(--gold);position:relative;touch-action:none;background:#000;cursor:grab}
@@ -441,8 +450,11 @@ select.inp{appearance:none;-webkit-appearance:none}
       <input class="inp" id="ptIn" placeholder="Add a personal task…" onkeydown="if(event.key==='Enter')addTask('personal','ptIn')">
       <button class="btn btn-gold" onclick="addTask('personal','ptIn')">＋</button>
     </div>
-    <div class="dtrow"><input type="date" class="inp" id="ptDate" title="Due date"><input type="time" class="inp" id="ptTime" title="Time">
-      <select class="inp" id="ptRep" title="Repeat" style="flex:0 0 38%"><option value="">No repeat</option><option value="daily">🔁 Daily</option><option value="weekly">🔁 Weekly</option><option value="monthly">🔁 Monthly</option><option value="yearly">🔁 Yearly</option></select></div>
+    <div class="dtrow">
+      <label class="fld"><span>Due date</span><input type="date" class="inp" id="ptDate"></label>
+      <label class="fld"><span>Time</span><input type="time" class="inp" id="ptTime"></label>
+      <label class="fld"><span>Repeat</span><select class="inp" id="ptRep"><option value="">No repeat</option><option value="daily">🔁 Daily</option><option value="weekly">🔁 Weekly</option><option value="monthly">🔁 Monthly</option><option value="yearly">🔁 Yearly</option></select></label>
+    </div>
     <div class="card" id="ptList" style="padding:6px 18px"></div>
   </div>
 
@@ -494,7 +506,7 @@ select.inp{appearance:none;-webkit-appearance:none}
       <input class="inp" id="exAmt" type="number" inputmode="numeric" placeholder="₹ Amount" style="flex:0 0 118px">
       <input class="inp" id="exNote" placeholder="What for?" onkeydown="if(event.key==='Enter')addMoneyEntry()">
     </div>
-    <div class="dtrow"><input type="date" class="inp" id="exDate" title="Backdate this entry (optional)"></div>
+    <div class="dtrow"><label class="fld"><span>Date (leave blank for today)</span><input type="date" class="inp" id="exDate"></label></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 10px" id="catChips">
       <span class="chip on" data-c="General" onclick="pickCat(this)">General</span>
       <span class="chip" data-c="Food" onclick="pickCat(this)">Food</span>
@@ -534,7 +546,11 @@ select.inp{appearance:none;-webkit-appearance:none}
 
     <div class="eyebrow">💊 Medicines</div>
     <input class="inp" id="medName" placeholder="Medicine name (e.g. Telma 40)">
-    <div class="dtrow"><input type="time" class="inp" id="medT1" title="Dose 1 time"><input type="time" class="inp" id="medT2" title="Dose 2 time (optional)"><input type="number" class="inp" id="medDays" placeholder="Days" title="Course length (blank = daily)" style="flex:0 0 86px"></div>
+    <div class="dtrow">
+      <label class="fld"><span>Dose 1</span><input type="time" class="inp" id="medT1"></label>
+      <label class="fld"><span>Dose 2 (optional)</span><input type="time" class="inp" id="medT2"></label>
+      <label class="fld" style="flex:0 0 88px"><span>Days</span><input type="number" class="inp" id="medDays" placeholder="Daily"></label>
+    </div>
     <button class="btn btn-gold" style="width:100%" onclick="addMed()">Add medicine reminder</button>
     <div id="medList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
 
@@ -552,8 +568,8 @@ select.inp{appearance:none;-webkit-appearance:none}
     <div class="card" id="carSummary"></div>
     <div class="eyebrow">⛽ Fuel log</div>
     <div class="dtrow" style="margin-top:0">
-      <input type="date" class="inp" id="flDate" title="Date">
-      <input type="number" inputmode="numeric" class="inp" id="flAmt" placeholder="₹ Amount">
+      <label class="fld"><span>Fill date</span><input type="date" class="inp" id="flDate"></label>
+      <label class="fld"><span>Amount</span><input type="number" inputmode="numeric" class="inp" id="flAmt" placeholder="₹ 2,000"></label>
     </div>
     <div class="dtrow">
       <input type="number" step="0.01" inputmode="decimal" class="inp" id="flLit" placeholder="Litres">
@@ -564,10 +580,13 @@ select.inp{appearance:none;-webkit-appearance:none}
     <div id="flList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
 
     <div class="eyebrow">🔧 Service history</div>
-    <div class="dtrow" style="margin-top:0"><input type="date" class="inp" id="svDate" title="Service date"><input type="number" inputmode="numeric" class="inp" id="svOdo" placeholder="Odometer km"></div>
+    <div class="dtrow" style="margin-top:0">
+      <label class="fld"><span>Service date</span><input type="date" class="inp" id="svDate"></label>
+      <label class="fld"><span>Odometer</span><input type="number" inputmode="numeric" class="inp" id="svOdo" placeholder="km"></label>
+    </div>
     <input class="inp" id="svWork" placeholder="Work done (oil change, brakes…)">
     <div class="dtrow"><input type="number" inputmode="numeric" class="inp" id="svCost" placeholder="₹ Cost"><input class="inp" id="svGarage" placeholder="Garage"></div>
-    <div class="dtrow"><input type="date" class="inp" id="svNext" title="Next service due"></div>
+    <div class="dtrow"><label class="fld"><span>Next service due (optional)</span><input type="date" class="inp" id="svNext"></label></div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-ghost" title="Attach bill" onclick="pickFiles(fs=>{pend.svc.push(...fs);drawPend('svc')})">📎</button>
       <button class="btn btn-gold" style="flex:1" onclick="addService()">Add service record</button>
@@ -589,7 +608,10 @@ select.inp{appearance:none;-webkit-appearance:none}
       <span class="chip" data-k="Other" onclick="pickKind(this)">✦ Other</span>
     </div>
     <div class="dtrow" style="margin-top:0"><input class="inp" id="rnProv" placeholder="Provider (LIC, HDFC Ergo…)"><input class="inp" id="rnNo" placeholder="Policy number"></div>
-    <div class="dtrow"><input type="number" inputmode="numeric" class="inp" id="rnPrem" placeholder="Premium ₹"><input type="date" class="inp" id="rnExp" title="Expiry / renewal date"></div>
+    <div class="dtrow">
+      <label class="fld"><span>Premium</span><input type="number" inputmode="numeric" class="inp" id="rnPrem" placeholder="₹"></label>
+      <label class="fld"><span>Expiry / renewal date</span><input type="date" class="inp" id="rnExp"></label>
+    </div>
     <select class="inp" id="rnRem">
       <option value="60">Remind 60 days before</option>
       <option value="30" selected>Remind 30 days before</option>
@@ -611,13 +633,13 @@ select.inp{appearance:none;-webkit-appearance:none}
       <span class="chip" data-k="Anniversary" onclick="pickBK(this)">💍 Anniversary</span>
     </div>
     <div class="dtrow" style="margin-top:0">
-      <input type="date" class="inp" id="bdDate" title="Date (include year if known)">
-      <select class="inp" id="bdRem" style="flex:0 0 46%">
+      <label class="fld"><span>Date (year optional)</span><input type="date" class="inp" id="bdDate"></label>
+      <label class="fld" style="flex:0 0 46%"><span>Reminder</span><select class="inp" id="bdRem">
         <option value="7" selected>Remind 7 days before</option>
         <option value="3">3 days before</option>
         <option value="1">1 day before</option>
         <option value="0">On the day only</option>
-      </select>
+      </select></label>
     </div>
     <input class="inp" id="bdNote" placeholder="Gift idea / note (optional)">
     <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addEventPerson()">Add</button>
@@ -651,8 +673,11 @@ select.inp{appearance:none;-webkit-appearance:none}
       <input class="inp" id="otIn" placeholder="Add an office task…" onkeydown="if(event.key==='Enter')addTask('office','otIn')">
       <button class="btn btn-gold" onclick="addTask('office','otIn')">＋</button>
     </div>
-    <div class="dtrow"><input type="date" class="inp" id="otDate" title="Due date"><input type="time" class="inp" id="otTime" title="Time">
-      <select class="inp" id="otRep" title="Repeat" style="flex:0 0 38%"><option value="">No repeat</option><option value="daily">🔁 Daily</option><option value="weekly">🔁 Weekly</option><option value="monthly">🔁 Monthly</option><option value="yearly">🔁 Yearly</option></select></div>
+    <div class="dtrow">
+      <label class="fld"><span>Due date</span><input type="date" class="inp" id="otDate"></label>
+      <label class="fld"><span>Time</span><input type="time" class="inp" id="otTime"></label>
+      <label class="fld"><span>Repeat</span><select class="inp" id="otRep"><option value="">No repeat</option><option value="daily">🔁 Daily</option><option value="weekly">🔁 Weekly</option><option value="monthly">🔁 Monthly</option><option value="yearly">🔁 Yearly</option></select></label>
+    </div>
     <div class="card" id="otList" style="padding:6px 18px"></div>
   </div>
 
@@ -668,7 +693,10 @@ select.inp{appearance:none;-webkit-appearance:none}
   <div class="wtab" id="wt-meet" style="display:none">
     <input class="inp" id="mtTitle" placeholder="Meeting name">
     <input class="inp" id="mtHost" placeholder="Meeting host" style="margin-top:8px">
-    <div class="dtrow"><input type="date" class="inp" id="mtDate"><input type="time" class="inp" id="mtTime"></div>
+    <div class="dtrow">
+      <label class="fld"><span>Meeting date</span><input type="date" class="inp" id="mtDate"></label>
+      <label class="fld"><span>Start time</span><input type="time" class="inp" id="mtTime"></label>
+    </div>
     <input class="inp" id="mtLink" placeholder="Meeting link (Zoom / Meet / Teams…)">
     <div class="dtrow"><input class="inp" id="mtId" placeholder="Meeting ID"><input class="inp" id="mtPwd" placeholder="Password"></div>
     <select class="inp" id="mtRem">
@@ -688,11 +716,11 @@ select.inp{appearance:none;-webkit-appearance:none}
   <div class="wtab" id="wt-circ" style="display:none">
     <input class="inp" id="circName" placeholder="Circular name / subject">
     <div class="dtrow">
-      <input type="date" class="inp" id="circDate" title="Circular date (backdate allowed)">
-      <select class="inp" id="circType">
+      <label class="fld"><span>Circular date</span><input type="date" class="inp" id="circDate"></label>
+      <label class="fld"><span>Type</span><select class="inp" id="circType">
         <option>Circular</option><option>Notification</option><option>Guideline</option>
         <option>Policy</option><option>Memo</option><option>Other</option>
-      </select>
+      </select></label>
     </div>
     <div id="circBanner" class="card" style="display:none;padding:12px 14px;font-size:13px;margin-bottom:10px"></div>
     <div style="display:flex;gap:8px">
