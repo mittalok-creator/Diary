@@ -321,6 +321,21 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .pv-img{border-radius:10px;box-shadow:0 6px 26px rgba(0,0,0,.5);display:block;max-width:none}
 .pv-load{color:var(--lo);font-size:13.5px;text-align:center;padding:60px 20px}
 @media(min-width:1000px){.pv-body{padding:24px}}
+#skOv{position:absolute;inset:0;z-index:132;display:none;flex-direction:column;background:var(--ink0)}
+#skOv.open{display:flex}
+.sk-bar{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+  border-bottom:1px solid var(--hair);flex-shrink:0}
+.sk-swatches{display:flex;gap:8px;flex:1;justify-content:center}
+.sw{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .2s}
+.sw.on{border-color:var(--gold);transform:scale(1.14)}
+.pv-btn.on{border-color:var(--gold);background:rgba(217,168,92,.14)}
+.sk-size{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair)}
+.sk-size input{flex:1;accent-color:#D9A85C}
+.sk-dot{border-radius:50%;flex-shrink:0;display:block}
+.sk-body{flex:1;padding:10px;display:flex;align-items:stretch;justify-content:center;min-height:0}
+#skCanvas{border-radius:14px;border:1px solid var(--hair);background:#fff;touch-action:none;
+  box-shadow:0 8px 30px rgba(0,0,0,.35);cursor:crosshair;display:block}
+.sk-foot{display:flex;gap:8px;padding:12px 16px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--hair)}
 </style>
 </head>
 <body>
@@ -463,6 +478,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <textarea class="inp" id="nBody" placeholder="Write something…" style="margin-top:8px"></textarea>
     <div style="display:flex;gap:8px;margin:10px 0 4px">
       <button class="btn btn-ghost" title="Attach image/PDF" onclick="pickFiles(fs=>{pend.note.push(...fs);drawPend('note')})">📎</button>
+      <button class="btn btn-ghost" title="Draw a sketch" onclick="skOpen('note')">✏️</button>
       <button class="btn btn-gold" style="flex:1" onclick="addNote('personal')">Save note</button>
     </div>
     <div id="pendNote"></div>
@@ -752,6 +768,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <textarea class="inp" id="onBody" placeholder="Meeting point, call gist…" style="margin-top:8px"></textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="btn btn-ghost" title="Attach image/PDF" onclick="pickFiles(fs=>{pend.onote.push(...fs);drawPend('onote')})">📎</button>
+      <button class="btn btn-ghost" title="Draw a sketch" onclick="skOpen('onote')">✏️</button>
       <button class="btn btn-gold" style="flex:1" onclick="addNote('office')">Save note</button>
     </div>
     <div id="pendONote"></div>
@@ -920,6 +937,31 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     Continue with Google
   </button>
   <button id="loginSkip" onclick="loginSkip()">Continue without account (this device only)</button>
+</div>
+
+<div id="skOv">
+  <div class="sk-bar">
+    <button class="pv-btn" onclick="skClose()" aria-label="Close">✕</button>
+    <div class="sk-swatches">
+      <span class="sw on" data-c="#171C24" style="background:#171C24" onclick="skColor(this)"></span>
+      <span class="sw" data-c="#B8863B" style="background:#B8863B" onclick="skColor(this)"></span>
+      <span class="sw" data-c="#C0392B" style="background:#C0392B" onclick="skColor(this)"></span>
+      <span class="sw" data-c="#2F6FBF" style="background:#2F6FBF" onclick="skColor(this)"></span>
+      <span class="sw" data-c="#2F855A" style="background:#2F855A" onclick="skColor(this)"></span>
+    </div>
+    <button class="pv-btn" id="skErase" onclick="skToggleErase()" aria-label="Eraser">⌫</button>
+    <button class="pv-btn" onclick="skUndo()" aria-label="Undo">↶</button>
+    <button class="pv-btn" onclick="skClear()" aria-label="Clear">🗑</button>
+  </div>
+  <div class="sk-size">
+    <span class="stat-label">Brush</span>
+    <input type="range" id="skSize" min="2" max="26" value="4" oninput="skDot()">
+    <span id="skDot" class="sk-dot"></span>
+  </div>
+  <div class="sk-body" id="skBody"><canvas id="skCanvas"></canvas></div>
+  <div class="sk-foot">
+    <button class="btn btn-gold" style="flex:1" onclick="skSave()">✓ Add sketch to note</button>
+  </div>
 </div>
 
 <div id="pvOv">
@@ -1166,6 +1208,63 @@ function linkCard(l){return '<div class="card"><div style="display:flex;align-it
 function renderLinks(){const el=document.getElementById('lkList');if(!el)return;
   el.innerHTML=S.links.map(linkCard).join('')
     ||'<div class="empty"><div class="em-ring">🔗</div>Portals, dashboards, forms —<br>save them by name and open with one tap</div>'}
+/* ============ SKETCH PAD (freehand drawing → image attachment) ============ */
+let sk={target:'note',color:'#171C24',size:4,erase:false,strokes:[],cur:null,dpr:1,W:0,H:0};
+function skOpen(target){sk.target=target||'note';sk.strokes=[];sk.cur=null;sk.erase=false;
+  document.getElementById('skErase').classList.remove('on');
+  document.getElementById('skOv').classList.add('open');
+  setTimeout(()=>{skFit();skDot()},40)}
+function skClose(){document.getElementById('skOv').classList.remove('open')}
+function skFit(){const c=document.getElementById('skCanvas'),b=document.getElementById('skBody');
+  sk.dpr=Math.min(2,window.devicePixelRatio||1);
+  sk.W=b.clientWidth-4;sk.H=b.clientHeight-4;
+  c.width=sk.W*sk.dpr;c.height=sk.H*sk.dpr;
+  c.style.width=sk.W+'px';c.style.height=sk.H+'px';
+  skRedraw()}
+function skColor(el){document.querySelectorAll('#skOv .sw').forEach(s=>s.classList.remove('on'));
+  el.classList.add('on');sk.color=el.dataset.c;sk.erase=false;
+  document.getElementById('skErase').classList.remove('on');skDot()}
+function skToggleErase(){sk.erase=!sk.erase;
+  document.getElementById('skErase').classList.toggle('on',sk.erase);skDot()}
+function skDot(){sk.size=+document.getElementById('skSize').value;
+  const d=document.getElementById('skDot');const s=Math.max(6,Math.min(26,sk.size));
+  d.style.width=s+'px';d.style.height=s+'px';d.style.background=sk.erase?'#ffffff':sk.color;
+  d.style.border=sk.erase?'1.5px solid var(--hair)':'none'}
+function skRedraw(){const c=document.getElementById('skCanvas'),x=c.getContext('2d');
+  x.setTransform(sk.dpr,0,0,sk.dpr,0,0);
+  x.fillStyle='#ffffff';x.fillRect(0,0,sk.W,sk.H);
+  x.lineCap='round';x.lineJoin='round';
+  sk.strokes.forEach(s=>skDraw(x,s))}
+function skDraw(x,s){if(!s.pts.length)return;
+  x.strokeStyle=s.erase?'#ffffff':s.color;x.lineWidth=s.erase?s.size*2.2:s.size;
+  x.beginPath();
+  if(s.pts.length===1){x.arc(s.pts[0].x,s.pts[0].y,x.lineWidth/2,0,Math.PI*2);
+    x.fillStyle=x.strokeStyle;x.fill();return}
+  x.moveTo(s.pts[0].x,s.pts[0].y);
+  for(let i=1;i<s.pts.length-1;i++){const m={x:(s.pts[i].x+s.pts[i+1].x)/2,y:(s.pts[i].y+s.pts[i+1].y)/2};
+    x.quadraticCurveTo(s.pts[i].x,s.pts[i].y,m.x,m.y)}
+  const last=s.pts[s.pts.length-1];x.lineTo(last.x,last.y);x.stroke()}
+function skUndo(){sk.strokes.pop();skRedraw()}
+function skClear(){if(!sk.strokes.length)return;sk.strokes=[];skRedraw();toast('Canvas cleared')}
+function skPt(e,c){const r=c.getBoundingClientRect();return {x:e.clientX-r.left,y:e.clientY-r.top}}
+function initSketch(){const c=document.getElementById('skCanvas');
+  c.addEventListener('pointerdown',e=>{c.setPointerCapture(e.pointerId);
+    sk.cur={color:sk.color,size:sk.size,erase:sk.erase,pts:[skPt(e,c)]};
+    sk.strokes.push(sk.cur);skRedraw()});
+  c.addEventListener('pointermove',e=>{if(!sk.cur)return;e.preventDefault();
+    const p=skPt(e,c),last=sk.cur.pts[sk.cur.pts.length-1];
+    if(Math.hypot(p.x-last.x,p.y-last.y)<1.2)return;
+    sk.cur.pts.push(p);skRedraw()},{passive:false});
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>c.addEventListener(ev,()=>{sk.cur=null}));
+  addEventListener('resize',()=>{if(document.getElementById('skOv').classList.contains('open'))skFit()})}
+async function skSave(){if(!sk.strokes.length){toast('Draw something first');return}
+  const c=document.getElementById('skCanvas');
+  const d=c.toDataURL('image/jpeg',0.88);
+  const id=uid();const ok=await fileSave(id,d);
+  if(ok===false){toast('Could not save the sketch');return}
+  pend[sk.target].push({id,name:'Sketch '+fmtD(new Date()),type:'img',size:d.length});
+  drawPend(sk.target);skClose();
+  toast('✏️ Sketch added — now save the note')}
 /* ============ SEARCH ENTRY ============ */
 function openSearch(){const d=document.getElementById('dashQ');
   const v=d?d.value.trim():'';if(d)d.value='';
@@ -2360,7 +2459,7 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   migrate();trashAutoPurge();
   if(!S.deviceId){S.deviceId=uid();save(true)}
   if(S.water.date!==today())S.water={date:today(),count:0};
-  applyTheme();renderAll();initCrop();initViewer();
+  applyTheme();renderAll();initCrop();initViewer();initSketch();
   if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');
     const onSys=()=>{if((S.profile.theme||'dark')==='auto'){applyTheme();renderSettings()}};
     mq.addEventListener?mq.addEventListener('change',onSys):mq.addListener(onSys)}
