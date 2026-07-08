@@ -1757,15 +1757,39 @@ async function driveDownload(id){const r=await fetch('https://www.googleapis.com
 async function drivePush(fileId){setSyncStatus('Uploading to your Drive…');
   const files={};for(const id of allAttIds()){const d=await fileGet(id);if(d)files[id]=d}
   const body=JSON.stringify({state:S,files,savedAt:Date.now()});
-  if(body.length>28*1024*1024)throw new Error('TOO_BIG');
+  if(body.length>300*1024*1024)throw new Error('TOO_BIG'); /* generous safety cap only — not the old artificial limit */
   const meta={name:'alokos-sync.json',appProperties:{updatedAt:String(S.updatedAt||Date.now())}};
   if(!fileId)meta.parents=['appDataFolder'];
-  const b='alokos'+Date.now();
-  const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)
-    +'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
-  const r=await fetch('https://www.googleapis.com/upload/drive/v3/files'+(fileId?'/'+fileId:'')+'?uploadType=multipart',
-    {method:fileId?'PATCH':'POST',headers:{Authorization:'Bearer '+gToken,'Content-Type':'multipart/related; boundary='+b},body:mp});
-  if(!r.ok)await driveErr(r)}
+  /* Small payloads: single-shot multipart (fast). Larger payloads: resumable upload —
+     Google's multipart endpoint is unreliable above a few MB, resumable is the correct
+     way to push bigger files/snapshots reliably. */
+  if(body.length<=3*1024*1024){
+    const b='alokos'+Date.now();
+    const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)
+      +'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
+    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files'+(fileId?'/'+fileId:'')+'?uploadType=multipart',
+      {method:fileId?'PATCH':'POST',headers:{Authorization:'Bearer '+gToken,'Content-Type':'multipart/related; boundary='+b},body:mp});
+    if(!r.ok)await driveErr(r);
+    return}
+  setSyncStatus('Uploading to your Drive… (large backup, may take a moment)');
+  const initUrl='https://www.googleapis.com/upload/drive/v3/files'+(fileId?'/'+fileId:'')+'?uploadType=resumable';
+  const initR=await fetch(initUrl,{method:fileId?'PATCH':'POST',
+    headers:{Authorization:'Bearer '+gToken,'Content-Type':'application/json; charset=UTF-8',
+      'X-Upload-Content-Type':'application/json'},body:JSON.stringify(meta)});
+  if(!initR.ok)await driveErr(initR);
+  const sessionUrl=initR.headers.get('Location');
+  if(!sessionUrl)throw new Error('HTTP'+initR.status);
+  const putR=await fetch(sessionUrl,{method:'PUT',headers:{'Content-Type':'application/json'},body});
+  if(!putR.ok&&putR.status!==200&&putR.status!==201)await driveErr(putR)}
+async function forcePush(){if(!S.profile.google){toast('Sign in first');return}
+  const ok=await ensureToken(true);if(!ok){toast('Could not reconnect to Google');return}
+  syncBusy=false;S.updatedAt=Date.now();save(true);
+  try{setSyncStatus('Force-uploading this device\'s data…');
+    const meta=await driveFind();await drivePush(meta&&meta.id);
+    S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync));
+    toast('☁ This device\\'s data pushed to Drive — open the app on other devices to pull it')}
+  catch(e){setSyncStatus('Push failed ('+String(e&&e.message||e)+')')}
+  renderSettings()}
 async function cloudSync(manual,_retry){
   if(!S.profile.google&&!manual)return;
   if(syncBusy)return;
@@ -1809,7 +1833,8 @@ function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
    +(g.pic?'<img src="'+g.pic+'" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--gold);flex-shrink:0">':'')
    +'<div style="min-width:0"><div class="set-name">'+esc(g.name)+'</div><div class="set-sub" style="overflow:hidden;text-overflow:ellipsis">'+esc(g.email)+'</div></div></div></div>'
    +'<div class="set-row"><div><div class="set-name">Drive sync</div><div class="set-sub" id="syncStatus">'+(syncMsg||(S.lastSync?'Up to date · '+fmtWhen(S.lastSync):'Not synced yet'))+'</div></div>'
-   +'<div style="display:flex;gap:8px;flex-shrink:0"><button class="btn btn-ghost btn-sm" onclick="cloudSync(true)">Sync now</button>'
+   +'<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="cloudSync(true)">Sync now</button>
+   <button class="btn btn-ghost btn-sm" onclick="forcePush()">Push this device\'s data</button>'
    +'<button class="btn btn-ghost btn-sm" onclick="gSignOut()">Sign out</button></div></div>'}
 /* ============ SETTINGS ============ */
 function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();
