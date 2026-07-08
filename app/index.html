@@ -1787,7 +1787,7 @@ async function forcePush(){if(!S.profile.google){toast('Sign in first');return}
   try{setSyncStatus('Force-uploading this device\'s data…');
     const meta=await driveFind();await drivePush(meta&&meta.id);
     S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync));
-    toast('☁ This device\\'s data pushed to Drive — open the app on other devices to pull it')}
+    toast('☁ Pushed to Drive — open the app on your other devices to pull it')}
   catch(e){setSyncStatus('Push failed ('+String(e&&e.message||e)+')')}
   renderSettings()}
 async function cloudSync(manual,_retry){
@@ -1833,8 +1833,7 @@ function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
    +(g.pic?'<img src="'+g.pic+'" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--gold);flex-shrink:0">':'')
    +'<div style="min-width:0"><div class="set-name">'+esc(g.name)+'</div><div class="set-sub" style="overflow:hidden;text-overflow:ellipsis">'+esc(g.email)+'</div></div></div></div>'
    +'<div class="set-row"><div><div class="set-name">Drive sync</div><div class="set-sub" id="syncStatus">'+(syncMsg||(S.lastSync?'Up to date · '+fmtWhen(S.lastSync):'Not synced yet'))+'</div></div>'
-   +'<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="cloudSync(true)">Sync now</button>
-   <button class="btn btn-ghost btn-sm" onclick="forcePush()">Push this device\'s data</button>'
+   +'<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="cloudSync(true)">Sync now</button><button class="btn btn-ghost btn-sm" onclick="forcePush()">Push this device&#39;s data</button>'
    +'<button class="btn btn-ghost btn-sm" onclick="gSignOut()">Sign out</button></div></div>'}
 /* ============ SETTINGS ============ */
 function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();
