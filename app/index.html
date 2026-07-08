@@ -648,8 +648,8 @@ const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
     try{return localStorage.getItem(k)}catch(e){return mem[k]||null} },
-  async set(k,v){ if(window.storage){try{await window.storage.set(k,v)}catch(e){} return}
-    try{localStorage.setItem(k,v)}catch(e){mem[k]=v} },
+  async set(k,v){ if(window.storage){try{await window.storage.set(k,v);return true}catch(e){return false}}
+    try{localStorage.setItem(k,v);return true}catch(e){mem[k]=v;return false} },
   async del(k=KEY){ if(window.storage){try{await window.storage.delete(k)}catch(e){} return}
     try{localStorage.removeItem(k)}catch(e){delete mem[k]} }
 };
@@ -658,8 +658,12 @@ const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
   tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
+let quotaWarned=false;
 function save(skipTouch){if(!skipTouch){S.updatedAt=Date.now();cloudPushSoon()}
-  clearTimeout(saveT);saveT=setTimeout(()=>store.set(KEY,JSON.stringify(S)),250)}
+  clearTimeout(saveT);saveT=setTimeout(async()=>{
+    const ok=await store.set(KEY,JSON.stringify(S));
+    if(ok===false&&!quotaWarned){quotaWarned=true;
+      toast('Device storage is full — download a Backup, then remove old attachments')}},250)}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -961,28 +965,55 @@ function renderHealth(){if(!document.getElementById('medList'))return;
 /* ============ ATTACHMENTS (image + PDF) ============ */
 let pend={note:[],onote:[],exp:[],meet:[]};
 const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet'};
-function fileSave(id,d){return store.set('alokos-f-'+id,d)}
-function fileGet(id){return store.get('alokos-f-'+id)}
-function fileDel(id){return store.del('alokos-f-'+id)}
+let _idb=null;
+function idbOpen(){return new Promise(res=>{
+  if(_idb)return res(_idb);
+  if(typeof indexedDB==='undefined')return res(null);
+  let r;try{r=indexedDB.open('alokos-files',1)}catch(e){return res(null)}
+  r.onupgradeneeded=()=>{const d=r.result;if(!d.objectStoreNames.contains('files'))d.createObjectStore('files')};
+  r.onsuccess=()=>{_idb=r.result;res(_idb)};
+  r.onerror=()=>res(null)})}
+function idbDo(mode,fn){return idbOpen().then(d=>{if(!d)return null;
+  return new Promise(res=>{let q;
+    try{const t=d.transaction('files',mode);q=fn(t.objectStore('files'));t.onerror=()=>res(null)}
+    catch(e){return res(null)}
+    q.onsuccess=()=>res(q.result===undefined?true:q.result);q.onerror=()=>res(null)})})}
+async function fileSave(id,d){const ok=await idbDo('readwrite',s=>s.put(d,id));
+  if(ok!==null)return true;
+  const r=await store.set('alokos-f-'+id,d);
+  if(r===false)toast('Could not save the file — storage is full');
+  return r}
+async function fileGet(id){const v=await idbDo('readonly',s=>s.get(id));
+  if(v&&v!==true)return v;
+  return store.get('alokos-f-'+id)}          /* read-through for files saved by older versions */
+async function fileDel(id){await idbDo('readwrite',s=>s.delete(id));return store.del('alokos-f-'+id)}
 function readAsDataURL(f){return new Promise(r=>{const rd=new FileReader();rd.onload=e=>r(e.target.result);rd.readAsDataURL(f)})}
 function compressImg(f){return new Promise(r=>{readAsDataURL(f).then(u=>{const im=new Image();im.onload=()=>{
-  const mx=1280,sc=Math.min(1,mx/Math.max(im.width,im.height));
+  const mx=1600,sc=Math.min(1,mx/Math.max(im.width,im.height));
   const c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
   c.getContext('2d').drawImage(im,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.8))};im.src=u})})}
-async function makeAtt(f){
+async function makeAtt(f){try{
   const isPdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name);
-  const isImg=f.type.startsWith('image/');
+  const isImg=(f.type||'').indexOf('image/')===0;
   if(!isPdf&&!isImg){toast('Only image or PDF files can be attached');return null}
   let d;
   if(isImg)d=await compressImg(f);
-  else{if(f.size>2.5*1024*1024){toast(f.name+' is larger than 2.5 MB — skipped');return null}
+  else{if(f.size>8*1024*1024){toast(f.name+' is larger than 8 MB — skipped');return null}
     d=await readAsDataURL(f)}
-  const id=uid();await fileSave(id,d);
+  const id=uid();const ok=await fileSave(id,d);
+  if(ok===false)return null;
   return {id,name:f.name.length>26?f.name.slice(0,23)+'…':f.name,type:isPdf?'pdf':'img',size:d.length}}
+  catch(e){toast('Could not read '+f.name);return null}}
 function pickFiles(cb){const i=document.createElement('input');i.type='file';
-  i.accept='image/*,application/pdf';i.multiple=true;
-  i.onchange=async()=>{const out=[];for(const f of i.files){const a=await makeAtt(f);if(a)out.push(a)}
-    if(out.length)toast('📎 '+out.length+' file attached');cb(out)};i.click()}
+  i.accept='image/*,application/pdf';i.multiple=true;i.style.display='none';
+  document.body.appendChild(i);
+  i.onchange=async()=>{const out=[];
+    try{for(const f of i.files){const a=await makeAtt(f);if(a)out.push(a)}}
+    catch(e){toast('Attachment failed — try a smaller file')}
+    i.remove();
+    if(out.length)toast('📎 '+out.length+' file attached');
+    cb(out)};
+  i.click()}
 function attChips(att,pk){if(!att||!att.length)return'';
   return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+att.map(a=>
    '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">'+(a.type==='pdf'?'📄':'🖼️')+' '+esc(a.name)
@@ -1334,6 +1365,7 @@ async function driveDownload(id){const r=await fetch('https://www.googleapis.com
 async function drivePush(fileId){setSyncStatus('Uploading to your Drive…');
   const files={};for(const id of allAttIds()){const d=await fileGet(id);if(d)files[id]=d}
   const body=JSON.stringify({state:S,files,savedAt:Date.now()});
+  if(body.length>28*1024*1024)throw new Error('TOO_BIG');
   const meta={name:'alokos-sync.json',appProperties:{updatedAt:String(S.updatedAt||Date.now())}};
   if(!fileId)meta.parents=['appDataFolder'];
   const b='alokos'+Date.now();
@@ -1370,6 +1402,7 @@ async function cloudSync(manual,_retry){
       if(again)return cloudSync(manual,true);
       setSyncStatus('Drive permission missing — tap Sync now and Allow Drive access');
       if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent',hint:gHint()})}
+    else if(m==='TOO_BIG')setSyncStatus('Too many large attachments to sync — remove a few, or keep them only on this device');
     else if(m==='DRIVE_OFF')setSyncStatus('Google Drive API is disabled in your Cloud project — enable it, then tap Sync now');
     else if(m==='NO_SCOPE'){setSyncStatus('Drive permission missing — tap Sync now and Allow Drive access');
       if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent',hint:gHint()})}
