@@ -292,6 +292,10 @@ select.inp{appearance:none;-webkit-appearance:none}
   .dash-col .grid2{grid-template-columns:1fr 1fr}
   #dashSeg{max-width:420px}
 }
+.cfov{position:absolute;inset:0;z-index:110;display:none;align-items:center;justify-content:center;
+  background:rgba(8,10,14,.9);backdrop-filter:blur(8px);padding:26px}
+.cfov.open{display:flex}
+.cfbox{max-width:380px;width:100%;text-align:center}
 </style>
 </head>
 <body>
@@ -850,6 +854,19 @@ select.inp{appearance:none;-webkit-appearance:none}
   </div>
 </div>
 
+<div id="conflictOv" class="cfov">
+  <div class="cfbox">
+    <div class="mono-big" style="width:64px;height:64px;font-size:22px;margin-bottom:18px">AM</div>
+    <h2 style="font-family:'Fraunces',serif;font-size:22px;margin-bottom:8px">Two copies differ</h2>
+    <p style="color:var(--lo);font-size:13.5px;margin-bottom:6px">Changes were made here <b>and</b> on another device since the last sync. Nothing has been overwritten — you choose.</p>
+    <p class="set-sub" id="cfInfo" style="margin-bottom:20px"></p>
+    <button class="btn btn-gold" style="width:100%" onclick="cfKeepLocal()">Keep this device (replace Drive)</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="cfKeepCloud()">Use the Drive copy (replace this device)</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="cfBackupFirst()">⬇ Download a backup first</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="cfClose()">Decide later</button>
+  </div>
+</div>
+
 <div id="loginOv">
   <div class="mono-big">AM</div>
   <h2>Welcome to ALOK OS</h2>
@@ -889,7 +906,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],trash:[],
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],trash:[],deviceId:uid(),baseRev:0,
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -1915,7 +1932,7 @@ function initGoogle(){if(!gConfigured()||typeof google==='undefined'||!google.ac
       const email=(S.profile.google&&S.profile.google.email)||null;
       if(email){
         if(prevOwner&&prevOwner!==email)await switchAccount(email);
-        else if(!prevOwner){S.owner=email;S.updatedAt=0;save(true)}
+        else if(!prevOwner){S.owner=email;S.baseRev=0;save(true)}
       }
       hideLogin();renderSettings();
       if(w)w.resolve(true);else cloudSync()}});
@@ -1962,7 +1979,7 @@ async function switchAccount(email){
   try{allAttIds().forEach(id=>fileDel(id))}catch(e){}
   const keepA=S.gAuth,g=S.profile.google,keepSkip=S.loginSkipped;
   S=blank();S.owner=email;S.gAuth=keepA;S.profile.google=g;S.loginSkipped=keepSkip;
-  S.updatedAt=0; /* ensures this account's cloud data wins on next sync */
+  S.updatedAt=0;S.baseRev=0; /* fresh baseline: this account's cloud data loads cleanly */
   save(true);applyTheme();renderAll()}
 function setSyncStatus(t){syncMsg=t;const el=document.getElementById('syncStatus');if(el)el.textContent=t}
 function cloudPushSoon(){if(!S.profile.google)return;clearTimeout(pushT);pushT=setTimeout(()=>cloudSync(),20000)}
@@ -1971,76 +1988,136 @@ async function driveErr(r){let t='';try{t=await r.text()}catch(e){}
   if(r.status===403&&(t.indexOf('insufficient')>-1||t.indexOf('PERMISSION')>-1))throw new Error('NO_SCOPE');
   if(r.status===401)throw new Error('NO_SCOPE');
   throw new Error('HTTP'+r.status)}
-async function driveFind(){const r=await fetch("https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&fields=files(id,appProperties)&q=name%3D'alokos-sync.json'",
-  {headers:{Authorization:'Bearer '+gToken}});if(!r.ok)await driveErr(r);
-  const j=await r.json();return (j.files&&j.files[0])||null}
-async function driveDownload(id){const r=await fetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',
-  {headers:{Authorization:'Bearer '+gToken}});if(!r.ok)await driveErr(r);return r.json()}
-async function drivePush(fileId){setSyncStatus('Uploading to your Drive…');
-  const files={};for(const id of allAttIds()){const d=await fileGet(id);if(d)files[id]=d}
-  const body=JSON.stringify({state:S,files,savedAt:Date.now()});
-  if(body.length>300*1024*1024)throw new Error('TOO_BIG'); /* generous safety cap only — not the old artificial limit */
-  const meta={name:'alokos-sync.json',appProperties:{updatedAt:String(S.updatedAt||Date.now())}};
-  if(!fileId)meta.parents=['appDataFolder'];
-  /* Small payloads: single-shot multipart (fast). Larger payloads: resumable upload —
-     Google's multipart endpoint is unreliable above a few MB, resumable is the correct
-     way to push bigger files/snapshots reliably. */
+const GH=()=>({Authorization:'Bearer '+gToken});
+/* ---- one listing gives us the snapshot + every attachment already in Drive ---- */
+async function driveList(){let page=null,snap=null;const files={};
+  do{const url='https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&pageSize=1000'
+      +'&fields=nextPageToken,files(id,name,appProperties)'+(page?'&pageToken='+page:'');
+    const r=await fetch(url,{headers:GH()});if(!r.ok)await driveErr(r);
+    const j=await r.json();
+    (j.files||[]).forEach(f=>{if(f.name==='alokos-sync.json')snap=f;
+      else if(f.name.indexOf('f_')===0)files[f.name.slice(2)]=f.id});
+    page=j.nextPageToken}while(page);
+  return {snap,files}}
+async function driveGet(id){const r=await fetch('https://www.googleapis.com/drive/v3/files/'+id+'?alt=media',{headers:GH()});
+  if(!r.ok)await driveErr(r);return r.text()}
+async function driveDel(id){const r=await fetch('https://www.googleapis.com/drive/v3/files/'+id,{method:'DELETE',headers:GH()});
+  if(!r.ok&&r.status!==404)await driveErr(r)}
+async function driveUp(name,body,driveId,props,mime){mime=mime||'application/json';
+  const meta={name};if(props)meta.appProperties=props;if(!driveId)meta.parents=['appDataFolder'];
   if(body.length<=3*1024*1024){
-    const b='alokos'+Date.now();
+    const b='alokos'+Date.now()+Math.random().toString(36).slice(2,6);
     const mp='--'+b+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+JSON.stringify(meta)
-      +'\r\n--'+b+'\r\nContent-Type: application/json\r\n\r\n'+body+'\r\n--'+b+'--';
-    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files'+(fileId?'/'+fileId:'')+'?uploadType=multipart',
-      {method:fileId?'PATCH':'POST',headers:{Authorization:'Bearer '+gToken,'Content-Type':'multipart/related; boundary='+b},body:mp});
-    if(!r.ok)await driveErr(r);
-    return}
-  setSyncStatus('Uploading to your Drive… (large backup, may take a moment)');
-  const initUrl='https://www.googleapis.com/upload/drive/v3/files'+(fileId?'/'+fileId:'')+'?uploadType=resumable';
-  const initR=await fetch(initUrl,{method:fileId?'PATCH':'POST',
-    headers:{Authorization:'Bearer '+gToken,'Content-Type':'application/json; charset=UTF-8',
-      'X-Upload-Content-Type':'application/json'},body:JSON.stringify(meta)});
+      +'\r\n--'+b+'\r\nContent-Type: '+mime+'\r\n\r\n'+body+'\r\n--'+b+'--';
+    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files'+(driveId?'/'+driveId:'')+'?uploadType=multipart',
+      {method:driveId?'PATCH':'POST',headers:Object.assign(GH(),{'Content-Type':'multipart/related; boundary='+b}),body:mp});
+    if(!r.ok)await driveErr(r);return}
+  const initR=await fetch('https://www.googleapis.com/upload/drive/v3/files'+(driveId?'/'+driveId:'')+'?uploadType=resumable',
+    {method:driveId?'PATCH':'POST',headers:Object.assign(GH(),{'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Type':mime}),
+     body:JSON.stringify(meta)});
   if(!initR.ok)await driveErr(initR);
-  const sessionUrl=initR.headers.get('Location');
-  if(!sessionUrl)throw new Error('HTTP'+initR.status);
-  const putR=await fetch(sessionUrl,{method:'PUT',headers:{'Content-Type':'application/json'},body});
+  const sess=initR.headers.get('Location');if(!sess)throw new Error('HTTP'+initR.status);
+  const putR=await fetch(sess,{method:'PUT',headers:{'Content-Type':mime},body});
   if(!putR.ok&&putR.status!==200&&putR.status!==201)await driveErr(putR)}
+/* ---- which attachments must survive: live items + anything sitting in Trash ---- */
+function trashAttIds(){const out=[];(S.trash||[]).forEach(t=>itemAttIds(t.kind,t.item).forEach(i=>out.push(i)));return out}
+function keepIds(){return Array.from(new Set(allAttIds().concat(trashAttIds())))}
+/* ---- push: upload only NEW attachments, drop orphans, then the (small) snapshot ---- */
+async function pushAll(snapId,driveFiles){
+  const keep=keepIds();
+  const missing=keep.filter(id=>!driveFiles[id]);
+  let n=0;
+  for(const id of missing){n++;setSyncStatus('Uploading attachment '+n+' of '+missing.length+'…');
+    const d=await fileGet(id);if(!d)continue;
+    await driveUp('f_'+id,d,null,{fid:id});}
+  for(const fid in driveFiles){if(keep.indexOf(fid)===-1)await driveDel(driveFiles[fid])}
+  setSyncStatus('Saving to your Drive…');
+  if(!S.updatedAt)S.updatedAt=Date.now();
+  const snapshot=JSON.stringify({v:3,state:S,savedAt:Date.now()});
+  await driveUp('alokos-sync.json',snapshot,snapId,{updatedAt:String(S.updatedAt),device:S.deviceId||''});
+  S.baseRev=S.updatedAt;S.lastSync=Date.now();save(true)}
+/* ---- pull: apply the cloud state, then fetch only attachments we don't already have ---- */
+async function pullAll(snap,driveFiles){setSyncStatus('Downloading from your Drive…');
+  const txt=await driveGet(snap.id);const j=JSON.parse(txt);
+  if(!j||!j.state)throw new Error('BAD_SNAPSHOT');
+  const keepG=S.profile.google,keepA=S.gAuth,keepLock=S.lock,dev=S.deviceId,skip=S.loginSkipped;
+  S={...blank(),...j.state};
+  if(keepG)S.profile.google=keepG; if(keepA)S.gAuth=keepA; if(keepLock)S.lock=keepLock;
+  S.deviceId=dev; S.loginSkipped=skip; S.owner=(keepG&&keepG.email)||S.owner;
+  migrate();
+  const cloudU=+((snap.appProperties&&snap.appProperties.updatedAt)||Date.now());
+  S.updatedAt=cloudU;S.baseRev=cloudU;S.lastSync=Date.now();save(true);
+  applyTheme();renderAll();
+  const need=[];for(const id of keepIds()){const have=await fileGet(id);if(!have)need.push(id)}
+  let n=0;
+  for(const id of need){n++;setSyncStatus('Downloading attachment '+n+' of '+need.length+'…');
+    const did=driveFiles[id];if(!did)continue;
+    try{const d=await driveGet(did);await fileSave(id,d)}catch(e){}}
+  renderAll()}
+/* ---- conflict: both sides changed since the last sync. Never overwrite silently. ---- */
+let conflictCtx=null;
+function isEmptyState(){return !(S.tasks.length||S.notes.length||S.expenses.length||S.income.length||
+  S.shopping.length||S.followups.length||S.meetings.length||S.circulars.length||S.docs.length||
+  S.renewals.length||S.fuel.length||S.service.length||S.meds.length||S.habits.length||
+  S.goals.length||S.events.length||S.links.length)}
+function showConflict(snap,files,cloudU){conflictCtx={snap,files};
+  const el=document.getElementById('conflictOv');
+  document.getElementById('cfInfo').innerHTML='This device changed at <b>'+fmtWhen(S.updatedAt)+'</b><br>Your Drive changed at <b>'+fmtWhen(cloudU)+'</b>';
+  el.classList.add('open');setSyncStatus('Conflict — choose which copy to keep')}
+function cfClose(){document.getElementById('conflictOv').classList.remove('open');conflictCtx=null}
+async function cfKeepLocal(){if(!conflictCtx)return;const c=conflictCtx;cfClose();
+  syncBusy=true;try{S.updatedAt=Date.now();await pushAll(c.snap.id,c.files);
+    setSyncStatus('Up to date · '+fmtWhen(S.lastSync));toast('☁ This device kept — Drive updated')}
+  catch(e){setSyncStatus('Push failed ('+String(e&&e.message||e)+')')}
+  syncBusy=false;renderSettings()}
+async function cfKeepCloud(){if(!conflictCtx)return;const c=conflictCtx;cfClose();
+  syncBusy=true;try{await pullAll(c.snap,c.files);
+    setSyncStatus('Up to date · '+fmtWhen(S.lastSync));toast('☁ Drive copy loaded onto this device')}
+  catch(e){setSyncStatus('Pull failed ('+String(e&&e.message||e)+')')}
+  syncBusy=false;renderSettings()}
+function cfBackupFirst(){backup();toast('Backup downloading — then pick a side')}
+/* ---- force push (manual, from Settings) ---- */
 async function forcePush(){if(!S.profile.google){toast('Sign in first');return}
   const ok=await ensureToken(true);if(!ok){toast('Could not reconnect to Google');return}
-  syncBusy=false;S.updatedAt=Date.now();save(true);
-  try{setSyncStatus('Force-uploading this device\'s data…');
-    const meta=await driveFind();await drivePush(meta&&meta.id);
-    S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync));
+  if(syncBusy){toast('A sync is already running');return}
+  syncBusy=true;
+  try{setSyncStatus('Force-uploading this device…');
+    const {snap,files}=await driveList();
+    S.updatedAt=Date.now();save(true);
+    await pushAll(snap&&snap.id,files);
+    setSyncStatus('Up to date · '+fmtWhen(S.lastSync));
     toast('☁ Pushed to Drive — open the app on your other devices to pull it')}
   catch(e){setSyncStatus('Push failed ('+String(e&&e.message||e)+')')}
-  renderSettings()}
+  syncBusy=false;renderSettings()}
+/* ---- the sync brain ---- */
 async function cloudSync(manual,_retry){
   if(!S.profile.google&&!manual)return;
   if(syncBusy)return;
   if(!navigator.onLine){setSyncStatus('Offline — will sync when you reconnect');return}
   const ok=await ensureToken(!!manual);
   if(!ok){if(manual)toast('Could not reconnect to Google — try Sign in again');return}
+  if(conflictCtx)return;
   syncBusy=true;
   try{setSyncStatus('Syncing…');
-    const meta=await driveFind();
-    const localU=S.updatedAt||0;
-    if(!meta){await drivePush(null)}
-    else{const cloudU=+((meta.appProperties&&meta.appProperties.updatedAt)||0);
-      if(cloudU>localU){const snap=await driveDownload(meta.id);
-        if(snap&&snap.state){const keepG=S.profile.google,keepA=S.gAuth;
-          S={...blank(),...snap.state};if(keepG)S.profile.google=keepG;if(keepA)S.gAuth=keepA;migrate();
-          for(const id in (snap.files||{}))await fileSave(id,snap.files[id]);
-          S.owner=(keepG&&keepG.email)||S.owner;S.updatedAt=cloudU;S.lastSync=Date.now();save(true);
-          applyTheme();renderAll();toast('☁ Updated from your Google Drive')}}
-      else if(localU>cloudU){await drivePush(meta.id);toast('☁ Saved to your Google Drive')}}
+    const {snap,files}=await driveList();
+    const base=S.baseRev||0, localU=S.updatedAt||0;
+    if(!snap){await pushAll(null,files)}
+    else{
+      const cloudU=+((snap.appProperties&&snap.appProperties.updatedAt)||0);
+      if(cloudU<=base){ if(localU>base)await pushAll(snap.id,files); }
+      else if(localU<=base||isEmptyState()){ await pullAll(snap,files) }
+      else { syncBusy=false; showConflict(snap,files,cloudU); renderSettings(); return }
+    }
     S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync))}
   catch(e){const m=String(e&&e.message||e);
     syncBusy=false;
-    if(m==='NO_SCOPE'&&!_retry){ /* token died mid-flight — refresh once, then retry silently */
+    if(m==='NO_SCOPE'&&!_retry){
       gToken=null;gTokenExp=0;delete S.gAuth;save(true);
       const again=await ensureToken(!!manual);
       if(again)return cloudSync(manual,true);
       setSyncStatus('Drive permission missing — tap Sync now and Allow Drive access');
       if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent',hint:gHint()})}
-    else if(m==='TOO_BIG')setSyncStatus('Too many large attachments to sync — remove a few, or keep them only on this device');
+    else if(m==='TOO_BIG')setSyncStatus('Attachment too large to sync');
     else if(m==='DRIVE_OFF')setSyncStatus('Google Drive API is disabled in your Cloud project — enable it, then tap Sync now');
     else if(m==='NO_SCOPE'){setSyncStatus('Drive permission missing — tap Sync now and Allow Drive access');
       if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent',hint:gHint()})}
@@ -2146,6 +2223,7 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
 (async function boot(){const raw=await store.get();
   if(raw){try{S={...blank(),...JSON.parse(raw)}}catch(e){}}
   migrate();trashAutoPurge();
+  if(!S.deviceId){S.deviceId=uid();save(true)}
   if(S.water.date!==today())S.water={date:today(),count:0};
   applyTheme();renderAll();initCrop();
   if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');
