@@ -1245,16 +1245,26 @@ async function bioUnlock(){if(!S.lock||!S.lock.bio)return;
 /* ============ GOOGLE SIGN-IN + DRIVE SYNC (user's own Drive) ============ */
 const GOOGLE_CLIENT_ID='804623197611-nr730ggbqtje62p7rfhlf8o7ptophjdj.apps.googleusercontent.com'; // ← paste your Client ID (see GOOGLE_SETUP guide)
 let gToken=null,gTokenExp=0,tokenClient=null,syncBusy=false,pushT=null;
+let tokenWait=null,refreshT=null,lastSilent=0,needsInteract=false;
 function gConfigured(){return GOOGLE_CLIENT_ID.indexOf('YOUR_')!==0}
 function fmtWhen(ts){const d=new Date(ts);let h=d.getHours();const ap=h>=12?'PM':'AM';h=h%12||12;
   return fmtD(d)+' · '+h+':'+String(d.getMinutes()).padStart(2,'0')+' '+ap}
+function gHint(){return (S.profile.google&&S.profile.google.email)||undefined}
+function scheduleRefresh(){clearTimeout(refreshT);
+  const ms=gTokenExp-Date.now()-5*60000;
+  if(ms>0)refreshT=setTimeout(()=>ensureToken(false),ms)}
 function initGoogle(){if(!gConfigured()||typeof google==='undefined'||!google.accounts||tokenClient)return;
   tokenClient=google.accounts.oauth2.initTokenClient({
     client_id:GOOGLE_CLIENT_ID,
     scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
-    callback:async r=>{if(!r||!r.access_token)return;
+    error_callback:err=>{const w=tokenWait;tokenWait=null;needsInteract=true;
+      if(w)w.resolve(false);else setSyncStatus('Reconnect needed — tap Sync now')},
+    callback:async r=>{
+      const w=tokenWait;tokenWait=null;
+      if(!r||!r.access_token){needsInteract=true;if(w)w.resolve(false);return}
       gToken=r.access_token;gTokenExp=Date.now()+((r.expires_in||3600)-90)*1000;
-      S.gAuth={t:gToken,exp:gTokenExp};save(true);
+      needsInteract=false;S.gAuth={t:gToken,exp:gTokenExp};save(true);scheduleRefresh();
+      if(w&&w.silent){w.resolve(true);return}
       const prevOwner=S.owner||null;
       await fetchGProfile();
       const email=(S.profile.google&&S.profile.google.email)||null;
@@ -1262,19 +1272,38 @@ function initGoogle(){if(!gConfigured()||typeof google==='undefined'||!google.ac
         if(prevOwner&&prevOwner!==email)await switchAccount(email);
         else if(!prevOwner){S.owner=email;S.updatedAt=0;save(true)}
       }
-      hideLogin();renderSettings();cloudSync()}});
-  if(S.gAuth&&Date.now()<S.gAuth.exp){gToken=S.gAuth.t;gTokenExp=S.gAuth.exp;cloudSync()}
-  else if(S.profile.google)setSyncStatus('Session expired — tap Sync now to reconnect');}
+      hideLogin();renderSettings();
+      if(w)w.resolve(true);else cloudSync()}});
+  /* resume a saved session, or try a silent refresh so the user is never asked again */
+  if(S.gAuth&&Date.now()<S.gAuth.exp){gToken=S.gAuth.t;gTokenExp=S.gAuth.exp;scheduleRefresh();cloudSync()}
+  else if(S.profile.google){setSyncStatus('Reconnecting…');ensureToken(false).then(ok=>ok?cloudSync():0)}}
+function reqToken(opt){return new Promise(res=>{
+  if(!tokenClient){initGoogle();if(!tokenClient){res(false);return}}
+  let done=false;const finish=v=>{if(done)return;done=true;clearTimeout(to);res(v)};
+  const to=setTimeout(()=>{if(tokenWait&&tokenWait.resolve===finish)tokenWait=null;finish(false)},12000);
+  tokenWait={resolve:finish,silent:!!opt.silent};
+  try{tokenClient.requestAccessToken({prompt:opt.prompt||'',hint:gHint()})}
+  catch(e){tokenWait=null;finish(false)}})}
+async function ensureToken(interactive){
+  if(gToken&&Date.now()<gTokenExp)return true;
+  if(S.gAuth&&Date.now()<S.gAuth.exp){gToken=S.gAuth.t;gTokenExp=S.gAuth.exp;scheduleRefresh();return true}
+  if(!S.profile.google&&!interactive)return false;
+  if(!interactive&&needsInteract&&Date.now()-lastSilent<5*60000)return false;
+  lastSilent=Date.now();
+  let ok=await reqToken({silent:true,prompt:''});
+  if(!ok&&interactive)ok=await reqToken({silent:false,prompt:''});
+  if(!ok&&!interactive)setSyncStatus('Reconnect needed — tap Sync now');
+  return ok}
 function gSignIn(){if(!gConfigured()){toast('Add your Google Client ID first — see the setup guide');return}
   if(!tokenClient){initGoogle();if(!tokenClient){toast('Google Sign-In is loading — try again in a moment');return}}
-  tokenClient.requestAccessToken({prompt:S.profile.google?'':'consent'})}
+  tokenClient.requestAccessToken({prompt:S.profile.google?'':'consent',hint:gHint()})}
 function showLoginIfNeeded(){if(gConfigured()&&!S.profile.google&&!S.loginSkipped)
   document.getElementById('loginOv').classList.add('open')}
 function hideLogin(){document.getElementById('loginOv').classList.remove('open')}
 function loginSkip(){S.loginSkipped=true;save();hideLogin();
   toast('No problem — you can sign in anytime from Settings')}
 function gSignOut(){try{if(gToken&&typeof google!=='undefined')google.accounts.oauth2.revoke(gToken)}catch(e){}
-  gToken=null;delete S.profile.google;delete S.gAuth;save();renderSettings();renderHeader();
+  gToken=null;clearTimeout(refreshT);needsInteract=false;delete S.profile.google;delete S.gAuth;delete S.owner;save();renderSettings();renderHeader();
   toast('Signed out — your data stays safely on this device')}
 async function fetchGProfile(){try{
   const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+gToken}});
@@ -1313,10 +1342,13 @@ async function drivePush(fileId){setSyncStatus('Uploading to your Drive…');
   const r=await fetch('https://www.googleapis.com/upload/drive/v3/files'+(fileId?'/'+fileId:'')+'?uploadType=multipart',
     {method:fileId?'PATCH':'POST',headers:{Authorization:'Bearer '+gToken,'Content-Type':'multipart/related; boundary='+b},body:mp});
   if(!r.ok)await driveErr(r)}
-async function cloudSync(manual){
+async function cloudSync(manual,_retry){
   if(!S.profile.google&&!manual)return;
-  if(!gToken||Date.now()>gTokenExp){if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:''});else setSyncStatus('Reconnect needed — tap Sync now');return}
-  if(syncBusy)return;syncBusy=true;
+  if(syncBusy)return;
+  if(!navigator.onLine){setSyncStatus('Offline — will sync when you reconnect');return}
+  const ok=await ensureToken(!!manual);
+  if(!ok){if(manual)toast('Could not reconnect to Google — try Sign in again');return}
+  syncBusy=true;
   try{setSyncStatus('Syncing…');
     const meta=await driveFind();
     const localU=S.updatedAt||0;
@@ -1331,10 +1363,18 @@ async function cloudSync(manual){
       else if(localU>cloudU){await drivePush(meta.id);toast('☁ Saved to your Google Drive')}}
     S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync))}
   catch(e){const m=String(e&&e.message||e);
-    if(m==='DRIVE_OFF')setSyncStatus('Google Drive API is disabled in your Cloud project — enable it, then tap Sync now');
+    syncBusy=false;
+    if(m==='NO_SCOPE'&&!_retry){ /* token died mid-flight — refresh once, then retry silently */
+      gToken=null;gTokenExp=0;delete S.gAuth;save(true);
+      const again=await ensureToken(!!manual);
+      if(again)return cloudSync(manual,true);
+      setSyncStatus('Drive permission missing — tap Sync now and Allow Drive access');
+      if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent',hint:gHint()})}
+    else if(m==='DRIVE_OFF')setSyncStatus('Google Drive API is disabled in your Cloud project — enable it, then tap Sync now');
     else if(m==='NO_SCOPE'){setSyncStatus('Drive permission missing — tap Sync now and Allow Drive access');
-      if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent'})}
-    else setSyncStatus('Sync failed ('+m+') — check internet, then Sync now')}
+      if(manual&&tokenClient)tokenClient.requestAccessToken({prompt:'consent',hint:gHint()})}
+    else setSyncStatus('Sync failed ('+m+') — check internet, then Sync now');
+    renderSettings();return}
   syncBusy=false;renderSettings()}
 function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
   if(!gConfigured()){el.innerHTML='<div class="set-row"><div><div class="set-name">Google Drive sync</div><div class="set-sub">Setup pending — create a free Google Client ID and paste it in index.html (see GOOGLE_SETUP guide)</div></div></div>';return}
@@ -1426,6 +1466,7 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
     checkReminders();renderToday();cloudSync();
     if(S.lock&&S.lock.pinHash&&Date.now()-hiddenAt>60000)showLock('verify')});
   addEventListener('focus',()=>cloudSync());
+  addEventListener('online',()=>cloudSync());
   setInterval(()=>cloudSync(),45000);
   (function gw(n){if(typeof google!=='undefined'&&google.accounts)initGoogle();else if(n<24)setTimeout(()=>gw(n+1),500)})(0);
   if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0){
