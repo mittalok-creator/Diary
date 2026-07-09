@@ -945,6 +945,32 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   <button id="loginSkip" onclick="loginSkip()">Continue without account (this device only)</button>
 </div>
 
+<div id="sheetOv" class="cfov"><div class="cfbox" style="text-align:left;max-height:80vh;overflow:auto">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <h2 id="sheetTitle" style="font-family:'Fraunces',serif;font-size:19px"></h2>
+      <button class="pv-btn" onclick="document.getElementById('sheetOv').classList.remove('open')">✕</button></div>
+    <div id="sheetBody"></div>
+  </div></div>
+
+<div id="renewOv" class="cfov"><div class="cfbox" style="text-align:left">
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:4px">Renew policy</h2>
+    <p class="set-sub" id="rwTitle" style="margin-bottom:16px"></p>
+    <label class="fld" style="width:100%"><span>Insurer / provider this time</span>
+      <input class="inp" id="rwProv" placeholder="Company name"></label>
+    <div class="dtrow" style="margin-top:12px">
+      <label class="fld"><span>Amount paid ₹</span><input type="number" inputmode="numeric" class="inp" id="rwPrem" placeholder="Premium"></label>
+      <label class="fld"><span>New expiry date</span><input type="date" class="inp" id="rwExp"></label>
+    </div>
+    <label class="fld" style="width:100%;margin-top:12px"><span>Policy number (if changed)</span>
+      <input class="inp" id="rwNo" placeholder="Leave blank to keep old"></label>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-ghost" title="Attach new policy copy" onclick="pickFiles(fs=>{pend.rw.push(...fs);drawPend('rw')})">📎</button>
+      <button class="btn btn-gold" style="flex:1" onclick="rwSave()">Save renewal</button>
+    </div>
+    <div id="pendRw" style="margin-top:10px"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="rwCancel()">Cancel</button>
+  </div></div>
+
 <div id="carOv" class="cfov">
   <div class="cfbox" style="text-align:left">
     <div style="text-align:center;margin-bottom:18px">
@@ -1292,6 +1318,7 @@ async function skSave(){if(!sk.strokes.length){toast('Draw something first');ret
   pend[sk.target].push({id,name:'Sketch '+fmtD(new Date()),type:'img',size:d.length});
   drawPend(sk.target);skClose();
   toast('✏️ Sketch added — now save the note')}
+function showSheet(t,html){document.getElementById('sheetTitle').textContent=t;document.getElementById('sheetBody').innerHTML=html||'';document.getElementById('sheetOv').classList.add('open');setTimeout(loadThumbs,0)}
 /* ============ SEARCH ENTRY ============ */
 function openSearch(){const d=document.getElementById('dashQ');
   const v=d?d.value.trim():'';if(d)d.value='';
@@ -1533,10 +1560,32 @@ function addRenewal(){const n=rnName.value.trim();
   drawPend('ren');save();renderLife();renderToday();toast('🛡 Renewal tracked — '+rnLabel(daysTo(S.renewals[0].expiry)))}
 function delRenewal(id){const r=S.renewals.find(x=>x.id===id);trashPush('renewal',r,r&&r.name);
   S.renewals=S.renewals.filter(x=>x.id!==id);save();renderLife();renderToday()}
-function renewPlus(id){const r=S.renewals.find(x=>x.id===id);if(!r)return;
+let renewTarget=null;
+function renewPlus(id){const r=S.renewals.find(x=>x.id===id);if(!r)return;renewTarget=id;
   const d=new Date(r.expiry+'T00:00');d.setFullYear(d.getFullYear()+1);
-  r.expiry=d.toISOString().slice(0,10);r.notified={};
-  save();renderLife();renderToday();toast('Renewed — next due '+fmtD(r.expiry))}
+  document.getElementById('rwTitle').textContent=r.name;
+  rwProv.value=r.provider||'';rwPrem.value='';rwNo.value=r.polno||'';
+  rwExp.value=d.toISOString().slice(0,10);
+  pend.rw=[];drawPend('rw');
+  document.getElementById('renewOv').classList.add('open')}
+function rwCancel(){document.getElementById('renewOv').classList.remove('open');renewTarget=null;
+  (pend.rw||[]).forEach(a=>fileDel(a.id));pend.rw=[]}
+function rwSave(){const r=S.renewals.find(x=>x.id===renewTarget);if(!r){rwCancel();return}
+  if(!rwExp.value){toast('Pick the new expiry date');rwExp.focus();return}
+  /* archive the outgoing term into history */
+  r.history=r.history||[];
+  r.history.unshift({provider:r.provider||'',polno:r.polno||'',premium:r.premium||0,
+    expiry:r.expiry,renewedOn:today(),att:(r.att||[]).slice()});
+  /* apply the new term; new papers replace the visible attachment set (old ones kept in history) */
+  const newAtt=(pend.rw||[]).slice();
+  r.provider=rwProv.value.trim()||r.provider;
+  r.polno=rwNo.value.trim()||r.polno;
+  if(rwPrem.value)r.premium=Number(rwPrem.value)||r.premium;
+  r.expiry=rwExp.value;r.notified={};
+  if(newAtt.length)r.att=newAtt;
+  pend.rw=[];
+  document.getElementById('renewOv').classList.remove('open');renewTarget=null;
+  save();renderLife();renderToday();toast('✓ Renewed — next due '+fmtD(r.expiry))}
 function rnCard(r){const n=daysTo(r.expiry),c=rnColor(n);
   return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
   +'<div class="row-title" style="font-family:Fraunces,serif;font-size:16.5px">'+esc(r.name)+'</div>'
@@ -1545,9 +1594,32 @@ function rnCard(r){const n=daysTo(r.expiry),c=rnColor(n);
   +'&nbsp; <b style="color:'+c+'">'+rnLabel(n)+'</b> · '+fmtD(r.expiry)+'</div>'
   +((r.provider||r.polno)?'<div class="row-meta" style="margin-top:4px">'+(r.provider?esc(r.provider):'')+(r.provider&&r.polno?' · ':'')+(r.polno?'No. <b style="color:var(--hi)">'+esc(r.polno)+'</b>':'')+'</div>':'')
   +(r.premium?'<div class="row-meta" style="margin-top:2px">Premium '+fmtR(r.premium)+'</div>':'')
-  +attChips(r.att)
-  +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-gold btn-sm" onclick="renewPlus(\''+r.id+'\')">✓ Renewed · +1 year</button></div>'
+  +((r.att&&r.att.length)?'<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">'
+     +r.att.map(a=>'<div class="row" style="padding:8px 0">'
+       +(a.type==='img'?'<img class="thumb" style="width:40px;height:40px" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\',\''+esc(r.name)+'\')">':'<div class="thumb-ph" style="width:40px;height:40px;font-size:18px">📄</div>')
+       +'<div class="row-body"><div class="row-title" style="font-size:13px">'+esc(a.name)+'</div></div>'
+       +'<button class="btn btn-gold btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name)+'\')">Read</button>'
+       +'<button class="btn btn-ghost btn-sm" onclick="dlAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name)+'\')">⬇</button>'
+       +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name)+'\')">↗</button>'
+       +'</div>').join('')+'</div>'
+     :'')
+  +((r.history&&r.history.length)?'<div class="row-meta" style="margin-top:10px;cursor:pointer" onclick="rnHist(\''+r.id+'\')">📜 '+r.history.length+' past term'+(r.history.length>1?'s':'')+' · view history ›</div>':'')
+  +'<div style="display:flex;gap:8px;margin-top:12px">'
+  +'<button class="btn btn-gold btn-sm" style="flex:1" onclick="renewPlus(\''+r.id+'\')">✓ Renew — update details</button>'
+  +'<button class="btn btn-ghost btn-sm" title="Attach policy copy" onclick="rnAddDoc(\''+r.id+'\')">📎</button>'
+  +'</div>'
   +'</div>'}
+function dlAtt(id,type,name){fileGet(id).then(d=>{if(!d)return;const a=document.createElement('a');
+  a.href=d;a.download=(name||'policy').replace(/[^\w\- ]+/g,'').trim()+(type==='pdf'?'.pdf':'.jpg');a.click()})}
+function rnAddDoc(id){const r=S.renewals.find(x=>x.id===id);if(!r)return;
+  pickFiles(fs=>{if(!fs.length)return;r.att=(r.att||[]).concat(fs);save();renderLife();toast('📎 Added to '+r.name)})}
+function rnHist(id){const r=S.renewals.find(x=>x.id===id);if(!r||!r.history)return;
+  const rows=r.history.map(h=>'<div class="card" style="margin-top:10px"><div class="row-title" style="font-size:14px">Term till '+fmtD(h.expiry)+'</div>'
+    +'<div class="row-meta" style="margin-top:3px">'+(h.provider?esc(h.provider):'')+(h.polno?' · No. '+esc(h.polno):'')+(h.premium?' · '+fmtR(h.premium):'')+'</div>'
+    +'<div class="row-meta">Renewed on '+fmtD(h.renewedOn)+'</div>'
+    +((h.att&&h.att.length)?'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">'+h.att.map(a=>'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name)+'\')">'+(a.type==='pdf'?'📄':'🖼')+' Read</button><button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name)+'\')">↗</button>').join('')+'</div>':'')
+    +'</div>').join('');
+  showSheet(r.name+' — history',rows)}
 function checkRenewRem(){const t=today();
   S.renewals.forEach(r=>{const n=daysTo(r.expiry);r.notified=r.notified||{};
     if(n>r.remind||n<-30||r.notified[t])return;
@@ -1783,8 +1855,8 @@ async function shareAtt(id,type,label){
     toast('Sharing not supported here — file downloaded instead')}
   catch(e){if(e&&e.name!=='AbortError')toast('Could not share this file')}}
 /* ============ ATTACHMENTS (image + PDF) ============ */
-let pend={note:[],onote:[],exp:[],meet:[],ren:[],svc:[]};
-const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet',ren:'pendRen',svc:'pendSvc'};
+let pend={note:[],onote:[],exp:[],meet:[],ren:[],svc:[],rw:[]};
+const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet',ren:'pendRen',svc:'pendSvc',rw:'pendRw'};
 let _idb=null;
 function idbOpen(){return new Promise(res=>{
   if(_idb)return res(_idb);
@@ -1940,7 +2012,7 @@ function allAttIds(){const ids=[];S.notes.forEach(n=>(n.att||[]).forEach(a=>ids.
   S.expenses.forEach(e=>(e.att||[]).forEach(a=>ids.push(a.id)));
   S.meetings.forEach(m=>(m.att||[]).forEach(a=>ids.push(a.id)));
   S.docs.forEach(d=>{if(d.att)ids.push(d.att.id)});S.circulars.forEach(c=>(c.versions||[]).forEach(v=>{if(v.att)ids.push(v.att.id)}));
-  S.renewals.forEach(r=>(r.att||[]).forEach(a=>ids.push(a.id)));S.service.forEach(s=>(s.att||[]).forEach(a=>ids.push(a.id)));return ids}
+  S.renewals.forEach(r=>{(r.att||[]).forEach(a=>ids.push(a.id));(r.history||[]).forEach(h=>(h.att||[]).forEach(a=>ids.push(a.id)))});S.service.forEach(s=>(s.att||[]).forEach(a=>ids.push(a.id)));return ids}
 function attBytes(){let b=0;const add=a=>b+=(a&&a.size)||0;
   S.notes.forEach(n=>(n.att||[]).forEach(add));S.expenses.forEach(e=>(e.att||[]).forEach(add));
   S.meetings.forEach(m=>(m.att||[]).forEach(add));S.docs.forEach(d=>add(d.att));S.circulars.forEach(c=>(c.versions||[]).forEach(v=>add(v.att)));
