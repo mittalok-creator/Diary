@@ -2324,16 +2324,24 @@ function galleryOpen(){go('search');document.getElementById('qIn').style.display
     const d=await fileGet(im.dataset.fid);if(d)im.src=d}),0)}
 function galClose(){document.getElementById('qIn').style.display='';qIn.value='';runSearch()}
 /* ============ SHARE (Web Share API, WhatsApp-ready) ============ */
+async function attMeta(id){for(const arr of [S.docs,S.circulars,S.notes,S.tasks,S.meetings,S.renewals,S.service]){
+    if(!arr)continue;for(const it of arr){const list=it.att||(Array.isArray(it)?null:null);
+      if(it.att)for(const a of it.att){if(a.id===id)return a}}}
+  return null}
 async function shareAtt(id,type,label){
   try{const d=await fileGet(id);if(!d){toast('File not found');return}
-    const bin=atob(d.split(',')[1]);const arr=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-    const mime=type==='pdf'?'application/pdf':'image/jpeg';
-    const ext=type==='pdf'?'.pdf':'.jpg';
-    const file=new File([arr],(label||'ALOK OS file').replace(/[^\w\- ]+/g,'').trim()+ext,{type:mime});
+    const meta=attMeta(id);
+    // rebuild the exact bytes from the stored data URL, preserving real mime
+    const res=await fetch(d);const blob=await res.blob();
+    let mime=(meta&&meta.mime)||blob.type||'';
+    if(!mime)mime=type==='pdf'?'application/pdf':(type==='img'?'image/jpeg':'application/octet-stream');
+    // real filename with its real extension
+    let fname=(meta&&meta.fname)||label||'file';
+    if(!/\.[a-z0-9]+$/i.test(fname)){fname+=(type==='pdf'?'.pdf':type==='img'?'.jpg':'')}
+    const file=new File([blob],fname,{type:mime||'application/octet-stream'});
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:label||'ALOK OS'});return}
-    const a=document.createElement('a');a.href=d;a.download=file.name;a.click();
+      await navigator.share({files:[file],title:fname});return}
+    const a=document.createElement('a');a.href=d;a.download=fname;a.click();
     toast('Sharing not supported here — file downloaded instead')}
   catch(e){if(e&&e.name!=='AbortError')toast('Could not share this file')}}
 /* ============ ATTACHMENTS (image + PDF) ============ */
@@ -2732,10 +2740,12 @@ function fileOpenCard(name,dataUrl){
     +'</div>';
 }
 async function pvDownloadCurrent(){try{const d=await fileGet(pv.id);if(!d)return;
-  const a=document.createElement('a');a.href=d;a.download=pv.name||'file';a.click()}catch(e){toast('Download failed')}}
+  const meta=attMeta(pv.id);const nm=(meta&&meta.fname)||pv.name||'file';
+  const a=document.createElement('a');a.href=d;a.download=nm;a.click()}catch(e){toast('Download failed')}}
 async function pvShareCurrent(){try{const d=await fileGet(pv.id);if(!d)return;
-  const res=await fetch(d);const blob=await res.blob();
-  const file=new File([blob],pv.name||'file',{type:blob.type||'application/octet-stream'});
+  const meta=attMeta(pv.id);const res=await fetch(d);const blob=await res.blob();
+  const nm=(meta&&meta.fname)||pv.name||'file';
+  const file=new File([blob],nm,{type:(meta&&meta.mime)||blob.type||'application/octet-stream'});
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
   const a=document.createElement('a');a.href=d;a.download=pv.name||'file';a.click()}catch(e){toast('Share not supported — downloaded instead')}}
 
