@@ -2324,9 +2324,16 @@ function galleryOpen(){go('search');document.getElementById('qIn').style.display
     const d=await fileGet(im.dataset.fid);if(d)im.src=d}),0)}
 function galClose(){document.getElementById('qIn').style.display='';qIn.value='';runSearch()}
 /* ============ SHARE (Web Share API, WhatsApp-ready) ============ */
-async function attMeta(id){for(const arr of [S.docs,S.circulars,S.notes,S.tasks,S.meetings,S.renewals,S.service]){
-    if(!arr)continue;for(const it of arr){const list=it.att||(Array.isArray(it)?null:null);
-      if(it.att)for(const a of it.att){if(a.id===id)return a}}}
+async function attMeta(id){const cols=[S.docs,S.circulars,S.notes,S.tasks,S.meetings,S.renewals,S.service,S.followups];
+  for(const arr of cols){if(!arr)continue;
+    for(const it of arr){if(!it)continue;
+      const at=it.att;
+      if(!at)continue;
+      if(Array.isArray(at)){for(const a of at){if(a&&a.id===id)return a}}
+      else if(at.id===id)return at;
+      // circulars keep version history with their own att
+      if(Array.isArray(it.versions))for(const v of it.versions){if(v&&v.att&&v.att.id===id)return v.att}
+    }}
   return null}
 async function shareAtt(id,type,label){
   try{const d=await fileGet(id);if(!d){toast('File not found');return}
@@ -2340,10 +2347,13 @@ async function shareAtt(id,type,label){
     if(!/\.[a-z0-9]+$/i.test(fname)){fname+=(type==='pdf'?'.pdf':type==='img'?'.jpg':'')}
     const file=new File([blob],fname,{type:mime||'application/octet-stream'});
     if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:fname});return}
+      try{await navigator.share({files:[file],title:fname});return}
+      catch(err){if(err&&err.name==='AbortError')return; /* user cancelled */ }
+    }
+    // no file-share support (most laptops) or share failed → download the real file
     const a=document.createElement('a');a.href=d;a.download=fname;a.click();
-    toast('Sharing not supported here — file downloaded instead')}
-  catch(e){if(e&&e.name!=='AbortError')toast('Could not share this file')}}
+    toast('↓ '+fname+' downloaded')}
+  catch(e){toast('Could not open this file')}}
 /* ============ ATTACHMENTS (image + PDF) ============ */
 let pend={note:[],onote:[],exp:[],meet:[],ren:[],svc:[],rw:[]};
 const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet',ren:'pendRen',svc:'pendSvc',rw:'pendRw'};
