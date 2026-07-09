@@ -378,6 +378,8 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;
   font-size:26px;color:var(--gold);z-index:140;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
 #swipeHint.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.ed{background:none;border:none;color:var(--lo);font-size:14px;cursor:pointer;padding:2px 6px;opacity:.7;transition:color .2s}
+.ed:hover{color:var(--gold);opacity:1}
 </style>
 </head>
 <body>
@@ -987,6 +989,13 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   <button id="loginSkip" onclick="loginSkip()">Continue without account (this device only)</button>
 </div>
 
+<div id="renameOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">Rename</h2>
+    <input class="inp" id="renameIn" placeholder="New name" onkeydown="if(event.key==='Enter')renameSave()">
+    <button class="btn btn-gold" style="width:100%;margin-top:14px" onclick="renameSave()">Save</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('renameOv').classList.remove('open')">Cancel</button>
+  </div></div>
+
 <div id="confirmOv" class="cfov"><div class="cfbox" style="text-align:center;max-width:340px">
     <div class="mono-big" style="width:56px;height:56px;font-size:20px;margin:0 auto 16px">AM</div>
     <h2 id="cfmTitle" style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:8px">Are you sure?</h2>
@@ -1388,7 +1397,7 @@ function linkCard(l){return '<div class="card"><div style="display:flex;align-it
   +'<button class="btn btn-gold btn-sm" style="flex:1" onclick="openLink(\''+l.id+'\')">↗ Open</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="shareLink(\''+l.id+'\')">Share</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="copyLink(\''+l.id+'\')">Copy</button>'
-  +'<button class="del" onclick="delLink(\''+l.id+'\')">✕</button></div></div>'}
+  +'<button class="ed" title="Rename" onclick="askRename(\'link\',\''+l.id+'\')">✎</button><button class="del" onclick="delLink(\''+l.id+'\')">✕</button></div></div>'}
 function renderLinks(){const el=document.getElementById('lkList');if(!el)return;
   el.innerHTML=S.links.map(linkCard).join('')
     ||'<div class="empty"><div class="em-ring">🔗</div>Portals, dashboards, forms —<br>save them by name and open with one tap</div>'}
@@ -1449,6 +1458,31 @@ async function skSave(){if(!sk.strokes.length){toast('Draw something first');ret
   pend[sk.target].push({id,name:'Sketch '+fmtD(new Date()),type:'img',size:d.length});
   drawPend(sk.target);skClose();
   toast('✏️ Sketch added — now save the note')}
+const RENAME_MAP={
+  task:['tasks','title'], note:['notes','title'], doc:['docs','name'], circular:['circulars','name'],
+  link:['links','name'], renewal:['renewals','name'], event:['events','name'], meeting:['meetings','title'],
+  goal:['goals','name'], med:['meds','name'], habit:['habits','name'], service:['service','work'],
+  income:['income','source'], link2:['links','name']};
+let _renCtx=null;
+function askRename(kind,id){const m=RENAME_MAP[kind];if(!m)return;
+  const it=(S[m[0]]||[]).find(x=>x.id===id);if(!it)return;
+  _renCtx={arr:m[0],field:m[1],id};
+  const inp=document.getElementById('renameIn');
+  inp.value=it[m[1]]||'';
+  document.getElementById('renameOv').classList.add('open');
+  setTimeout(()=>{inp.focus();inp.select()},60)}
+function renameFollowup(id){const fu=S.followups.find(x=>x.id===id);if(!fu)return;
+  _renCtx={arr:'followups',field:'topic',id};
+  const inp=document.getElementById('renameIn');inp.value=fu.topic||'';
+  document.getElementById('renameOv').classList.add('open');
+  setTimeout(()=>{inp.focus();inp.select()},60)}
+function renameSave(){if(!_renCtx)return;
+  const v=document.getElementById('renameIn').value.trim();
+  if(!v){toast('Name cannot be empty');return}
+  const it=(S[_renCtx.arr]||[]).find(x=>x.id===_renCtx.id);
+  if(it){it[_renCtx.field]=v}
+  document.getElementById('renameOv').classList.remove('open');_renCtx=null;
+  save();renderAll();toast('✓ Renamed')}
 function cfmClose(){document.getElementById('confirmOv').classList.remove('open');_cfmFn=null}
 let _cfmFn=null;
 function askDelete(name,fn,label){_cfmFn=fn;
@@ -1478,7 +1512,7 @@ function taskRow(x){return '<div class="row '+(x.done?'done':'')+'">'+
   '<div class="chk '+(x.done?'on':'')+'" onclick="tglTask(\''+x.id+'\')"></div>'+
   '<div class="row-body"><div class="row-title">'+esc(x.title)+'</div>'+
   ((x.due||x.time||x.rep)?'<div class="row-meta">'+dueLabel(x.due)+(x.time?(x.due?' · ':'')+fmtTime(x.time):'')+(x.rep?' · <span style="color:var(--gold)">🔁 '+REP_LBL[x.rep]+'</span>':'')+'</div>':'')+'</div>'+
-  '<button class="del" onclick="delTask(\''+x.id+'\')">✕</button></div>'}
+  '<button class="ed" title="Rename" onclick="askRename(\'task\',\''+x.id+'\')">✎</button><button class="del" onclick="delTask(\''+x.id+'\')">✕</button></div>'}
 function tglTask(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.done;
   if(x.done&&x.rep&&x.due){const nd=nextDue(x.due,x.rep);
     if(nd){S.tasks.unshift({id:uid(),title:x.title,space:x.space,due:nd,time:x.time||null,rep:x.rep,done:false,at:new Date().toISOString()});
@@ -1497,7 +1531,7 @@ function addNote(space){const p=space==='personal';const t=p?nTitle:onTitle,b=p?
 function noteCard(n){return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'+
   '<div class="row-title" style="font-family:Fraunces,serif;font-size:17px">'+esc(n.title)+'</div>'+
   '<div style="display:flex;gap:4px"><button class="del" style="opacity:'+(n.pinned?1:.45)+';color:var(--gold)" onclick="pinNote(\''+n.id+'\')">📌</button>'+
-  '<button class="del" onclick="delNote(\''+n.id+'\')">✕</button></div></div>'+
+  '<button class="ed" title="Rename" onclick="askRename(\'note\',\''+n.id+'\')">✎</button><button class="del" onclick="delNote(\''+n.id+'\')">✕</button></div></div>'+
   (n.body?'<div style="color:var(--lo);font-size:13.5px;margin-top:6px;white-space:pre-wrap">'+esc(n.body)+'</div>':'')+attChips(n.att)+'</div>'}
 function pinNote(id){const n=S.notes.find(x=>x.id===id);n.pinned=!n.pinned;save();renderLife();renderWork();toast(n.pinned?'Pinned to Today':'Unpinned')}
 function delNote(id){const n=S.notes.find(x=>x.id===id);askDelete(n&&n.title,()=>_delNote(id));}
@@ -1554,7 +1588,7 @@ function joinMeet(id){const m=S.meetings.find(x=>x.id===id);
 function delMeet(id){const x=S.meetings.find(m=>m.id===id);askDelete(x&&x.title,()=>_delMeet(id));}
 function _delMeet(id){const x=S.meetings.find(m=>m.id===id);trashPush('meeting',x,x&&x.title);S.meetings=S.meetings.filter(m=>m.id!==id);save();renderWork();renderToday()}
 function meetCard(m){return '<div class="card">'
-  +'<div style="display:flex;justify-content:space-between;gap:8px"><div class="row-title" style="font-family:Fraunces,serif;font-size:17px">'+esc(m.title)+'</div><button class="del" onclick="delMeet(\''+m.id+'\')">✕</button></div>'
+  +'<div style="display:flex;justify-content:space-between;gap:8px"><div class="row-title" style="font-family:Fraunces,serif;font-size:17px">'+esc(m.title)+'</div><button class="ed" title="Rename" onclick="askRename(\'meeting\',\''+m.id+'\')">✎</button><button class="del" onclick="delMeet(\''+m.id+'\')">✕</button></div>'
   +'<div class="row-meta" style="margin-top:4px">'+(m.host?'👤 '+esc(m.host)+' · ':'')+dueLabel(m.date)+(m.time?' · <b style="color:var(--gold)">'+fmtTime(m.time)+'</b>':'')+(m.rem?' · 🔔 '+m.rem+' min before':'')+'</div>'
   +((m.mid||m.pwd)?'<div class="row-meta" style="margin-top:6px">'+(m.mid?'ID: <b style="color:var(--hi)">'+esc(m.mid)+'</b>':'')+(m.mid&&m.pwd?' · ':'')+(m.pwd?'Pwd: <b style="color:var(--hi)">'+esc(m.pwd)+'</b>':'')+'</div>':'')
   +attChips(m.att)+(m.link?'<button class="btn btn-gold btn-sm" style="margin-top:12px" onclick="joinMeet(\''+m.id+'\')">🔗 Join meeting</button>':'')
@@ -1627,7 +1661,7 @@ function renderMoney2(){if(!document.getElementById('budBar'))return;
     :'<div class="empty"><div class="em-ring">₹</div>No entries yet — add your first expense or income.</div>';
   const gl=document.getElementById('goalList');
   gl.innerHTML=S.goals.map(g=>{const p=Math.min(100,(g.saved||0)/g.target*100);
-    return '<div class="card"><div style="display:flex;justify-content:space-between"><div class="row-title">'+esc(g.name)+'</div><button class="del" onclick="delGoal(\''+g.id+'\')">✕</button></div>'
+    return '<div class="card"><div style="display:flex;justify-content:space-between"><div class="row-title">'+esc(g.name)+'</div><button class="ed" title="Rename" onclick="askRename(\'goal\',\''+g.id+'\')">✎</button><button class="del" onclick="delGoal(\''+g.id+'\')">✕</button></div>'
     +'<div class="row-meta" style="margin-top:3px">'+fmtR(g.saved||0)+' of '+fmtR(g.target)+' · '+Math.round(p)+'%'+(p>=100?' 🏆':'')+'</div>'
     +'<div class="hairbar" style="margin-top:8px"><i style="width:'+p+'%"></i></div>'
     +'<div style="display:flex;gap:8px;margin-top:12px"><input class="inp" type="number" inputmode="numeric" placeholder="₹ add savings" id="ga_'+g.id+'" style="padding:9px 12px;font-size:13px"><button class="btn btn-gold btn-sm" onclick="goalAdd(\''+g.id+'\')">＋ Save</button></div></div>'}).join('')
@@ -1651,7 +1685,7 @@ function medsDueToday(){const t=today();let n=0;S.meds.forEach(m=>{if(!medActive
 function medCard(m){const t=today();const act=medActive(m,t);
   const dayIdx=Math.round((new Date(t+'T00:00')-new Date(m.start+'T00:00'))/864e5)+1;
   return '<div class="card" style="'+(act?'':'opacity:.55')+'">'
-  +'<div style="display:flex;justify-content:space-between"><div class="row-title">💊 '+esc(m.name)+'</div><button class="del" onclick="delMed(\''+m.id+'\')">✕</button></div>'
+  +'<div style="display:flex;justify-content:space-between"><div class="row-title">💊 '+esc(m.name)+'</div><button class="ed" title="Rename" onclick="askRename(\'med\',\''+m.id+'\')">✎</button><button class="del" onclick="delMed(\''+m.id+'\')">✕</button></div>'
   +'<div class="row-meta" style="margin-top:3px">'+(m.days?(act?('Day '+Math.min(dayIdx,m.days)+' of '+m.days):'Course completed ✓'):'Daily')+'</div>'
   +(act?'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">'+m.times.map(tm=>{const on=(((m.taken||{})[t])||[]).includes(tm);
     return '<span class="chip '+(on?'on':'')+'" onclick="medToggle(\''+m.id+'\',\''+tm+'\')">'+(on?'✓ ':'')+fmtTime(tm)+'</span>'}).join('')+'</div>':'')
@@ -1679,7 +1713,7 @@ function habitCard(h){const t=today();const days=[];const d=new Date();d.setDate
   return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
   +'<div class="chk '+(on?'on':'')+'" onclick="habitToggle(\''+h.id+'\')" style="width:28px;height:28px;border-radius:9px"></div>'
   +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(h.name)+'</div><div class="row-meta">🔥 '+habitStreak(h)+' day streak</div></div>'
-  +'<button class="del" onclick="delHabit(\''+h.id+'\')">✕</button></div>'
+  +'<button class="ed" title="Rename" onclick="askRename(\'habit\',\''+h.id+'\')">✎</button><button class="del" onclick="delHabit(\''+h.id+'\')">✕</button></div>'
   +'<div class="dotstrip" style="margin-top:12px">'+days.join('')+'</div></div>'}
 function addWeight(){const v=Number(wtIn.value);if(!v)return;
   S.vitals.unshift({id:uid(),kind:'weight',v1:v,at:new Date().toISOString()});
@@ -1763,7 +1797,7 @@ function rnCard(r){const n=daysTo(r.expiry),c=rnColor(n),open=(rnOpen===r.id);
   +'<div style="display:flex;gap:8px;margin-top:12px">'
   +'<button class="btn btn-gold btn-sm" style="flex:1" onclick="renewPlus(\''+r.id+'\')">✓ Renew — update details</button>'
   +'<button class="btn btn-ghost btn-sm" title="Attach policy copy" onclick="rnAddDoc(\''+r.id+'\')">📎</button>'
-  +'<button class="btn btn-ghost btn-sm" onclick="delRenewal(\''+r.id+'\')">✕</button>'
+  +'<button class="btn btn-ghost btn-sm" onclick="askRename(\'renewal\',\''+r.id+'\')">✎</button><button class="btn btn-ghost btn-sm" onclick="delRenewal(\''+r.id+'\')">✕</button>'
   +'</div>'
   +'</div>'}
 function dlAtt(id,type,name){fileGet(id).then(d=>{if(!d)return;const a=document.createElement('a');
@@ -1965,7 +1999,7 @@ function _delEvent(id){const e=S.events.find(x=>x.id===id);
 function evCard(e){const occ=nextOcc(e.date),n=daysTo(occ),yrs=yearsOn(e.date,occ);
   return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
   +'<div class="row-title">'+(e.kind==='Birthday'?'🎂 ':'💍 ')+esc(e.name)+'</div>'
-  +'<button class="del" onclick="delEvent(\''+e.id+'\')">✕</button></div>'
+  +'<button class="ed" title="Rename" onclick="askRename(\'event\',\''+e.id+'\')">✎</button><button class="del" onclick="delEvent(\''+e.id+'\')">✕</button></div>'
   +'<div class="row-meta" style="margin-top:4px"><b style="color:'+rnColor(n)+'">'+(n===0?'today!':'in '+n+' day'+(n>1?'s':''))+'</b> · '+fmtD(occ)
   +(yrs?(e.kind==='Birthday'?' · turns '+yrs:' · '+yrs+' years'):'')+'</div>'
   +(e.note?'<div class="row-meta" style="margin-top:4px">🎁 '+esc(e.note)+'</div>':'')+'</div>'}
@@ -2242,7 +2276,7 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(d.name)+'</div><div class="row-meta">'+(d.space==='office'?'💼 Office · ':'')+fmtD(d.at)+'</div></div>'
   +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')">Open</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
-  +'<button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
+  +'<button class="ed" title="Rename" onclick="askRename(\'doc\',\''+d.id+'\')">✎</button><button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
 function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
