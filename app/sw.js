@@ -1,5 +1,5 @@
 /* ALOK OS service worker — offline shell + system notifications */
-const CACHE = 'alokos-v6.5.0';
+const CACHE = 'alokos-v6.6.0';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
   './vendor/pdf.min.js', './vendor/pdf.worker.min.js', './firebase-messaging-sw.js'];
 
@@ -23,6 +23,21 @@ self.addEventListener('fetch', e => {
   if (!sameOrigin && !isFont) return; // never touch Google Sign-In / Drive API calls
   if (e.request.mode === 'navigate') {
     e.respondWith(fetch(e.request).catch(() => caches.match('./index.html')));
+    return;
+  }
+  // network-first for the app code (HTML/JS) so new versions always load;
+  // cache-first for everything else (fonts, pdf worker, icons) for speed/offline
+  const isCode = sameOrigin && /\.(html|js)$/.test(u.pathname);
+  if (isCode) {
+    e.respondWith(
+      fetch(e.request).then(res => {
+        if (res && res.status === 200) {
+          const copy = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, copy));
+        }
+        return res;
+      }).catch(() => caches.match(e.request))
+    );
     return;
   }
   e.respondWith(
