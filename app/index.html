@@ -1248,7 +1248,7 @@ function today(){return new Date().toISOString().slice(0,10)}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
   clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
-function fmtR(n){return '₹'+Number(n).toLocaleString('en-IN')}
+function fmtR(n){n=Number(n)||0;const hasDec=Math.round(n*100)%100!==0;return '₹'+n.toLocaleString('en-IN',{minimumFractionDigits:hasDec?2:0,maximumFractionDigits:2})}
 function fmtTime(t){if(!t)return'';let[h,m]=String(t).split(':').map(Number);const ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+String(m).padStart(2,'0')+' '+ap}
 function fmtD(d){if(!d)return'';const dt=(d instanceof Date)?d:new Date(String(d).length===10?d+'T00:00':d);
   const p=n=>String(n).padStart(2,'0');return p(dt.getDate())+'-'+p(dt.getMonth()+1)+'-'+dt.getFullYear()}
@@ -2123,7 +2123,7 @@ function addFuel(){const a=Number(flAmt.value),r=Number(flRate.value),o=Number(f
   document.getElementById('flCalcOut').textContent='';
   save();renderLife();
   const f=fuelStats().find(x=>x.id===id);
-  toast(f&&f._kmpl?('⛽ '+f._kmpl.toFixed(1)+' km/l · ₹'+f._rpk.toFixed(1)+'/km'):'⛽ Fuel logged — add one more fill to see mileage')}
+  toast(f&&f._kmpl?('⛽ '+f._kmpl.toFixed(2)+' km/l · ₹'+f._rpk.toFixed(2)+'/km'):'⛽ Fuel logged — add one more fill to see mileage')}
 /* ---- car profile ---- */
 function lastOdoNow(){const l=S.fuel.slice().sort((a,b)=>a.odo-b.odo);return l.length?l[l.length-1].odo:0}
 function carEdit(){const c=S.car||{};
@@ -2157,8 +2157,8 @@ function fuelCard(f,prevKmpl){
   return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
   +'<div><div class="row-title">'+fmtR(f.amount)+(f.litres?' · '+f.litres+' L':'')+'</div>'
   +'<div class="row-meta">'+fmtD(f.date)+' · '+f.odo.toLocaleString('en-IN')+' km</div></div>'
-  +'<div style="text-align:right"><div class="row-title" style="color:var(--gold)">'+(f._kmpl?f._kmpl.toFixed(1)+' km/l '+trend:'—')+'</div>'
-  +'<div class="row-meta">'+(f._rpk?'₹'+f._rpk.toFixed(1)+'/km':'first fill')+'</div></div>'
+  +'<div style="text-align:right"><div class="row-title" style="color:var(--gold)">'+(f._kmpl?f._kmpl.toFixed(2)+' km/l '+trend:'—')+'</div>'
+  +'<div class="row-meta">'+(f._rpk?'₹'+f._rpk.toFixed(2)+'/km':'first fill')+'</div></div>'
   +'<button class="del" onclick="delFuel(\''+f.id+'\')">✕</button></div></div>'}
 function addService(){const w=svWork.value.trim();if(!w){toast('What work was done?');svWork.focus();return}
   const d=svDate.value||today(),cost=Number(svCost.value)||0,id=uid();
@@ -2198,7 +2198,7 @@ function renderCar(){if(!document.getElementById('flList'))return;
     :'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="stat-label">🚗 Add your vehicle</div><span style="color:var(--gold);font-size:12px">Set up ›</span></div>';
   document.getElementById('carSummary').innerHTML= hdr
     +'<div class="grid2" style="gap:14px">'
-    +'<div><div class="stat-label">Avg mileage</div><div class="stat-num">'+(avg?avg.toFixed(1):'—')+'<span style="font-size:14px;color:var(--lo)"> km/l</span></div></div>'
+    +'<div><div class="stat-label">Avg mileage</div><div class="stat-num">'+(avg?avg.toFixed(2):'—')+'<span style="font-size:14px;color:var(--lo)"> km/l</span></div></div>'
     +'<div><div class="stat-label">Car spend · month</div><div class="stat-num">'+fmtR(carSpend)+'</div></div></div>'
     +(sk?'<div class="row-meta" style="margin-top:12px;color:'+(sk.remain<0?'var(--risk)':sk.remain<=500?'var(--warn)':'var(--gold)')+'">🔧 Service '+(sk.remain<0?('overdue by '+Math.abs(sk.remain).toLocaleString('en-IN')+' km'):('in '+sk.remain.toLocaleString('en-IN')+' km'))+' · at '+sk.due.toLocaleString('en-IN')+' km</div>':(ns?'<div class="row-meta" style="margin-top:12px;color:'+rnColor(daysTo(ns.next))+'">🔧 Next service '+rnLabel(daysTo(ns.next))+'</div>':''))
     +(carRen?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(carRen.expiry))+'">🛡 '+esc(carRen.name)+' '+rnLabel(daysTo(carRen.expiry))+'</div>':'<div class="row-meta" style="margin-top:3px">🛡 No car insurance tracked — add it under Renewals</div>');
@@ -2699,6 +2699,42 @@ function exportExpenses(){if(!S.expenses.length&&!S.income.length){toast('Nothin
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a2=document.createElement('a');
   a2.href=URL.createObjectURL(blob);a2.download='alokos-money-'+fmtD(new Date())+'.csv';a2.click();
   setTimeout(()=>URL.revokeObjectURL(a2.href),3000);toast('Excel file downloaded — open to analyse')}
+/* ============ RENAME & DELETE HELPERS ============ */
+const RENAME_MAP={
+  task:['tasks','title'], note:['notes','title'], doc:['docs','name'], circular:['circulars','name'],
+  link:['links','name'], renewal:['renewals','name'], event:['events','name'], meeting:['meetings','title'],
+  goal:['goals','name'], med:['meds','name'], habit:['habits','name'], service:['service','work'],
+  income:['income','source'], link2:['links','name']};
+let _renCtx=null;
+function askRename(kind,id){const m=RENAME_MAP[kind];if(!m)return;
+  const it=(S[m[0]]||[]).find(x=>x.id===id);if(!it)return;
+  _renCtx={arr:m[0],field:m[1],id};
+  const inp=document.getElementById('renameIn');
+  inp.value=it[m[1]]||'';
+  document.getElementById('renameOv').classList.add('open');
+  setTimeout(()=>{inp.focus();inp.select()},60)}
+function renameFollowup(id){const fu=S.followups.find(x=>x.id===id);if(!fu)return;
+  _renCtx={arr:'followups',field:'topic',id};
+  const inp=document.getElementById('renameIn');inp.value=fu.topic||'';
+  document.getElementById('renameOv').classList.add('open');
+  setTimeout(()=>{inp.focus();inp.select()},60)}
+function renameSave(){if(!_renCtx)return;
+  const v=document.getElementById('renameIn').value.trim();
+  if(!v){toast('Name cannot be empty');return}
+  const it=(S[_renCtx.arr]||[]).find(x=>x.id===_renCtx.id);
+  if(it){it[_renCtx.field]=v}
+  document.getElementById('renameOv').classList.remove('open');_renCtx=null;
+  save();renderAll();toast('✓ Renamed')}
+function cfmClose(){document.getElementById('confirmOv').classList.remove('open');_cfmFn=null}
+let _cfmFn=null;
+function askDelete(name,fn,label){_cfmFn=fn;
+  const perm=label&&/forever/i.test(label);
+  document.getElementById('cfmMsg').innerHTML='<b style="color:var(--hi)">'+esc(name||'This item')+'</b> will be removed.'+(perm?'<br><span style="color:var(--risk)">This cannot be undone.</span>':'<br>You can restore it from Settings → Recently deleted for 30 days.');
+  document.getElementById('cfmYes').textContent=label||'Delete';
+  document.getElementById('cfmYes').onclick=()=>{const fn=_cfmFn;cfmClose();if(fn)fn()};
+  document.getElementById('confirmOv').classList.add('open')}
+function showSheet(t,html){document.getElementById('sheetTitle').textContent=t;document.getElementById('sheetBody').innerHTML=html||'';document.getElementById('sheetOv').classList.add('open');setTimeout(loadThumbs,0)}
+
 /* ============ FIREBASE CLOUD MESSAGING (closed-app push) ============ */
 const FCM_CONFIG={apiKey:"AIzaSyDLZY5yMJT4YXj8rqiKI0U9GpYpM1kHS9w",authDomain:"alok-os-19787.firebaseapp.com",projectId:"alok-os-19787",storageBucket:"alok-os-19787.firebasestorage.app",messagingSenderId:"774257734126",appId:"1:774257734126:web:5846d255032f8540229eff"};
 const FCM_VAPID="BJemHpH2HIHMWIZgqO5UPv6hUI98XiftDoIbBSfiOsw_K4Q20DC_81BmOlsOavOhjD36Wo3gmcl3WHdKKzH0MCo";
