@@ -1,7 +1,7 @@
 /* ALOK OS service worker — offline shell + system notifications */
-const CACHE = 'alokos-v5.9.0';
+const CACHE = 'alokos-v6.0.0';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
-  './vendor/pdf.min.js', './vendor/pdf.worker.min.js'];
+  './vendor/pdf.min.js', './vendor/pdf.worker.min.js', './firebase-messaging-sw.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

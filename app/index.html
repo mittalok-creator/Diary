@@ -960,6 +960,15 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     </div>
   </div>
 
+  <div class="eyebrow">Reminders when app is closed</div>
+  <div class="card">
+    <div class="set-row">
+      <div style="flex:1;min-width:0"><div class="set-name">Push reminders</div><div class="set-sub" id="pushStatus">Off</div></div>
+      <div style="display:flex;gap:8px;flex-shrink:0" id="pushBtns"></div>
+    </div>
+    <div class="set-sub" style="margin-top:10px">Get meeting, bill, renewal and medicine reminders even when ALOK OS is fully closed. Only the reminder time and short label are sent — never your notes, money or documents.</div>
+  </div>
+
   <div class="eyebrow">Security</div>
   <div class="card">
     <div class="set-row">
@@ -1225,7 +1234,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],bills:[],cards:[],lend:[],drawings:[],trash:[],car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],bills:[],cards:[],lend:[],drawings:[],trash:[],push:{enabled:false,token:null},car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -2690,6 +2699,78 @@ function exportExpenses(){if(!S.expenses.length&&!S.income.length){toast('Nothin
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a2=document.createElement('a');
   a2.href=URL.createObjectURL(blob);a2.download='alokos-money-'+fmtD(new Date())+'.csv';a2.click();
   setTimeout(()=>URL.revokeObjectURL(a2.href),3000);toast('Excel file downloaded — open to analyse')}
+/* ============ FIREBASE CLOUD MESSAGING (closed-app push) ============ */
+const FCM_CONFIG={apiKey:"AIzaSyDLZY5yMJT4YXj8rqiKI0U9GpYpM1kHS9w",authDomain:"alok-os-19787.firebaseapp.com",projectId:"alok-os-19787",storageBucket:"alok-os-19787.firebasestorage.app",messagingSenderId:"774257734126",appId:"1:774257734126:web:5846d255032f8540229eff"};
+const FCM_VAPID="BJemHpH2HIHMWIZgqO5UPv6hUI98XiftDoIbBSfiOsw_K4Q20DC_81BmOlsOavOhjD36Wo3gmcl3WHdKKzH0MCo";
+let fcmApp=null,fcmMsg=null,fcmReady=false;
+async function fcmLoad(){if(fcmReady)return true;
+  try{
+    if(!window.firebase){
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+      await loadScript('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+    }
+    if(!fcmApp)fcmApp=firebase.initializeApp(FCM_CONFIG);
+    fcmMsg=firebase.messaging();
+    fcmReady=true;return true}
+  catch(e){console.warn('fcm load failed',e);return false}}
+async function fcmEnable(){
+  if(!S.profile.google){toast('Sign in with Google first so reminders can reach this device');return}
+  if(!('Notification' in window)){toast('This browser does not support notifications');return}
+  let perm=Notification.permission;
+  if(perm!=='granted')perm=await Notification.requestPermission();
+  if(perm!=='granted'){toast('Notifications are blocked — enable them in browser settings');renderSettings();return}
+  setPushStatus('Connecting to notification service…');
+  const ok=await fcmLoad();
+  if(!ok){setPushStatus('Could not load notification service — check internet');return}
+  try{
+    let freg=await navigator.serviceWorker.getRegistration('./firebase-messaging-sw.js');
+    if(!freg)freg=await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+    const token=await fcmMsg.getToken({vapidKey:FCM_VAPID,serviceWorkerRegistration:freg});
+    if(!token){setPushStatus('Could not get a device token — try again');return}
+    S.push=S.push||{};S.push.token=token;S.push.enabled=true;save(true);
+    await fcmSyncSchedule(); /* upload reminder schedule so the server can push */
+    setPushStatus('On · this device will get reminders even when closed');
+    toast('🔔 Closed-app reminders enabled');
+    /* foreground messages still show a toast */
+    fcmMsg.onMessage(p=>{const n=(p&&p.notification)||{};notify(n.title||'Reminder',n.body||'')});
+  }catch(e){console.warn(e);setPushStatus('Setup failed ('+(e&&e.code||e&&e.message||'error')+')')}
+  renderSettings()}
+async function fcmDisable(){
+  try{if(await fcmLoad()){await fcmMsg.deleteToken().catch(()=>{})}}catch(e){}
+  if(S.push){S.push.enabled=false;S.push.token=null}
+  await fcmDeleteSchedule();
+  save(true);setPushStatus('Off');toast('Closed-app reminders turned off');renderSettings()}
+function setPushStatus(t){const el=document.getElementById('pushStatus');if(el)el.textContent=t}
+function renderPushCard(){const b=document.getElementById('pushBtns');if(!b)return;
+  const on=S.push&&S.push.enabled;
+  b.innerHTML=on?'<button class="btn btn-ghost btn-sm" onclick="fcmDisable()">Turn off</button>':'<button class="btn btn-gold btn-sm" onclick="fcmEnable()">Enable</button>';
+  const st=document.getElementById('pushStatus');if(st&&!on)st.textContent='Off';
+  else if(st&&on&&st.textContent==='Off')st.textContent='On · this device will get reminders even when closed'}
+/* ---- schedule upload: only reminder time + short text go to the server ---- */
+function upcomingReminders(){const out=[];const now=Date.now();const horizon=now+30*864e5; /* next 30 days */
+  const push=(ts,title,body)=>{if(ts>now-60000&&ts<horizon)out.push({ts,title,body})};
+  const at=(d,t)=>new Date(d+'T'+(t||'09:00')).getTime();
+  S.meetings.forEach(m=>{if(m.date&&!m.done)push(at(m.date,m.time)-(m.remind||10)*60000,'🎥 '+m.title,(m.time?fmtTime(m.time):'')+' meeting'+(m.host?' · '+m.host:''))});
+  S.tasks.forEach(x=>{if(x.due&&!x.done&&x.time)push(at(x.due,x.time),(x.space==='office'?'💼 ':'✓ ')+x.title,'Task due')});
+  S.meds.forEach(m=>{if(!medActive(m,today()))return;(m.times||[]).forEach(tm=>push(at(today(),tm),'💊 '+m.name,'Dose time'))});
+  S.renewals.forEach(r=>{const d=daysTo(r.expiry);if(d>=0&&d<=r.remind)push(at(r.expiry.slice(0,10),'09:00')-(r.remind)*864e5,'🛡 '+r.name,rnLabel(daysTo(r.expiry)))});
+  S.bills.forEach(b=>{if(b.paid)return;push(at(b.due,'09:00'),'🧾 '+b.name,'Bill due'+(b.amount?' · '+fmtR(b.amount):''))});
+  S.cards.forEach(c=>push(at(c.due,'09:00'),'💳 '+c.name,'Card payment due · min '+fmtR(c.min)));
+  S.events.forEach(e=>{const occ=nextOcc(e.date);push(at(occ,'09:00'),(e.kind==='Birthday'?'🎂 ':'💍 ')+e.name,e.kind)});
+  return out.sort((a,b)=>a.ts-b.ts).slice(0,100)}
+const FCM_FN="https://us-central1-alok-os-19787.cloudfunctions.net/saveSchedule";
+async function fcmSyncSchedule(){
+  if(!S.push||!S.push.enabled||!S.push.token)return;
+  if(!gToken)await ensureToken(false);
+  if(!gToken)return;
+  const items=upcomingReminders();
+  try{await fetch(FCM_FN,{method:"POST",headers:{Authorization:"Bearer "+gToken,"Content-Type":"application/json"},
+    body:JSON.stringify({deviceId:S.deviceId,token:S.push.token,tz:Intl.DateTimeFormat().resolvedOptions().timeZone||"",reminders:items})})}
+  catch(e){console.warn("schedule sync failed",e)}}
+async function fcmDeleteSchedule(){
+  try{if(!gToken)await ensureToken(false);if(!gToken)return;
+    await fetch(FCM_FN,{method:"POST",headers:{Authorization:"Bearer "+gToken,"Content-Type":"application/json"},
+      body:JSON.stringify({deviceId:S.deviceId,remove:true})})}catch(e){}}
 /* ============ NOTIFICATIONS ============ */
 function notify(title,body){toast(title+(body?' — '+body:''));
   if(!('Notification' in window)||Notification.permission!=='granted')return;
@@ -3008,7 +3089,8 @@ async function cloudSync(manual,_retry){
       else if(localU<=base2||isEmptyState()){ await pullAll(snap,files) }
       else { syncBusy=false; showConflict(snap,files,cloudU); renderSettings(); return }
     }
-    S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync))}
+    S.lastSync=Date.now();save(true);setSyncStatus('Up to date · '+fmtWhen(S.lastSync));
+    if(S.push&&S.push.enabled)fcmSyncSchedule()}
   catch(e){const m=String(e&&e.message||e);
     syncBusy=false;
     if(m==='NO_SCOPE'&&!_retry){
@@ -3049,7 +3131,7 @@ function renderDashToggles(){const el=document.getElementById('dashToggles');if(
   const hid=S.profile.dashHidden||[];
   el.innerHTML=DASH_SECS.map(([k,label])=>'<div class="set-row"><div class="set-name" style="font-size:13.5px">'+esc(label)+'</div>'
     +'<div class="toggle'+(hid.includes(k)?'':' on')+'" onclick="toggleDashSec(\''+k+'\')"></div></div>').join('')}
-function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();renderDashToggles();
+function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();renderDashToggles();renderPushCard();
   const tm=S.profile.theme||'dark';
   document.querySelectorAll('#themeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.t===tm));
   const tsub=document.getElementById('themeSub');
