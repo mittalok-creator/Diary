@@ -2369,17 +2369,17 @@ function compressImg(f){return new Promise(r=>{readAsDataURL(f).then(u=>{const i
 async function makeAtt(f){try{
   const isPdf=f.type==='application/pdf'||/\.pdf$/i.test(f.name);
   const isImg=(f.type||'').indexOf('image/')===0;
-  if(!isPdf&&!isImg){toast('Only image or PDF files can be attached');return null}
-  let d;
-  if(isImg)d=await compressImg(f);
-  else{if(f.size>8*1024*1024){toast(f.name+' is larger than 8 MB — skipped');return null}
-    d=await readAsDataURL(f)}
+  if(f.size>100*1024*1024){toast(f.name+' is larger than 100 MB — skipped');return null}
+  let d,type;
+  if(isImg){d=await compressImg(f);type='img'}
+  else if(isPdf){d=await readAsDataURL(f);type='pdf'}
+  else{d=await readAsDataURL(f);type='file'}
   const id=uid();const ok=await fileSave(id,d);
   if(ok===false)return null;
-  return {id,name:f.name.length>26?f.name.slice(0,23)+'…':f.name,type:isPdf?'pdf':'img',size:d.length}}
+  return {id,name:f.name.length>32?f.name.slice(0,29)+'…':f.name,type,mime:f.type||'',fname:f.name,size:d.length}}
   catch(e){toast('Could not read '+f.name);return null}}
 function pickFiles(cb,opt){opt=opt||{};const i=document.createElement('input');i.type='file';
-  i.accept=opt.accept||'image/*,application/pdf';i.multiple=!opt.capture;
+  i.accept=opt.accept||'*/*';i.multiple=!opt.capture;
   if(opt.capture)i.capture='environment';
   i.style.display='none';
   document.body.appendChild(i);
@@ -2395,7 +2395,7 @@ function loadThumbs(){document.querySelectorAll('img.thumb[data-fid]').forEach(a
   const d=await fileGet(im.dataset.fid);if(d)im.src=d})}
 function attChips(att,pk){if(!att||!att.length)return'';
   return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+att.map(a=>
-   '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(a.name).replace(/'/g,"\\'")+'\')">'+(a.type==='pdf'?'📄':'🖼️')+' '+esc(a.name)
+   '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(a.name).replace(/'/g,"\\'")+'\')">'+fileIcon(a)+' '+esc(a.name)
    +(pk?'<b style="margin-left:6px;color:var(--risk)" onclick="event.stopPropagation();removePend(\''+pk+'\',\''+a.id+'\')">✕</b>'
         :'<b style="margin-left:6px;color:var(--gold)" onclick="event.stopPropagation();shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(a.name).replace(/'/g,"\\'")+'\')" title="Share">↗</b>')
    +'</span>').join('')+'</div>'}
@@ -2422,6 +2422,9 @@ async function openAtt(id,type,name){
   const stage=document.getElementById('pvStage');stage.innerHTML='';
   document.getElementById('pvOv').classList.add('open');
   document.getElementById('pvZoom').textContent='100%';
+  if(type==='file'||(type!=='img'&&type!=='pdf')){
+    stage.innerHTML=fileOpenCard(pv.name,d);
+    return}
   if(type==='img'){
     const img=document.createElement('img');img.className='pv-img';img.src=d;img.alt='';
     img.onload=()=>{pv.base=img.naturalWidth;pvApplyZoom()};
@@ -2699,6 +2702,43 @@ function exportExpenses(){if(!S.expenses.length&&!S.income.length){toast('Nothin
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a2=document.createElement('a');
   a2.href=URL.createObjectURL(blob);a2.download='alokos-money-'+fmtD(new Date())+'.csv';a2.click();
   setTimeout(()=>URL.revokeObjectURL(a2.href),3000);toast('Excel file downloaded — open to analyse')}
+/* ============ FILE ATTACHMENT HELPERS ============ */
+function fileExt(name){const m=/\.([a-z0-9]+)$/i.exec(name||'');return m?m[1].toLowerCase():''}
+function fileIcon(a){
+  if(a.type==='pdf')return '\ud83d\udcc4';
+  if(a.type==='img')return '\ud83d\uddbc\ufe0f';
+  const e=fileExt(a.fname||a.name);
+  if(['xls','xlsx','csv','ods'].includes(e))return '\ud83d\udcca';
+  if(['doc','docx','odt','rtf'].includes(e))return '\ud83d\udcdd';
+  if(['ppt','pptx','odp'].includes(e))return '\ud83d\udcd1';
+  if(['txt','md','log'].includes(e))return '\ud83d\udcc3';
+  if(['zip','rar','7z','tar','gz'].includes(e))return '\ud83d\udddc\ufe0f';
+  if(['apk','xapk'].includes(e))return '\ud83e\udd16';
+  if(['mp3','wav','m4a','aac','ogg'].includes(e))return '\ud83c\udfb5';
+  if(['mp4','mkv','mov','avi','webm'].includes(e))return '\ud83c\udfac';
+  if(['exe','msi','dmg','app'].includes(e))return '\ud83d\udce6';
+  return '\ud83d\udcce';
+}
+function fmtBytes(n){n=Number(n)||0;if(n<1024)return n+' B';if(n<1048576)return (n/1024).toFixed(1)+' KB';if(n<1073741824)return (n/1048576).toFixed(1)+' MB';return (n/1073741824).toFixed(2)+' GB';}
+function fileOpenCard(name,dataUrl){
+  const e=fileExt(name).toUpperCase();
+  return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:18px;padding:30px;text-align:center">'
+    +'<div style="font-size:64px">'+fileIcon({fname:name})+'</div>'
+    +'<div style="font-family:Fraunces,serif;font-size:20px;color:var(--hi);word-break:break-word;max-width:90%">'+esc(name)+'</div>'
+    +(e?'<div class="stat-sub">'+e+' file</div>':'')
+    +'<div class="stat-sub" style="max-width:280px">This file type opens in its own app. Download it, then tap to open with Excel, Word, or any installed app.</div>'
+    +'<button class="btn btn-gold" style="min-width:200px" onclick="pvDownloadCurrent()">\u2193 Download file</button>'
+    +'<button class="btn btn-ghost" style="min-width:200px" onclick="pvShareCurrent()">\u2197 Share</button>'
+    +'</div>';
+}
+async function pvDownloadCurrent(){try{const d=await fileGet(pv.id);if(!d)return;
+  const a=document.createElement('a');a.href=d;a.download=pv.name||'file';a.click()}catch(e){toast('Download failed')}}
+async function pvShareCurrent(){try{const d=await fileGet(pv.id);if(!d)return;
+  const res=await fetch(d);const blob=await res.blob();
+  const file=new File([blob],pv.name||'file',{type:blob.type||'application/octet-stream'});
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
+  const a=document.createElement('a');a.href=d;a.download=pv.name||'file';a.click()}catch(e){toast('Share not supported — downloaded instead')}}
+
 /* ============ RENAME & DELETE HELPERS ============ */
 const RENAME_MAP={
   task:['tasks','title'], note:['notes','title'], doc:['docs','name'], circular:['circulars','name'],
