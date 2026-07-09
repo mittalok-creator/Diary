@@ -1586,13 +1586,19 @@ function rwSave(){const r=S.renewals.find(x=>x.id===renewTarget);if(!r){rwCancel
   pend.rw=[];
   document.getElementById('renewOv').classList.remove('open');renewTarget=null;
   save();renderLife();renderToday();toast('✓ Renewed — next due '+fmtD(r.expiry))}
-function rnCard(r){const n=daysTo(r.expiry),c=rnColor(n);
-  return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
-  +'<div class="row-title" style="font-family:Fraunces,serif;font-size:16.5px">'+esc(r.name)+'</div>'
-  +'<button class="del" onclick="delRenewal(\''+r.id+'\')">✕</button></div>'
-  +'<div class="row-meta" style="margin-top:5px"><span class="chip" style="padding:3px 10px;font-size:11px;cursor:default">'+esc(r.kind)+'</span>'
-  +'&nbsp; <b style="color:'+c+'">'+rnLabel(n)+'</b> · '+fmtD(r.expiry)+'</div>'
-  +((r.provider||r.polno)?'<div class="row-meta" style="margin-top:4px">'+(r.provider?esc(r.provider):'')+(r.provider&&r.polno?' · ':'')+(r.polno?'No. <b style="color:var(--hi)">'+esc(r.polno)+'</b>':'')+'</div>':'')
+let rnOpen=null;
+function rnToggle(id){rnOpen=(rnOpen===id)?null:id;renderCar()}
+function rnCard(r){const n=daysTo(r.expiry),c=rnColor(n),open=(rnOpen===r.id);
+  const head='<div style="display:flex;align-items:center;gap:10px;cursor:pointer" onclick="rnToggle(\''+r.id+'\')">'
+    +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:15.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.name)+'</div>'
+    +'<div class="row-meta" style="margin-top:2px"><b style="color:'+c+'">'+rnLabel(n)+'</b> · '+fmtD(r.expiry)+'</div></div>'
+    +((r.att&&r.att.length)?'<span class="thumb-ph" style="width:26px;height:26px;font-size:13px;flex-shrink:0">📎</span>':'')
+    +'<span style="color:var(--lo);font-size:13px;transition:transform .2s;transform:rotate('+(open?'180':'0')+'deg);flex-shrink:0">▾</span></div>';
+  if(!open)return '<div class="card" style="padding:14px 16px">'+head+'</div>';
+  return '<div class="card">'+head
+  +'<div style="height:1px;background:var(--hair);margin:12px 0"></div>'
+  +'<div class="row-meta"><span class="chip" style="padding:3px 10px;font-size:11px;cursor:default">'+esc(r.kind)+'</span></div>'
+  +((r.provider||r.polno)?'<div class="row-meta" style="margin-top:8px">'+(r.provider?esc(r.provider):'')+(r.provider&&r.polno?' · ':'')+(r.polno?'No. <b style="color:var(--hi)">'+esc(r.polno)+'</b>':'')+'</div>':'')
   +(r.premium?'<div class="row-meta" style="margin-top:2px">Premium '+fmtR(r.premium)+'</div>':'')
   +((r.att&&r.att.length)?'<div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">'
      +r.att.map(a=>'<div class="row" style="padding:8px 0">'
@@ -1607,6 +1613,7 @@ function rnCard(r){const n=daysTo(r.expiry),c=rnColor(n);
   +'<div style="display:flex;gap:8px;margin-top:12px">'
   +'<button class="btn btn-gold btn-sm" style="flex:1" onclick="renewPlus(\''+r.id+'\')">✓ Renew — update details</button>'
   +'<button class="btn btn-ghost btn-sm" title="Attach policy copy" onclick="rnAddDoc(\''+r.id+'\')">📎</button>'
+  +'<button class="btn btn-ghost btn-sm" onclick="delRenewal(\''+r.id+'\')">✕</button>'
   +'</div>'
   +'</div>'}
 function dlAtt(id,type,name){fileGet(id).then(d=>{if(!d)return;const a=document.createElement('a');
