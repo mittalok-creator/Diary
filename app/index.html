@@ -373,6 +373,11 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .backbtn:active{transform:scale(.9)}
 .backbtn:hover{border-color:var(--gold)}
 .modttl{font-family:'Fraunces',serif;font-size:22px;font-weight:600}
+#swipeHint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(.7);
+  width:54px;height:54px;border-radius:50%;background:var(--glass);backdrop-filter:blur(10px);
+  border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;
+  font-size:26px;color:var(--gold);z-index:140;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s}
+#swipeHint.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 </style>
 </head>
 <body>
@@ -2139,6 +2144,52 @@ function pvShare(){shareAtt(pv.id,pv.type,pv.name)}
 async function pvDownload(){const d=await fileGet(pv.id);if(!d)return;
   const a=document.createElement('a');a.href=d;
   a.download=(pv.name||'file').replace(/[^\w\- ]+/g,'').trim()+(pv.type==='pdf'?'.pdf':'.jpg');a.click()}
+/* ============ SWIPE NAVIGATION ============ */
+const SWIPE_TABS=['today','life','cal','work'];
+function curView(){const v=document.querySelector('.view.active');return v?v.id.slice(2):'today'}
+function inModule(view){ /* if inside a Life/Work module (not on the launcher), right-swipe goes back to grid */
+  if(view==='life')return document.getElementById('lifeBar')&&document.getElementById('lifeBar').style.display!=='none';
+  if(view==='work')return document.getElementById('workBar')&&document.getElementById('workBar').style.display!=='none';
+  return false}
+function noSwipe(el){ /* walk up from the touch target: bail if inside anything horizontally scrollable/interactive */
+  while(el&&el!==document.body){
+    if(el.classList&&(el.classList.contains('weekstrip')||el.classList.contains('marquee')||
+       el.classList.contains('pv-body')||el.classList.contains('sk-body')||el.classList.contains('launcher')||
+       el.classList.contains('seg')||el.tagName==='CANVAS'||el.tagName==='INPUT'||el.tagName==='TEXTAREA'||
+       el.tagName==='SELECT'||el.scrollWidth>el.clientWidth+8&&getComputedStyle(el).overflowX!=='visible'))return true;
+    el=el.parentElement}
+  return false}
+function initSwipe(){const main=document.getElementById('main');
+  let x0=0,y0=0,active=false,locked=false,dir=0;
+  main.addEventListener('touchstart',e=>{if(e.touches.length!==1){active=false;return}
+    const t=e.touches[0];
+    if(noSwipe(e.target)){active=false;return}
+    x0=t.clientX;y0=t.clientY;active=true;locked=false;dir=0},{passive:true});
+  main.addEventListener('touchmove',e=>{if(!active)return;
+    const t=e.touches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+    if(!locked){if(Math.abs(dx)<10&&Math.abs(dy)<10)return;
+      if(Math.abs(dy)>Math.abs(dx)){active=false;return} /* vertical scroll wins */
+      locked=true}
+  },{passive:true});
+  main.addEventListener('touchend',e=>{if(!active||!locked){active=false;return}
+    const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+    active=false;
+    if(Math.abs(dx)<60||Math.abs(dy)>70)return; /* too small or too diagonal */
+    const view=curView();
+    if(dx>0&&inModule(view)){ /* right-swipe inside a module → back to that section's grid */
+      if(view==='life')lifeHome();else if(view==='work')workHome();
+      hintSwipe(dx>0?'‹':'›');return}
+    const idx=SWIPE_TABS.indexOf(view);
+    if(idx<0)return; /* on settings/search — ignore */
+    let ni=idx+(dx<0?1:-1);
+    if(ni<0||ni>=SWIPE_TABS.length)return;
+    go(SWIPE_TABS[ni]);hintSwipe(dx<0?'›':'‹')},{passive:true});
+}
+let _hintT=null;
+function hintSwipe(sym){let h=document.getElementById('swipeHint');
+  if(!h){h=document.createElement('div');h.id='swipeHint';document.body.appendChild(h)}
+  h.textContent=sym;h.classList.add('show');
+  clearTimeout(_hintT);_hintT=setTimeout(()=>h.classList.remove('show'),320)}
 function initViewer(){const body=document.getElementById('pvBody');
   const pts=new Map();let d0=0,s0=1,mid={x:0,y:0};
   body.addEventListener('pointerdown',e=>{pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
@@ -2773,7 +2824,7 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   migrate();trashAutoPurge();
   if(!S.deviceId){S.deviceId=uid();save(true)}
   if(S.water.date!==today())S.water={date:today(),count:0};
-  applyTheme();renderAll();initCrop();initViewer();initSketch();
+  applyTheme();renderAll();initCrop();initViewer();initSketch();initSwipe();
   if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');
     const onSys=()=>{if((S.profile.theme||'dark')==='auto'){applyTheme();renderSettings()}};
     mq.addEventListener?mq.addEventListener('change',onSys):mq.addListener(onSys)}
