@@ -338,6 +338,19 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 #skCanvas{border-radius:14px;border:1px solid var(--hair);background:#fff;touch-action:none;
   box-shadow:0 8px 30px rgba(0,0,0,.35);cursor:crosshair;display:block}
 .sk-foot{display:flex;gap:8px;padding:12px 16px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--hair)}
+.weekstrip{display:flex;gap:7px;margin:16px 0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
+.weekstrip::-webkit-scrollbar{display:none}
+.ws-day{flex:1 0 auto;min-width:52px;border:1px solid var(--hair);border-radius:15px;padding:9px 4px 8px;
+  text-align:center;cursor:pointer;background:var(--ink1);transition:border-color .2s,transform .15s;position:relative}
+.ws-day:active{transform:scale(.95)}
+.ws-day.today{border-color:rgba(217,168,92,.5)}
+.ws-day.sel{background:linear-gradient(135deg,var(--gold),var(--goldb));border-color:transparent}
+.ws-day.sel .ws-dow,.ws-day.sel .ws-dom{color:#12151b}
+.ws-dow{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--lo)}
+.ws-dom{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-top:2px;color:var(--hi)}
+.ws-dot{width:5px;height:5px;border-radius:50%;background:var(--gold);margin:3px auto 0;opacity:0}
+.ws-dot.on{opacity:1}
+.ws-day.sel .ws-dot{background:#12151b}
 </style>
 </head>
 <body>
@@ -386,11 +399,14 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <button data-f="work" onclick="setDashFilter('work')">Work</button>
   </div>
 
-  <div class="eyebrow">✦ Your day</div>
+  <div class="weekstrip" id="weekStrip"></div>
+
+  <div class="eyebrow" id="tlEyebrow">✦ Your day</div>
   <div class="card" id="timelineCard"></div>
 
   <div class="dash-cols">
     <div class="dash-col" id="colLife">
+      <div data-sec="lifeStats">
       <div class="eyebrow">Life</div>
       <div class="grid2">
         <div class="card" onclick="go('life');lifeTab('money')">
@@ -415,13 +431,19 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
           <div class="stat-sub" id="gHabitSub">done today</div>
         </div>
       </div>
+      </div>
+      <div data-sec="upcoming">
       <div class="eyebrow">🛡 Upcoming</div>
       <div class="card" id="renewToday" style="padding:6px 18px"></div>
+      </div>
+      <div data-sec="pinned">
       <div class="eyebrow">Pinned notes</div>
       <div class="card" id="pinList" style="padding:6px 18px"></div>
+      </div>
     </div>
 
     <div class="dash-col" id="colWork">
+      <div data-sec="workStats">
       <div class="eyebrow">Work</div>
       <div class="grid2">
         <div class="card" onclick="go('work')">
@@ -435,10 +457,15 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
           <div class="stat-sub">saved</div>
         </div>
       </div>
+      </div>
+      <div data-sec="meetings">
       <div class="eyebrow">Today's Meetings</div>
       <div class="card" id="meetToday" style="padding:6px 18px"></div>
+      </div>
+      <div data-sec="followups">
       <div class="eyebrow">Follow-ups due</div>
       <div class="card" id="fuToday" style="padding:6px 18px"></div>
+      </div>
     </div>
   </div>
 </section>
@@ -853,6 +880,9 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     </div>
   </div>
 
+  <div class="eyebrow">Dashboard cards</div>
+  <div class="card" id="dashToggles"></div>
+
   <div class="eyebrow">Recently deleted</div>
   <div class="card">
     <div class="set-row">
@@ -1137,7 +1167,7 @@ function renderToday(){renderHeader();
   countUp(scoreTxt,pct);
   scoreSub.textContent=tot?(don+' of '+tot+' done today'):'Nothing due today';
 
-  renderTimeline();
+  renderWeekStrip();renderTimeline();
 
   /* --- Life column --- */
   const mk=t.slice(0,7);
@@ -1177,13 +1207,25 @@ function renderToday(){renderHeader();
     :'<div class="empty" style="padding:20px">No meetings today</div>';
   fuToday.innerHTML=fuDue.length?fuDue.slice(0,6).map(f=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(f.person)+' — '+esc(f.topic)+'</div><div class="row-meta">'+dueLabel(f.due)+'</div></div><button class="btn btn-gold btn-sm" onclick="fuDone(\''+f.id+'\')">✓</button></div>').join('')
     :'<div class="empty" style="padding:20px">No follow-ups due</div>';
-  applyDashFilter()}
+  applyDashFilter();applyDashSections()}
 
 /* ============ TIMELINE DAY VIEW ============ */
+function renderDayPreview(el){const d=dashDay;const items=[];
+  S.meetings.filter(m=>m.date===d&&!m.done).forEach(m=>items.push({t:m.time||'',ic:'🎥',x:m.title,s:'Meeting'}));
+  S.tasks.filter(x=>!x.done&&x.due===d).forEach(x=>items.push({t:x.time||'',ic:x.space==='office'?'💼':'●',x:x.title,s:'Task'}));
+  S.followups.filter(x=>!x.done&&x.due===d).forEach(x=>items.push({t:'',ic:'↺',x:x.person+' — '+x.topic,s:'Follow-up'}));
+  S.renewals.filter(r=>r.expiry===d).forEach(r=>items.push({t:'',ic:'🛡',x:r.name,s:r.kind+' expires'}));
+  S.events.filter(e=>nextOcc(e.date)===d).forEach(e=>items.push({t:'',ic:e.kind==='Birthday'?'🎂':'💍',x:e.name,s:e.kind}));
+  items.sort((a,b)=>(a.t||'99')<(b.t||'99')?-1:1);
+  el.innerHTML=items.length?('<div class="tl tl-plain">'+items.map(i=>'<div class="tl-row"><div class="tl-time">'+(i.t?fmtTime(i.t):'—')+'</div><div class="tl-dot"></div><div class="tl-body"><div class="row-title">'+i.ic+' '+esc(i.x)+'</div><div class="row-meta">'+i.s+'</div></div></div>').join('')+'</div>'
+    +'<button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px" onclick="pickDashDay(\''+today()+'\')">← Back to today</button>')
+    :'<div class="empty"><div class="em-ring">✦</div>Nothing on '+fmtD(d)+'<br><button class="btn btn-ghost btn-sm" style="margin-top:14px" onclick="pickDashDay(\''+today()+'\')">← Back to today</button></div>'}
 let dashFilter='all';
 function setDashFilter(f){dashFilter=f;
   document.querySelectorAll('#dashSeg button').forEach(b=>b.classList.toggle('on',b.dataset.f===f));
   renderTimeline();applyDashFilter()}
+function applyDashSections(){const hid=(S.profile.dashHidden)||[];
+  document.querySelectorAll('[data-sec]').forEach(el=>{el.style.display=hid.includes(el.dataset.sec)?'none':''})}
 function applyDashFilter(){
   const l=document.getElementById('colLife'),w=document.getElementById('colWork');
   if(!l||!w)return;
@@ -1208,7 +1250,32 @@ function tlRow(i,past){return '<div class="tl-row'+(past?' past':'')+(i.done?' t
   +'<div class="tl-dot'+(i.done?' on':'')+'"></div>'
   +'<div class="tl-body"><div class="row-title">'+i.icon+' '+esc(i.title)+'</div>'
   +'<div class="row-meta">'+i.meta+(i.time&&!past&&!i.done?' · <span class="cd" data-ts="'+new Date(today()+'T'+i.time).getTime()+'"></span>':'')+'</div></div></div>'}
+let dashDay=null; /* null = today */
+function dayCount(d){let n=0;
+  S.tasks.forEach(x=>{if(!x.done&&x.due===d)n++});
+  S.meetings.forEach(m=>{if(m.date===d&&!m.done)n++});
+  S.followups.forEach(x=>{if(!x.done&&x.due===d)n++});
+  S.renewals.forEach(r=>{if(r.expiry===d)n++});
+  S.events.forEach(e=>{if(nextOcc(e.date)===d)n++});
+  return n}
+function renderWeekStrip(){const el=document.getElementById('weekStrip');if(!el)return;
+  const base=new Date(today()+'T00:00');const sel=dashDay||today();
+  const dows=['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  let h='';
+  for(let i=0;i<7;i++){const dt=new Date(base);dt.setDate(dt.getDate()+i);
+    const z=n=>String(n).padStart(2,'0');
+    const ds=dt.getFullYear()+'-'+z(dt.getMonth()+1)+'-'+z(dt.getDate());
+    const cnt=dayCount(ds);
+    h+='<div class="ws-day'+(i===0?' today':'')+(ds===sel?' sel':'')+'" onclick="pickDashDay(\''+ds+'\')">'
+      +'<div class="ws-dow">'+(i===0?'TODAY':dows[dt.getDay()])+'</div>'
+      +'<div class="ws-dom">'+dt.getDate()+'</div>'
+      +'<div class="ws-dot'+(cnt?' on':'')+'"></div></div>'}
+  el.innerHTML=h}
+function pickDashDay(ds){dashDay=(ds===today())?null:ds;
+  document.getElementById('tlEyebrow').textContent=dashDay?('✦ '+fmtD(dashDay)):'✦ Your day';
+  renderWeekStrip();renderTimeline()}
 function renderTimeline(){const el=document.getElementById('timelineCard');if(!el)return;
+  if(dashDay&&dashDay!==today())return renderDayPreview(el);
   const items=timelineItems();
   const timed=items.filter(i=>i.time).sort((a,b)=>a.time<b.time?-1:1);
   const anytime=items.filter(i=>!i.time);
@@ -2544,7 +2611,16 @@ function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
    +'<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="cloudSync(true)">Sync now</button><button class="btn btn-ghost btn-sm" onclick="forcePush()">Push this device&#39;s data</button>'
    +'<button class="btn btn-ghost btn-sm" onclick="gSignOut()">Sign out</button></div></div>'}
 /* ============ SETTINGS ============ */
-function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();
+function toggleDashSec(k){S.profile.dashHidden=S.profile.dashHidden||[];
+  const i=S.profile.dashHidden.indexOf(k);
+  if(i>=0)S.profile.dashHidden.splice(i,1);else S.profile.dashHidden.push(k);
+  save();renderSettings()}
+const DASH_SECS=[['lifeStats','Life stats (money, water, shopping, habits)'],['upcoming','Upcoming renewals & birthdays'],['pinned','Pinned notes'],['workStats','Work stats (office, circulars)'],['meetings','Today\'s meetings'],['followups','Follow-ups due']];
+function renderDashToggles(){const el=document.getElementById('dashToggles');if(!el)return;
+  const hid=S.profile.dashHidden||[];
+  el.innerHTML=DASH_SECS.map(([k,label])=>'<div class="set-row"><div class="set-name" style="font-size:13.5px">'+esc(label)+'</div>'
+    +'<div class="toggle'+(hid.includes(k)?'':' on')+'" onclick="toggleDashSec(\''+k+'\')"></div></div>').join('')}
+function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();renderDashToggles();
   const tm=S.profile.theme||'dark';
   document.querySelectorAll('#themeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.t===tm));
   const tsub=document.getElementById('themeSub');
