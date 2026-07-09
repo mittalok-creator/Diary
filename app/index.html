@@ -2113,7 +2113,7 @@ function flCalc(){const a=Number(document.getElementById('flAmt').value),r=Numbe
   else out.textContent=''}
 function addFuel(){const a=Number(flAmt.value),r=Number(flRate.value),o=Number(flOdo.value);
   if(!a||!o){toast('Amount and odometer are needed');return}
-  const l=r?a/r:0;
+  const l=r?Math.round((a/r)*100)/100:0;
   const d=flDate.value||today();
   const id=uid();
   S.fuel.unshift({id,date:d,amount:a,litres:l||0,rate:r||0,odo:o});
@@ -2155,7 +2155,7 @@ function _delFuel(id){const f=S.fuel.find(x=>x.id===id);
 function fuelCard(f,prevKmpl){
   const trend=(f._kmpl&&prevKmpl)?(f._kmpl>prevKmpl?'<span style="color:var(--good)">↑</span>':f._kmpl<prevKmpl?'<span style="color:var(--risk)">↓</span>':''):'';
   return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
-  +'<div><div class="row-title">'+fmtR(f.amount)+(f.litres?' · '+f.litres+' L':'')+'</div>'
+  +'<div><div class="row-title">'+fmtR(f.amount)+(f.litres?' · '+Number(f.litres).toFixed(2)+' L':'')+'</div>'
   +'<div class="row-meta">'+fmtD(f.date)+' · '+f.odo.toLocaleString('en-IN')+' km</div></div>'
   +'<div style="text-align:right"><div class="row-title" style="color:var(--gold)">'+(f._kmpl?f._kmpl.toFixed(2)+' km/l '+trend:'—')+'</div>'
   +'<div class="row-meta">'+(f._rpk?'₹'+f._rpk.toFixed(2)+'/km':'first fill')+'</div></div>'
