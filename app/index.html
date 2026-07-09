@@ -2659,12 +2659,17 @@ function renderGCard(){const el=document.getElementById('gCard');if(!el)return;
   if(!gConfigured()){el.innerHTML='<div class="set-row"><div><div class="set-name">Google Drive sync</div><div class="set-sub">Setup pending — create a free Google Client ID and paste it in index.html (see GOOGLE_SETUP guide)</div></div></div>';return}
   const g=S.profile.google;
   if(!g){el.innerHTML='<div class="set-row"><div><div class="set-name">Sign in with Google</div><div class="set-sub">Your data syncs to <b style="color:var(--gold)">your own Google Drive</b> — never to anyone\'s server. Use the same account on phone, tablet & laptop.</div></div><button class="btn btn-gold btn-sm" onclick="gSignIn()">Sign in</button></div>';return}
-  el.innerHTML='<div class="set-row"><div style="display:flex;gap:12px;align-items:center;min-width:0">'
-   +(g.pic?'<img src="'+g.pic+'" referrerpolicy="no-referrer" style="width:42px;height:42px;border-radius:50%;border:1.5px solid var(--gold);flex-shrink:0">':'')
-   +'<div style="min-width:0"><div class="set-name">'+esc(g.name)+'</div><div class="set-sub" style="overflow:hidden;text-overflow:ellipsis">'+esc(g.email)+'</div></div></div></div>'
-   +'<div class="set-row"><div><div class="set-name">Drive sync</div><div class="set-sub" id="syncStatus">'+(syncMsg||(S.lastSync?'Up to date · '+fmtWhen(S.lastSync):'Not synced yet'))+'</div></div>'
-   +'<div style="display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="cloudSync(true)">Sync now</button><button class="btn btn-ghost btn-sm" onclick="forcePush()">Push this device&#39;s data</button>'
-   +'<button class="btn btn-ghost btn-sm" onclick="gSignOut()">Sign out</button></div></div>'}
+  el.innerHTML='<div style="display:flex;gap:12px;align-items:center;min-width:0">'
+   +(g.pic?'<img src="'+g.pic+'" referrerpolicy="no-referrer" style="width:44px;height:44px;border-radius:50%;border:1.5px solid var(--gold);flex-shrink:0">':'')
+   +'<div style="min-width:0;flex:1"><div class="set-name">'+esc(g.name)+'</div><div class="set-sub" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(g.email)+'</div></div></div>'
+   +'<div style="height:1px;background:var(--hair);margin:14px 0"></div>'
+   +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">'
+   +'<span style="width:8px;height:8px;border-radius:50%;background:var(--good);flex-shrink:0;box-shadow:0 0 8px var(--good)"></span>'
+   +'<div class="set-sub" id="syncStatus" style="margin:0">'+(syncMsg||(S.lastSync?'Up to date · '+fmtWhen(S.lastSync):'Not synced yet'))+'</div></div>'
+   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+   +'<button class="btn btn-gold btn-sm" onclick="cloudSync(true)">↻ Sync now</button>'
+   +'<button class="btn btn-ghost btn-sm" onclick="forcePush()">Push this device</button>'
+   +'<button class="btn btn-ghost btn-sm" style="grid-column:1/-1" onclick="gSignOut()">Sign out</button></div>'}
 /* ============ SETTINGS ============ */
 function toggleDashSec(k){S.profile.dashHidden=S.profile.dashHidden||[];
   const i=S.profile.dashHidden.indexOf(k);
