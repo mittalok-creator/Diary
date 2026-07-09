@@ -304,7 +304,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .cfov p{color:var(--lo)}
 .cfov.open{display:flex}
 .cfbox{max-width:380px;width:100%;text-align:center}
-#pvOv{position:absolute;inset:0;z-index:130;display:none;flex-direction:column;background:var(--ink0)}
+#pvOv{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100vh;height:100dvh;z-index:130;display:none;flex-direction:column;background:var(--ink0)}
 #pvOv.open{display:flex}
 .pv-bar{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
   border-bottom:1px solid var(--hair);background:var(--glass);backdrop-filter:blur(20px);flex-shrink:0}
@@ -318,6 +318,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .pv-zoom{font-size:11.5px;font-weight:700;color:var(--lo);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
 .pv-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;
   padding:14px 8px calc(env(safe-area-inset-bottom) + 20px);background:#08090c}
+@media(min-width:700px){.pv-body{padding:20px 24px}}
 .pv-stage{display:flex;flex-direction:column;align-items:center;gap:12px;min-width:min-content;margin:0 auto}
 .pv-page{border-radius:6px;box-shadow:0 6px 26px rgba(0,0,0,.5);background:#fff;max-width:none;display:block}
 .pv-img{border-radius:10px;box-shadow:0 6px 26px rgba(0,0,0,.5);display:block;max-width:none}
@@ -2419,7 +2420,7 @@ async function openAtt(id,type,name){
     const doc=await lib.getDocument({data:b64ToBytes(d)}).promise;
     pv.pdf=doc;stage.innerHTML='';
     document.getElementById('pvPages').textContent=doc.numPages+(doc.numPages>1?' pages':' page');
-    const w=Math.min(stage.clientWidth-8,900);
+    const w=Math.min(stage.clientWidth-8,1400);
     for(let p=1;p<=doc.numPages;p++){
       const page=await doc.getPage(p);
       const v1=page.getViewport({scale:1});
@@ -2520,6 +2521,10 @@ function initViewer(){const body=document.getElementById('pvBody');
     if(now-lastTap<300){const r=body.getBoundingClientRect();
       pvZoomBy(pv.scale>1.2?(1/pv.scale):2,e.clientX-r.left,e.clientY-r.top)}
     lastTap=now});
+  let _rot=null;
+  addEventListener('resize',()=>{const ov=document.getElementById('pvOv');
+    if(!ov.classList.contains('open')||pv.type!=='pdf'||!pv.id)return;
+    clearTimeout(_rot);_rot=setTimeout(()=>{const id=pv.id,nm=pv.name;openAtt(id,'pdf',nm)},350)});
   addEventListener('keydown',e=>{if(!document.getElementById('pvOv').classList.contains('open'))return;
     if(e.key==='Escape')pvClose();
     if(e.key==='+'||e.key==='=')pvZoomBy(1.2);
