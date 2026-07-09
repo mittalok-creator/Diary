@@ -713,6 +713,59 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <div id="bdList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
+  <div class="ltab" id="lt-pay" style="display:none">
+    <div class="seg" id="paySeg" style="margin-top:0">
+      <button data-p="bill" class="on" onclick="payTab('bill')">Bills</button>
+      <button data-p="card" onclick="payTab('card')">Cards</button>
+      <button data-p="lend" onclick="payTab('lend')">Lent / Borrowed</button>
+    </div>
+
+    <div class="paysub" id="paysub-bill">
+      <input class="inp" id="blName" placeholder="Bill name (Airtel wifi, Jio mobile, DTH, Rent…)">
+      <div class="dtrow" style="margin-top:0">
+        <label class="fld"><span>Amount ₹</span><input type="number" inputmode="numeric" class="inp" id="blAmt" placeholder="Amount"></label>
+        <label class="fld"><span>Due date</span><input type="date" class="inp" id="blDue"></label>
+      </div>
+      <div class="dtrow" style="margin-top:0">
+        <label class="fld"><span>Repeats</span><select class="inp" id="blRep"><option value="monthly">Monthly</option><option value="">One-time</option><option value="yearly">Yearly</option></select></label>
+        <label class="fld"><span>Remind</span><select class="inp" id="blRem"><option value="3">3 days before</option><option value="1">1 day before</option><option value="7">7 days before</option><option value="0">On the day</option></select></label>
+      </div>
+      <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addBill()">＋ Add bill</button>
+      <div id="blList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <div class="paysub" id="paysub-card" style="display:none">
+      <input class="inp" id="cdName" placeholder="Card name (HDFC Regalia, SBI…)">
+      <div class="dtrow" style="margin-top:0">
+        <label class="fld"><span>Total due ₹</span><input type="number" inputmode="numeric" class="inp" id="cdTotal" placeholder="Statement"></label>
+        <label class="fld"><span>Minimum due ₹</span><input type="number" inputmode="numeric" class="inp" id="cdMin" placeholder="Min"></label>
+      </div>
+      <div class="dtrow" style="margin-top:0">
+        <label class="fld"><span>Payment due date</span><input type="date" class="inp" id="cdDue"></label>
+        <label class="fld"><span>Remind</span><select class="inp" id="cdRem"><option value="3">3 days before</option><option value="5">5 days before</option><option value="1">1 day before</option><option value="7">7 days before</option></select></label>
+      </div>
+      <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addCard()">＋ Add card bill</button>
+      <div class="stat-sub" style="margin-top:8px">Each month, mark it paid and set the next statement — history is kept.</div>
+      <div id="cdList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+
+    <div class="paysub" id="paysub-lend" style="display:none">
+      <div style="display:flex;gap:8px;margin-bottom:10px" id="lendDir">
+        <span class="chip on" data-d="out" onclick="pickLendDir(this)">↗ I gave (to receive)</span>
+        <span class="chip" data-d="in" onclick="pickLendDir(this)">↙ I took (to pay)</span>
+      </div>
+      <input class="inp" id="lnWho" placeholder="Person / party name">
+      <div class="dtrow" style="margin-top:0">
+        <label class="fld"><span>Amount ₹</span><input type="number" inputmode="numeric" class="inp" id="lnAmt" placeholder="Amount"></label>
+        <label class="fld"><span>Due date (optional)</span><input type="date" class="inp" id="lnDue"></label>
+      </div>
+      <input class="inp" id="lnNote" placeholder="Note (optional)" style="margin-top:8px">
+      <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addLend()">＋ Add entry</button>
+      <div id="lnSummary" class="card" style="margin-top:14px;display:none"></div>
+      <div id="lnList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+    </div>
+  </div>
+
   <div class="ltab" id="lt-docs" style="display:none">
     <input class="inp" id="docName" placeholder="Document name (PAN, RC, Policy, Warranty…)">
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -1115,7 +1168,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],trash:[],car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],bills:[],cards:[],lend:[],trash:[],car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -1158,7 +1211,7 @@ function go(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove(
   if(v==='today')renderToday(); if(v==='life'){lifeHome()} if(v==='work'){workHome()}
   if(v==='cal'){const c=document.getElementById('calDate');if(!c.value)c.value=today();renderCal()} if(v==='settings')renderSettings(); if(v==='search'){renderSearch();setTimeout(()=>qIn.focus(),150)}}
 const LIFE_MODS=[
-  ['tasks','Tasks','✓'],['notes','Notes','🗒'],['shopping','Shopping','🛒'],['money','Money','₹'],
+  ['tasks','Tasks','✓'],['notes','Notes','🗒'],['shopping','Shopping','🛒'],['money','Money','₹'],['pay','Payments','💳'],
   ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄']];
 const WORK_MODS=[
   ['tasks','Tasks','✓'],['follow','Follow-ups','↺'],['meet','Meetings','🎥'],['circ','Circulars','📑'],
@@ -1169,6 +1222,7 @@ function lifeBadge(t){const d=today();
   if(t==='renew'){const soon=S.renewals.filter(r=>daysTo(r.expiry)<=30).length;return soon?{dot:S.renewals.some(r=>daysTo(r.expiry)<=7)?'var(--risk)':'var(--warn)'}:null}
   if(t==='bday'){const soon=S.events.filter(e=>daysTo(nextOcc(e.date))<=7).length;return soon?{dot:'var(--gold)'}:null}
   if(t==='health'){const md=medsDueToday();return md?{n:md}:null}
+  if(t==='pay'){const soon=[...S.bills.filter(b=>!b.paid&&daysTo(b.due)<=7),...S.cards.filter(c=>daysTo(c.due)<=7)].length;return soon?{dot:'var(--warn)'}:null}
   return null}
 function workBadge(t){const d=today();
   if(t==='tasks')return {n:S.tasks.filter(x=>x.space==='office'&&!x.done).length};
@@ -1257,6 +1311,8 @@ function renderToday(){renderHeader();
   const ns2=nextService();if(ns2&&daysTo(ns2.next)<=60)up.push({r:{name:'Car service',kind:'Service',expiry:ns2.next},n:daysTo(ns2.next)});
   S.events.forEach(e=>{const occ=nextOcc(e.date),n2=daysTo(occ);
     if(n2<=30)up.push({r:{name:(e.kind==='Birthday'?'🎂 ':'💍 ')+e.name,kind:e.kind,expiry:occ},n:n2})});
+  S.bills.forEach(b=>{if(b.paid)return;const n2=daysTo(b.due);if(n2<=30)up.push({r:{name:'🧾 '+b.name,kind:'Bill',expiry:b.due},n:n2})});
+  S.cards.forEach(c=>{const n2=daysTo(c.due);if(n2<=30)up.push({r:{name:'💳 '+c.name,kind:'Card · min '+fmtR(c.min),expiry:c.due},n:n2})});
   up.sort((a,b)=>a.n-b.n);
   renewToday.innerHTML=up.length?up.slice(0,6).map(x=>'<div class="row" style="cursor:pointer" onclick="go(\'life\');lifeTab(\''+(x.r.kind==='Birthday'||x.r.kind==='Anniversary'?'bday':'renew')+'\')"><div class="row-body"><div class="row-title">'+esc(x.r.name)+'</div><div class="row-meta">'+esc(x.r.kind)+' · '+fmtD(x.r.expiry)+'</div></div><b style="color:'+rnColor(x.n)+';font-size:12.5px;white-space:nowrap">'+rnLabel(x.n)+'</b></div>').join('')
     :'<div class="empty" style="padding:20px">Nothing expiring in the next 60 days</div>';
@@ -1727,6 +1783,80 @@ function renderHealth(){if(!document.getElementById('medList'))return;
   medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
   habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
   vitList.innerHTML=S.vitals.slice(0,6).map(v=>'<div class="row"><div class="row-body"><div class="row-title">'+(v.kind==='weight'?'⚖ '+v.v1+' kg':'🩺 '+v.v1+'/'+v.v2)+'</div><div class="row-meta">'+fmtD(v.at)+'</div></div><button class="del" onclick="delVital(\''+v.id+'\')">✕</button></div>').join('')||'<div class="empty" style="padding:12px">Log weight or BP to build history</div>'}
+/* ============ PAYMENT REMINDERS ============ */
+function payTab(p){document.querySelectorAll('#paySeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
+  ['bill','card','lend'].forEach(k=>{const el=document.getElementById('paysub-'+k);if(el)el.style.display=k===p?'block':'none'})}
+/* -- bills -- */
+function addBill(){const n=blName.value.trim(),a=Number(blAmt.value);
+  if(!n){toast('Bill name?');blName.focus();return}
+  if(!blDue.value){toast('Pick the due date');blDue.focus();return}
+  S.bills.unshift({id:uid(),name:n,amount:a||0,due:blDue.value,rep:blRep.value,remind:+blRem.value,paid:false,notified:{}});
+  ['blName','blAmt','blDue'].forEach(i=>document.getElementById(i).value='');
+  save();renderLife();renderToday();toast('🧾 Bill added')}
+function billPaid(id){const b=S.bills.find(x=>x.id===id);if(!b)return;
+  if(b.rep){const nd=nextDue(b.due,b.rep);if(nd){b.due=nd;b.notified={};save();renderLife();renderToday();toast('✓ Paid — next due '+fmtD(nd));return}}
+  b.paid=true;save();renderLife();renderToday();toast('✓ Marked paid')}
+function delBill(id){const b=S.bills.find(x=>x.id===id);askDelete(b&&b.name,()=>{S.bills=S.bills.filter(x=>x.id!==id);save();renderLife();renderToday()})}
+function billCard(b){const n=daysTo(b.due),c=rnColor(n);
+  return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">'
+    +'<div style="flex:1;min-width:0"><div class="row-title">'+(b.rep?'🔁 ':'')+esc(b.name)+'</div>'
+    +'<div class="row-meta" style="margin-top:3px"><b style="color:'+c+'">'+rnLabel(n)+'</b> · '+fmtD(b.due)+(b.rep?' · '+(b.rep==='monthly'?'monthly':'yearly'):'')+'</div></div>'
+    +(b.amount?'<div class="row-title" style="color:var(--gold)">'+fmtR(b.amount)+'</div>':'')+'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn btn-gold btn-sm" style="flex:1" onclick="billPaid(\''+b.id+'\')">✓ Paid'+(b.rep?' · next month':'')+'</button>'
+    +'<button class="btn btn-ghost btn-sm" onclick="delBill(\''+b.id+'\')">✕</button></div></div>'}
+/* -- credit cards -- */
+function addCard(){const n=cdName.value.trim();
+  if(!n){toast('Card name?');cdName.focus();return}
+  if(!cdDue.value){toast('Pick the due date');cdDue.focus();return}
+  S.cards.unshift({id:uid(),name:n,total:Number(cdTotal.value)||0,min:Number(cdMin.value)||0,due:cdDue.value,remind:+cdRem.value,notified:{}});
+  ['cdName','cdTotal','cdMin','cdDue'].forEach(i=>document.getElementById(i).value='');
+  save();renderLife();renderToday();toast('💳 Card bill added')}
+function cardPaid(id){const c=S.cards.find(x=>x.id===id);if(!c)return;
+  const d=new Date(c.due+'T00:00');d.setMonth(d.getMonth()+1);
+  c.due=d.toISOString().slice(0,10);c.total=0;c.min=0;c.notified={};
+  save();renderLife();renderToday();toast('✓ Paid — set next statement when it arrives')}
+function delCard(id){const c=S.cards.find(x=>x.id===id);askDelete(c&&c.name,()=>{S.cards=S.cards.filter(x=>x.id!==id);save();renderLife();renderToday()})}
+function cardCard(c){const n=daysTo(c.due),col=rnColor(n);
+  return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'
+    +'<div class="row-title" style="font-family:Fraunces,serif;font-size:16px">💳 '+esc(c.name)+'</div>'
+    +'<button class="del" onclick="delCard(\''+c.id+'\')">✕</button></div>'
+    +'<div class="row-meta" style="margin-top:5px"><b style="color:'+col+'">'+rnLabel(n)+'</b> · '+fmtD(c.due)+'</div>'
+    +'<div class="grid2" style="gap:12px;margin-top:12px">'
+    +'<div><div class="stat-label">Total due</div><div class="stat-num" style="font-size:20px">'+fmtR(c.total)+'</div></div>'
+    +'<div><div class="stat-label">Minimum due</div><div class="stat-num" style="font-size:20px;color:var(--warn)">'+fmtR(c.min)+'</div></div></div>'
+    +'<button class="btn btn-gold btn-sm" style="width:100%;margin-top:12px" onclick="cardPaid(\''+c.id+'\')">✓ Paid · roll to next month</button></div>'}
+/* -- lent / borrowed -- */
+let lendDir='out';
+function pickLendDir(el){document.querySelectorAll('#lendDir .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');lendDir=el.dataset.d}
+function addLend(){const w=lnWho.value.trim(),a=Number(lnAmt.value);
+  if(!w){toast('Who?');lnWho.focus();return}
+  if(!a){toast('Amount?');lnAmt.focus();return}
+  S.lend.unshift({id:uid(),who:w,amount:a,dir:lendDir,due:lnDue.value||'',note:lnNote.value.trim(),settled:false,notified:{},at:new Date().toISOString()});
+  ['lnWho','lnAmt','lnDue','lnNote'].forEach(i=>document.getElementById(i).value='');
+  save();renderLife();renderToday();toast(lendDir==='out'?'↗ To receive added':'↙ To pay added')}
+function lendSettle(id){const l=S.lend.find(x=>x.id===id);if(!l)return;l.settled=!l.settled;save();renderLife();renderToday();toast(l.settled?'✓ Settled':'Reopened')}
+function delLend(id){const l=S.lend.find(x=>x.id===id);askDelete(l&&(l.who+' · '+fmtR(l.amount)),()=>{S.lend=S.lend.filter(x=>x.id!==id);save();renderLife();renderToday()})}
+function lendCard(l){const n=l.due?daysTo(l.due):null;
+  return '<div class="card"'+(l.settled?' style="opacity:.55"':'')+'><div style="display:flex;justify-content:space-between;gap:8px">'
+    +'<div style="flex:1;min-width:0"><div class="row-title">'+(l.dir==='out'?'↗ ':'↙ ')+esc(l.who)+(l.settled?' · settled':'')+'</div>'
+    +'<div class="row-meta" style="margin-top:2px">'+(l.dir==='out'?'To receive':'To pay')+(l.due?' · <b style="color:'+rnColor(n)+'">'+rnLabel(n)+'</b>':'')+(l.note?' · '+esc(l.note):'')+'</div></div>'
+    +'<div class="row-title" style="color:'+(l.dir==='out'?'var(--good)':'var(--risk)')+'">'+fmtR(l.amount)+'</div></div>'
+    +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn '+(l.settled?'btn-ghost':'btn-gold')+' btn-sm" style="flex:1" onclick="lendSettle(\''+l.id+'\')">'+(l.settled?'Reopen':'✓ Mark settled')+'</button>'
+    +'<button class="btn btn-ghost btn-sm" onclick="delLend(\''+l.id+'\')">✕</button></div></div>'}
+function renderPay(){
+  const bl=document.getElementById('blList');
+  if(bl)bl.innerHTML=S.bills.filter(b=>!b.paid).sort((a,b)=>a.due<b.due?-1:1).map(billCard).join('')||'<div class="empty" style="padding:16px">No bills yet — add wifi, mobile, rent, DTH…</div>';
+  const cl=document.getElementById('cdList');
+  if(cl)cl.innerHTML=S.cards.sort((a,b)=>a.due<b.due?-1:1).map(cardCard).join('')||'<div class="empty" style="padding:16px">Add a credit card to track total & minimum due</div>';
+  const ll=document.getElementById('lnList');
+  if(ll){const active=S.lend.filter(l=>!l.settled),recv=active.filter(l=>l.dir==='out').reduce((a,b)=>a+b.amount,0),pay=active.filter(l=>l.dir==='in').reduce((a,b)=>a+b.amount,0);
+    const sm=document.getElementById('lnSummary');
+    if(sm){if(active.length){sm.style.display='block';sm.innerHTML='<div class="grid2" style="gap:12px"><div><div class="stat-label">You\'ll receive</div><div class="stat-num" style="font-size:20px;color:var(--good)">'+fmtR(recv)+'</div></div><div><div class="stat-label">You owe</div><div class="stat-num" style="font-size:20px;color:var(--risk)">'+fmtR(pay)+'</div></div></div>'}else sm.style.display='none'}
+    ll.innerHTML=S.lend.sort((a,b)=>(a.settled?1:0)-(b.settled?1:0)).map(lendCard).join('')||'<div class="empty" style="padding:16px">Track money you lent or borrowed</div>'}}
+function checkPayRem(){const t=today();
+  S.bills.forEach(b=>{if(b.paid)return;const n=daysTo(b.due);b.notified=b.notified||{};if(n>b.remind||n<-30||b.notified[t])return;b.notified[t]=1;save(true);notify('🧾 '+b.name,rnLabel(daysTo(b.due))+(b.amount?' · '+fmtR(b.amount):''))});
+  S.cards.forEach(c=>{const n=daysTo(c.due);c.notified=c.notified||{};if(n>c.remind||n<-30||c.notified[t])return;c.notified[t]=1;save(true);notify('💳 '+c.name,rnLabel(daysTo(c.due))+' · min '+fmtR(c.min)+' of '+fmtR(c.total))});
+  S.lend.forEach(l=>{if(l.settled||!l.due)return;const n=daysTo(l.due);l.notified=l.notified||{};if(n>1||n<-30||l.notified[t])return;l.notified[t]=1;save(true);notify((l.dir==='out'?'↗ ':'↙ ')+l.who,(l.dir==='out'?'To receive ':'To pay ')+fmtR(l.amount)+' · '+rnLabel(daysTo(l.due)))})}
 /* ============ RENEWALS & POLICIES ============ */
 let curKind='Car insurance';
 function pickKind(el){document.querySelectorAll('#rnChips .chip').forEach(c=>c.classList.remove('on'));
@@ -2278,7 +2408,7 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
   +'<button class="ed" title="Rename" onclick="askRename(\'doc\',\''+d.id+'\')">✎</button><button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
-function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
+function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
@@ -2308,6 +2438,9 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Income',S.income.filter(i=>hit(i.source)).map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div><div class="row-meta">'+fmtD(i.at)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>')],
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
    ['Links',S.links.filter(l=>hit(l.name)).map(linkCard)],
+   ['Bills',S.bills.filter(b=>hit(b.name)).map(billCard)],
+   ['Cards',S.cards.filter(c=>hit(c.name)).map(cardCard)],
+   ['Lent / Borrowed',S.lend.filter(l=>hit(l.who)||hit(l.note)).map(lendCard)],
    ['Birthdays',S.events.filter(e=>hit(e.name)||hit(e.note)).map(evCard)],
    ['Renewals',S.renewals.filter(r=>hit(r.name)||hit(r.kind)||hit(r.provider)||hit(r.polno)).map(rnCard)],
    ['Car',[...S.fuel.filter(x=>hit('fuel')||hit(String(x.odo))).map(x=>'<div class="row"><div class="row-body"><div class="row-title">⛽ '+fmtR(x.amount)+'</div><div class="row-meta">'+fmtD(x.date)+' · '+x.odo+' km</div></div></div>'),...S.service.filter(s=>hit(s.work)||hit(s.garage)).map(svcCard)]],
@@ -2317,7 +2450,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
    ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
-  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
+  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'||name==='Bills'||name==='Cards'||name==='Lent / Borrowed'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
   qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>';setTimeout(loadThumbs,0)}
 /* ============ CIRCULARS (with version history) ============ */
 let circVerTarget=null;let circOpen=null;
@@ -2428,7 +2561,7 @@ function checkTaskRem(){const now=Date.now(),t=today();
     const ts=new Date(t+'T'+x.time).getTime();const diff=(ts-now)/60000;
     if(diff<=10&&diff>-2){x.notified=true;save();
       notify('⏰ '+x.title,diff>0?'Due in '+Math.round(diff)+' min':'Due now')}})}
-function checkReminders(){checkMeetRem();checkTaskRem();checkMedRem();checkRenewRem();checkEventRem()}
+function checkReminders(){checkMeetRem();checkTaskRem();checkMedRem();checkRenewRem();checkEventRem();checkPayRem()}
 /* ============ CALENDAR ============ */
 function calShift(n){const el=document.getElementById('calDate');
   const d=new Date((el.value||today())+'T12:00:00');d.setDate(d.getDate()+n);
