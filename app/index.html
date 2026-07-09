@@ -388,6 +388,28 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .draw-actions{display:flex;justify-content:space-between;padding:7px 12px;background:var(--ink1)}
 .draw-actions span{font-size:12px;color:var(--lo);cursor:pointer;font-weight:600}
 .draw-actions span:hover{color:var(--gold)}
+#noteOv{position:absolute;inset:0;z-index:128;display:none;flex-direction:column;background:var(--ink0)}
+#noteOv.open{display:flex}
+.ne-bar{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;border-bottom:1px solid var(--hair);flex-shrink:0}
+.ne-title{flex:1;background:none;border:none;color:var(--hi);font-family:'Fraunces',serif;font-size:20px;font-weight:600;outline:none;min-width:0}
+.ne-toolbar{display:flex;align-items:center;gap:4px;padding:8px 12px;border-bottom:1px solid var(--hair);overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.ne-toolbar::-webkit-scrollbar{display:none}
+.ne-t{min-width:34px;height:34px;border-radius:9px;border:1px solid var(--hair);background:var(--ink1);color:var(--hi);font-size:15px;cursor:pointer;flex-shrink:0;padding:0 8px}
+.ne-t:active{transform:scale(.92)}
+.ne-div{width:1px;height:22px;background:var(--hair);flex-shrink:0;margin:0 3px}
+.ne-colors{display:flex;gap:5px;flex-shrink:0}
+.ne-sw{width:22px;height:22px;border-radius:50%;cursor:pointer;border:1.5px solid transparent}
+.ne-body{flex:1;overflow:auto;padding:18px 16px calc(env(safe-area-inset-bottom) + 20px)}
+#neEditor{min-height:100%;outline:none;color:var(--hi);font-size:15.5px;line-height:1.75;font-family:'Space Grotesk',sans-serif}
+#neEditor:empty:before{content:attr(data-ph);color:var(--lo)}
+#neEditor blockquote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 0 4px 14px;color:var(--lo);font-style:italic}
+#neEditor ul{padding-left:22px;margin:8px 0}
+#neEditor img{max-width:100%;border-radius:10px;margin:8px 0}
+.ne-foot{display:flex;gap:8px;padding:12px 16px calc(env(safe-area-inset-bottom) + 14px);border-top:1px solid var(--hair);flex-shrink:0}
+.diary-card{background:linear-gradient(160deg,var(--ink1),color-mix(in srgb,var(--ink1) 88%,var(--gold)));position:relative;overflow:hidden}
+.diary-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(var(--gold),var(--goldb))}
+.diary-body{color:var(--lo);font-size:13.5px;margin-top:8px;max-height:120px;overflow:hidden;position:relative}
+.diary-body *{max-width:100%}
 </style>
 </head>
 <body>
@@ -529,14 +551,8 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   </div>
 
   <div class="ltab" id="lt-notes" style="display:none">
-    <input class="inp" id="nTitle" placeholder="Note title">
-    <textarea class="inp" id="nBody" placeholder="Write something…" style="margin-top:8px"></textarea>
-    <div style="display:flex;gap:8px;margin:10px 0 4px">
-      <button class="btn btn-ghost" title="Attach image/PDF" onclick="pickFiles(fs=>{pend.note.push(...fs);drawPend('note')})">📎</button>
-      <button class="btn btn-gold" style="flex:1" onclick="addNote('personal')">Save note</button>
-    </div>
-    <div id="pendNote"></div>
-    <div id="nList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+    <button class="btn btn-gold" style="width:100%" onclick="noteNew('personal')">✎ New note</button>
+    <div id="nList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
   <div class="ltab" id="lt-shopping" style="display:none">
@@ -877,14 +893,8 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   </div>
 
   <div class="wtab" id="wt-notes" style="display:none">
-    <input class="inp" id="onTitle" placeholder="Note title">
-    <textarea class="inp" id="onBody" placeholder="Meeting point, call gist…" style="margin-top:8px"></textarea>
-    <div style="display:flex;gap:8px;margin-top:10px">
-      <button class="btn btn-ghost" title="Attach image/PDF" onclick="pickFiles(fs=>{pend.onote.push(...fs);drawPend('onote')})">📎</button>
-      <button class="btn btn-gold" style="flex:1" onclick="addNote('office')">Save note</button>
-    </div>
-    <div id="pendONote"></div>
-    <div id="onList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+    <button class="btn btn-gold" style="width:100%" onclick="noteNew('office')">✎ New quick note</button>
+    <div id="onList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 </section>
 
@@ -1114,6 +1124,37 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <button class="btn btn-gold" style="width:100%;margin-top:16px" onclick="carSaveProfile()">Save vehicle</button>
     <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('carOv').classList.remove('open')">Cancel</button>
   </div>
+</div>
+
+<div id="noteOv">
+  <div class="ne-bar">
+    <button class="pv-btn" onclick="noteEditClose()" aria-label="Close">✕</button>
+    <input class="ne-title" id="neTitle" placeholder="Title">
+    <button class="pv-btn" onclick="noteEditSave()" title="Save" style="color:var(--gold)">✓</button>
+  </div>
+  <div class="ne-toolbar" id="neToolbar">
+    <button class="ne-t" onclick="neCmd('bold')" title="Bold"><b>B</b></button>
+    <button class="ne-t" onclick="neCmd('italic')" title="Italic"><i>I</i></button>
+    <button class="ne-t" onclick="neCmd('underline')" title="Underline"><u>U</u></button>
+    <button class="ne-t" onclick="neCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
+    <span class="ne-div"></span>
+    <button class="ne-t" onclick="neSize('5')" title="Large">Aᴺ</button>
+    <button class="ne-t" onclick="neSize('3')" title="Normal">A</button>
+    <button class="ne-t" onclick="neSize('1')" title="Small">ᴀ</button>
+    <span class="ne-div"></span>
+    <button class="ne-t" onclick="neCmd('insertUnorderedList')" title="Bullets">•</button>
+    <button class="ne-t" onclick="neCmd('formatBlock','blockquote')" title="Quote">”</button>
+    <span class="ne-div"></span>
+    <span class="ne-colors" id="neColors"></span>
+    <button class="ne-t" onclick="neCmd('removeFormat')" title="Clear formatting">⊘</button>
+  </div>
+  <div class="ne-body"><div id="neEditor" contenteditable="true" spellcheck="false"></div></div>
+  <div class="ne-foot">
+    <button class="btn btn-ghost" title="Attach" onclick="neAttach()">📎</button>
+    <button class="btn btn-ghost" onclick="noteExport()">⤓ Export</button>
+    <button class="btn btn-gold" style="flex:1" onclick="noteEditSave()">✓ Save note</button>
+  </div>
+  <div id="nePend"></div>
 </div>
 
 <div id="skOv">
@@ -1472,6 +1513,66 @@ function linkCard(l){return '<div class="card"><div style="display:flex;align-it
 function renderLinks(){const el=document.getElementById('lkList');if(!el)return;
   el.innerHTML=S.links.map(linkCard).join('')
     ||'<div class="empty"><div class="em-ring">🔗</div>Portals, dashboards, forms —<br>save them by name and open with one tap</div>'}
+/* ============ NOTE EXPORT ============ */
+function noteExport(){const title=document.getElementById('neTitle').value.trim()||'Note';
+  const rows='<div style="display:flex;flex-direction:column;gap:9px">'
+    +'<button class="btn btn-ghost" style="width:100%" onclick="neExpText()">\u2197 Share as text</button>'
+    +'<button class="btn btn-ghost" style="width:100%" onclick="neExpImage()">\ud83d\uddbc Save as image</button>'
+    +'<button class="btn btn-ghost" style="width:100%" onclick="neExpPDF()">\ud83d\udcc4 Export as PDF</button>'
+    +'<button class="btn btn-ghost" style="width:100%" onclick="neExpWord()">\ud83d\udcdd Export as Word (.doc)</button>'
+    +'</div>';
+  showSheet('Export \u201c'+title+'\u201d',rows)}
+function neSheetClose(){document.getElementById('sheetOv').classList.remove('open')}
+function neCurrent(){return {title:document.getElementById('neTitle').value.trim()||'Note',
+  html:document.getElementById('neEditor').innerHTML,
+  text:(document.getElementById('neEditor').textContent||'').trim()}}
+async function neExpText(){const n=neCurrent();neSheetClose();
+  const payload=n.title+'\n\n'+n.text+'\n\n\u2014 ALOK OS';
+  try{if(navigator.share){await navigator.share({title:n.title,text:payload});return}}catch(e){if(e&&e.name==='AbortError')return}
+  try{await navigator.clipboard.writeText(payload);toast('Copied to clipboard')}catch(e){toast('Could not share')}}
+function neWrapHtml(n){return '<div style="font-family:Georgia,serif;max-width:640px;margin:0 auto;padding:34px;color:#171C24;background:#fff">'
+  +'<h1 style="font-family:Georgia,serif;font-size:26px;border-bottom:2px solid #B8863B;padding-bottom:10px;margin-bottom:18px">'+esc(n.title)+'</h1>'
+  +'<div style="font-size:15px;line-height:1.8">'+n.html+'</div>'
+  +'<div style="margin-top:28px;color:#9C6B26;font-size:12px;letter-spacing:.1em">BY ALOK MITTAL \u00b7 ALOK OS</div></div>'}
+async function neExpImage(){const n=neCurrent();neSheetClose();
+  setSyncStatus&&0;
+  const wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-9999px;top:0;width:680px';
+  wrap.innerHTML=neWrapHtml(n);document.body.appendChild(wrap);
+  try{
+    if(!window.html2canvas)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    const canvas=await html2canvas(wrap.firstChild,{scale:2,backgroundColor:'#ffffff'});
+    const url=canvas.toDataURL('image/png');
+    const a=document.createElement('a');a.href=url;a.download=n.title.replace(/[^\w\- ]+/g,'').trim()+'.png';a.click();
+    toast('\ud83d\uddbc Image saved')}
+  catch(e){toast('Image export needs internet the first time')}
+  wrap.remove()}
+async function neExpPDF(){const n=neCurrent();neSheetClose();
+  const wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-9999px;top:0;width:680px';
+  wrap.innerHTML=neWrapHtml(n);document.body.appendChild(wrap);
+  try{
+    if(!window.html2canvas)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
+    if(!window.jspdf)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+    const canvas=await html2canvas(wrap.firstChild,{scale:2,backgroundColor:'#ffffff'});
+    const img=canvas.toDataURL('image/jpeg',0.92);
+    const {jsPDF}=window.jspdf;const pdf=new jsPDF('p','mm','a4');
+    const pw=210,ph=(canvas.height*pw)/canvas.width;
+    let left=ph,pos=0;const pageH=297;
+    pdf.addImage(img,'JPEG',0,pos,pw,ph);left-=pageH;
+    while(left>0){pos=left-ph;pdf.addPage();pdf.addImage(img,'JPEG',0,pos,pw,ph);left-=pageH}
+    pdf.save(n.title.replace(/[^\w\- ]+/g,'').trim()+'.pdf');
+    toast('\ud83d\udcc4 PDF exported')}
+  catch(e){toast('PDF export needs internet the first time')}
+  wrap.remove()}
+function neExpWord(){const n=neCurrent();neSheetClose();
+  const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>'+esc(n.title)+'</title></head><body>'
+    +'<h1 style="font-family:Georgia,serif;color:#171C24">'+esc(n.title)+'</h1>'+n.html
+    +'<p style="color:#9C6B26;font-size:10pt;margin-top:24pt">BY ALOK MITTAL \u00b7 ALOK OS</p></body></html>';
+  const blob=new Blob(['\ufeff',html],{type:'application/msword'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=n.title.replace(/[^\w\- ]+/g,'').trim()+'.doc';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast('\ud83d\udcdd Word file saved')}
+function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc)})}
 /* ============ DRAWING STUDIO ============ */
 const SK_COLORS=['#171C24','#D9A85C','#C0392B','#E67E22','#F1C40F','#27AE60','#2980B9','#8E44AD','#E84393','#FFFFFF'];
 let sk={tool:'pen',color:'#171C24',size:5,W:0,H:0,dpr:1,ops:[],redo:[],cur:null,editId:null};
@@ -1586,11 +1687,52 @@ function addNote(space){const p=space==='personal';const t=p?nTitle:onTitle,b=p?
   if(!t.value.trim()&&!b.value.trim()&&!pend[pk].length)return;
   S.notes.unshift({id:uid(),title:t.value.trim()||'Untitled',body:b.value.trim(),space,pinned:false,att:pend[pk].splice(0),at:new Date().toISOString()});
   t.value='';b.value='';drawPend(pk);save();renderLife();renderWork();toast('Note saved')}
-function noteCard(n){return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px">'+
-  '<div class="row-title" style="font-family:Fraunces,serif;font-size:17px">'+esc(n.title)+'</div>'+
-  '<div style="display:flex;gap:4px"><button class="del" style="opacity:'+(n.pinned?1:.45)+';color:var(--gold)" onclick="pinNote(\''+n.id+'\')">📌</button>'+
-  '<button class="ed" title="Rename" onclick="askRename(\'note\',\''+n.id+'\')">✎</button><button class="del" onclick="delNote(\''+n.id+'\')">✕</button></div></div>'+
-  (n.body?'<div style="color:var(--lo);font-size:13.5px;margin-top:6px;white-space:pre-wrap">'+esc(n.body)+'</div>':'')+attChips(n.att)+'</div>'}
+/* ============ NOTES · RICH TEXT EDITOR ============ */
+const NE_COLORS=['#F3EFE6','#D9A85C','#C0392B','#E67E22','#27AE60','#2980B9','#8E44AD'];
+let neCtx={id:null,space:'personal',att:[]};
+function neBuildColors(){const el=document.getElementById('neColors');
+  el.innerHTML=NE_COLORS.map(c=>'<span class="ne-sw" style="background:'+c+'" onclick="neColor(\''+c+'\')"></span>').join('')}
+function neCmd(cmd,val){document.getElementById('neEditor').focus();try{document.execCommand(cmd,false,val||null)}catch(e){}}
+function neSize(sz){document.getElementById('neEditor').focus();try{document.execCommand('fontSize',false,sz)}catch(e){}}
+function neColor(c){document.getElementById('neEditor').focus();try{document.execCommand('foreColor',false,c)}catch(e){}}
+function noteNew(space){neCtx={id:null,space:space||'personal',att:[]};
+  document.getElementById('neTitle').value='';
+  const ed=document.getElementById('neEditor');ed.innerHTML='';ed.setAttribute('data-ph','Start writing your thoughts\u2026');
+  neBuildColors();drawNePend();
+  document.getElementById('noteOv').classList.add('open');
+  setTimeout(()=>document.getElementById('neTitle').focus(),60)}
+function noteOpen(id){const n=S.notes.find(x=>x.id===id);if(!n)return;
+  neCtx={id:n.id,space:n.space||'personal',att:(n.att||[]).slice()};
+  document.getElementById('neTitle').value=n.title==='Untitled'?'':n.title;
+  const ed=document.getElementById('neEditor');
+  ed.innerHTML=n.html||(n.body?esc(n.body).replace(/\n/g,'<br>'):'');
+  ed.setAttribute('data-ph','Start writing your thoughts\u2026');
+  neBuildColors();drawNePend();
+  document.getElementById('noteOv').classList.add('open')}
+function noteEditClose(){document.getElementById('noteOv').classList.remove('open')}
+function neAttach(){pickFiles(fs=>{neCtx.att.push(...fs);drawNePend()})}
+function drawNePend(){const el=document.getElementById('nePend');if(!el)return;
+  el.innerHTML=neCtx.att.length?('<div style="padding:0 16px 12px">'+attChips(neCtx.att)+'</div>'):''}
+function plainFromHtml(h){const d=document.createElement('div');d.innerHTML=h;return (d.textContent||'').trim()}
+function noteEditSave(){const title=document.getElementById('neTitle').value.trim();
+  const html=document.getElementById('neEditor').innerHTML;
+  const plain=plainFromHtml(html);
+  if(!title&&!plain&&!neCtx.att.length){noteEditClose();return}
+  if(neCtx.id){const n=S.notes.find(x=>x.id===neCtx.id);
+    if(n){n.title=title||'Untitled';n.html=html;n.body=plain;n.att=neCtx.att.slice();n.at=new Date().toISOString()}}
+  else S.notes.unshift({id:uid(),title:title||'Untitled',html,body:plain,space:neCtx.space,pinned:false,att:neCtx.att.slice(),at:new Date().toISOString()});
+  save();renderLife();renderWork();noteEditClose();toast('\u2713 Note saved')}
+function noteCard(n){const preview=n.html||(n.body?esc(n.body).replace(/\n/g,'<br>'):'');
+  return '<div class="card diary-card" style="cursor:pointer" onclick="noteOpen(\''+n.id+'\')">'
+  +'<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">'
+  +'<div class="row-title" style="font-family:Fraunces,serif;font-size:17px;padding-left:8px">'+esc(n.title)+'</div>'
+  +'<div style="display:flex;gap:4px" onclick="event.stopPropagation()">'
+  +'<button class="del" style="opacity:'+(n.pinned?1:.45)+';color:var(--gold)" onclick="pinNote(\''+n.id+'\')">\ud83d\udccc</button>'
+  +'<button class="ed" title="Rename" onclick="askRename(\'note\',\''+n.id+'\')">\u270e</button>'
+  +'<button class="del" onclick="delNote(\''+n.id+'\')">\u2715</button></div></div>'
+  +(preview?'<div class="diary-body" style="padding-left:8px">'+preview+'</div>':'')
+  +'<div class="row-meta" style="padding-left:8px;margin-top:8px">'+fmtD(n.at)+(n.att&&n.att.length?' \u00b7 \ud83d\udcce '+n.att.length:'')+'</div>'
+  +'</div>'}
 function pinNote(id){const n=S.notes.find(x=>x.id===id);n.pinned=!n.pinned;save();renderLife();renderWork();toast(n.pinned?'Pinned to Today':'Unpinned')}
 function delNote(id){const n=S.notes.find(x=>x.id===id);askDelete(n&&n.title,()=>_delNote(id));}
 function _delNote(id){const n=S.notes.find(x=>x.id===id);trashPush('note',n,n&&n.title);S.notes=S.notes.filter(x=>x.id!==id);save();renderLife();renderWork()}
