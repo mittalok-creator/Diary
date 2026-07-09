@@ -347,12 +347,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <div class="h-date"><span id="hDate"></span><span id="hTime" style="color:var(--hi);margin-left:8px;font-size:12px"></span></div>
     <div class="h-greet" id="hGreet"></div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px">
-    <button class="hbtn" onclick="openSearch()" aria-label="Search">
-      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-    </button>
-    <div class="avatar" id="hAvatar" onclick="go('settings')">A</div>
-  </div>
+  <div class="avatar" id="hAvatar" onclick="go('settings')">A</div>
 </header>
 
 <main id="main">
@@ -945,6 +940,14 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   <button id="loginSkip" onclick="loginSkip()">Continue without account (this device only)</button>
 </div>
 
+<div id="confirmOv" class="cfov"><div class="cfbox" style="text-align:center;max-width:340px">
+    <div class="mono-big" style="width:56px;height:56px;font-size:20px;margin:0 auto 16px">AM</div>
+    <h2 id="cfmTitle" style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:8px">Are you sure?</h2>
+    <p id="cfmMsg" class="set-sub" style="margin-bottom:20px"></p>
+    <button class="btn btn-risk" id="cfmYes" style="width:100%">Delete</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="cfmClose()">Cancel</button>
+  </div></div>
+
 <div id="sheetOv" class="cfov"><div class="cfbox" style="text-align:left;max-height:80vh;overflow:auto">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <h2 id="sheetTitle" style="font-family:'Fraunces',serif;font-size:19px"></h2>
@@ -1247,7 +1250,8 @@ async function copyLink(id){const l=S.links.find(x=>x.id===id);if(!l)return;
   catch(e){const t=document.createElement('textarea');t.value=l.url;document.body.appendChild(t);
     t.select();try{document.execCommand('copy');toast('Link copied')}catch(e2){toast('Could not copy the link')}
     t.remove()}}
-function delLink(id){const l=S.links.find(x=>x.id===id);trashPush('link',l,'🔗 '+(l&&l.name));
+function delLink(id){const l=S.links.find(x=>x.id===id);askDelete(l&&l.name,()=>_delLink(id));}
+function _delLink(id){const l=S.links.find(x=>x.id===id);trashPush('link',l,'🔗 '+(l&&l.name));
   S.links=S.links.filter(x=>x.id!==id);save();renderWork()}
 function linkCard(l){return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
   +'<div class="thumb-ph" style="width:42px;height:42px;font-size:19px">🔗</div>'
@@ -1318,6 +1322,14 @@ async function skSave(){if(!sk.strokes.length){toast('Draw something first');ret
   pend[sk.target].push({id,name:'Sketch '+fmtD(new Date()),type:'img',size:d.length});
   drawPend(sk.target);skClose();
   toast('✏️ Sketch added — now save the note')}
+function cfmClose(){document.getElementById('confirmOv').classList.remove('open');_cfmFn=null}
+let _cfmFn=null;
+function askDelete(name,fn,label){_cfmFn=fn;
+  const perm=label&&/forever/i.test(label);
+  document.getElementById('cfmMsg').innerHTML='<b style="color:var(--hi)">'+esc(name||'This item')+'</b> will be removed.'+(perm?'<br><span style="color:var(--risk)">This cannot be undone.</span>':'<br>You can restore it from Settings → Recently deleted for 30 days.');
+  document.getElementById('cfmYes').textContent=label||'Delete';
+  document.getElementById('cfmYes').onclick=()=>{const fn=_cfmFn;cfmClose();if(fn)fn()};
+  document.getElementById('confirmOv').classList.add('open')}
 function showSheet(t,html){document.getElementById('sheetTitle').textContent=t;document.getElementById('sheetBody').innerHTML=html||'';document.getElementById('sheetOv').classList.add('open');setTimeout(loadThumbs,0)}
 /* ============ SEARCH ENTRY ============ */
 function openSearch(){const d=document.getElementById('dashQ');
@@ -1346,7 +1358,8 @@ function tglTask(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.d
       x.rep=null;save();renderLife();renderWork();toast('✓ Done — next one on '+fmtD(nd));return}}
   save();if(x.done)toast('✓ Done — nicely handled');
   renderLife();renderWork();}
-function delTask(id){const x=S.tasks.find(t=>t.id===id);trashPush('task',x,x&&x.title);S.tasks=S.tasks.filter(t=>t.id!==id);save();renderLife();renderWork()}
+function delTask(id){const x=S.tasks.find(t=>t.id===id);askDelete(x&&x.title,()=>_delTask(id));}
+function _delTask(id){const x=S.tasks.find(t=>t.id===id);trashPush('task',x,x&&x.title);S.tasks=S.tasks.filter(t=>t.id!==id);save();renderLife();renderWork()}
 function listOr(el,arr,fn,msg){el.innerHTML=arr.length?arr.map(fn).join(''):
   '<div class="empty"><div class="em-ring">AM</div>'+msg+'</div>'}
 /* ============ NOTES ============ */
@@ -1360,7 +1373,8 @@ function noteCard(n){return '<div class="card"><div style="display:flex;justify-
   '<button class="del" onclick="delNote(\''+n.id+'\')">✕</button></div></div>'+
   (n.body?'<div style="color:var(--lo);font-size:13.5px;margin-top:6px;white-space:pre-wrap">'+esc(n.body)+'</div>':'')+attChips(n.att)+'</div>'}
 function pinNote(id){const n=S.notes.find(x=>x.id===id);n.pinned=!n.pinned;save();renderLife();renderWork();toast(n.pinned?'Pinned to Today':'Unpinned')}
-function delNote(id){const n=S.notes.find(x=>x.id===id);trashPush('note',n,n&&n.title);S.notes=S.notes.filter(x=>x.id!==id);save();renderLife();renderWork()}
+function delNote(id){const n=S.notes.find(x=>x.id===id);askDelete(n&&n.title,()=>_delNote(id));}
+function _delNote(id){const n=S.notes.find(x=>x.id===id);trashPush('note',n,n&&n.title);S.notes=S.notes.filter(x=>x.id!==id);save();renderLife();renderWork()}
 /* ============ SHOPPING ============ */
 function addShop(inputId,name){const inp=inputId?document.getElementById(inputId):null;
   const items=(name??inp.value).split(/,| and /i).map(s=>s.trim()).filter(Boolean);
@@ -1381,7 +1395,8 @@ function addExpense(amt,note,cat){const a=amt??Number(exAmt.value);if(!a||a<=0){
   S.expenses.unshift({id:uid(),amount:a,note:(note??exNote.value.trim())||curCat,cat:cat||curCat,att:manual?pend.exp.splice(0):[],at:when});
   if(manual){exAmt.value='';exNote.value='';exDate.value='';drawPend('exp')}
   save();renderLife();toast(fmtR(a)+' logged'+(back?' · '+fmtD(when):''))}
-function delExp(id){const x=S.expenses.find(e=>e.id===id);trashPush('expense',x,x&&(x.note+' · '+fmtR(x.amount)));S.expenses=S.expenses.filter(e=>e.id!==id);save();renderLife()}
+function delExp(id){const x=S.expenses.find(e=>e.id===id);askDelete(x&&x.note,()=>_delExp(id));}
+function _delExp(id){const x=S.expenses.find(e=>e.id===id);trashPush('expense',x,x&&(x.note+' · '+fmtR(x.amount)));S.expenses=S.expenses.filter(e=>e.id!==id);save();renderLife()}
 /* ============ FOLLOW-UPS ============ */
 function addFollow(person,topic,due){const p=(person??fuWho.value).trim(),t=(topic??fuWhat.value).trim();
   if(!p&&!t)return;
@@ -1397,7 +1412,8 @@ function fuCard(f){return '<div class="card '+(f.done?'':'')+'" style="'+(f.done
 function fuDone(id){S.followups.find(f=>f.id===id).done=true;save();renderWork();toast('✓ Follow-up closed')}
 function fuPush(id){const f=S.followups.find(x=>x.id===id);const d=new Date(f.due);d.setDate(d.getDate()+1);
   f.due=d.toISOString().slice(0,10);f.nudges++;save();renderWork();toast('Pushed to '+fmtD(d))}
-function fuDel(id){const f=S.followups.find(x=>x.id===id);trashPush('followup',f,f&&(f.person+' — '+f.topic));S.followups=S.followups.filter(x=>x.id!==id);save();renderWork()}
+function fuDel(id){const f=S.followups.find(x=>x.id===id);askDelete(f&&(f.person+' — '+f.topic),()=>_fuDel(id));}
+function _fuDel(id){const f=S.followups.find(x=>x.id===id);trashPush('followup',f,f&&(f.person+' — '+f.topic));S.followups=S.followups.filter(x=>x.id!==id);save();renderWork()}
 /* ============ MEETINGS ============ */
 function addMeeting(){const title=mtTitle.value.trim();if(!title){toast('Meeting name is required');return}
   S.meetings.unshift({id:uid(),title,host:mtHost.value.trim(),date:mtDate.value||today(),time:mtTime.value||'',
@@ -1408,7 +1424,8 @@ function joinMeet(id){const m=S.meetings.find(x=>x.id===id);
   if(m&&m.link){let u=m.link;if(!/^https?:/i.test(u))u='https://'+u;
     const w=window.open(u,'_blank');if(!w)toast('Popup blocked — open this link: '+u)}
   else{go('work');workTab('meet');toast('No link saved for this meeting')}}
-function delMeet(id){const x=S.meetings.find(m=>m.id===id);trashPush('meeting',x,x&&x.title);S.meetings=S.meetings.filter(m=>m.id!==id);save();renderWork();renderToday()}
+function delMeet(id){const x=S.meetings.find(m=>m.id===id);askDelete(x&&x.title,()=>_delMeet(id));}
+function _delMeet(id){const x=S.meetings.find(m=>m.id===id);trashPush('meeting',x,x&&x.title);S.meetings=S.meetings.filter(m=>m.id!==id);save();renderWork();renderToday()}
 function meetCard(m){return '<div class="card">'
   +'<div style="display:flex;justify-content:space-between;gap:8px"><div class="row-title" style="font-family:Fraunces,serif;font-size:17px">'+esc(m.title)+'</div><button class="del" onclick="delMeet(\''+m.id+'\')">✕</button></div>'
   +'<div class="row-meta" style="margin-top:4px">'+(m.host?'👤 '+esc(m.host)+' · ':'')+dueLabel(m.date)+(m.time?' · <b style="color:var(--gold)">'+fmtTime(m.time)+'</b>':'')+(m.rem?' · 🔔 '+m.rem+' min before':'')+'</div>'
@@ -1434,7 +1451,8 @@ function addIncome(){const a=Number(exAmt.value);if(!a||a<=0){toast('Enter an am
   const when=exDate.value?new Date(exDate.value+'T12:00:00').toISOString():new Date().toISOString();
   S.income.unshift({id:uid(),amount:a,source:exNote.value.trim()||'Income',at:when});
   exAmt.value='';exNote.value='';exDate.value='';save();renderLife();toast('+'+fmtR(a)+' income logged')}
-function delInc(id){const x=S.income.find(i=>i.id===id);trashPush('income',x,x&&(x.source+' · '+fmtR(x.amount)));S.income=S.income.filter(i=>i.id!==id);save();renderLife()}
+function delInc(id){const x=S.income.find(i=>i.id===id);askDelete(x&&x.source,()=>_delInc(id));}
+function _delInc(id){const x=S.income.find(i=>i.id===id);trashPush('income',x,x&&(x.source+' · '+fmtR(x.amount)));S.income=S.income.filter(i=>i.id!==id);save();renderLife()}
 function setBudget(){const v=Number(document.getElementById('budIn').value)||0;
   S.money=S.money||{};S.money.budget=v;document.getElementById('budIn').value='';
   save();renderLife();toast(v?'Monthly budget set — '+fmtR(v):'Budget cleared')}
@@ -1445,7 +1463,8 @@ function addGoal(){const n=goalName.value.trim(),t=Number(goalTarget.value);
 function goalAdd(id){const inp=document.getElementById('ga_'+id);const v=Number(inp.value);if(!v)return;
   const g=S.goals.find(x=>x.id===id);g.saved=(g.saved||0)+v;inp.value='';save();renderLife();
   toast(g.saved>=g.target?'🏆 '+g.name+' complete!':fmtR(v)+' saved toward '+g.name)}
-function delGoal(id){const g=S.goals.find(x=>x.id===id);trashPush('goal',g,g&&g.name);S.goals=S.goals.filter(x=>x.id!==id);save();renderLife()}
+function delGoal(id){const g=S.goals.find(x=>x.id===id);askDelete(g&&g.name,()=>_delGoal(id));}
+function _delGoal(id){const g=S.goals.find(x=>x.id===id);trashPush('goal',g,g&&g.name);S.goals=S.goals.filter(x=>x.id!==id);save();renderLife()}
 function monthKey(d){return String(d).slice(0,7)}
 function renderMoney2(){if(!document.getElementById('budBar'))return;
   const t=today(),mk=t.slice(0,7);
@@ -1494,7 +1513,8 @@ function addMed(){const n=medName.value.trim();if(!n){toast('Medicine name?');re
   S.meds.unshift({id:uid(),name:n,times:ts,days:Number(medDays.value)||0,start:today(),taken:{},notified:{}});
   medName.value='';medT1.value='';medT2.value='';medDays.value='';
   save();renderLife();renderToday();toast('💊 Reminders set — '+ts.map(fmtTime).join(', '))}
-function delMed(id){const m=S.meds.find(x=>x.id===id);trashPush('med',m,m&&('💊 '+m.name));S.meds=S.meds.filter(x=>x.id!==id);save();renderLife();renderToday()}
+function delMed(id){const m=S.meds.find(x=>x.id===id);askDelete(m&&m.name,()=>_delMed(id));}
+function _delMed(id){const m=S.meds.find(x=>x.id===id);trashPush('med',m,m&&('💊 '+m.name));S.meds=S.meds.filter(x=>x.id!==id);save();renderLife();renderToday()}
 function medToggle(id,tm){const m=S.meds.find(x=>x.id===id);const t=today();m.taken=m.taken||{};
   const arr=m.taken[t]=m.taken[t]||[];const i=arr.indexOf(tm);
   if(i>-1)arr.splice(i,1);else{arr.push(tm);toast('💊 Dose logged')}
@@ -1516,7 +1536,8 @@ function checkMedRem(){const t=today();S.meds.forEach(m=>{if(!medActive(m,t))ret
     if(diff<=0&&diff>-30){m.notified[key]=1;save(true);notify('💊 '+m.name,'Dose time — '+fmtTime(tm))}})})}
 function addHabit(){const n=habName.value.trim();if(!n)return;
   S.habits.unshift({id:uid(),name:n,done:{}});habName.value='';save();renderLife();toast('🔥 Habit added')}
-function delHabit(id){const h=S.habits.find(x=>x.id===id);trashPush('habit',h,h&&h.name);S.habits=S.habits.filter(x=>x.id!==id);save();renderLife()}
+function delHabit(id){const h=S.habits.find(x=>x.id===id);askDelete(h&&h.name,()=>_delHabit(id));}
+function _delHabit(id){const h=S.habits.find(x=>x.id===id);trashPush('habit',h,h&&h.name);S.habits=S.habits.filter(x=>x.id!==id);save();renderLife()}
 function habitStreak(h){let n=0;const d=new Date();h.done=h.done||{};
   if(!h.done[today()])d.setDate(d.getDate()-1);
   while(h.done[d.toISOString().slice(0,10)]){n++;d.setDate(d.getDate()-1)}return n}
@@ -1539,7 +1560,8 @@ function addWeight(){const v=Number(wtIn.value);if(!v)return;
 function addBP(){const a=Number(bpS.value),b2=Number(bpD.value);if(!a||!b2)return;
   S.vitals.unshift({id:uid(),kind:'bp',v1:a,v2:b2,at:new Date().toISOString()});
   bpS.value='';bpD.value='';save();renderLife();toast('🩺 '+a+'/'+b2+' logged')}
-function delVital(id){const v=S.vitals.find(x=>x.id===id);trashPush('vital',v,'Vital reading');S.vitals=S.vitals.filter(x=>x.id!==id);save();renderLife()}
+function delVital(id){askDelete('This reading',()=>_delVital(id));}
+function _delVital(id){const v=S.vitals.find(x=>x.id===id);trashPush('vital',v,'Vital reading');S.vitals=S.vitals.filter(x=>x.id!==id);save();renderLife()}
 function renderHealth(){if(!document.getElementById('medList'))return;
   medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
   habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
@@ -1558,7 +1580,8 @@ function addRenewal(){const n=rnName.value.trim();
     premium:Number(rnPrem.value)||0,expiry:rnExp.value,remind:+rnRem.value,att:pend.ren.splice(0),notified:{}});
   ['rnName','rnProv','rnNo','rnPrem','rnExp'].forEach(i=>document.getElementById(i).value='');
   drawPend('ren');save();renderLife();renderToday();toast('🛡 Renewal tracked — '+rnLabel(daysTo(S.renewals[0].expiry)))}
-function delRenewal(id){const r=S.renewals.find(x=>x.id===id);trashPush('renewal',r,r&&r.name);
+function delRenewal(id){const r=S.renewals.find(x=>x.id===id);askDelete(r&&r.name,()=>_delRenewal(id));}
+function _delRenewal(id){const r=S.renewals.find(x=>x.id===id);trashPush('renewal',r,r&&r.name);
   S.renewals=S.renewals.filter(x=>x.id!==id);save();renderLife();renderToday()}
 let renewTarget=null;
 function renewPlus(id){const r=S.renewals.find(x=>x.id===id);if(!r)return;renewTarget=id;
@@ -1677,7 +1700,8 @@ function carSaveProfile(){const img=document.getElementById('carPicImg');
 function serviceDueKm(){const c=S.car||{};if(!c.svcEvery||!c.svcKm)return null;
   const due=c.svcKm+c.svcEvery;const now=lastOdoNow();
   return {due,now,remain:due-now}}
-function delFuel(id){const f=S.fuel.find(x=>x.id===id);
+function delFuel(id){const f=S.fuel.find(x=>x.id===id);askDelete(f&&('Fuel · '+fmtR(f.amount)),()=>_delFuel(id));}
+function _delFuel(id){const f=S.fuel.find(x=>x.id===id);
   const ex=S.expenses.find(e=>e.src==='fuel:'+id);if(f&&ex)f._exp=ex;
   trashPush('fuel',f,f&&('⛽ '+fmtR(f.amount)));
   S.fuel=S.fuel.filter(x=>x.id!==id);S.expenses=S.expenses.filter(e=>e.src!=='fuel:'+id);save();renderLife()}
@@ -1697,7 +1721,8 @@ function addService(){const w=svWork.value.trim();if(!w){toast('What work was do
     at:new Date(d+'T12:00:00').toISOString(),src:'svc:'+id});
   ['svDate','svOdo','svWork','svCost','svGarage','svNext','svNextKm'].forEach(i=>document.getElementById(i).value='');
   drawPend('svc');save();renderLife();toast('🔧 Service recorded')}
-function delService(id){const s=S.service.find(x=>x.id===id);
+function delService(id){const s=S.service.find(x=>x.id===id);askDelete(s&&s.work,()=>_delService(id));}
+function _delService(id){const s=S.service.find(x=>x.id===id);
   const ex=S.expenses.find(e=>e.src==='svc:'+id);if(s&&ex)s._exp=ex;
   trashPush('service',s,s&&('🔧 '+s.work));
   S.service=S.service.filter(x=>x.id!==id);S.expenses=S.expenses.filter(e=>e.src!=='svc:'+id);save();renderLife()}
@@ -1757,10 +1782,12 @@ function trashRestore(tid){const t=S.trash.find(x=>x.tid===tid);if(!t)return;
   if(t.item._exp){S.expenses.unshift(t.item._exp);delete t.item._exp}
   S.trash=S.trash.filter(x=>x.tid!==tid);
   save();applyTheme();renderAll();toast('✓ Restored')}
-function trashDrop(tid){const t=S.trash.find(x=>x.tid===tid);if(!t)return;
+function trashDrop(tid){const t=S.trash.find(x=>x.tid===tid);if(!t)return;askDelete(t.label,()=>_trashDrop(tid),'Delete forever');}
+function _trashDrop(tid){const t=S.trash.find(x=>x.tid===tid);if(!t)return;
   itemAttIds(t.kind,t.item).forEach(fileDel);
   S.trash=S.trash.filter(x=>x.tid!==tid);save();renderSettings()}
-function trashEmpty(){if(!S.trash.length){toast('Trash is already empty');return}
+function trashEmpty(){if(!S.trash.length){toast('Trash is already empty');return}askDelete('Everything in Trash',()=>_trashEmpty(),'Empty forever');}
+function _trashEmpty(){
   S.trash.forEach(t=>itemAttIds(t.kind,t.item).forEach(fileDel));
   S.trash=[];save();renderSettings();toast('Trash emptied')}
 function trashAutoPurge(){const cut=Date.now()-30*864e5;
@@ -1804,7 +1831,8 @@ function addEventPerson(){const n=bdName.value.trim();
   S.events.unshift({id:uid(),name:n,kind:curBK,date:bdDate.value,note:bdNote.value.trim(),remind:+bdRem.value,notified:{}});
   ['bdName','bdDate','bdNote'].forEach(i=>document.getElementById(i).value='');
   save();renderLife();renderToday();toast((curBK==='Birthday'?'🎂 ':'💍 ')+n+' added')}
-function delEvent(id){const e=S.events.find(x=>x.id===id);
+function delEvent(id){const e=S.events.find(x=>x.id===id);askDelete(e&&e.name,()=>_delEvent(id));}
+function _delEvent(id){const e=S.events.find(x=>x.id===id);
   trashPush('event',e,(e.kind==='Birthday'?'🎂 ':'💍 ')+e.name);
   S.events=S.events.filter(x=>x.id!==id);save();renderLife();renderToday()}
 function evCard(e){const occ=nextOcc(e.date),n=daysTo(occ),yrs=yearsOn(e.date,occ);
@@ -2033,7 +2061,8 @@ function addDocIn(space,inputId,cam){const el=document.getElementById(inputId);c
     fs.forEach((a,i)=>S.docs.unshift({id:uid(),name:fs.length>1?n+' ('+(i+1)+')':n,space,att:a,at:new Date().toISOString()}));
     el.value='';save();renderLife();renderWork();toast(fs.length+' document saved 🔒')},
     cam?{capture:true,accept:'image/*'}:null)}
-function delDoc(id){const d=S.docs.find(x=>x.id===id);trashPush('doc',d,d&&d.name);
+function delDoc(id){const d=S.docs.find(x=>x.id===id);askDelete(d&&d.name,()=>_delDoc(id));}
+function _delDoc(id){const d=S.docs.find(x=>x.id===id);trashPush('doc',d,d&&d.name);
   S.docs=S.docs.filter(x=>x.id!==id);save();renderLife();renderWork()}
 function docCard(d){const a=d.att;return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
   +(a.type==='img'?'<img class="thumb" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\')">':'<div class="thumb-ph">📄</div>')
@@ -2121,7 +2150,8 @@ function addCircular(cam){const copt=cam?{capture:true,accept:'image/*'}:null;
     fs.slice(1).forEach(a=>fileDel(a.id));
     document.getElementById('circName').value='';document.getElementById('circDate').value='';
     save();renderWork();toast('Circular saved')},copt)}
-function delCirc(id){const c=S.circulars.find(x=>x.id===id);trashPush('circular',c,c&&c.name);
+function delCirc(id){const c=S.circulars.find(x=>x.id===id);askDelete(c&&c.name,()=>_delCirc(id));}
+function _delCirc(id){const c=S.circulars.find(x=>x.id===id);trashPush('circular',c,c&&c.name);
   S.circulars=S.circulars.filter(x=>x.id!==id);if(circOpen===id)circOpen=null;save();renderWork()}
 function delCircVer(cid,vid){const c=S.circulars.find(x=>x.id===cid);if(!c)return;
   const v=c.versions.find(x=>x.id===vid);if(v&&v.att)fileDel(v.att.id);
