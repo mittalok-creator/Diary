@@ -1074,6 +1074,14 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   <button id="loginSkip" onclick="loginSkip()">Continue without account (this device only)</button>
 </div>
 
+<div id="pdfPwOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:340px">
+    <h2 style="font-family:'Fraunces',serif;font-size:19px;margin-bottom:6px">🔒 Protected PDF</h2>
+    <div class="set-sub" id="pdfPwMsg" style="margin-bottom:12px">Enter the password to open this document</div>
+    <input class="inp" id="pdfPwIn" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')pdfPwSubmit()">
+    <button class="btn btn-gold" style="width:100%;margin-top:14px" onclick="pdfPwSubmit()">Open</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="pdfPwCancel()">Cancel</button>
+  </div></div>
+
 <div id="renameOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
     <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">Rename</h2>
     <input class="inp" id="renameIn" placeholder="New name" onkeydown="if(event.key==='Enter')renameSave()">
@@ -2449,7 +2457,12 @@ async function openAtt(id,type,name){
     stage.appendChild(img);return}
   stage.innerHTML='<div class="pv-load">Opening document…</div>';
   try{const lib=await loadPdfJs();
-    const doc=await lib.getDocument({data:b64ToBytes(d)}).promise;
+    const task=lib.getDocument({data:b64ToBytes(d)});
+    task.onPassword=(updatePassword,reason)=>{
+      const msg=reason===lib.PasswordResponses.INCORRECT_PASSWORD?'Wrong password — try again':'This PDF is password protected';
+      askPdfPassword(msg,pw=>{if(pw==null){stage.innerHTML='<div class="pv-load">Locked — password needed</div>'}else updatePassword(pw)});
+    };
+    const doc=await task.promise;
     pv.pdf=doc;stage.innerHTML='';
     document.getElementById('pvPages').textContent=doc.numPages+(doc.numPages>1?' pages':' page');
     const w=Math.min(stage.clientWidth-8,1400);
@@ -2583,7 +2596,7 @@ function delDoc(id){const d=S.docs.find(x=>x.id===id);askDelete(d&&d.name,()=>_d
 function _delDoc(id){const d=S.docs.find(x=>x.id===id);trashPush('doc',d,d&&d.name);
   S.docs=S.docs.filter(x=>x.id!==id);save();renderLife();renderWork()}
 function docCard(d){const a=d.att;return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
-  +(a.type==='img'?'<img class="thumb" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\')">':'<div class="thumb-ph">📄</div>')
+  +(a.type==='img'?'<img class="thumb" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\')">':'<div class="thumb-ph" style="font-size:26px">'+fileIcon(a)+'</div>')
   +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(d.name)+'</div><div class="row-meta">'+(d.space==='office'?'💼 Office · ':'')+fmtD(d.at)+'</div></div>'
   +'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')">Open</button>'
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
@@ -2720,6 +2733,17 @@ function exportExpenses(){if(!S.expenses.length&&!S.income.length){toast('Nothin
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a2=document.createElement('a');
   a2.href=URL.createObjectURL(blob);a2.download='alokos-money-'+fmtD(new Date())+'.csv';a2.click();
   setTimeout(()=>URL.revokeObjectURL(a2.href),3000);toast('Excel file downloaded — open to analyse')}
+function askPdfPassword(msg,cb){_pdfPwCb=cb;
+  document.getElementById('pdfPwMsg').textContent=msg||'Enter the password to open this document';
+  const inp=document.getElementById('pdfPwIn');inp.value='';
+  document.getElementById('pdfPwOv').classList.add('open');
+  setTimeout(()=>inp.focus(),60)}
+let _pdfPwCb=null;
+function pdfPwSubmit(){const pw=document.getElementById('pdfPwIn').value;
+  document.getElementById('pdfPwOv').classList.remove('open');
+  const cb=_pdfPwCb;_pdfPwCb=null;if(cb)cb(pw)}
+function pdfPwCancel(){document.getElementById('pdfPwOv').classList.remove('open');
+  const cb=_pdfPwCb;_pdfPwCb=null;if(cb)cb(null)}
 /* ============ FILE ATTACHMENT HELPERS ============ */
 function fileExt(name){const m=/\.([a-z0-9]+)$/i.exec(name||'');return m?m[1].toLowerCase():''}
 function fileIcon(a){
