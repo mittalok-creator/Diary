@@ -1,7 +1,7 @@
 {
   "name": "ALOK OS",
   "short_name": "ALOK OS",
-  "description": "Personal & Office Operating System \u2014 BY ALOK MITTAL",
+  "description": "Personal & Office Operating System — BY ALOK MITTAL",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -65,5 +65,13 @@
         }
       ]
     }
+  ],
+  "id": "/app/",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "productivity",
+    "business",
+    "lifestyle"
   ]
 }
