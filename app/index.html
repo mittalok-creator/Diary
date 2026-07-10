@@ -426,6 +426,7 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
 .hdr-search:active{transform:scale(.9)}
 .sk-palette{flex-shrink:0}
 @media(max-height:620px){.sk-toolbar-note{display:none}}
+.focus-card{background:linear-gradient(160deg,var(--ink1),color-mix(in srgb,var(--ink1) 88%,var(--gold)))}
 </style>
 </head>
 <body>
@@ -453,22 +454,18 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     </button>
   </div>
 
-  <div class="card" style="margin-top:14px">
-    <div class="ringwrap">
-      <svg class="ring" width="84" height="84" viewBox="0 0 84 84">
-        <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#D9A85C"/><stop offset="1" stop-color="#F0C27B"/>
-        </linearGradient></defs>
-        <circle class="bg" cx="42" cy="42" r="36" stroke-width="6" fill="none"/>
-        <circle class="fg" id="scoreRing" cx="42" cy="42" r="36" stroke-width="6" fill="none"
-          stroke-dasharray="226" stroke-dashoffset="226"/>
+  <div class="card focus-card" id="focusCard" style="margin-top:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div><div class="stat-label">Today's Focus</div>
+        <div id="focusHead" style="font-family:'Fraunces',serif;font-size:22px;margin-top:2px">—</div></div>
+      <svg class="ring" width="60" height="60" viewBox="0 0 84 84" style="flex-shrink:0">
+        <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#D9A85C"/><stop offset="1" stop-color="#F0C27B"/></linearGradient></defs>
+        <circle class="bg" cx="42" cy="42" r="36" stroke-width="7" fill="none"/>
+        <circle class="fg" id="scoreRing" cx="42" cy="42" r="36" stroke-width="7" fill="none" stroke-dasharray="226" stroke-dashoffset="226"/>
       </svg>
-      <div>
-        <div class="stat-label">Today's Score</div>
-        <div class="ring-num"><span id="scoreTxt">0</span>%</div>
-        <div class="stat-sub" id="scoreSub"></div>
-      </div>
     </div>
+    <div id="focusChips" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px"></div>
+    <div id="focusNext" class="stat-sub" style="margin-top:10px"></div>
   </div>
 
   <div class="seg" id="dashSeg" style="margin-top:16px">
@@ -1408,18 +1405,49 @@ function dueLabel(d){if(!d)return'';const t=today();
   return fmtD(d)}
 function renderToday(){renderHeader();
   const t=today();
-  /* --- Today's Score: only what is actually due today (tasks due<=today, habits, medicine doses) --- */
+  /* --- Today's Focus: overdue + due-today across the app --- */
+  const overT=S.tasks.filter(x=>!x.done&&x.due&&x.due<t);
+  const dueTodayT=S.tasks.filter(x=>!x.done&&x.due===t);
   const dueT=S.tasks.filter(x=>x.due&&x.due<=t);
   const doneT=dueT.filter(x=>x.done).length;
   const habT=S.habits.length, habD=S.habits.filter(h=>(h.done||{})[t]).length;
   let dosT=0,dosD=0;
   S.meds.forEach(m=>{if(!medActive(m,t))return;(m.times||[]).forEach(tm=>{dosT++;
     if((((m.taken||{})[t])||[]).includes(tm))dosD++})});
+  const meetToday=S.meetings.filter(m=>m.date===t&&!m.done).length;
+  const followToday=S.followups.filter(fu=>!fu.done&&fu.due&&fu.due<=t).length;
+  const billsSoon=S.bills.filter(b=>!b.paid&&daysTo(b.due)<=3).length+S.cards.filter(c=>daysTo(c.due)<=3).length;
   const tot=dueT.length+habT+dosT, don=doneT+habD+dosD;
   const pct=tot?Math.round(don/tot*100):0;
   scoreRing.style.strokeDashoffset=226-226*pct/100;
-  countUp(scoreTxt,pct);
-  scoreSub.textContent=tot?(don+' of '+tot+' done today'):'Nothing due today';
+  /* headline */
+  const head=document.getElementById('focusHead');
+  if(head){
+    if(overT.length)head.innerHTML='<span style="color:var(--risk)">'+overT.length+' overdue</span>';
+    else if(dueTodayT.length||meetToday||followToday)head.textContent=(dueTodayT.length+meetToday+followToday)+' due today';
+    else if(tot&&don===tot)head.innerHTML='<span style="color:var(--good)">All done ✓</span>';
+    else head.textContent='You\'re clear';
+  }
+  /* chips */
+  const chips=document.getElementById('focusChips');
+  if(chips){const c=[];
+    const chip=(n,label,col,view)=>c.push('<span onclick="'+(view||'')+'" style="'+(view?'cursor:pointer;':'')+'background:'+col+'22;color:'+col+';border:1px solid '+col+'44;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600">'+n+' '+label+'</span>');
+    if(overT.length)chip(overT.length,'overdue','var(--risk)',"go('life')");
+    if(dueTodayT.length)chip(dueTodayT.length,'task'+(dueTodayT.length>1?'s':'')+' today','var(--gold)',"go('life')");
+    if(meetToday)chip(meetToday,'meeting'+(meetToday>1?'s':''),'var(--gold)',"go('work')");
+    if(followToday)chip(followToday,'follow-up'+(followToday>1?'s':''),'var(--gold)',"go('work')");
+    if(dosT-dosD>0)chip(dosT-dosD,'dose'+((dosT-dosD)>1?'s':''),'#3498DB',"lifeTab('health')");
+    if(billsSoon)chip(billsSoon,'bill'+(billsSoon>1?'s':'')+' soon','var(--warn)',"lifeTab('pay')");
+    if(!c.length)c.push('<span style="color:var(--lo);font-size:13px">Nothing pending — enjoy your day ✦</span>');
+    chips.innerHTML=c.join('');
+  }
+  /* next up */
+  const nx=document.getElementById('focusNext');
+  if(nx){let next=null;
+    [...overT,...dueTodayT].filter(x=>x.time).sort((a,b)=>(a.time||'').localeCompare(b.time||'')).forEach(x=>{if(!next)next=x});
+    if(next)nx.innerHTML='Next: <b>'+esc(next.title)+'</b>'+(next.time?' at '+fmtTime(next.time):'');
+    else nx.textContent=tot?(don+' of '+tot+' done today'):'';
+  }
 
   renderWeekStrip();renderTimeline();
 
