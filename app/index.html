@@ -421,6 +421,9 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
 .sk-stamp{font-size:24px;cursor:pointer;padding:4px 6px;border-radius:10px;line-height:1;transition:background .15s}
 .sk-stamp.on{background:rgba(217,168,92,.22)}
 .sk-stamp:active{transform:scale(.85)}
+.hdr-search{width:42px;height:42px;border-radius:50%;border:1px solid var(--hair);background:var(--ink1);color:var(--gold);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .15s}
+.hdr-search:hover{border-color:var(--gold)}
+.hdr-search:active{transform:scale(.9)}
 </style>
 </head>
 <body>
@@ -430,7 +433,10 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     <div class="h-date"><span id="hDate"></span><span id="hTime" style="color:var(--hi);margin-left:8px;font-size:12px"></span></div>
     <div class="h-greet" id="hGreet"></div>
   </div>
-  <div class="avatar" id="hAvatar" onclick="go('settings')">A</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="hdr-search" onclick="go('search')" aria-label="Search" title="Search everything">🔍</button>
+    <div class="avatar" id="hAvatar" onclick="go('settings')">A</div>
+  </div>
 </header>
 
 <main id="main">
@@ -917,7 +923,8 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
 
 <!-- ================= SEARCH ================= -->
 <section class="view" id="v-search">
-  <input class="inp" id="qIn" placeholder="Search tasks, notes, expenses, follow-ups…" oninput="runSearch()" style="margin-top:8px">
+  <div class="modbar" style="margin-top:4px"><button class="backbtn" onclick="searchBack()">‹</button><div class="modttl">Search</div></div>
+  <input class="inp" id="qIn" placeholder="Search everything — tasks, notes, money, docs, family…" oninput="runSearch()">
 <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:10px" onclick="galleryOpen()">🖼 View all attachments</button>
   <div id="qOut" style="margin-top:8px"></div>
 </section>
@@ -1306,7 +1313,8 @@ function countUp(el,val,pre='',suf=''){const st=performance.now(),d=600,from=0;
     el.textContent=pre+Math.round(from+(val-from)*e).toLocaleString('en-IN')+suf;
     if(p<1)requestAnimationFrame(f)}requestAnimationFrame(f)}
 /* ============ NAV ============ */
-function go(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+function go(v){
+  if(v==='search'){const cur=document.querySelector('.view.active');if(cur){const id=cur.id.slice(2);if(id!=='search')_searchFrom=id}}document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById('v-'+v).classList.add('active');
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
   const nb=document.getElementById('nb-'+v);if(nb)nb.classList.add('on');
@@ -2711,6 +2719,8 @@ function renderWork(){renderWorkLauncher();listOr(otList,S.tasks.filter(t=>t.spa
   if(document.getElementById('circList'))circList.innerHTML=S.circulars.slice().sort((a,b)=>circLatest(a).date<circLatest(b).date?1:-1).map(circCard).join('')||'<div class="empty"><div class="em-ring">📑</div>Store every circular here by name, date and type —<br>read in-app or download anytime</div>';
   onList.innerHTML=S.notes.filter(n=>n.space==='office').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Call gists & meeting points live here</div>'}
 /* ============ SEARCH ============ */
+let _searchFrom='today';
+function searchBack(){go(_searchFrom&&_searchFrom!=='search'?_searchFrom:'today')}
 function renderSearch(){runSearch()}
 function runSearch(){const q=qIn.value.trim().toLowerCase();
   if(!q){qOut.innerHTML='<div class="empty"><div class="em-ring">⌕</div>Search across your whole life —<br>tasks, notes, money, follow-ups, shopping.</div>';return}
