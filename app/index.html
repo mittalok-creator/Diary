@@ -2490,11 +2490,14 @@ async function attMeta(id){const cols=[S.docs,S.circulars,S.notes,S.tasks,S.meet
   for(const arr of cols){if(!arr)continue;
     for(const it of arr){if(!it)continue;
       const at=it.att;
-      if(!at)continue;
-      if(Array.isArray(at)){for(const a of at){if(a&&a.id===id)return a}}
-      else if(at.id===id)return at;
+      if(at){
+        if(Array.isArray(at)){for(const a of at){if(a&&a.id===id)return a}}
+        else if(at.id===id)return at;
+      }
       // circulars keep version history with their own att
       if(Array.isArray(it.versions))for(const v of it.versions){if(v&&v.att&&v.att.id===id)return v.att}
+      // family members keep documents with their own att
+      if(Array.isArray(it.docs))for(const dd of it.docs){if(dd&&dd.att&&dd.att.id===id)return dd.att}
     }}
   return null}
 function dataUrlToBlob(d){
@@ -2528,21 +2531,34 @@ function mimeExt(m){const map={'application/pdf':'.pdf','image/jpeg':'.jpg','ima
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document':'.docx','application/msword':'.doc',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation':'.pptx',
   'text/plain':'.txt','text/csv':'.csv','application/zip':'.zip','application/json':'.json'};return map[m]||'';}
+function extToMime(fn){const m=/\.([a-z0-9]{1,8})$/i.exec(fn||'');if(!m)return'';
+  const map={pdf:'application/pdf',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',
+    xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',xls:'application/vnd.ms-excel',
+    docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',doc:'application/msword',
+    pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',ppt:'application/vnd.ms-powerpoint',
+    txt:'text/plain',csv:'text/csv',zip:'application/zip',json:'application/json',mp3:'audio/mpeg',mp4:'video/mp4',
+    m4a:'audio/mp4',wav:'audio/wav',avi:'video/x-msvideo',mov:'video/quicktime'};
+  return map[m[1].toLowerCase()]||''}
 async function shareAtt(id,type,label){
   let d=null,fname='file';
   try{
     d=await fileGet(id);
     if(!d){toast('File not found');return}
     const meta=attMeta(id);
-    let mime=(meta&&meta.mime)||'';
-    if(!mime)mime=type==='pdf'?'application/pdf':(type==='img'?'image/jpeg':'application/octet-stream');
     fname=attName(id,type,label,meta);
+    /* best mime: stored -> from extension -> from data URL -> generic */
+    let mime=(meta&&meta.mime)||extToMime(fname)||'';
     const blob=dataUrlToBlob(d);
-    if(blob){
-      const file=new File([blob],fname,{type:blob.type||mime||'application/octet-stream'});
-      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-        try{await navigator.share({files:[file],title:fname});return}
-        catch(err){if(err&&err.name==='AbortError')return;}
+    if(blob&&navigator.share&&navigator.canShare){
+      if(!mime)mime=blob.type||'application/octet-stream';
+      /* Android Chrome only shares certain types; try real mime, then blank, then generic */
+      const tries=[mime,'','application/octet-stream'];
+      for(const tm of tries){
+        const file=new File([blob],fname,{type:tm});
+        if(navigator.canShare({files:[file]})){
+          try{await navigator.share({files:[file],title:fname});return}
+          catch(err){if(err&&err.name==='AbortError')return; break}
+        }
       }
     }
   }catch(e){/* fall through to download */}
