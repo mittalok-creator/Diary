@@ -796,6 +796,12 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <div id="drawGallery" style="margin-top:14px;display:grid;grid-template-columns:repeat(2,1fr);gap:12px"></div>
   </div>
 
+  <div class="ltab" id="lt-family" style="display:none">
+    <div id="famMembers"></div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:6px" onclick="famAddMember()">＋ Add family member</button>
+    <div id="famBody" style="margin-top:16px"></div>
+  </div>
+
   <div class="ltab" id="lt-docs" style="display:none">
     <input class="inp" id="docName" placeholder="Document name (PAN, RC, Policy, Warranty…)">
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -1082,6 +1088,13 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
     <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="pdfPwCancel()">Cancel</button>
   </div></div>
 
+<div id="promptOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
+    <h2 id="promptTitle" style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:12px">Enter</h2>
+    <input class="inp" id="promptIn" placeholder="" onkeydown="if(event.key==='Enter')promptSubmit()">
+    <button class="btn btn-gold" style="width:100%;margin-top:14px" onclick="promptSubmit()">OK</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="promptCancel()">Cancel</button>
+  </div></div>
+
 <div id="renameOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
     <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">Rename</h2>
     <input class="inp" id="renameIn" placeholder="New name" onkeydown="if(event.key==='Enter')renameSave()">
@@ -1242,7 +1255,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],bills:[],cards:[],lend:[],drawings:[],trash:[],push:{enabled:false,token:null},car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],bills:[],cards:[],lend:[],drawings:[],family:[],trash:[],push:{enabled:false,token:null},car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -1286,7 +1299,7 @@ function go(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove(
   if(v==='cal'){const c=document.getElementById('calDate');if(!c.value)c.value=today();renderCal()} if(v==='settings')renderSettings(); if(v==='search'){renderSearch();setTimeout(()=>qIn.focus(),150)}}
 const LIFE_MODS=[
   ['tasks','Tasks','✓'],['notes','Notes','🗒'],['draw','Draw','🎨'],['shopping','Shopping','🛒'],['money','Money','₹'],['pay','Payments','💳'],
-  ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄']];
+  ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄'],['family','Family Docs','👪']];
 const WORK_MODS=[
   ['tasks','Tasks','✓'],['follow','Follow-ups','↺'],['meet','Meetings','🎥'],['circ','Circulars','📑'],
   ['odoc','Docs','📄'],['link','Links','🔗'],['notes','Quick Notes','🗒']];
@@ -2332,7 +2345,7 @@ function galleryOpen(){go('search');document.getElementById('qIn').style.display
     const d=await fileGet(im.dataset.fid);if(d)im.src=d}),0)}
 function galClose(){document.getElementById('qIn').style.display='';qIn.value='';runSearch()}
 /* ============ SHARE (Web Share API, WhatsApp-ready) ============ */
-async function attMeta(id){const cols=[S.docs,S.circulars,S.notes,S.tasks,S.meetings,S.renewals,S.service,S.followups];
+async function attMeta(id){const cols=[S.docs,S.circulars,S.notes,S.tasks,S.meetings,S.renewals,S.service,S.followups,S.links,S.events,S.family];
   for(const arr of cols){if(!arr)continue;
     for(const it of arr){if(!it)continue;
       const at=it.att;
@@ -2343,25 +2356,63 @@ async function attMeta(id){const cols=[S.docs,S.circulars,S.notes,S.tasks,S.meet
       if(Array.isArray(it.versions))for(const v of it.versions){if(v&&v.att&&v.att.id===id)return v.att}
     }}
   return null}
+function dataUrlToBlob(d){
+  // robust base64/dataURL -> Blob, works for large files where fetch() may choke
+  try{
+    const comma=d.indexOf(',');
+    const header=d.slice(0,comma);
+    const isB64=/;base64/i.test(header);
+    const mimeM=/^data:([^;,]+)/i.exec(header);
+    const mime=mimeM?mimeM[1]:'application/octet-stream';
+    const data=d.slice(comma+1);
+    if(!isB64){return new Blob([decodeURIComponent(data)],{type:mime})}
+    const bin=atob(data);
+    const len=bin.length;
+    const bytes=new Uint8Array(len);
+    for(let i=0;i<len;i++)bytes[i]=bin.charCodeAt(i);
+    return new Blob([bytes],{type:mime});
+  }catch(e){return null}
+}
+function attName(id,type,label,meta){
+  let fname=(meta&&meta.fname)||label||'file';
+  if(!/\.[a-z0-9]{1,8}$/i.test(fname)){
+    const ext=(meta&&meta.mime?mimeExt(meta.mime):'')||(type==='pdf'?'.pdf':type==='img'?'.jpg':'');
+    fname+=ext;
+  }
+  // strip characters that break downloads on some OSes
+  return fname.replace(/[\\/:*?"<>|]+/g,'_');
+}
+function mimeExt(m){const map={'application/pdf':'.pdf','image/jpeg':'.jpg','image/png':'.png','image/webp':'.webp',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':'.xlsx','application/vnd.ms-excel':'.xls',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':'.docx','application/msword':'.doc',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation':'.pptx',
+  'text/plain':'.txt','text/csv':'.csv','application/zip':'.zip','application/json':'.json'};return map[m]||'';}
 async function shareAtt(id,type,label){
-  try{const d=await fileGet(id);if(!d){toast('File not found');return}
+  let d=null,fname='file';
+  try{
+    d=await fileGet(id);
+    if(!d){toast('File not found');return}
     const meta=attMeta(id);
-    // rebuild the exact bytes from the stored data URL, preserving real mime
-    const res=await fetch(d);const blob=await res.blob();
-    let mime=(meta&&meta.mime)||blob.type||'';
+    let mime=(meta&&meta.mime)||'';
     if(!mime)mime=type==='pdf'?'application/pdf':(type==='img'?'image/jpeg':'application/octet-stream');
-    // real filename with its real extension
-    let fname=(meta&&meta.fname)||label||'file';
-    if(!/\.[a-z0-9]+$/i.test(fname)){fname+=(type==='pdf'?'.pdf':type==='img'?'.jpg':'')}
-    const file=new File([blob],fname,{type:mime||'application/octet-stream'});
-    if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:fname});return}
-      catch(err){if(err&&err.name==='AbortError')return; /* user cancelled */ }
+    fname=attName(id,type,label,meta);
+    const blob=dataUrlToBlob(d);
+    if(blob){
+      const file=new File([blob],fname,{type:blob.type||mime||'application/octet-stream'});
+      if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:fname});return}
+        catch(err){if(err&&err.name==='AbortError')return;}
+      }
     }
-    // no file-share support (most laptops) or share failed → download the real file
-    const a=document.createElement('a');a.href=d;a.download=fname;a.click();
-    toast('↓ '+fname+' downloaded')}
-  catch(e){toast('Could not open this file')}}
+  }catch(e){/* fall through to download */}
+  // fallback: download the real file with its real name (laptops, share unsupported, or any error)
+  try{
+    if(!d)d=await fileGet(id);
+    if(!d){toast('Could not open this file');return}
+    const a=document.createElement('a');a.href=d;a.download=fname;
+    document.body.appendChild(a);a.click();a.remove();
+    toast('↓ '+fname)
+  }catch(e2){toast('Could not open this file')}}
 /* ============ ATTACHMENTS (image + PDF) ============ */
 let pend={note:[],onote:[],exp:[],meet:[],ren:[],svc:[],rw:[]};
 const pendEl={note:'pendNote',onote:'pendONote',exp:'pendExp',meet:'pendMeet',ren:'pendRen',svc:'pendSvc',rw:'pendRw'};
@@ -2578,7 +2629,10 @@ function allAttIds(){const ids=[];S.notes.forEach(n=>(n.att||[]).forEach(a=>ids.
   S.expenses.forEach(e=>(e.att||[]).forEach(a=>ids.push(a.id)));
   S.meetings.forEach(m=>(m.att||[]).forEach(a=>ids.push(a.id)));
   S.docs.forEach(d=>{if(d.att)ids.push(d.att.id)});S.circulars.forEach(c=>(c.versions||[]).forEach(v=>{if(v.att)ids.push(v.att.id)}));
-  S.renewals.forEach(r=>{(r.att||[]).forEach(a=>ids.push(a.id));(r.history||[]).forEach(h=>(h.att||[]).forEach(a=>ids.push(a.id)))});S.service.forEach(s=>(s.att||[]).forEach(a=>ids.push(a.id)));return ids}
+  S.renewals.forEach(r=>{(r.att||[]).forEach(a=>ids.push(a.id));(r.history||[]).forEach(h=>(h.att||[]).forEach(a=>ids.push(a.id)))});S.service.forEach(s=>(s.att||[]).forEach(a=>ids.push(a.id)));
+  (S.family||[]).forEach(m=>(m.docs||[]).forEach(d=>{if(d.att)ids.push(d.att.id)}));
+  (S.links||[]).forEach(l=>{if(l.att)ids.push(l.att.id)});
+  return ids}
 function attBytes(){let b=0;const add=a=>b+=(a&&a.size)||0;
   S.notes.forEach(n=>(n.att||[]).forEach(add));S.expenses.forEach(e=>(e.att||[]).forEach(add));
   S.meetings.forEach(m=>(m.att||[]).forEach(add));S.docs.forEach(d=>add(d.att));S.circulars.forEach(c=>(c.versions||[]).forEach(v=>add(v.att)));
@@ -2602,7 +2656,7 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
   +'<button class="ed" title="Rename" onclick="askRename(\'doc\',\''+d.id+'\')">✎</button><button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
-function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
+function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();renderFamily();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
@@ -2632,6 +2686,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Income',S.income.filter(i=>hit(i.source)).map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div><div class="row-meta">'+fmtD(i.at)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>')],
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
    ['Links',S.links.filter(l=>hit(l.name)).map(linkCard)],
+   ['Family Documents',(S.family||[]).flatMap(m=>(m.docs||[]).filter(d=>hit(d.name)||hit(m.name)).map(d=>famDocCard(m.id,d)))],
    ['Bills',S.bills.filter(b=>hit(b.name)).map(billCard)],
    ['Cards',S.cards.filter(c=>hit(c.name)).map(cardCard)],
    ['Lent / Borrowed',S.lend.filter(l=>hit(l.who)||hit(l.note)).map(lendCard)],
@@ -2644,7 +2699,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
    ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
-  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'||name==='Bills'||name==='Cards'||name==='Lent / Borrowed'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
+  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'||name==='Bills'||name==='Cards'||name==='Lent / Borrowed'||name==='Family Documents'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
   qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>';setTimeout(loadThumbs,0)}
 /* ============ CIRCULARS (with version history) ============ */
 let circVerTarget=null;let circOpen=null;
@@ -2774,12 +2829,13 @@ function fileOpenCard(name,dataUrl){
     +'</div>';
 }
 async function pvDownloadCurrent(){try{const d=await fileGet(pv.id);if(!d)return;
-  const meta=attMeta(pv.id);const nm=(meta&&meta.fname)||pv.name||'file';
+  const meta=attMeta(pv.id);const nm=attName(pv.id,pv.type,pv.name,meta);
   const a=document.createElement('a');a.href=d;a.download=nm;a.click()}catch(e){toast('Download failed')}}
 async function pvShareCurrent(){try{const d=await fileGet(pv.id);if(!d)return;
-  const meta=attMeta(pv.id);const res=await fetch(d);const blob=await res.blob();
-  const nm=(meta&&meta.fname)||pv.name||'file';
-  const file=new File([blob],nm,{type:(meta&&meta.mime)||blob.type||'application/octet-stream'});
+  const meta=attMeta(pv.id);const blob=dataUrlToBlob(d);
+  const nm=attName(pv.id,pv.type,pv.name,meta);
+  if(!blob){const a=document.createElement('a');a.href=d;a.download=nm;a.click();return}
+  const file=new File([blob],nm,{type:blob.type||(meta&&meta.mime)||'application/octet-stream'});
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
   const a=document.createElement('a');a.href=d;a.download=pv.name||'file';a.click()}catch(e){toast('Share not supported — downloaded instead')}}
 
@@ -2818,6 +2874,101 @@ function askDelete(name,fn,label){_cfmFn=fn;
   document.getElementById('cfmYes').onclick=()=>{const fn=_cfmFn;cfmClose();if(fn)fn()};
   document.getElementById('confirmOv').classList.add('open')}
 function showSheet(t,html){document.getElementById('sheetTitle').textContent=t;document.getElementById('sheetBody').innerHTML=html||'';document.getElementById('sheetOv').classList.add('open');setTimeout(loadThumbs,0)}
+
+function askPrompt(title,placeholder,cb,preset){_promptCb=cb;
+  document.getElementById('promptTitle').textContent=title||'Enter';
+  const inp=document.getElementById('promptIn');inp.placeholder=placeholder||'';inp.value=preset||'';
+  document.getElementById('promptOv').classList.add('open');
+  setTimeout(()=>{inp.focus();if(preset)inp.select()},60)}
+let _promptCb=null;
+function promptSubmit(){const v=document.getElementById('promptIn').value.trim();
+  document.getElementById('promptOv').classList.remove('open');
+  const cb=_promptCb;_promptCb=null;if(cb)cb(v)}
+function promptCancel(){document.getElementById('promptOv').classList.remove('open');
+  const cb=_promptCb;_promptCb=null;if(cb)cb(null)}
+
+/* ============ FAMILY DOCUMENTS ============ */
+const REL_LIST=['Self','Spouse','Son','Daughter','Father','Mother','Brother','Sister','Other'];
+let famSel=null;
+function famAddMember(){
+  askPrompt('Add family member','Name (e.g. Papa, Riya)',v=>{
+    if(!v)return;
+    const m={id:uid(),name:v,rel:'Other',docs:[]};
+    S.family.push(m);save();famSel=m.id;renderFamily();
+  });
+}
+function famRenameMember(id){const m=S.family.find(x=>x.id===id);if(!m)return;
+  askPrompt('Rename member',m.name,v=>{if(!v)return;m.name=v;save();renderFamily()},m.name)}
+function famSetRel(id,rel){const m=S.family.find(x=>x.id===id);if(!m)return;m.rel=rel;save();renderFamily()}
+function famDelMember(id){const m=S.family.find(x=>x.id===id);if(!m)return;
+  askDelete(m.name+' and all their documents',()=>{
+    (m.docs||[]).forEach(d=>{if(d.att)fileDel(d.att.id)});
+    S.family=S.family.filter(x=>x.id!==id);
+    if(famSel===id)famSel=null;save();renderFamily();
+  });
+}
+function famAddDoc(mid){const m=S.family.find(x=>x.id===mid);if(!m)return;
+  askPrompt('Document name','e.g. Aadhaar, PAN, Passport, Marksheet',name=>{
+    if(!name)return;
+    pickFiles(fs=>{if(!fs.length)return;
+      fs.forEach((a,i)=>m.docs.unshift({id:uid(),name:fs.length>1?name+' ('+(i+1)+')':name,att:a,at:new Date().toISOString()}));
+      save();renderFamily();toast(fs.length+' document saved \ud83d\udd12');
+    });
+  });
+}
+function famDelDoc(mid,did){const m=S.family.find(x=>x.id===mid);if(!m)return;
+  const doc=m.docs.find(d=>d.id===did);if(!doc)return;
+  askDelete(doc.name,()=>{if(doc.att)fileDel(doc.att.id);m.docs=m.docs.filter(d=>d.id!==did);save();renderFamily()});
+}
+function famRenameDoc(mid,did){const m=S.family.find(x=>x.id===mid);if(!m)return;
+  const doc=m.docs.find(d=>d.id===did);if(!doc)return;
+  askPrompt('Rename document',doc.name,v=>{if(!v)return;doc.name=v;save();renderFamily()},doc.name);
+}
+function famInitials(name){return (name||'?').trim().slice(0,2).toUpperCase()}
+function famDocCard(mid,doc){const a=doc.att;
+  return '<div class="card" style="padding:12px"><div style="display:flex;align-items:center;gap:12px">'
+    +(a&&a.type==='img'?'<img class="thumb" data-fid="'+a.id+'" alt="" onclick="openAtt(\''+a.id+'\',\'img\',\''+esc(doc.name)+'\')">':'<div class="thumb-ph" style="font-size:24px">'+(a?fileIcon(a):'\ud83d\udcc4')+'</div>')
+    +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(doc.name)+'</div><div class="row-meta">'+fmtD(doc.at)+'</div></div>'
+    +(a?'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(doc.name)+'\')">Open</button>'
+       +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(doc.name)+'\')" title="Share">\u2197</button>':'')
+    +'<button class="ed" title="Rename" onclick="famRenameDoc(\''+mid+'\',\''+doc.id+'\')">\u270e</button>'
+    +'<button class="del" onclick="famDelDoc(\''+mid+'\',\''+doc.id+'\')">\u2715</button>'
+    +'</div></div>';
+}
+function renderFamily(){
+  const wrap=document.getElementById('famMembers');if(!wrap)return;
+  if(!S.family)S.family=[];
+  if(!S.family.length){
+    wrap.innerHTML='<div class="empty"><div class="em-ring">\ud83d\udc6a</div>No family members yet.<br>Add a member, then keep their important documents safe in one place.</div>';
+    document.getElementById('famBody').innerHTML='';return;
+  }
+  if(!famSel||!S.family.find(m=>m.id===famSel))famSel=S.family[0].id;
+  // member chips
+  wrap.innerHTML='<div style="display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none">'
+    +S.family.map(m=>{const on=m.id===famSel;const n=(m.docs||[]).length;
+      return '<div onclick="famSel=\''+m.id+'\';renderFamily()" style="flex-shrink:0;cursor:pointer;text-align:center;width:74px">'
+        +'<div style="width:60px;height:60px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;'
+        +'font-family:Fraunces,serif;font-size:20px;border:2px solid '+(on?'var(--gold)':'var(--hair)')+';'
+        +'background:'+(on?'rgba(217,168,92,.15)':'var(--ink1)')+';color:'+(on?'var(--gold)':'var(--hi)')+'">'+famInitials(m.name)+'</div>'
+        +'<div style="font-size:11.5px;margin-top:5px;color:'+(on?'var(--gold)':'var(--lo)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.name)+'</div>'
+        +(n?'<div style="font-size:10px;color:var(--lo)">'+n+' doc'+(n>1?'s':'')+'</div>':'')
+        +'</div>';
+    }).join('')+'</div>';
+  // selected member panel
+  const m=S.family.find(x=>x.id===famSel);
+  const body=document.getElementById('famBody');
+  const relOpts=REL_LIST.map(r=>'<option value="'+r+'"'+(m.rel===r?' selected':'')+'>'+r+'</option>').join('');
+  body.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:12px">'
+    +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:19px">'+esc(m.name)+'</div>'
+    +'<select class="inp" style="margin-top:8px;height:40px" onchange="famSetRel(\''+m.id+'\',this.value)">'+relOpts+'</select></div>'
+    +'<button class="ed" title="Rename" onclick="famRenameMember(\''+m.id+'\')">\u270e</button>'
+    +'<button class="del" onclick="famDelMember(\''+m.id+'\')">\u2715</button></div></div>'
+    +'<button class="btn btn-gold" style="width:100%" onclick="famAddDoc(\''+m.id+'\')">\ud83d\udcce Add document</button>'
+    +'<div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">'
+    +((m.docs&&m.docs.length)?m.docs.map(d=>famDocCard(m.id,d)).join(''):'<div class="empty" style="padding:20px">No documents for '+esc(m.name)+' yet</div>')
+    +'</div>';
+  setTimeout(loadThumbs,0);
+}
 
 /* ============ FIREBASE CLOUD MESSAGING (closed-app push) ============ */
 const FCM_CONFIG={apiKey:"AIzaSyDLZY5yMJT4YXj8rqiKI0U9GpYpM1kHS9w",authDomain:"alok-os-19787.firebaseapp.com",projectId:"alok-os-19787",storageBucket:"alok-os-19787.firebasestorage.app",messagingSenderId:"774257734126",appId:"1:774257734126:web:5846d255032f8540229eff"};
