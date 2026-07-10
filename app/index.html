@@ -329,7 +329,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .sk-bar{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
   border-bottom:1px solid var(--hair);flex-shrink:0}
 .sk-swatches{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;padding:8px 12px;flex-shrink:0}
-.sw{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .2s}
+.sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .2s}
 .sw.on{border-color:var(--gold);transform:scale(1.14)}
 .pv-btn.on{border-color:var(--gold);background:rgba(217,168,92,.14)}
 .sk-size{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair)}
@@ -424,6 +424,8 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
 .hdr-search{width:42px;height:42px;border-radius:50%;border:1px solid var(--hair);background:var(--ink1);color:var(--gold);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .15s}
 .hdr-search:hover{border-color:var(--gold)}
 .hdr-search:active{transform:scale(.9)}
+.sk-palette{flex-shrink:0}
+@media(max-height:620px){.sk-toolbar-note{display:none}}
 </style>
 </head>
 <body>
@@ -1112,6 +1114,21 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="promptCancel()">Cancel</button>
   </div></div>
 
+<div id="taskEdOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:380px">
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">Edit task</h2>
+    <label class="fld"><span>Task</span><input class="inp" id="teTitle" placeholder="Task"></label>
+    <div class="dtrow" style="margin-top:10px">
+      <label class="fld"><span>Due date</span><input type="date" class="inp" id="teDate"></label>
+      <label class="fld"><span>Time</span><input type="time" class="inp" id="teTime"></label>
+    </div>
+    <label class="fld" style="margin-top:10px"><span>Repeat</span><select class="inp" id="teRep">
+      <option value="">Does not repeat</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></label>
+    <label class="fld" style="margin-top:10px"><span>Notes / details</span><textarea class="inp" id="teNote" placeholder="Optional details" style="min-height:70px"></textarea></label>
+    <div id="teStatus" class="set-sub" style="margin-top:10px"></div>
+    <button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="taskEditSave()">Save</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('taskEdOv').classList.remove('open')">Cancel</button>
+  </div></div>
+
 <div id="renameOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
     <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">Rename</h2>
     <input class="inp" id="renameIn" placeholder="New name" onkeydown="if(event.key==='Enter')renameSave()">
@@ -1223,7 +1240,9 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     </div>
     <button class="pv-btn" onclick="skUndo()" aria-label="Undo">↶</button>
     <button class="pv-btn" onclick="skRedo()" aria-label="Redo">↷</button>
+    <button class="pv-btn" id="skZoomBtn" onclick="skToggleMax()" aria-label="Bigger canvas" title="Bigger canvas">⇕</button>
   </div>
+  <div class="sk-palette" id="skPalette">
   <div class="sk-swatches" id="skSwatches"></div>
   <div class="sk-stamps" id="skStamps" style="display:none"></div>
   <div class="sk-size">
@@ -1231,6 +1250,7 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     <input type="range" id="skSize" min="2" max="40" value="5" oninput="skDot()">
     <span id="skDot" class="sk-dot"></span>
     <button class="btn btn-ghost btn-sm" onclick="skClear()">🗑 Clear</button>
+  </div>
   </div>
   <div class="sk-body" id="skBody"><canvas id="skCanvas"></canvas></div>
   <div class="sk-foot">
@@ -1705,6 +1725,11 @@ function initSketch(){const c=document.getElementById('skCanvas');
   ['pointerup','pointercancel','pointerleave'].forEach(function(ev){c.addEventListener(ev,function(){
     if(sk.cur){sk.ops.push(sk.cur);sk.redo=[];sk.cur=null;skRedraw()}})});
   addEventListener('resize',function(){if(document.getElementById('skOv').classList.contains('open'))skFit()})}
+function skToggleMax(){const p=document.getElementById('skPalette');const b=document.getElementById('skZoomBtn');
+  const hidden=p.style.display==='none';
+  p.style.display=hidden?'':'none';
+  if(b)b.textContent=hidden?'\u21d5':'\u21d1';
+  setTimeout(skFit,30)}
 function skToDataURL(){return document.getElementById('skCanvas').toDataURL('image/jpeg',0.9)}
 function skSaveDrawing(){if(!sk.ops.length){toast('Draw something first');return}
   const thumb=skToDataURL();
@@ -1743,9 +1768,9 @@ function addTask(space,inputId,title,due,time){const inp=inputId?document.getEle
   if(inp)inp.value='';save();renderLife();renderWork();toast('Task added'+(tm?' · '+fmtTime(tm):''));}
 function taskRow(x){return '<div class="row '+(x.done?'done':'')+'">'+
   '<div class="chk '+(x.done?'on':'')+'" onclick="tglTask(\''+x.id+'\')"></div>'+
-  '<div class="row-body"><div class="row-title">'+esc(x.title)+'</div>'+
+  '<div class="row-body" onclick="taskEdit(\''+x.id+'\')" style="cursor:pointer"><div class="row-title">'+esc(x.title)+'</div>'+
   ((x.due||x.time||x.rep)?'<div class="row-meta">'+dueLabel(x.due)+(x.time?(x.due?' · ':'')+fmtTime(x.time):'')+(x.rep?' · <span style="color:var(--gold)">🔁 '+REP_LBL[x.rep]+'</span>':'')+'</div>':'')+'</div>'+
-  '<button class="ed" title="Rename" onclick="askRename(\'task\',\''+x.id+'\')">✎</button><button class="del" onclick="delTask(\''+x.id+'\')">✕</button></div>'}
+  '<button class="ed" title="Edit" onclick="taskEdit(\''+x.id+'\')">✎</button><button class="del" onclick="delTask(\''+x.id+'\')">✕</button></div>'}
 function tglTask(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.done;
   if(x.done&&x.rep&&x.due){const nd=nextDue(x.due,x.rep);
     if(nd){S.tasks.unshift({id:uid(),title:x.title,space:x.space,due:nd,time:x.time||null,rep:x.rep,done:false,at:new Date().toISOString()});
@@ -2885,6 +2910,31 @@ async function pvShareCurrent(){try{const d=await fileGet(pv.id);if(!d)return;
   if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file]});return}
   const a=document.createElement('a');a.href=d;a.download=pv.name||'file';a.click()}catch(e){toast('Share not supported — downloaded instead')}}
 
+let _teId=null;
+function taskEdit(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;_teId=id;
+  document.getElementById('teTitle').value=x.title||'';
+  document.getElementById('teDate').value=x.due||'';
+  document.getElementById('teTime').value=x.time||'';
+  document.getElementById('teRep').value=x.rep||'';
+  document.getElementById('teNote').value=x.note||'';
+  const t=today();let st='';
+  if(x.done)st='✓ Completed';
+  else if(x.due&&x.due<t)st='<span style="color:var(--risk)">⚠ Overdue — was due '+fmtD(x.due)+'</span>';
+  else if(x.due===t)st='<span style="color:var(--gold)">Due today</span>';
+  else if(x.due)st='Due '+fmtD(x.due);
+  document.getElementById('teStatus').innerHTML=st;
+  document.getElementById('taskEdOv').classList.add('open');
+  setTimeout(()=>document.getElementById('teTitle').focus(),60)}
+function taskEditSave(){if(!_teId)return;const x=S.tasks.find(t=>t.id===_teId);if(!x)return;
+  const nt=document.getElementById('teTitle').value.trim();
+  if(!nt){toast('Task cannot be empty');return}
+  x.title=nt;
+  x.due=document.getElementById('teDate').value||null;
+  x.time=document.getElementById('teTime').value||null;
+  x.rep=document.getElementById('teRep').value||null;
+  x.note=document.getElementById('teNote').value.trim()||'';
+  document.getElementById('taskEdOv').classList.remove('open');_teId=null;
+  save();renderLife();renderWork();renderToday();toast('✓ Task updated')}
 /* ============ RENAME & DELETE HELPERS ============ */
 const RENAME_MAP={
   task:['tasks','title'], note:['notes','title'], doc:['docs','name'], circular:['circulars','name'],
