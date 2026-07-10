@@ -231,13 +231,16 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   main{margin-left:232px;padding:10px 44px 60px}
   .grid2{grid-template-columns:repeat(4,1fr)}
   .seg{max-width:680px}
-  /* use the wide canvas: multi-column lists on desktop */
-  #nList,#onList,#drawGallery,#vaultList,#blList,#cdList,#lnList{column-gap:16px}
-  #nList,#onList,#vaultList,#blList,#cdList,#lnList{columns:2}
-  #nList>*,#onList>*,#vaultList>*,#blList>*,#cdList>*,#lnList>*{break-inside:avoid;margin-bottom:12px}
+  /* desktop: natural left-right 2-column grids, comfortable widths */
+  #nList,#onList,#vaultList,#blList,#cdList,#lnList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}
   #drawGallery{grid-template-columns:repeat(4,1fr) !important}
-  .launcher{grid-template-columns:repeat(5,1fr) !important}
-  main{max-width:1368px}
+  .launcher{grid-template-columns:repeat(4,1fr) !important;gap:16px !important}
+  main{max-width:1200px}
+  .ltab>.btn,.ltab>button.btn{max-width:640px}
+  #focusCard{max-width:760px}
+  .card{box-shadow:0 10px 30px rgba(0,0,0,.16)}
+  body.light .card{box-shadow:0 2px 10px rgba(24,30,40,.07)}
+  @media(hover:hover){.card:hover{transform:translateY(-1px)}}
   #toast{bottom:36px}
 }
 @media(min-width:1000px){#waterCard{cursor:pointer}}
@@ -2849,7 +2852,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
    ['Links',S.links.filter(l=>hit(l.name)).map(linkCard)],
    ['Family Documents',(S.family||[]).flatMap(m=>(m.docs||[]).filter(d=>hit(d.name)||hit(m.name)).map(d=>famDocCard(m.id,d)))],
-   ['Vault (logins)',(modLocked('vault')?[]:(S.vault||[]).filter(v=>hit(v.title)||hit(v.user)||hit(v.url)).map(vaultCard))],
+   ['Vault (logins)',((modLocked('vault')||((S.lock&&S.lock.pinHash)&&!_vaultLoaded))?[]:VD().filter(v=>hit(v.title)||hit(v.user)||hit(v.url)).map(vaultCard))],
    ['Bills',S.bills.filter(b=>hit(b.name)).map(billCard)],
    ['Cards',S.cards.filter(c=>hit(c.name)).map(cardCard)],
    ['Lent / Borrowed',S.lend.filter(l=>hit(l.who)||hit(l.note)).map(lendCard)],
@@ -3214,9 +3217,56 @@ function famSetPhoto(mid){const m=S.family.find(x=>x.id===mid);if(!m)return;
 function famRemovePhoto(mid){const m=S.family.find(x=>x.id===mid);if(!m)return;m.photo=null;save();renderFamily()}
 
 /* ============ PASSWORD VAULT ============ */
-function vaultAdd(){vaultEdit(null)}
+/* ---- vault encryption (AES-GCM, key from your PIN) ---- */
+let _sessionPin=null,_vaultKey=null,_vaultSalt=null,_vaultPlain=null,_vaultLoaded=false,_lkForcePin=false;
+function vlB64e(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf)))}
+function vlB64d(str){return Uint8Array.from(atob(str),function(c){return c.charCodeAt(0)})}
+async function vlKey(pin,saltB64){
+  const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:vlB64d(saltB64),iterations:150000,hash:'SHA-256'},km,
+    {name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function vlEncrypt(){
+  const salt=(S.vaultEnc&&S.vaultEnc.salt)||vlB64e(crypto.getRandomValues(new Uint8Array(16)).buffer);
+  if(!_vaultKey||_vaultSalt!==salt){_vaultKey=await vlKey(_sessionPin,salt);_vaultSalt=salt}
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:iv},_vaultKey,
+    new TextEncoder().encode(JSON.stringify(_vaultPlain||[])));
+  S.vaultEnc={v:1,salt:salt,iv:vlB64e(iv.buffer),data:vlB64e(ct)};S.vault=[];
+}
+async function vlDecryptWith(pin){
+  const e=S.vaultEnc;const k=await vlKey(pin,e.salt);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:vlB64d(e.iv)},k,vlB64d(e.data));
+  _vaultKey=k;_vaultSalt=e.salt;
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function vaultCanUse(){return !(S.lock&&S.lock.pinHash) || (_vaultLoaded&&!!_sessionPin)}
+function VD(){
+  if(S.lock&&S.lock.pinHash){if(!_vaultPlain)_vaultPlain=[];return _vaultPlain}
+  if(!S.vault)S.vault=[];return S.vault;
+}
+async function vaultPersist(){
+  if(S.lock&&S.lock.pinHash){
+    if(!_sessionPin){toast('Enter your PIN to save the vault');vaultUnlock();return}
+    try{await vlEncrypt()}catch(e){toast('Could not encrypt — not saved');return}
+  } else { S.vault=_vaultPlain||S.vault||[]; delete S.vaultEnc; }
+  save();
+}
+function vaultUnlock(){_lkForcePin=true;requireUnlock(function(){_lkForcePin=false;renderVault()})}
+function vaultRecoverPin(){
+  askPrompt('Vault PIN','PIN this vault was locked with',async function(v){
+    if(!v)return;
+    try{const arr=await vlDecryptWith(v);_vaultPlain=arr;_vaultLoaded=true;
+      if(_sessionPin){_vaultKey=null;_vaultSalt=null;await vlEncrypt();save()}
+      renderVault();toast('Vault recovered \u2713');
+    }catch(e){toast('That PIN did not decrypt the vault')}
+  });
+}
+function lockSession(){_sessionPin=null;_vaultKey=null;_vaultSalt=null;_vaultPlain=null;_vaultLoaded=false;_unlocked={}}
+
+function vaultAdd(){if(!vaultCanUse()){vaultUnlock();return}vaultEdit(null)}
 let _vaultId=null;
-function vaultEdit(id){_vaultId=id;const v=id?(S.vault||[]).find(x=>x.id===id):null;
+function vaultEdit(id){if(!vaultCanUse()){vaultUnlock();return}_vaultId=id;const v=id?VD().find(x=>x.id===id):null;
   document.getElementById('vaTitle').value=v?v.title||'':'';
   document.getElementById('vaUser').value=v?v.user||'':'';
   document.getElementById('vaPass').value=v?v.pass||'':'';
@@ -3240,17 +3290,17 @@ function vaultSave(){const title=document.getElementById('vaTitle').value.trim()
     recQA:document.getElementById('vaRecQA').value.trim(),
     recCodes:document.getElementById('vaRecCodes').value.trim(),
     at:new Date().toISOString()};
-  if(!S.vault)S.vault=[];
-  if(_vaultId){const v=S.vault.find(x=>x.id===_vaultId);if(v)Object.assign(v,rec)}
-  else{rec.id=uid();S.vault.unshift(rec)}
+  const _va=VD();
+  if(_vaultId){const v=_va.find(x=>x.id===_vaultId);if(v)Object.assign(v,rec)}
+  else{rec.id=uid();_va.unshift(rec)}
   document.getElementById('vaultOv').classList.remove('open');_vaultId=null;
   save();renderVault();toast('\U0001F512 Saved')}
-function vaultDel(id){const v=(S.vault||[]).find(x=>x.id===id);askDelete(v&&v.title,function(){S.vault=S.vault.filter(x=>x.id!==id);save();renderVault()})}
-function vaultReveal(id,el){const v=(S.vault||[]).find(x=>x.id===id);if(!v)return;
+function vaultDel(id){const v=VD().find(x=>x.id===id);askDelete(v&&v.title,function(){const a=VD();const i=a.findIndex(x=>x.id===id);if(i>=0)a.splice(i,1);vaultPersist();renderVault()})}
+function vaultReveal(id,el){const v=VD().find(x=>x.id===id);if(!v)return;
   const span=document.getElementById('vp-'+id);if(!span)return;
   if(span.dataset.shown==='1'){span.textContent='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';span.dataset.shown='0';el.textContent='\U0001F441';}
   else{span.textContent=v.pass||'(none)';span.dataset.shown='1';el.textContent='\U0001F648';}}
-function vaultCopy(id,field){const v=(S.vault||[]).find(x=>x.id===id);if(!v)return;
+function vaultCopy(id,field){const v=VD().find(x=>x.id===id);if(!v)return;
   const val=field==='user'?v.user:v.pass;if(!val){toast('Nothing to copy');return}
   navigator.clipboard.writeText(val).then(function(){toast('Copied '+(field==='user'?'username':'password'))},function(){toast('Copy failed')})}
 function vaultCard(v){
@@ -3272,8 +3322,34 @@ function vaultCard(v){
     +'</div>';
 }
 function renderVault(){const el=document.getElementById('vaultList');if(!el)return;
-  if(!S.vault)S.vault=[];
-  el.innerHTML=S.vault.length?S.vault.map(vaultCard).join('')
+  const pinSet=!!(S.lock&&S.lock.pinHash);
+  if(pinSet){
+    if(!_sessionPin){
+      el.innerHTML='<div class="empty"><div class="em-ring">\U0001F510</div>Vault is encrypted.<br>Enter your PIN to open it.'
+        +'<br><button class="btn btn-gold" style="margin-top:14px" onclick="vaultUnlock()">Unlock vault</button></div>';
+      return;
+    }
+    if(S.vaultEnc&&!_vaultLoaded){
+      el.innerHTML='<div class="empty">Decrypting\u2026</div>';
+      vlDecryptWith(_sessionPin).then(function(arr){
+        _vaultPlain=arr;_vaultLoaded=true;
+        if((S.vault||[]).length){var ids={};arr.forEach(function(x){ids[x.id]=1});
+          S.vault.forEach(function(x){if(!ids[x.id])_vaultPlain.push(x)});vaultPersist()}
+        renderVault();
+      }).catch(function(){
+        el.innerHTML='<div class="empty"><div class="em-ring">\u26a0</div>Could not decrypt with this PIN.'
+          +'<br>This vault may have been locked with a previous PIN.'
+          +'<br><button class="btn btn-gold" style="margin-top:14px" onclick="vaultRecoverPin()">Enter the old PIN</button></div>';
+      });
+      return;
+    }
+    if(!S.vaultEnc){
+      if(!_vaultLoaded){_vaultPlain=(S.vault||[]).slice();_vaultLoaded=true}
+      if((S.vault||[]).length||!S.vaultEnc){vaultPersist()}
+    }
+  }
+  const list=VD();
+  el.innerHTML=list.length?list.map(vaultCard).join('')
     :'<div class="empty"><div class="em-ring">\U0001F510</div>No logins saved yet.<br>Keep bank logins, card PINs, wifi and app passwords here \u2014 safe behind your lock.</div>';
 }
 /* ============ FIREBASE CLOUD MESSAGING (closed-app push) ============ */
@@ -3452,7 +3528,8 @@ function showLock(mode){lkMode=mode||'verify';lkBuf='';lkFirst='';
   document.getElementById('lkSub').textContent=lkMode==='verify'?'ALOK OS is locked':'';
   document.getElementById('lockOv').classList.add('open');lkRender();
   if(!_lkKeyBound){document.addEventListener('keydown',_lkKeyHandler);_lkKeyBound=true}
-  if(lkMode==='verify'&&S.lock&&S.lock.bio)setTimeout(bioUnlock,500)}
+  if(lkMode==='verify'&&_lkForcePin)document.getElementById('lkSub').textContent='PIN needed for the vault';
+  if(lkMode==='verify'&&S.lock&&S.lock.bio&&!_lkForcePin)setTimeout(bioUnlock,500)}
 function hideLock(){document.getElementById('lockOv').classList.remove('open')}
 function lkFail(msg){document.getElementById('lkSub').textContent=msg;lkBuf='';lkRender();
   const p=document.querySelector('#lockOv .lk-pad');p.classList.add('shake');setTimeout(()=>p.classList.remove('shake'),430)}
@@ -3465,17 +3542,24 @@ async function lkKey(k){
     document.getElementById('lkTitle').textContent='Confirm PIN';lkRender();return}
   if(lkMode==='confirm'){
     if(lkBuf===lkFirst){const salt=uid();
+      if(S.vaultEnc&&!_vaultLoaded&&_sessionPin){try{_vaultPlain=await vlDecryptWith(_sessionPin);_vaultLoaded=true}catch(e){}}
       S.lock={pinHash:await hashPin(lkBuf,salt),salt,bio:(S.lock&&S.lock.bio)||null};
+      _sessionPin=lkBuf;_vaultKey=null;_vaultSalt=null;
+      if(!_vaultLoaded&&(S.vault||[]).length){_vaultPlain=S.vault.slice();_vaultLoaded=true}
+      if(_vaultLoaded){try{await vlEncrypt()}catch(e){}}
       save(true);hideLock();renderSettings();toast('App lock enabled 🔒')}
     else{lkMode='set';document.getElementById('lkTitle').textContent='Choose a 4-digit PIN';
       lkFail("PINs didn't match — start again")}
     return}
   const ok=S.lock&&(await hashPin(lkBuf,S.lock.salt))===S.lock.pinHash;
-  if(ok){hideLock();if(lkAfter){const fn=lkAfter;lkAfter=null;fn()}}
+  if(ok){_sessionPin=lkBuf;hideLock();if(lkAfter){const fn=lkAfter;lkAfter=null;fn()}}
   else lkFail('Wrong PIN — try again')}
 function pinSetup(){if(S.lock&&S.lock.pinHash){lkAfter=()=>showLock('set');showLock('verify')}else showLock('set')}
 function pinRemove(){if(!S.lock||!S.lock.pinHash){toast('No PIN is set');return}
-  lkAfter=()=>{delete S.lock;save(true);renderSettings();toast('App lock removed')};showLock('verify')}
+  lkAfter=async ()=>{
+    if(S.vaultEnc){try{if(!_vaultLoaded&&_sessionPin){_vaultPlain=await vlDecryptWith(_sessionPin);_vaultLoaded=true}}catch(e){}
+      if(_vaultLoaded){S.vault=_vaultPlain||[];delete S.vaultEnc;toast('Vault is now stored unencrypted')}}
+    delete S.lock;lockSession();save(true);renderSettings();renderVault();toast('App lock removed')};showLock('verify')}
 function bioToggle(){if(!S.lock||!S.lock.pinHash){toast('Set a PIN first');return}
   if(S.lock.bio){S.lock.bio=null;save(true);renderSettings();toast('Biometric unlock disabled');return}
   bioEnroll()}
@@ -3568,6 +3652,7 @@ async function switchAccount(email){
   toast('Switching account — loading '+email+"'s data…");
   try{allAttIds().forEach(id=>fileDel(id))}catch(e){}
   const keepA=S.gAuth,g=S.profile.google,keepSkip=S.loginSkipped;
+  lockSession();
   S=blank();S.owner=email;S.gAuth=keepA;S.profile.google=g;S.loginSkipped=keepSkip;
   S.updatedAt=0;S.baseRev=0; /* fresh baseline: this account's cloud data loads cleanly */
   save(true);applyTheme();renderAll()}
@@ -3809,14 +3894,14 @@ async function backup(){toast('Preparing backup…');const files={};
 function restore(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();
   rd.onload=async e=>{try{const j=JSON.parse(e.target.result);const st=j.state||j;
     if(!st.profile||!Array.isArray(st.tasks))throw 0;
-    S={...blank(),...st};migrate();const fl=j.files||{};for(const id in fl)await fileSave(id,fl[id]);
+    lockSession();S={...blank(),...st};migrate();const fl=j.files||{};for(const id in fl)await fileSave(id,fl[id]);
     save();applyTheme();renderAll();toast('✓ Backup restored');go('today')}
     catch(err){toast('That file isn’t a valid ALOK OS backup')}};
   rd.readAsText(f);inp.value=''}
 let clearArm=false;
 function clearAll(){if(!clearArm){clearArm=true;toast('Tap Clear again to erase everything');
     setTimeout(()=>clearArm=false,4000);return}
-  clearArm=false;allAttIds().forEach(id=>fileDel(id));S=blank();store.del();save();applyTheme();renderAll();go('today');toast('All data cleared')}
+  clearArm=false;allAttIds().forEach(id=>fileDel(id));lockSession();S=blank();store.del();save();applyTheme();renderAll();go('today');toast('All data cleared')}
 /* ============ BOOT ============ */
 function migrate(){(S.circulars||[]).forEach(c=>{if(!c.versions){c.versions=[{id:uid(),date:c.date||today(),att:c.att,at:c.at||new Date().toISOString()}];delete c.att;delete c.date}});
   /* upgrades from before the conflict guard: adopt the last successful sync as the baseline,
@@ -3854,7 +3939,7 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden){hiddenAt=Date.now();return}
     checkReminders();renderToday();cloudSync();
-    if(S.lock&&S.lock.pinHash&&Date.now()-hiddenAt>60000)showLock('verify')});
+    if(S.lock&&S.lock.pinHash&&Date.now()-hiddenAt>60000){lockSession();renderVault();showLock('verify')}});
   addEventListener('focus',()=>cloudSync());
   addEventListener('online',()=>cloudSync());
   setInterval(()=>cloudSync(),45000);
