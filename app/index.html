@@ -427,6 +427,12 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
 .sk-palette{flex-shrink:0}
 @media(max-height:620px){.sk-toolbar-note{display:none}}
 .focus-card{background:linear-gradient(160deg,var(--ink1),color-mix(in srgb,var(--ink1) 88%,var(--gold)))}
+.tile-lock{position:absolute;top:9px;left:9px;font-size:12px;opacity:.85}
+.va-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13.5px}
+.va-k{color:var(--lo);width:42px;flex-shrink:0;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+.va-v{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;font-family:ui-monospace,monospace;color:var(--hi)}
+.va-cp{background:none;border:1px solid var(--hair);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--lo);flex-shrink:0;font-size:14px}
+.va-cp:hover{border-color:var(--gold);color:var(--gold)}
 </style>
 </head>
 <body>
@@ -817,6 +823,12 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     <div id="famBody" style="margin-top:16px"></div>
   </div>
 
+  <div class="ltab" id="lt-vault" style="display:none">
+    <button class="btn btn-gold" style="width:100%" onclick="vaultAdd()">🔑 Add login / password</button>
+    <div class="stat-sub" style="margin-top:8px;text-align:center">Bank logins, cards, wifi passwords, app accounts — all locked behind your PIN</div>
+    <div id="vaultList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+
   <div class="ltab" id="lt-docs" style="display:none">
     <input class="inp" id="docName" placeholder="Document name (PAN, RC, Policy, Warranty…)">
     <div style="display:flex;gap:8px;margin-top:10px">
@@ -1004,6 +1016,15 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
       <div><div class="set-name">Biometric unlock</div><div class="set-sub" id="bioStatus">Set a PIN first</div></div>
       <button class="btn btn-ghost btn-sm" id="bioBtn" onclick="bioToggle()">Enable</button>
     </div>
+    <div style="height:1px;background:var(--hair);margin:8px 0"></div>
+    <div class="set-row">
+      <div><div class="set-name">🔐 Lock Vault</div><div class="set-sub">Ask for PIN to open</div></div>
+      <button class="btn btn-ghost btn-sm" id="lkVault" onclick="toggleModLock('vault')">—</button>
+    </div>
+    <div class="set-row">
+      <div><div class="set-name">👪 Lock Family Documents</div><div class="set-sub">Ask for PIN to open</div></div>
+      <button class="btn btn-ghost btn-sm" id="lkFamily" onclick="toggleModLock('family')">—</button>
+    </div>
   </div>
 
   <div class="eyebrow">Dashboard cards</div>
@@ -1124,6 +1145,17 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     <div id="teStatus" class="set-sub" style="margin-top:10px"></div>
     <button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="taskEditSave()">Save</button>
     <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('taskEdOv').classList.remove('open')">Cancel</button>
+  </div></div>
+
+<div id="vaultOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:380px">
+    <h2 id="vaTtl" style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">New entry</h2>
+    <label class="fld"><span>Name</span><input class="inp" id="vaTitle" placeholder="HDFC NetBanking, Gmail, Wifi…"></label>
+    <label class="fld" style="margin-top:10px"><span>Username / ID</span><input class="inp" id="vaUser" placeholder="Login ID (optional)"></label>
+    <label class="fld" style="margin-top:10px"><span>Password / PIN</span><input class="inp" id="vaPass" placeholder="Password"></label>
+    <label class="fld" style="margin-top:10px"><span>Website (optional)</span><input class="inp" id="vaUrl" placeholder="netbanking.hdfcbank.com"></label>
+    <label class="fld" style="margin-top:10px"><span>Notes (optional)</span><textarea class="inp" id="vaNote" placeholder="Security question, recovery info…" style="min-height:60px"></textarea></label>
+    <button class="btn btn-gold" style="width:100%;margin-top:14px" onclick="vaultSave()">Save</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('vaultOv').classList.remove('open')">Cancel</button>
   </div></div>
 
 <div id="renameOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
@@ -1295,7 +1327,7 @@ const store={
 };
 /* ============ STATE ============ */
 const blank=()=>({profile:{name:'',photo:null,theme:'dark'},
-  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],bills:[],cards:[],lend:[],drawings:[],family:[],trash:[],push:{enabled:false,token:null},car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
+  tasks:[],notes:[],shopping:[],expenses:[],followups:[],meetings:[],docs:[],circulars:[],income:[],goals:[],meds:[],habits:[],vitals:[],money:{budget:0},renewals:[],fuel:[],service:[],events:[],links:[],bills:[],cards:[],lend:[],drawings:[],family:[],vault:[],trash:[],push:{enabled:false,token:null},lockMods:{},car:{name:'',pic:null,svcKm:0,svcEvery:0},deviceId:uid(),baseRev:0,
   water:{date:today(),count:0},created:new Date().toISOString()});
 let S=blank(); let saveT=null;
 let quotaWarned=false;
@@ -1340,7 +1372,7 @@ function go(v){
   if(v==='cal'){const c=document.getElementById('calDate');if(!c.value)c.value=today();renderCal()} if(v==='settings')renderSettings(); if(v==='search'){renderSearch();setTimeout(()=>qIn.focus(),150)}}
 const LIFE_MODS=[
   ['tasks','Tasks','✓'],['notes','Notes','🗒'],['draw','Draw','🎨'],['shopping','Shopping','🛒'],['money','Money','₹'],['pay','Payments','💳'],
-  ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄'],['family','Family Docs','👪']];
+  ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄'],['family','Family Docs','👪'],['vault','Vault','🔐']];
 const WORK_MODS=[
   ['tasks','Tasks','✓'],['follow','Follow-ups','↺'],['meet','Meetings','🎥'],['circ','Circulars','📑'],
   ['odoc','Docs','📄'],['link','Links','🔗'],['notes','Quick Notes','🗒']];
@@ -1357,12 +1389,12 @@ function workBadge(t){const d=today();
   if(t==='follow')return {n:S.followups.filter(f=>!f.done&&f.due<=d).length};
   if(t==='meet')return {n:S.meetings.filter(m=>m.date===d&&!m.done).length};
   return null}
-function tileHtml(space,m){const [t,name,ic]=m;
+function tileHtml(space,m){const [t,name,ic]=m;const _lk=modLocked(t)?'<span class="tile-lock">\ud83d\udd12</span>':'';
   const b=(space==='life'?lifeBadge:workBadge)(t);
   let badge='';
   if(b&&b.n)badge='<span class="tile-badge">'+b.n+'</span>';
   else if(b&&b.dot)badge='<span class="tile-dot" style="color:'+b.dot+'"></span>';
-  return '<div class="tile" onclick="'+(space==='life'?'lifeTab':'workTab')+'(\''+t+'\')">'+badge
+  return '<div class="tile" onclick="'+(space==='life'?'lifeTab':'workTab')+'(\''+t+'\')">'+badge+_lk
     +'<div class="tile-ic">'+ic+'</div><div class="tile-nm">'+name+'</div></div>'}
 function renderLifeLauncher(){const el=document.getElementById('lifeLauncher');if(el)el.innerHTML=LIFE_MODS.map(m=>tileHtml('life',m)).join('')}
 function renderWorkLauncher(){const el=document.getElementById('workLauncher');if(el)el.innerHTML=WORK_MODS.map(m=>tileHtml('work',m)).join('')}
@@ -1374,7 +1406,9 @@ function workHome(){document.querySelectorAll('.wtab').forEach(x=>x.style.displa
   document.getElementById('workBar').style.display='none';
   document.getElementById('workLauncher').style.display='';
   document.getElementById('main').scrollTop=0;renderWorkLauncher()}
-function lifeTab(t){document.querySelectorAll('.ltab').forEach(x=>x.style.display='none');
+function lifeTab(t){
+  if(modLocked(t)&&!_unlocked[t]){requireUnlock(function(){_unlocked[t]=1;lifeTab(t);setTimeout(function(){_unlocked[t]=0},1500)});return}
+  document.querySelectorAll('.ltab').forEach(x=>x.style.display='none');
   const el=document.getElementById('lt-'+t);if(!el)return;
   el.style.display='block';
   document.getElementById('lifeLauncher').style.display='none';
@@ -2753,7 +2787,7 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
   +'<button class="ed" title="Rename" onclick="askRename(\'doc\',\''+d.id+'\')">✎</button><button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
-function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();renderFamily();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
+function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();renderFamily();renderVault();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
@@ -2786,6 +2820,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
    ['Links',S.links.filter(l=>hit(l.name)).map(linkCard)],
    ['Family Documents',(S.family||[]).flatMap(m=>(m.docs||[]).filter(d=>hit(d.name)||hit(m.name)).map(d=>famDocCard(m.id,d)))],
+   ['Vault (logins)',(modLocked('vault')?[]:(S.vault||[]).filter(v=>hit(v.title)||hit(v.user)||hit(v.url)).map(vaultCard))],
    ['Bills',S.bills.filter(b=>hit(b.name)).map(billCard)],
    ['Cards',S.cards.filter(c=>hit(c.name)).map(cardCard)],
    ['Lent / Borrowed',S.lend.filter(l=>hit(l.who)||hit(l.note)).map(lendCard)],
@@ -2798,7 +2833,7 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
    ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
-  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'||name==='Bills'||name==='Cards'||name==='Lent / Borrowed'||name==='Family Documents'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
+  let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'||name==='Bills'||name==='Cards'||name==='Lent / Borrowed'||name==='Family Documents'||name==='Vault (logins)'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
   qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>';setTimeout(loadThumbs,0)}
 /* ============ CIRCULARS (with version history) ============ */
 let circVerTarget=null;let circOpen=null;
@@ -3149,6 +3184,56 @@ function famSetPhoto(mid){const m=S.family.find(x=>x.id===mid);if(!m)return;
 }
 function famRemovePhoto(mid){const m=S.family.find(x=>x.id===mid);if(!m)return;m.photo=null;save();renderFamily()}
 
+/* ============ PASSWORD VAULT ============ */
+function vaultAdd(){vaultEdit(null)}
+let _vaultId=null;
+function vaultEdit(id){_vaultId=id;const v=id?(S.vault||[]).find(x=>x.id===id):null;
+  document.getElementById('vaTitle').value=v?v.title||'':'';
+  document.getElementById('vaUser').value=v?v.user||'':'';
+  document.getElementById('vaPass').value=v?v.pass||'':'';
+  document.getElementById('vaUrl').value=v?v.url||'':'';
+  document.getElementById('vaNote').value=v?v.note||'':'';
+  document.getElementById('vaTtl').textContent=id?'Edit entry':'New entry';
+  document.getElementById('vaultOv').classList.add('open');
+  setTimeout(function(){document.getElementById('vaTitle').focus()},60)}
+function vaultSave(){const title=document.getElementById('vaTitle').value.trim();
+  if(!title){toast('Give it a name (e.g. HDFC NetBanking)');return}
+  const rec={title,user:document.getElementById('vaUser').value.trim(),
+    pass:document.getElementById('vaPass').value,
+    url:document.getElementById('vaUrl').value.trim(),
+    note:document.getElementById('vaNote').value.trim(),at:new Date().toISOString()};
+  if(!S.vault)S.vault=[];
+  if(_vaultId){const v=S.vault.find(x=>x.id===_vaultId);if(v)Object.assign(v,rec)}
+  else{rec.id=uid();S.vault.unshift(rec)}
+  document.getElementById('vaultOv').classList.remove('open');_vaultId=null;
+  save();renderVault();toast('\U0001F512 Saved')}
+function vaultDel(id){const v=(S.vault||[]).find(x=>x.id===id);askDelete(v&&v.title,function(){S.vault=S.vault.filter(x=>x.id!==id);save();renderVault()})}
+function vaultReveal(id,el){const v=(S.vault||[]).find(x=>x.id===id);if(!v)return;
+  const span=document.getElementById('vp-'+id);if(!span)return;
+  if(span.dataset.shown==='1'){span.textContent='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';span.dataset.shown='0';el.textContent='\U0001F441';}
+  else{span.textContent=v.pass||'(none)';span.dataset.shown='1';el.textContent='\U0001F648';}}
+function vaultCopy(id,field){const v=(S.vault||[]).find(x=>x.id===id);if(!v)return;
+  const val=field==='user'?v.user:v.pass;if(!val){toast('Nothing to copy');return}
+  navigator.clipboard.writeText(val).then(function(){toast('Copied '+(field==='user'?'username':'password'))},function(){toast('Copy failed')})}
+function vaultCard(v){
+  return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">'
+    +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:17px">\U0001F511 '+esc(v.title)+'</div>'
+    +(v.url?'<div class="row-meta" style="margin-top:2px"><a href="'+esc(v.url.startsWith('http')?v.url:'https://'+v.url)+'" target="_blank" rel="noopener" style="color:var(--gold)">'+esc(v.url)+'</a></div>':'')
+    +'</div>'
+    +'<div style="display:flex;gap:4px"><button class="ed" title="Edit" onclick="vaultEdit(\''+v.id+'\')">\u270e</button>'
+    +'<button class="del" onclick="vaultDel(\''+v.id+'\')">\u2715</button></div></div>'
+    +(v.user?'<div class="va-row"><span class="va-k">User</span><span class="va-v">'+esc(v.user)+'</span><button class="va-cp" onclick="vaultCopy(\''+v.id+'\',\'user\')">\u29c9</button></div>':'')
+    +'<div class="va-row"><span class="va-k">Pass</span><span class="va-v" id="vp-'+v.id+'" data-shown="0">\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022</span>'
+    +'<button class="va-cp" onclick="vaultReveal(\''+v.id+'\',this)">\U0001F441</button>'
+    +'<button class="va-cp" onclick="vaultCopy(\''+v.id+'\',\'pass\')">\u29c9</button></div>'
+    +(v.note?'<div class="row-meta" style="margin-top:8px">'+esc(v.note)+'</div>':'')
+    +'</div>';
+}
+function renderVault(){const el=document.getElementById('vaultList');if(!el)return;
+  if(!S.vault)S.vault=[];
+  el.innerHTML=S.vault.length?S.vault.map(vaultCard).join('')
+    :'<div class="empty"><div class="em-ring">\U0001F510</div>No logins saved yet.<br>Keep bank logins, card PINs, wifi and app passwords here \u2014 safe behind your lock.</div>';
+}
 /* ============ FIREBASE CLOUD MESSAGING (closed-app push) ============ */
 const FCM_CONFIG={apiKey:"AIzaSyDLZY5yMJT4YXj8rqiKI0U9GpYpM1kHS9w",authDomain:"alok-os-19787.firebaseapp.com",projectId:"alok-os-19787",storageBucket:"alok-os-19787.firebasestorage.app",messagingSenderId:"774257734126",appId:"1:774257734126:web:5846d255032f8540229eff"};
 const FCM_VAPID="BJemHpH2HIHMWIZgqO5UPv6hUI98XiftDoIbBSfiOsw_K4Q20DC_81BmOlsOavOhjD36Wo3gmcl3WHdKKzH0MCo";
@@ -3281,7 +3366,34 @@ function renderCal(){const d=document.getElementById('calDate').value||today();
      :'<div class="empty"><div class="em-ring">📅</div>Nothing recorded on this date.<br>Past & future entries — Life and Work — will all appear here.</div>');
   setTimeout(loadThumbs,0)}
 /* ============ APP LOCK: PIN + BIOMETRIC ============ */
+function askPrompt2(title,msg,onYes,onNo){
+  const rows='<div class="set-sub" style="margin-bottom:14px">'+esc(msg)+'</div>'
+    +'<button class="btn btn-gold" style="width:100%" onclick="neSheetClose();(_ap2y&&_ap2y())">Yes, set a PIN</button>'
+    +'<button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="neSheetClose();(_ap2n&&_ap2n())">Not now</button>';
+  _ap2y=onYes;_ap2n=onNo;showSheet(title,rows);
+}
+let _ap2y=null,_ap2n=null;
+function requireUnlock(cb){
+  if(!S.lock||!S.lock.pinHash){
+    askPrompt2('Protect this area','You have no app PIN yet. Set a 4-digit PIN to lock sensitive areas like Vault and Family Documents?',function(){lkAfter=function(){ if(S.lock&&S.lock.pinHash){cb()} };showLock('set')},cb);
+    return;
+  }
+  lkAfter=function(){cb()};
+  showLock('verify');
+}
+function modLocked(key){return !!(S.lockMods&&S.lockMods[key])}
+function toggleModLock(key){
+  if(!S.lockMods)S.lockMods={};
+  if(S.lockMods[key]){
+    requireUnlock(function(){delete S.lockMods[key];save();if(window.renderSettings)renderSettings();toast('Lock removed')});
+  } else {
+    if(!S.lock||!S.lock.pinHash){toast('Set an app PIN first (Settings \u2192 App lock)');return}
+    S.lockMods[key]=1;save();if(window.renderSettings)renderSettings();toast('\ud83d\udd12 Locked');
+  }
+}
+
 let lkMode='verify',lkBuf='',lkFirst='',lkAfter=null,hiddenAt=0;
+let _unlocked={};
 async function hashPin(pin,salt){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin));
   return btoa(String.fromCharCode.apply(null,new Uint8Array(h)))}
 function lkRender(){document.querySelectorAll('#lockOv .lk-dot').forEach((d,i)=>d.classList.toggle('on',i<lkBuf.length));
@@ -3582,6 +3694,8 @@ function renderDashToggles(){const el=document.getElementById('dashToggles');if(
   el.innerHTML=DASH_SECS.map(([k,label])=>'<div class="set-row"><div class="set-name" style="font-size:13.5px">'+esc(label)+'</div>'
     +'<div class="toggle'+(hid.includes(k)?'':' on')+'" onclick="toggleDashSec(\''+k+'\')"></div></div>').join('')}
 function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();renderDashToggles();renderPushCard();
+  var lv=document.getElementById('lkVault');if(lv)lv.textContent=modLocked('vault')?'On':'Off';
+  var lf=document.getElementById('lkFamily');if(lf)lf.textContent=modLocked('family')?'On':'Off';
   const tm=S.profile.theme||'dark';
   document.querySelectorAll('#themeChips .chip').forEach(c=>c.classList.toggle('on',c.dataset.t===tm));
   const tsub=document.getElementById('themeSub');
