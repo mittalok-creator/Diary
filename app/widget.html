@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ALOK OS — Widget</title>
+<style>
+  :root{
+    --ink0:#0B0E13; --ink1:#141A22; --gold:#D9A85C; --goldb:#F0C27B;
+    --hi:#F3EFE6; --lo:#8A93A0; --hair:rgba(255,255,255,.09);
+    --risk:#E06A5A; --warn:#E0A44A; --good:#5FB98E;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-user-select:none;user-select:none}
+  html,body{height:100%;background:transparent;overflow:hidden;font-family:'Space Grotesk',-apple-system,system-ui,sans-serif}
+  #card{
+    height:100vh; border-radius:18px;
+    background:linear-gradient(160deg, rgba(20,26,34,.92), rgba(11,14,19,.94));
+    backdrop-filter:blur(18px) saturate(1.1); -webkit-backdrop-filter:blur(18px);
+    border:1px solid rgba(217,168,92,.28);
+    box-shadow:0 18px 50px rgba(0,0,0,.5);
+    display:flex; flex-direction:column; overflow:hidden; color:var(--hi);
+  }
+  #drag{ -webkit-app-region:drag; padding:12px 14px 8px; display:flex; align-items:center; justify-content:space-between; cursor:move }
+  .brand{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:.14em;color:var(--gold);font-weight:700}
+  .dm{width:22px;height:22px;border-radius:50%;border:1.3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:9px;color:var(--gold)}
+  .wbtns{ -webkit-app-region:no-drag; display:flex; gap:6px }
+  .wbtn{width:22px;height:22px;border-radius:6px;border:none;background:rgba(255,255,255,.06);color:var(--lo);cursor:pointer;font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center}
+  .wbtn:hover{background:rgba(217,168,92,.2);color:var(--gold)}
+  #body{flex:1;overflow-y:auto;padding:4px 16px 16px}
+  #head{font-family:Georgia,serif;font-size:23px;margin:2px 0 12px;font-weight:600}
+  .chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:600;margin:0 6px 8px 0}
+  .list{margin-top:6px;display:flex;flex-direction:column;gap:8px}
+  .item{ -webkit-app-region:no-drag; display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:11px;background:rgba(255,255,255,.03);border:1px solid var(--hair);cursor:pointer}
+  .item:hover{border-color:rgba(217,168,92,.4)}
+  .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .it-t{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .it-m{font-size:11px;color:var(--lo);flex-shrink:0}
+  .empty{color:var(--lo);font-size:13px;text-align:center;padding:24px 10px}
+  .foot{ -webkit-app-region:no-drag; padding:10px 16px calc(12px);border-top:1px solid var(--hair);display:flex;gap:8px}
+  .foot button{flex:1;padding:8px;border-radius:9px;border:1px solid var(--hair);background:none;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+  .foot button:hover{border-color:var(--gold)}
+  #body::-webkit-scrollbar{width:6px}
+  #body::-webkit-scrollbar-thumb{background:var(--hair);border-radius:3px}
+</style>
+</head>
+<body>
+<div id="card">
+  <div id="drag">
+    <div class="brand"><div class="dm">AM</div> ALOK OS</div>
+    <div class="wbtns">
+      <button class="wbtn" id="refreshBtn" title="Refresh">&#x21bb;</button>
+      <button class="wbtn" id="openBtn" title="Open app">&#x2197;</button>
+      <button class="wbtn" id="hideBtn" title="Hide">&#x2715;</button>
+    </div>
+  </div>
+  <div id="body">
+    <div id="head">&mdash;</div>
+    <div id="chips"></div>
+    <div class="list" id="list"></div>
+  </div>
+  <div class="foot">
+    <button id="todayBtn">Today</button>
+    <button id="addBtn">+ Task</button>
+  </div>
+</div>
+
+<script>
+const KEY='alokos-v1';
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+function today(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function fmtTime(t){ if(!t) return ''; let [h,m]=t.split(':').map(Number); const ap=h<12?'AM':'PM'; h=h%12||12; return h+':'+String(m).padStart(2,'0')+' '+ap; }
+function esc(s){ return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function render(){
+  const S=load();
+  const t=today();
+  const tasks=S.tasks||[], meetings=S.meetings||[], follow=S.followups||[], meds=S.meds||[];
+  const over=tasks.filter(x=>!x.done&&x.due&&x.due<t);
+  const dueToday=tasks.filter(x=>!x.done&&x.due===t);
+  const meetToday=meetings.filter(m=>m.date===t&&!m.done);
+  const folToday=follow.filter(f=>!f.done&&f.due&&f.due<=t);
+
+  const head=document.getElementById('head');
+  if(over.length) head.innerHTML='<span style="color:var(--risk)">'+over.length+' overdue</span>';
+  else if(dueToday.length+meetToday.length+folToday.length) head.textContent=(dueToday.length+meetToday.length+folToday.length)+' due today';
+  else head.innerHTML='<span style="color:var(--good)">All clear &#10003;</span>';
+
+  const chips=document.getElementById('chips'); let c='';
+  const chip=(n,l,col)=>{ if(n) c+='<span class="chip" style="background:'+col+'22;color:'+col+';border:1px solid '+col+'44">'+n+' '+l+'</span>'; };
+  chip(over.length,'overdue','#E06A5A');
+  chip(dueToday.length,'today','#D9A85C');
+  chip(meetToday.length,'meeting'+(meetToday.length>1?'s':''),'#D9A85C');
+  chip(folToday.length,'follow-up'+(folToday.length>1?'s':''),'#D9A85C');
+  chips.innerHTML=c;
+
+  // combined list, soonest first
+  const rows=[];
+  over.forEach(x=>rows.push({t:x.title,m:'overdue',col:'#E06A5A',time:x.time||''}));
+  dueToday.forEach(x=>rows.push({t:x.title,m:x.time?fmtTime(x.time):'today',col:'#D9A85C',time:x.time||''}));
+  meetToday.forEach(x=>rows.push({t:'🎥 '+x.title,m:x.time?fmtTime(x.time):'meeting',col:'#8FA9C9',time:x.time||''}));
+  folToday.forEach(x=>rows.push({t:'↺ '+(x.topic||x.person||'Follow-up'),m:'follow-up',col:'#D9A85C',time:''}));
+  rows.sort((a,b)=>(a.time||'99').localeCompare(b.time||'99'));
+
+  const list=document.getElementById('list');
+  if(!rows.length){ list.innerHTML='<div class="empty">Nothing pending — enjoy your day ✦</div>'; return; }
+  list.innerHTML=rows.slice(0,8).map(r=>
+    '<div class="item" data-open="1"><span class="dot" style="background:'+r.col+'"></span>'
+    +'<span class="it-t">'+esc(r.t)+'</span><span class="it-m">'+esc(r.m)+'</span></div>').join('');
+  list.querySelectorAll('[data-open]').forEach(el=>el.onclick=()=>openApp('today'));
+}
+
+function openApp(view){
+  if(window.alokWidget&&window.alokWidget.openApp){ window.alokWidget.openApp(view||'today'); }
+  else { window.open('https://diary.alokmittal.net/app/','_blank'); }
+}
+document.getElementById('refreshBtn').onclick=render;
+document.getElementById('openBtn').onclick=()=>openApp('today');
+document.getElementById('todayBtn').onclick=()=>openApp('today');
+document.getElementById('addBtn').onclick=()=>openApp('add');
+document.getElementById('hideBtn').onclick=()=>{ if(window.alokWidget&&window.alokWidget.hide) window.alokWidget.hide(); };
+
+render();
+setInterval(render, 60000); // refresh every minute
+window.addEventListener('focus', render);
+</script>
+</body>
+</html>
