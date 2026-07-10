@@ -1350,6 +1350,7 @@ html[data-theme="light"] .sk-tool{color:#3a4250}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
+const APP_VER='7.9.3';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2608,29 +2609,23 @@ async function shareAtt(id,type,label){
     /* best mime: stored -> from extension -> from data URL -> generic */
     let mime=(meta&&meta.mime)||extToMime(fname)||'';
     const blob=dataUrlToBlob(d);
-    if(blob&&navigator.share&&navigator.canShare){
+    if(blob&&navigator.share){
       if(!mime)mime=blob.type||'application/octet-stream';
-      /* Android Chrome only shares certain types; try real mime, then blank, then generic */
-      const tries=[mime,'','application/octet-stream'];
-      for(const tm of tries){
-        const file=new File([blob],fname,{type:tm});
-        if(navigator.canShare({files:[file]})){
-          try{await navigator.share({files:[file],title:fname});return}
-          catch(err){if(err&&err.name==='AbortError')return; break}
-        }
-      }
-      /* Android refuses this type entirely -> wrap it in a ZIP (always shareable, opens fine on the other side) */
+      /* candidates: real type, blank type, then a real ZIP wrap */
+      const cands=[new File([blob],fname,{type:mime}),new File([blob],fname,{type:''})];
       if(blob.size<=60*1024*1024){
-        try{
-          const raw=new Uint8Array(await blob.arrayBuffer());
-          const zbytes=zipWrap(fname,raw);
-          const zf=new File([zbytes],fname+'.zip',{type:'application/zip'});
-          if(navigator.canShare({files:[zf]})){
-            toast('Sharing as ZIP \u2014 phone doesn\u2019t allow this type directly');
-            try{await navigator.share({files:[zf],title:fname});return}
-            catch(err){if(err&&err.name==='AbortError')return}
-          }
-        }catch(e){}
+        try{const raw=new Uint8Array(await blob.arrayBuffer());
+          cands.push(new File([zipWrap(fname,raw)],fname+'.zip',{type:'application/zip'}))}catch(e){}
+      }
+      for(let ci=0;ci<cands.length;ci++){
+        const file=cands[ci];
+        const isZip=ci===cands.length-1&&file.name.endsWith('.zip');
+        /* trust canShare when it says yes; for the ZIP, attempt even if it says no (some browsers misreport) */
+        const ok=(navigator.canShare&&navigator.canShare({files:[file]}))||isZip||!navigator.canShare;
+        if(!ok)continue;
+        if(isZip)toast('Sharing as ZIP \u2014 this type can\u2019t go directly');
+        try{await navigator.share({files:[file],title:fname});return}
+        catch(err){if(err&&err.name==='AbortError')return; /* try next candidate */}
       }
     }
   }catch(e){/* fall through to download */}
@@ -3897,7 +3892,13 @@ function renderDashToggles(){const el=document.getElementById('dashToggles');if(
   const hid=S.profile.dashHidden||[];
   el.innerHTML=DASH_SECS.map(([k,label])=>'<div class="set-row"><div class="set-name" style="font-size:13.5px">'+esc(label)+'</div>'
     +'<div class="toggle'+(hid.includes(k)?'':' on')+'" onclick="toggleDashSec(\''+k+'\')"></div></div>').join('')}
-function renderSettings(){setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();renderDashToggles();renderPushCard();
+function renderSettings(){
+  let vv=document.getElementById('appVer');
+  if(!vv){vv=document.createElement('div');vv.id='appVer';vv.className='stat-sub';
+    vv.style.cssText='text-align:center;margin:18px 0 6px;opacity:.65';
+    const host=document.getElementById('v-settings');if(host)host.appendChild(vv)}
+  if(vv)vv.textContent='ALOK OS \u00b7 v'+APP_VER;
+  setName.value=S.profile.name;renderHeader();renderGCard();renderTrash();renderDashToggles();renderPushCard();
   var lv=document.getElementById('lkVault');if(lv)lv.textContent=modLocked('vault')?'On':'Off';
   var lf=document.getElementById('lkFamily');if(lf)lf.textContent=modLocked('family')?'On':'Off';
   const tm=S.profile.theme||'dark';
