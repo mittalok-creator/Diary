@@ -202,7 +202,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 #loginOv.open{display:flex}
 .mono-big{width:84px;height:84px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;
   font-family:'Fraunces',serif;color:var(--gold);font-size:28px;margin-bottom:28px;animation:lpulse 4s ease-in-out infinite}
-@keyframes lpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 25%,transparent)}50%{box-shadow:0 0 0 18px rgba(217,168,92,0)}}
+@keyframes lpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 25%,transparent)}50%{box-shadow:0 0 0 18px transparent}}
 #loginOv h2{font-family:'Fraunces',serif;font-size:28px;font-weight:600;margin-bottom:10px}
 #loginOv p{color:var(--lo);font-size:14px;max-width:300px;margin-bottom:34px}
 .gbtn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;max-width:320px;
@@ -299,7 +299,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .tl-now{display:flex;align-items:center;gap:10px;margin:6px 0 6px 64px;position:relative}
 .tl-now::before{content:'';position:absolute;left:-6px;width:9px;height:9px;border-radius:50%;
   background:var(--gold);box-shadow:0 0 10px var(--gold);animation:nowPulse 2.6s ease-in-out infinite}
-@keyframes nowPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 45%,transparent)}50%{box-shadow:0 0 0 7px rgba(217,168,92,0)}}
+@keyframes nowPulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 45%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
 .tl-now::after{content:'';flex:1;height:1.5px;background:linear-gradient(90deg,var(--gold),transparent)}
 .tl-now span{font-size:9.5px;font-weight:700;letter-spacing:.13em;color:var(--gold);margin-left:12px;white-space:nowrap}
 .dash-cols{display:block}
