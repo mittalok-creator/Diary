@@ -636,7 +636,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
         <button class="btn btn-ghost btn-sm" onclick="setBudget()">Set</button>
       </div>
     </div>
-    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px" onclick="exportExpenses()">⬇ Export to Excel (CSV)</button>
+    <button class="btn btn-ghost btn-sm" style="width:100%;margin-top:12px" onclick="moneyExcel()">📊 Excel dashboard (.xlsx)</button>
 
     <div class="eyebrow">Trends · last 6 months</div>
     <div class="card"><div id="mChart"></div><div id="catBars" style="margin-top:16px"></div></div>
@@ -1373,7 +1373,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.0.0';
+const APP_VER='8.1.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -3439,6 +3439,234 @@ function renderVault(){const el=document.getElementById('vaultList');if(!el)retu
   el.innerHTML=list.length?list.map(vaultCard).join('')
     :'<div class="empty"><div class="em-ring">\U0001F510</div>No logins saved yet.<br>Keep bank logins, card PINs, wifi and app passwords here \u2014 safe behind your lock.</div>';
 }
+/* ============ MONEY EXCEL DASHBOARD ============ */
+// ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
+function zipMulti(files){
+  const chunks=[];const cd=[];let off=0;
+  const u16=v=>[v&255,(v>>8)&255];
+  const u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+  const enc=new TextEncoder();
+  for(const fl of files){
+    const nm=enc.encode(fl.name);const data=fl.data;const crc=crc32(data);const sz=data.length;
+    const lfh=new Uint8Array([0x50,0x4B,3,4].concat(u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(sz),u32(sz),u16(nm.length),u16(0)));
+    chunks.push(lfh,nm,data);
+    cd.push({nm,crc,sz,off});
+    off+=lfh.length+nm.length+sz;
+  }
+  const cdParts=[];let cdLen=0;
+  for(const e of cd){
+    const h=new Uint8Array([0x50,0x4B,1,2].concat(u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(e.crc),u32(e.sz),u32(e.sz),u16(e.nm.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(e.off)));
+    cdParts.push(h,e.nm);cdLen+=h.length+e.nm.length;
+  }
+  const eocd=new Uint8Array([0x50,0x4B,5,6].concat(u16(0),u16(0),u16(cd.length),u16(cd.length),u32(cdLen),u32(off),u16(0)));
+  let total=off+cdLen+eocd.length;const out=new Uint8Array(total);let p=0;
+  for(const c of chunks){out.set(c,p);p+=c.length}
+  for(const c of cdParts){out.set(c,p);p+=c.length}
+  out.set(eocd,p);
+  return out;
+}
+function xlEsc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function xlCol(n){let s='';n++;while(n){const m=(n-1)%26;s=String.fromCharCode(65+m)+s;n=(n-1-m)/26}return s}
+function xlSerial(iso){return Math.floor((Date.parse(iso.slice(0,10)+'T00:00:00Z')-Date.parse('1899-12-30T00:00:00Z'))/86400000)}
+/* cell: {v, t:'n'|'s'|'f', s:styleIdx, f:formula} */
+function xlSheet(rows,opt){
+  opt=opt||{};let cols='';
+  if(opt.widths){cols='<cols>'+opt.widths.map((w,i)=>'<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+w+'" customWidth="1"/>').join('')+'</cols>'}
+  let sv='';
+  if(opt.freeze){sv='<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>'}
+  else{sv='<sheetViews><sheetView workbookViewId="0"/></sheetViews>'}
+  let body='';
+  rows.forEach((row,ri)=>{
+    if(!row){return}
+    let cells='';
+    row.forEach((c,ci)=>{
+      if(c==null)return;
+      const ref=xlCol(ci)+(ri+1);
+      const st=c.s?(' s="'+c.s+'"'):'';
+      if(c.f){cells+='<c r="'+ref+'"'+st+'><f>'+xlEsc(c.f)+'</f></c>'}
+      else if(c.t==='n'){cells+='<c r="'+ref+'"'+st+'><v>'+c.v+'</v></c>'}
+      else{cells+='<c r="'+ref+'"'+st+' t="inlineStr"><is><t xml:space="preserve">'+xlEsc(c.v)+'</t></is></c>'}
+    });
+    body+='<row r="'+(ri+1)+'">'+cells+'</row>';
+  });
+  const af=opt.autoFilter?('<autoFilter ref="'+opt.autoFilter+'"/>'):'';
+  return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
+    +sv+cols+'<sheetData>'+body+'</sheetData>'+af+'</worksheet>';
+}
+const XL_STYLES='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
++'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
++'<numFmts count="2">'
++'<numFmt numFmtId="164" formatCode="&quot;\u20B9&quot;#,##0.00;[Red]-&quot;\u20B9&quot;#,##0.00"/>'
++'<numFmt numFmtId="165" formatCode="dd-mm-yyyy"/>'
++'</numFmts>'
++'<fonts count="4">'
++'<font><sz val="11"/><name val="Arial"/></font>'
++'<font><b/><sz val="11"/><name val="Arial"/></font>'
++'<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Arial"/></font>'
++'<font><b/><sz val="16"/><color rgb="FF946420"/><name val="Arial"/></font>'
++'</fonts>'
++'<fills count="4">'
++'<fill><patternFill patternType="none"/></fill>'
++'<fill><patternFill patternType="gray125"/></fill>'
++'<fill><patternFill patternType="solid"><fgColor rgb="FFB98A44"/></patternFill></fill>'
++'<fill><patternFill patternType="solid"><fgColor rgb="FFF5EBDD"/></patternFill></fill>'
++'</fills>'
++'<borders count="2">'
++'<border><left/><right/><top/><bottom/><diagonal/></border>'
++'<border><left style="thin"><color rgb="FFD9D2C4"/></left><right style="thin"><color rgb="FFD9D2C4"/></right><top style="thin"><color rgb="FFD9D2C4"/></top><bottom style="thin"><color rgb="FFD9D2C4"/></bottom><diagonal/></border>'
++'</borders>'
++'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
++'<cellXfs count="11">'
++'<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'                                             // 0 default
++'<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0"/>'                                             // 1 bold
++'<xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyAlignment="1"><alignment horizontal="center"/></xf>' // 2 header
++'<xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0"/>'                                           // 3 currency
++'<xf numFmtId="164" fontId="1" fillId="3" borderId="1" xfId="0"/>'                                           // 4 currency bold total
++'<xf numFmtId="10" fontId="0" fillId="0" borderId="1" xfId="0"/>'                                            // 5 percent (built-in 10 = 0.00%)
++'<xf numFmtId="165" fontId="0" fillId="0" borderId="1" xfId="0"/>'                                           // 6 date
++'<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"/>'                                             // 7 text bordered
++'<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0"/>'                                             // 8 title
++'<xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0"/>'                                             // 9 label
++'<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0"/>'                                           // 10 currency plain
++'</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
+function buildMoneyXlsx(expenses,income){
+  const H=(v)=>({v,s:2}), T=(v)=>({v,s:7}), Tt=(v)=>({v,s:0}), B=(v)=>({v,s:1}), L=(v)=>({v,s:9});
+  const NUM=(v,st)=>({v:+v,t:'n',s:st==null?3:st});
+  const F=(f,st)=>({f,s:st==null?3:st});
+  const months={},cats={},srcs={};
+  expenses.forEach(e=>{const m=(e.at||'').slice(0,7);if(!m)return;months[m]=1;cats[e.cat||'Other']=1});
+  income.forEach(e=>{const m=(e.at||'').slice(0,7);if(!m)return;months[m]=1;srcs[e.source||'Income']=1});
+  const M=Object.keys(months).sort();
+  const C=Object.keys(cats).sort();
+  const SR=Object.keys(srcs).sort();
+  const mLabel=m=>{const [y,mo]=m.split('-');return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+mo-1]+' '+y};
+
+  /* ---- Transactions (the single dynamic source of truth) ---- */
+  const tr=[[H('Date'),H('Type'),H('Category / Source'),H('Amount'),H('Note')]];
+  const all=[];
+  expenses.forEach(e=>all.push({at:e.at,type:'Expense',cat:e.cat||'Other',amt:e.amount,note:e.note||''}));
+  income.forEach(e=>all.push({at:e.at,type:'Income',cat:e.source||'Income',amt:e.amount,note:''}));
+  all.sort((a,b)=>(a.at||'').localeCompare(b.at||''));
+  all.forEach(r=>tr.push([{v:xlSerial(r.at),t:'n',s:6},T(r.type),T(r.cat),NUM(r.amt),T(r.note)]));
+  const trN=tr.length;
+
+  /* ---- Dashboard ---- */
+  const dash=[];
+  dash.push([{v:'ALOK OS \u00b7 Money Dashboard',s:8}]);
+  dash.push([Tt('Generated '+new Date().toLocaleDateString('en-IN')+' \u00b7 edit the Transactions sheet \u2014 every number here recalculates')]);
+  dash.push(null);
+  dash.push([L('Total income'),F('SUMIF(Transactions!B:B,"Income",Transactions!D:D)',4)]);
+  dash.push([L('Total spend'),F('SUMIF(Transactions!B:B,"Expense",Transactions!D:D)',4)]);
+  dash.push([L('Net savings'),F('B4-B5',4)]);
+  dash.push([L('Savings rate'),F('IF(B4=0,0,B6/B4)',5)]);
+  dash.push(null);
+  dash.push([B('Month'),B('Income'),B('Spend'),B('Savings'),B('Spend bar')]);
+  const mr0=dash.length+1;
+  M.forEach((m,i)=>{const r=mr0+i;const [y,mo]=m.split('-').map(Number);
+    const ds='DATE('+y+','+mo+',1)',de='DATE('+y+','+(mo+1)+',1)';
+    dash.push([T(mLabel(m)),
+      F('SUMIFS(Transactions!D:D,Transactions!B:B,"Income",Transactions!A:A,">="&'+ds+',Transactions!A:A,"<"&'+de+')'),
+      F('SUMIFS(Transactions!D:D,Transactions!B:B,"Expense",Transactions!A:A,">="&'+ds+',Transactions!A:A,"<"&'+de+')'),
+      F('B'+r+'-C'+r),
+      F('REPT("\u2587",IFERROR(ROUND(C'+r+'/MAX($C$'+mr0+':$C$'+(mr0+M.length-1)+')*14,0),0))',7)]);
+  });
+  const mrEnd=mr0+M.length-1;
+  dash.push([B('Total'),F('SUM(B'+mr0+':B'+mrEnd+')',4),F('SUM(C'+mr0+':C'+mrEnd+')',4),F('SUM(D'+mr0+':D'+mrEnd+')',4),T('')]);
+  dash.push(null);
+  dash.push([B('Top categories'),B('Spend'),B('Share'),B('')]);
+  const cr0=dash.length+1;
+  C.forEach((c,i)=>{const r=cr0+i;
+    dash.push([T(c),
+      F('SUMIFS(Transactions!D:D,Transactions!B:B,"Expense",Transactions!C:C,A'+r+')'),
+      F('IF($B$5=0,0,B'+r+'/$B$5)',5),
+      F('REPT("\u2587",IFERROR(ROUND(C'+r+'*20,0),0))',7)]);
+  });
+
+  /* ---- Monthly x Category pivot (all formulas) ---- */
+  const pv=[[H('Month'),H('Start')].concat(C.map(H),[H('Total')])];
+  M.forEach((m,i)=>{const r=i+2;const [y,mo]=m.split('-').map(Number);
+    const row=[T(mLabel(m)),{v:xlSerial(m+'-01T00:00:00Z'),t:'n',s:6}];
+    C.forEach((c,ci)=>{const col=xlCol(ci+2);
+      row.push(F('SUMIFS(Transactions!$D:$D,Transactions!$B:$B,"Expense",Transactions!$C:$C,'+col+'$1,Transactions!$A:$A,">="&$B'+r+',Transactions!$A:$A,"<"&DATE(YEAR($B'+r+'),MONTH($B'+r+')+1,1))'));
+    });
+    row.push(F('SUM(C'+r+':'+xlCol(C.length+1)+r+')',4));
+    pv.push(row);
+  });
+  const pvTot=[B('Total'),T('')];
+  C.forEach((c,ci)=>{const col=xlCol(ci+2);pvTot.push(F('SUM('+col+'2:'+col+(M.length+1)+')',4))});
+  pvTot.push(F('SUM('+xlCol(C.length+2)+'2:'+xlCol(C.length+2)+(M.length+1)+')',4));
+  pv.push(pvTot);
+
+  /* ---- Income by source ---- */
+  const inc=[[H('Month'),H('Start')].concat(SR.map(H),[H('Total')])];
+  M.forEach((m,i)=>{const r=i+2;
+    const row=[T(mLabel(m)),{v:xlSerial(m+'-01T00:00:00Z'),t:'n',s:6}];
+    SR.forEach((sname,ci)=>{const col=xlCol(ci+2);
+      row.push(F('SUMIFS(Transactions!$D:$D,Transactions!$B:$B,"Income",Transactions!$C:$C,'+col+'$1,Transactions!$A:$A,">="&$B'+r+',Transactions!$A:$A,"<"&DATE(YEAR($B'+r+'),MONTH($B'+r+')+1,1))'));
+    });
+    row.push(F('SUM(C'+r+':'+xlCol(SR.length+1)+r+')',4));
+    inc.push(row);
+  });
+
+  const sheets=[
+    {name:'Dashboard',xml:xlSheet(dash,{widths:[22,15,15,15,20]})},
+    {name:'Monthly',xml:xlSheet(pv,{widths:[14,11].concat(C.map(()=>13),[14]),freeze:true})},
+    {name:'Income',xml:xlSheet(inc,{widths:[14,11].concat(SR.map(()=>15),[14]),freeze:true})},
+    {name:'Transactions',xml:xlSheet(tr,{widths:[12,10,20,13,32],freeze:true,autoFilter:'A1:E'+trN})}
+  ];
+  const enc=s=>new TextEncoder().encode(s);
+  const ct='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+    +sheets.map((sh,i)=>'<Override PartName="/xl/worksheets/sheet'+(i+1)+'.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>').join('')
+    +'<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>'
+    +'</Types>';
+  const rels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>'
+    +'</Relationships>';
+  const wb='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<sheets>'+sheets.map((sh,i)=>'<sheet name="'+xlEsc(sh.name)+'" sheetId="'+(i+1)+'" r:id="rId'+(i+1)+'"/>').join('')+'</sheets>'
+    +'<calcPr fullCalcOnLoad="1"/></workbook>';
+  const wbRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +sheets.map((sh,i)=>'<Relationship Id="rId'+(i+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet'+(i+1)+'.xml"/>').join('')
+    +'<Relationship Id="rId'+(sheets.length+1)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+    +'</Relationships>';
+  const files=[
+    {name:'[Content_Types].xml',data:enc(ct)},
+    {name:'_rels/.rels',data:enc(rels)},
+    {name:'xl/workbook.xml',data:enc(wb)},
+    {name:'xl/_rels/workbook.xml.rels',data:enc(wbRels)},
+    {name:'xl/styles.xml',data:enc(XL_STYLES)}
+  ];
+  sheets.forEach((sh,i)=>files.push({name:'xl/worksheets/sheet'+(i+1)+'.xml',data:enc(sh.xml)}));
+  return zipMulti(files);
+}
+async function moneyExcel(){
+  try{
+    if(!(S.expenses||[]).length&&!(S.income||[]).length){toast('No money entries yet');return}
+    const bytes=buildMoneyXlsx(S.expenses||[],S.income||[]);
+    const fname='ALOK-OS-Money-'+today()+'.xlsx';
+    const blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    if(navigator.share&&navigator.canShare){
+      const file=new File([blob],fname,{type:blob.type});
+      if(navigator.canShare({files:[file]})){
+        try{await navigator.share({files:[file],title:fname});return}
+        catch(err){if(err&&err.name==='AbortError')return}
+      }
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    toast('\u2b07 '+fname);
+  }catch(e){toast('Excel export failed')}
+}
+
 /* ============ FIREBASE CLOUD MESSAGING (closed-app push) ============ */
 const FCM_CONFIG={apiKey:"AIzaSyDLZY5yMJT4YXj8rqiKI0U9GpYpM1kHS9w",authDomain:"alok-os-19787.firebaseapp.com",projectId:"alok-os-19787",storageBucket:"alok-os-19787.firebasestorage.app",messagingSenderId:"774257734126",appId:"1:774257734126:web:5846d255032f8540229eff"};
 const FCM_VAPID="BJemHpH2HIHMWIZgqO5UPv6hUI98XiftDoIbBSfiOsw_K4Q20DC_81BmOlsOavOhjD36Wo3gmcl3WHdKKzH0MCo";
