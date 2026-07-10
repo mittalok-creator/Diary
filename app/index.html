@@ -414,6 +414,9 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .tile-x{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:8px;border:none;background:rgba(0,0,0,.06);color:var(--lo);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2}
 .tile-x:hover{background:rgba(217,168,92,.18);color:var(--gold)}
 body.dark .tile-x{background:rgba(255,255,255,.06)}
+.fam-face{width:52px;height:52px;margin:0 auto 10px;border-radius:50%;background-size:cover;background-position:center;background-color:var(--ink1)}
+.fam-face-ph{display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:19px;color:var(--gold);border:1.5px solid rgba(217,168,92,.3)}
+.tile-add{border-style:dashed !important;opacity:.85}
 </style>
 </head>
 <body>
@@ -2472,7 +2475,10 @@ function pickFiles(cb,opt){opt=opt||{};const i=document.createElement('input');i
   i.click()}
 function loadThumbs(){document.querySelectorAll('img.thumb[data-fid]').forEach(async im=>{
   if(im.dataset.done)return;im.dataset.done='1';
-  const d=await fileGet(im.dataset.fid);if(d)im.src=d})}
+  const d=await fileGet(im.dataset.fid);if(d)im.src=d});
+  document.querySelectorAll('.fam-face[data-fid]').forEach(async el=>{
+    if(el.dataset.done)return;el.dataset.done='1';
+    const d=await fileGet(el.dataset.fid);if(d)el.style.backgroundImage='url('+d+')'})}
 function attChips(att,pk){if(!att||!att.length)return'';
   return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">'+att.map(a=>
    '<span class="chip" onclick="openAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(a.name).replace(/'/g,"\\'")+'\')">'+fileIcon(a)+' '+esc(a.name)
@@ -2941,45 +2947,66 @@ function famDocCard(mid,doc){const a=doc.att;
 function renderFamily(){
   const wrap=document.getElementById('famMembers');if(!wrap)return;
   if(!S.family)S.family=[];
-  if(!S.family.length){
-    wrap.innerHTML='<div class="empty"><div class="em-ring">\ud83d\udc6a</div>No family members yet.<br>Add a member, then keep their important documents safe in one place.</div>';
-    document.getElementById('famBody').innerHTML='';return;
-  }
-  if(!famSel||!S.family.find(m=>m.id===famSel))famSel=S.family[0].id;
-  wrap.innerHTML='<div style="display:flex;gap:10px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none">'
-    +S.family.map(m=>{const on=m.id===famSel;const n=(m.docs||[]).length;
-      const avatar=m.photo
-        ?'<div style="width:60px;height:60px;margin:0 auto;border-radius:50%;background-image:url('+m.photo+');background-size:cover;background-position:center;border:2px solid '+(on?'var(--gold)':'var(--hair)')+'"></div>'
-        :'<div style="width:60px;height:60px;margin:0 auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:20px;border:2px solid '+(on?'var(--gold)':'var(--hair)')+';background:'+(on?'rgba(217,168,92,.15)':'var(--ink1)')+';color:'+(on?'var(--gold)':'var(--hi)')+'">'+famInitials(m.name)+'</div>';
-      return '<div onclick="famSel=\''+m.id+'\';renderFamily()" style="flex-shrink:0;cursor:pointer;text-align:center;width:74px">'
-        +avatar
-        +'<div style="font-size:11.5px;margin-top:5px;color:'+(on?'var(--gold)':'var(--lo)')+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(m.name)+'</div>'
-        +(n?'<div style="font-size:10px;color:var(--lo)">'+n+' doc'+(n>1?'s':'')+'</div>':'')
-        +'</div>';
-    }).join('')+'</div>';
-  const m=S.family.find(x=>x.id===famSel);
   const body=document.getElementById('famBody');
-  const relOpts=REL_LIST.map(r=>'<option value="'+r+'"'+(m.rel===r?' selected':'')+'>'+r+'</option>').join('');
-  const bigAvatar=m.photo
-    ?'<div style="width:64px;height:64px;border-radius:50%;background-image:url('+m.photo+');background-size:cover;background-position:center;border:2px solid var(--gold);flex-shrink:0;cursor:pointer" onclick="famSetPhoto(\''+m.id+'\')"></div>'
-    :'<div style="width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:22px;border:2px solid var(--hair);background:var(--ink1);color:var(--gold);flex-shrink:0;cursor:pointer" onclick="famSetPhoto(\''+m.id+'\')">'+famInitials(m.name)+'</div>';
-  body.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:14px">'
-    +bigAvatar
-    +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:19px">'+esc(m.name)+'</div>'
-    +'<select class="inp" style="margin-top:8px;height:40px" onchange="famSetRel(\''+m.id+'\',this.value)">'+relOpts+'</select></div>'
-    +'<button class="ed" title="Rename" onclick="famRenameMember(\''+m.id+'\')">\u270e</button>'
-    +'<button class="del" onclick="famDelMember(\''+m.id+'\')">\u2715</button></div>'
-    +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn btn-ghost btn-sm" style="flex:1" onclick="famSetPhoto(\''+m.id+'\')">\ud83d\udcf7 '+(m.photo?'Change photo':'Add photo')+'</button>'
-    +(m.photo?'<button class="btn btn-ghost btn-sm" onclick="famRemovePhoto(\''+m.id+'\')">Remove</button>':'')+'</div></div>'
-    +'<button class="btn btn-gold" style="width:100%" onclick="famAddDoc(\''+m.id+'\')">\ud83d\udcce Add document</button>'
-    +((m.docs&&m.docs.length)
-       ?'<div class="launcher" style="margin-top:16px">'+m.docs.map(d=>famDocTile(m.id,d)).join('')+'</div>'
-       :'<div class="empty" style="margin-top:16px;padding:20px">No documents for '+esc(m.name)+' yet</div>');
-  setTimeout(loadThumbs,0);
+  // ---------- LEVEL 2: a member is open ----------
+  if(famSel){
+    const m=S.family.find(x=>x.id===famSel);
+    if(!m){famSel=null;return renderFamily()}
+    wrap.innerHTML='<div class="modbar" style="margin-bottom:4px">'
+      +'<button class="backbtn" onclick="famSel=null;renderFamily()">\u2039</button>'
+      +'<div class="modttl">'+esc(m.name)+'</div></div>';
+    const avatar=m.photo
+      ?'<div style="width:70px;height:70px;border-radius:50%;background-image:url('+m.photo+');background-size:cover;background-position:center;border:2px solid var(--gold);flex-shrink:0"></div>'
+      :'<div style="width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:Fraunces,serif;font-size:24px;border:2px solid var(--hair);background:var(--ink1);color:var(--gold);flex-shrink:0">'+famInitials(m.name)+'</div>';
+    body.innerHTML='<div class="card" style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:14px">'
+      +avatar
+      +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:20px">'+esc(m.name)+'</div>'
+      +'<div class="row-meta" style="margin-top:2px">'+esc(m.rel||'Family')+' \u00b7 '+((m.docs||[]).length)+' document'+(((m.docs||[]).length)===1?'':'s')+'</div></div>'
+      +'<button class="ed" title="Edit member" onclick="famEditMember(\''+m.id+'\')">\u270e</button></div></div>'
+      +'<button class="btn btn-gold" style="width:100%" onclick="famAddDoc(\''+m.id+'\')">\ud83d\udcce Add document</button>'
+      +((m.docs&&m.docs.length)
+         ?'<div class="launcher" style="margin-top:16px">'+m.docs.map(d=>famDocTile(m.id,d)).join('')+'</div>'
+         :'<div class="empty" style="margin-top:16px;padding:24px">No documents for '+esc(m.name)+' yet.<br>Tap \u201cAdd document\u201d to save their Aadhaar, PAN, passport\u2026</div>');
+    setTimeout(loadThumbs,0);
+    return;
+  }
+  // ---------- LEVEL 1: grid of members ----------
+  document.getElementById('famBody').innerHTML='';
+  let html='<div class="launcher">';
+  S.family.forEach(m=>{
+    const n=(m.docs||[]).length;
+    const face=m.photo
+      ?'<div class="fam-face" style="background-image:url('+m.photo+')"></div>'
+      :'<div class="fam-face fam-face-ph">'+famInitials(m.name)+'</div>';
+    html+='<div class="tile" onclick="famSel=\''+m.id+'\';renderFamily()">'
+      +(n?'<span class="tile-badge">'+n+'</span>':'')
+      +face
+      +'<div class="tile-nm">'+esc(m.name)+'</div></div>';
+  });
+  // add-member tile
+  html+='<div class="tile tile-add" onclick="famAddMember()"><div class="tile-ic">\uff0b</div><div class="tile-nm">Add member</div></div>';
+  html+='</div>';
+  wrap.innerHTML=html;
 }
+function famEditMember(id){const m=S.family.find(x=>x.id===id);if(!m)return;
+  const relOpts=REL_LIST.map(r=>'<option value="'+r+'"'+(m.rel===r?' selected':'')+'>'+r+'</option>').join('');
+  const rows='<div style="display:flex;flex-direction:column;gap:10px">'
+    +'<label class="fld"><span>Name</span><input class="inp" id="famEdName" value="'+esc(m.name).replace(/"/g,'&quot;')+'"></label>'
+    +'<label class="fld"><span>Relation</span><select class="inp" id="famEdRel">'+relOpts+'</select></label>'
+    +'<button class="btn btn-gold" style="width:100%;margin-top:4px" onclick="famEditSave(\''+m.id+'\')">Save</button>'
+    +'<button class="btn btn-ghost" style="width:100%" onclick="famSetPhoto(\''+m.id+'\')">\ud83d\udcf7 '+(m.photo?'Change photo':'Add photo')+'</button>'
+    +(m.photo?'<button class="btn btn-ghost" style="width:100%" onclick="neSheetClose();famRemovePhoto(\''+m.id+'\')">Remove photo</button>':'')
+    +'<button class="btn btn-ghost" style="width:100%;color:var(--risk)" onclick="neSheetClose();famDelMember(\''+m.id+'\')">\u2715 Remove '+esc(m.name)+'</button>'
+    +'</div>';
+  showSheet('Edit member',rows);
+}
+function famEditSave(id){const m=S.family.find(x=>x.id===id);if(!m)return;
+  const nm=document.getElementById('famEdName').value.trim();
+  const rel=document.getElementById('famEdRel').value;
+  if(nm)m.name=nm;m.rel=rel;save();neSheetClose();renderFamily()}
 function famDocTile(mid,doc){const a=doc.att;
   const face=a&&a.type==='img'
-    ?'<img class="thumb" data-fid="'+a.id+'" alt="" style="width:46px;height:46px;border-radius:12px;object-fit:cover">'
+    ?'<div class="fam-face" data-fid="'+a.id+'" style="border-radius:14px"></div>'
     :'<div class="tile-ic">'+(a?fileIcon(a):'\ud83d\udcc4')+'</div>';
   return '<div class="tile" onclick="famOpenDoc(\''+mid+'\',\''+doc.id+'\')">'
     +'<button class="tile-x" onclick="event.stopPropagation();famDocMenu(\''+mid+'\',\''+doc.id+'\')">\u22ef</button>'
@@ -3002,6 +3029,7 @@ function famDocMenu(mid,did){const m=S.family.find(x=>x.id===mid);if(!m)return;
   showSheet(doc.name,rows);
 }
 function famSetPhoto(mid){const m=S.family.find(x=>x.id===mid);if(!m)return;
+  neSheetClose();
   cropPhotoFor(data=>{m.photo=data;save();renderFamily();toast('Photo updated \u2726')});
 }
 function famRemovePhoto(mid){const m=S.family.find(x=>x.id===mid);if(!m)return;m.photo=null;save();renderFamily()}
