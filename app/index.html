@@ -2574,13 +2574,29 @@ function mimeExt(m){const map={'application/pdf':'.pdf','image/jpeg':'.jpg','ima
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document':'.docx','application/msword':'.doc',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation':'.pptx',
   'text/plain':'.txt','text/csv':'.csv','application/zip':'.zip','application/json':'.json'};return map[m]||'';}
+let _crcT=null;
+function crc32(u8){if(!_crcT){_crcT=new Uint32Array(256);
+    for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);_crcT[n]=c>>>0}}
+  let c=0xFFFFFFFF;for(let i=0;i<u8.length;i++)c=_crcT[(c^u8[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0}
+function zipWrap(name,data){
+  const nm=new TextEncoder().encode(name);const crc=crc32(data);const sz=data.length;
+  const u16=v=>[v&255,(v>>8)&255];
+  const u32=v=>[v&255,(v>>8)&255,(v>>16)&255,(v>>>24)&255];
+  const lfh=[0x50,0x4B,3,4].concat(u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(sz),u32(sz),u16(nm.length),u16(0));
+  const cdh=[0x50,0x4B,1,2].concat(u16(20),u16(20),u16(0x0800),u16(0),u16(0),u16(0),u32(crc),u32(sz),u32(sz),u16(nm.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(0));
+  const cdOff=lfh.length+nm.length+sz;
+  const eocd=[0x50,0x4B,5,6].concat(u16(0),u16(0),u16(1),u16(1),u32(cdh.length+nm.length),u32(cdOff),u16(0));
+  const out=new Uint8Array(cdOff+cdh.length+nm.length+eocd.length);
+  out.set(lfh,0);out.set(nm,lfh.length);out.set(data,lfh.length+nm.length);
+  out.set(cdh,cdOff);out.set(nm,cdOff+cdh.length);out.set(eocd,cdOff+cdh.length+nm.length);
+  return out}
 function extToMime(fn){const m=/\.([a-z0-9]{1,8})$/i.exec(fn||'');if(!m)return'';
   const map={pdf:'application/pdf',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',
     xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',xls:'application/vnd.ms-excel',
     docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',doc:'application/msword',
     pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',ppt:'application/vnd.ms-powerpoint',
     txt:'text/plain',csv:'text/csv',zip:'application/zip',json:'application/json',mp3:'audio/mpeg',mp4:'video/mp4',
-    m4a:'audio/mp4',wav:'audio/wav',avi:'video/x-msvideo',mov:'video/quicktime'};
+    m4a:'audio/mp4',wav:'audio/wav',avi:'video/x-msvideo',mov:'video/quicktime',eml:'message/rfc822',rtf:'application/rtf',xml:'text/xml',html:'text/html',htm:'text/html','7z':'application/x-7z-compressed',rar:'application/vnd.rar',ics:'text/calendar'};
   return map[m[1].toLowerCase()]||''}
 async function shareAtt(id,type,label){
   let d=null,fname='file';
@@ -2602,6 +2618,19 @@ async function shareAtt(id,type,label){
           try{await navigator.share({files:[file],title:fname});return}
           catch(err){if(err&&err.name==='AbortError')return; break}
         }
+      }
+      /* Android refuses this type entirely -> wrap it in a ZIP (always shareable, opens fine on the other side) */
+      if(blob.size<=60*1024*1024){
+        try{
+          const raw=new Uint8Array(await blob.arrayBuffer());
+          const zbytes=zipWrap(fname,raw);
+          const zf=new File([zbytes],fname+'.zip',{type:'application/zip'});
+          if(navigator.canShare({files:[zf]})){
+            toast('Sharing as ZIP \u2014 phone doesn\u2019t allow this type directly');
+            try{await navigator.share({files:[zf],title:fname});return}
+            catch(err){if(err&&err.name==='AbortError')return}
+          }
+        }catch(e){}
       }
     }
   }catch(e){/* fall through to download */}
