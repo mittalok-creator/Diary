@@ -417,6 +417,10 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
 .fam-face{width:52px;height:52px;margin:0 auto 10px;border-radius:50%;background-size:cover;background-position:center;background-color:var(--ink1)}
 .fam-face-ph{display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-size:19px;color:var(--gold);border:1.5px solid rgba(217,168,92,.3)}
 .tile-add{border-style:dashed !important;opacity:.85}
+.sk-stamps{gap:6px;justify-content:center;flex-wrap:wrap;padding:8px 12px 0;max-height:96px;overflow-y:auto}
+.sk-stamp{font-size:24px;cursor:pointer;padding:4px 6px;border-radius:10px;line-height:1;transition:background .15s}
+.sk-stamp.on{background:rgba(217,168,92,.22)}
+.sk-stamp:active{transform:scale(.85)}
 </style>
 </head>
 <body>
@@ -1204,11 +1208,17 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
       <button class="sk-tool" data-tool="circle" onclick="skTool('circle',this)" title="Circle">○</button>
       <button class="sk-tool" data-tool="fill" onclick="skTool('fill',this)" title="Fill">◉</button>
       <button class="sk-tool" data-tool="erase" onclick="skTool('erase',this)" title="Eraser">⌫</button>
+      <button class="sk-tool" data-tool="star" onclick="skTool('star',this)" title="Star">⭐</button>
+      <button class="sk-tool" data-tool="heart" onclick="skTool('heart',this)" title="Heart">❤️</button>
+      <button class="sk-tool" data-tool="rainbow" onclick="skTool('rainbow',this)" title="Rainbow brush">🌈</button>
+      <button class="sk-tool" data-tool="spray" onclick="skTool('spray',this)" title="Spray">✳️</button>
+      <button class="sk-tool" data-tool="stamp" onclick="skTool('stamp',this)" title="Stickers">🦄</button>
     </div>
     <button class="pv-btn" onclick="skUndo()" aria-label="Undo">↶</button>
     <button class="pv-btn" onclick="skRedo()" aria-label="Redo">↷</button>
   </div>
   <div class="sk-swatches" id="skSwatches"></div>
+  <div class="sk-stamps" id="skStamps" style="display:none"></div>
   <div class="sk-size">
     <span class="stat-label">Brush</span>
     <input type="range" id="skSize" min="2" max="40" value="5" oninput="skDot()">
@@ -1611,13 +1621,19 @@ function neExpWord(){const n=neCurrent();neSheetClose();
   toast('\ud83d\udcdd Word file saved')}
 function loadScript(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=rej;document.head.appendChild(sc)})}
 /* ============ DRAWING STUDIO ============ */
-const SK_COLORS=['#171C24','#D9A85C','#C0392B','#E67E22','#F1C40F','#27AE60','#2980B9','#8E44AD','#E84393','#FFFFFF'];
-let sk={tool:'pen',color:'#171C24',size:5,W:0,H:0,dpr:1,ops:[],redo:[],cur:null,editId:null};
+const SK_COLORS=['#171C24','#C0392B','#E74C3C','#E67E22','#F1C40F','#2ECC71','#27AE60','#1ABC9C','#3498DB','#2980B9','#9B59B6','#E84393','#FF6FB5','#8B5A2B','#D9A85C','#95A5A6','#FFFFFF'];
+const SK_STAMPS=['⭐','❤️','🌟','🌸','🌈','🦄','🐱','🐶','🦋','🐝','🐟','🌈','🍕','🍨','🎁','🎨','⚽','😀','😍','👍'];
+let sk={tool:'pen',color:'#171C24',stamp:'⭐',rainbow:false,size:5,W:0,H:0,dpr:1,ops:[],redo:[],cur:null,editId:null};
 function skBuildSwatches(){const el=document.getElementById('skSwatches');
   el.innerHTML=SK_COLORS.map((c,i)=>'<span class="sw'+(i===0?' on':'')+'" data-c="'+c+'" style="background:'+c+(c==='#FFFFFF'?';border:1px solid var(--hair)':'')+'" onclick="skColor(this)"></span>').join('')}
 function skColor(el){document.querySelectorAll('#skSwatches .sw').forEach(s=>s.classList.remove('on'));
   el.classList.add('on');sk.color=el.dataset.c;if(sk.tool==='erase'){skTool('pen',document.querySelector('.sk-tool[data-tool=pen]'))}skDot()}
-function skTool(t,el){sk.tool=t;document.querySelectorAll('.sk-tool').forEach(b=>b.classList.remove('on'));if(el)el.classList.add('on');skDot()}
+function skTool(t,el){sk.tool=t;document.querySelectorAll('.sk-tool').forEach(b=>b.classList.remove('on'));if(el)el.classList.add('on');
+  const sp=document.getElementById('skStamps');if(sp){if(t==='stamp'){skBuildStamps();sp.style.display='flex'}else sp.style.display='none'}
+  skDot()}
+function skBuildStamps(){const el=document.getElementById('skStamps');
+  el.innerHTML=SK_STAMPS.map(e=>'<span class="sk-stamp'+(e===sk.stamp?' on':'')+'" onclick="skPickStamp(\''+e+'\',this)">'+e+'</span>').join('')}
+function skPickStamp(e,el){sk.stamp=e;document.querySelectorAll('#skStamps .sk-stamp').forEach(s=>s.classList.remove('on'));if(el)el.classList.add('on')}
 function skDot(){sk.size=+document.getElementById('skSize').value;const d=document.getElementById('skDot');
   const s=Math.max(6,Math.min(30,sk.size));d.style.width=s+'px';d.style.height=s+'px';
   d.style.background=sk.tool==='erase'?'#fff':sk.color;d.style.border=sk.tool==='erase'?'1.5px solid var(--hair)':'none'}
@@ -1653,18 +1669,29 @@ function skPaint(x,op){
   if(op.t==='line'){x.beginPath();x.moveTo(op.x0,op.y0);x.lineTo(op.x1,op.y1);x.stroke();return}
   if(op.t==='rect'){x.strokeRect(Math.min(op.x0,op.x1),Math.min(op.y0,op.y1),Math.abs(op.x1-op.x0),Math.abs(op.y1-op.y0));return}
   if(op.t==='circle'){const rx=Math.abs(op.x1-op.x0)/2,ry=Math.abs(op.y1-op.y0)/2;
-    x.beginPath();x.ellipse(Math.min(op.x0,op.x1)+rx,Math.min(op.y0,op.y1)+ry,rx,ry,0,0,7);x.stroke();return}}
+    x.beginPath();x.ellipse(Math.min(op.x0,op.x1)+rx,Math.min(op.y0,op.y1)+ry,rx,ry,0,0,7);x.stroke();return}
+  if(op.t==='star'){skStar(x,(op.x0+op.x1)/2,(op.y0+op.y1)/2,Math.hypot(op.x1-op.x0,op.y1-op.y0)/2,5,op.c,op.fill);return}
+  if(op.t==='heart'){skHeart(x,Math.min(op.x0,op.x1),Math.min(op.y0,op.y1),Math.abs(op.x1-op.x0),Math.abs(op.y1-op.y0),op.c);return}
+  if(op.t==='tri'){x.beginPath();x.moveTo((op.x0+op.x1)/2,Math.min(op.y0,op.y1));x.lineTo(op.x0,op.y1);x.lineTo(op.x1,op.y1);x.closePath();x.stroke();return}
+  if(op.t==='spray'){const p=op.pts;if(!p)return;x.fillStyle=op.c;p.forEach(pt=>{for(let i=0;i<8;i++){const a=Math.random()*7,r=Math.random()*op.s*1.6;x.beginPath();x.arc(pt.x+Math.cos(a)*r,pt.y+Math.sin(a)*r,op.s*0.14+0.6,0,7);x.fill()}});return}
+  if(op.t==='rainbow'){const p=op.pts;if(!p||p.length<2)return;x.lineWidth=op.s;for(let i=1;i<p.length;i++){const hue=(op.hue0+i*8)%360;x.strokeStyle='hsl('+hue+',85%,55%)';x.beginPath();x.moveTo(p[i-1].x,p[i-1].y);x.lineTo(p[i].x,p[i].y);x.stroke()}return}
+  if(op.t==='stamp'){x.font=(op.s*6)+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(op.e,op.x,op.y);return}}
+function skStar(x,cx,cy,r,pts,color,fill){x.beginPath();for(let i=0;i<pts*2;i++){const rad=i%2?r*0.45:r;const a=(Math.PI/pts)*i-Math.PI/2;const px=cx+Math.cos(a)*rad,py=cy+Math.sin(a)*rad;i?x.lineTo(px,py):x.moveTo(px,py)}x.closePath();x.strokeStyle=color;x.fillStyle=color;fill?x.fill():x.stroke()}
+function skHeart(x,left,top,w,h,color){const cx=left+w/2;x.beginPath();x.moveTo(cx,top+h*0.28);x.bezierCurveTo(left+w*0.1,top-h*0.1,left-w*0.1,top+h*0.45,cx,top+h);x.bezierCurveTo(left+w*1.1,top+h*0.45,left+w*0.9,top-h*0.1,cx,top+h*0.28);x.closePath();x.strokeStyle=color;x.stroke()}
 function skUndo(){if(!sk.ops.length)return;sk.redo.push(sk.ops.pop());skRedraw()}
 function skRedo(){if(!sk.redo.length)return;sk.ops.push(sk.redo.pop());skRedraw()}
 function skClear(){if(!sk.ops.length)return;sk.ops=[];sk.redo=[];skRedraw();toast('Cleared')}
 function initSketch(){const c=document.getElementById('skCanvas');
   c.addEventListener('pointerdown',function(e){c.setPointerCapture(e.pointerId);const p=skPt(e,c);
     if(sk.tool==='fill'){sk.ops.push({t:'fill',c:sk.color});sk.redo=[];skRedraw();return}
+    if(sk.tool==='stamp'){sk.ops.push({t:'stamp',e:sk.stamp,x:p.x,y:p.y,s:sk.size});sk.redo=[];skRedraw();return}
     if(sk.tool==='pen'||sk.tool==='erase')sk.cur={t:sk.tool,c:sk.color,s:sk.size,pts:[p]};
-    else sk.cur={t:sk.tool,c:sk.color,s:sk.size,x0:p.x,y0:p.y,x1:p.x,y1:p.y};
+    else if(sk.tool==='spray')sk.cur={t:'spray',c:sk.color,s:sk.size,pts:[p]};
+    else if(sk.tool==='rainbow')sk.cur={t:'rainbow',s:sk.size,hue0:Math.floor(Math.random()*360),pts:[p]};
+    else sk.cur={t:sk.tool,c:sk.color,s:sk.size,x0:p.x,y0:p.y,x1:p.x,y1:p.y,fill:sk.fillShape};
     skRedraw()});
   c.addEventListener('pointermove',function(e){if(!sk.cur)return;e.preventDefault();const p=skPt(e,c);
-    if(sk.cur.t==='pen'||sk.cur.t==='erase'){const l=sk.cur.pts[sk.cur.pts.length-1];
+    if(sk.cur.pts){const l=sk.cur.pts[sk.cur.pts.length-1];
       if(Math.hypot(p.x-l.x,p.y-l.y)>1.2)sk.cur.pts.push(p)}
     else{sk.cur.x1=p.x;sk.cur.y1=p.y}skRedraw()},{passive:false});
   ['pointerup','pointercancel','pointerleave'].forEach(function(ev){c.addEventListener(ev,function(){
