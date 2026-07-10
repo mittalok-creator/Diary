@@ -336,19 +336,20 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 @media(min-width:1000px){.pv-body{padding:24px}}
 #skOv{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100vh;height:100dvh;z-index:132;display:none;flex-direction:column;background:var(--ink0)}
 #skOv.open{display:flex}
-.sk-bar{display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
-  border-bottom:1px solid var(--hair);flex-shrink:0}
+.sk-bar{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:50%;transform:translateX(-50%);z-index:5;display:flex;align-items:center;gap:6px;padding:8px 10px;max-width:calc(100vw - 14px);background:rgba(13,17,23,.68);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border:1px solid rgba(217,168,92,.3);border-radius:20px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+body.light .sk-bar{background:rgba(255,255,255,.78);border-color:rgba(20,26,34,.14);box-shadow:0 12px 34px rgba(24,30,40,.18)}
 .sk-swatches{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;padding:8px 12px;flex-shrink:0}
 .sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .2s}
 .sw.on{border-color:var(--gold);transform:scale(1.14)}
 .pv-btn.on{border-color:var(--gold);background:rgba(217,168,92,.14)}
-.sk-size{display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--hair)}
+.sk-size{display:flex;align-items:center;gap:12px;padding:10px 16px 12px}
 .sk-size input{flex:1;accent-color:#D9A85C}
 .sk-dot{border-radius:50%;flex-shrink:0;display:block}
-.sk-body{flex:1 1 auto;padding:10px;display:flex;align-items:stretch;justify-content:center;min-height:0;overflow:hidden}
+.sk-body{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:center;overflow:hidden}
 #skCanvas{border-radius:14px;border:1px solid var(--hair);background:#fff;touch-action:none;
   box-shadow:0 8px 30px rgba(0,0,0,.35);cursor:crosshair;display:block;width:100%;height:100%}
-.sk-foot{display:flex;gap:8px;padding:12px 16px calc(env(safe-area-inset-bottom) + 16px);border-top:1px solid var(--hair)}
+.sk-foot{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:5;display:flex;gap:8px;padding:8px;width:min(430px,calc(100vw - 14px));background:rgba(13,17,23,.68);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border:1px solid rgba(217,168,92,.3);border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.45)}
+body.light .sk-foot{background:rgba(255,255,255,.78);border-color:rgba(20,26,34,.14);box-shadow:0 12px 34px rgba(24,30,40,.18)}
 .weekstrip{display:flex;gap:7px;margin:16px 0 4px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px;scrollbar-width:none}
 .weekstrip::-webkit-scrollbar{display:none}
 .ws-day{flex:1 0 auto;min-width:52px;border:1px solid var(--hair);border-radius:15px;padding:9px 4px 8px;
@@ -392,8 +393,9 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .ed{background:none;border:none;color:var(--lo);font-size:14px;cursor:pointer;padding:2px 6px;opacity:.7;transition:color .2s}
 .ed:hover{color:var(--gold);opacity:1}
 .sk-tools{display:flex;gap:5px;flex:1;justify-content:center;flex-wrap:wrap}
-.sk-tool{width:36px;height:36px;border-radius:10px;border:1px solid var(--hair);background:var(--ink1);color:var(--hi);font-size:16px;cursor:pointer;transition:border-color .2s,background .2s}
-.sk-tool.on{border-color:var(--gold);background:rgba(217,168,92,.15);color:var(--gold)}
+.sk-tool{width:38px;height:38px;border-radius:12px;border:1px solid transparent;background:transparent;color:var(--hi);font-size:17px;cursor:pointer;transition:border-color .2s,background .2s,transform .1s}
+.sk-tool:active{transform:scale(.88)}
+.sk-tool.on{border-color:var(--gold);background:rgba(217,168,92,.18);color:var(--gold);box-shadow:0 0 14px rgba(217,168,92,.35)}
 .draw-cell{border:1px solid var(--hair);border-radius:16px;overflow:hidden;background:#fff}
 .draw-cell img{width:100%;aspect-ratio:1;object-fit:cover;display:block;cursor:pointer}
 .draw-actions{display:flex;justify-content:space-between;padding:7px 12px;background:var(--ink1)}
@@ -434,7 +436,13 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
 .hdr-search{width:42px;height:42px;border-radius:50%;border:1px solid var(--hair);background:var(--ink1);color:var(--gold);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .2s,transform .15s}
 .hdr-search:hover{border-color:var(--gold)}
 .hdr-search:active{transform:scale(.9)}
-.sk-palette{flex-shrink:0}
+.sk-palette{position:absolute;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 78px);z-index:5;width:min(560px,calc(100vw - 14px));background:rgba(13,17,23,.68);backdrop-filter:blur(16px) saturate(1.2);-webkit-backdrop-filter:blur(16px) saturate(1.2);border:1px solid rgba(217,168,92,.3);border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.45);overflow:hidden}
+body.light .sk-palette{background:rgba(255,255,255,.8);border-color:rgba(20,26,34,.14);box-shadow:0 12px 34px rgba(24,30,40,.18)}
+.sk-papers{display:flex;align-items:center;gap:8px;padding:9px 14px 0;justify-content:center}
+.sk-paper{width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(20,26,34,.18);cursor:pointer;transition:transform .15s}
+.sk-paper:active{transform:scale(.85)}
+#skMirBtn.on{border-color:var(--gold);color:var(--gold);background:rgba(217,168,92,.18)}
+
 @media(max-height:620px){.sk-toolbar-note{display:none}}
 .focus-card{background:linear-gradient(160deg,var(--ink1),color-mix(in srgb,var(--ink1) 88%,var(--gold)))}
 .tile-lock{position:absolute;top:9px;left:9px;font-size:12px;opacity:.85}
@@ -1281,15 +1289,19 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
       <button class="sk-tool" data-tool="heart" onclick="skTool('heart',this)" title="Heart">❤️</button>
       <button class="sk-tool" data-tool="rainbow" onclick="skTool('rainbow',this)" title="Rainbow brush">🌈</button>
       <button class="sk-tool" data-tool="spray" onclick="skTool('spray',this)" title="Spray">✳️</button>
+      <button class="sk-tool" data-tool="neon" onclick="skTool('neon',this)" title="Neon glow">🔆</button>
+      <button class="sk-tool" data-tool="glitter" onclick="skTool('glitter',this)" title="Glitter">✨</button>
       <button class="sk-tool" data-tool="stamp" onclick="skTool('stamp',this)" title="Stickers">🦄</button>
     </div>
     <button class="pv-btn" onclick="skUndo()" aria-label="Undo">↶</button>
     <button class="pv-btn" onclick="skRedo()" aria-label="Redo">↷</button>
+    <button class="pv-btn" id="skMirBtn" onclick="skMirror(this)" aria-label="Mirror" title="Butterfly mirror">🦋</button>
     <button class="pv-btn" id="skZoomBtn" onclick="skToggleMax()" aria-label="Bigger canvas" title="Bigger canvas">⇕</button>
   </div>
   <div class="sk-palette" id="skPalette">
   <div class="sk-swatches" id="skSwatches"></div>
   <div class="sk-stamps" id="skStamps" style="display:none"></div>
+  <div class="sk-papers" id="skPapers"><span class="stat-label" style="margin-right:2px">Paper</span><button class="sk-paper" style="background:#FFFFFF" onclick="skPaper('#FFFFFF')" title="White"></button><button class="sk-paper" style="background:#FFF6E3" onclick="skPaper('#FFF6E3')" title="Cream"></button><button class="sk-paper" style="background:#E8F4FF" onclick="skPaper('#E8F4FF')" title="Sky"></button><button class="sk-paper" style="background:#E9F9EE" onclick="skPaper('#E9F9EE')" title="Mint"></button><button class="sk-paper" style="background:#FFEDF3" onclick="skPaper('#FFEDF3')" title="Pink"></button><button class="sk-paper" style="background:#173428;border-color:rgba(255,255,255,.25)" onclick="skPaper('#173428')" title="Blackboard"></button></div>
   <div class="sk-size">
     <span class="stat-label">Brush</span>
     <input type="range" id="skSize" min="2" max="40" value="5" oninput="skDot()">
@@ -1729,7 +1741,7 @@ function loadScript(src){return new Promise((res,rej)=>{const sc=document.create
 /* ============ DRAWING STUDIO ============ */
 const SK_COLORS=['#171C24','#C0392B','#E74C3C','#E67E22','#F1C40F','#2ECC71','#27AE60','#1ABC9C','#3498DB','#2980B9','#9B59B6','#E84393','#FF6FB5','#8B5A2B','#D9A85C','#95A5A6','#FFFFFF'];
 const SK_STAMPS=['⭐','❤️','🌟','🌸','🌈','🦄','🐱','🐶','🦋','🐝','🐟','🌈','🍕','🍨','🎁','🎨','⚽','😀','😍','👍'];
-let sk={tool:'pen',color:'#171C24',stamp:'⭐',rainbow:false,size:5,W:0,H:0,dpr:1,ops:[],redo:[],cur:null,editId:null};
+let sk={tool:'pen',color:'#171C24',stamp:'⭐',rainbow:false,mirror:false,size:5,W:0,H:0,dpr:1,ops:[],redo:[],cur:null,editId:null};
 function skBuildSwatches(){const el=document.getElementById('skSwatches');
   el.innerHTML=SK_COLORS.map((c,i)=>'<span class="sw'+(i===0?' on':'')+'" data-c="'+c+'" style="background:'+c+(c==='#FFFFFF'?';border:1px solid var(--hair)':'')+'" onclick="skColor(this)"></span>').join('')}
 function skColor(el){document.querySelectorAll('#skSwatches .sw').forEach(s=>s.classList.remove('on'));
@@ -1763,7 +1775,16 @@ function skRedraw(){const c=document.getElementById('skCanvas'),x=c.getContext('
   x.setTransform(sk.dpr,0,0,sk.dpr,0,0);x.fillStyle='#fff';x.fillRect(0,0,sk.W,sk.H);
   x.lineCap='round';x.lineJoin='round';
   sk.ops.forEach(function(op){skPaint(x,op)});if(sk.cur)skPaint(x,sk.cur)}
-function skPaint(x,op){
+function skMirror(el){sk.mirror=!sk.mirror;el.classList.toggle('on',sk.mirror);
+  toast(sk.mirror?'\ud83e\udd8b Butterfly mirror ON \u2014 draws both sides':'Mirror off')}
+function skPaper(c){sk.ops.push({t:'fill',c:c});sk.redo=[];skRedraw()}
+function skMirrorOp(op){const W=op.W||sk.W;const o=Object.assign({},op,{mir:false});
+  if(op.pts)o.pts=op.pts.map(function(p){return {x:W-p.x,y:p.y}});
+  if(typeof op.x0==='number'){o.x0=W-op.x0;o.x1=W-op.x1}
+  if(typeof op.x==='number')o.x=W-op.x;
+  return o}
+function skPaint(x,op){skPaintCore(x,op);if(op&&op.mir)skPaintCore(x,skMirrorOp(op))}
+function skPaintCore(x,op){
   if(op.t==='fill'){x.fillStyle=op.c;x.fillRect(0,0,sk.W,sk.H);return}
   x.strokeStyle=op.t==='erase'?'#fff':op.c;x.fillStyle=op.c;
   x.lineWidth=op.t==='erase'?op.s*2.4:op.s;
@@ -1781,6 +1802,18 @@ function skPaint(x,op){
   if(op.t==='tri'){x.beginPath();x.moveTo((op.x0+op.x1)/2,Math.min(op.y0,op.y1));x.lineTo(op.x0,op.y1);x.lineTo(op.x1,op.y1);x.closePath();x.stroke();return}
   if(op.t==='spray'){const p=op.pts;if(!p)return;x.fillStyle=op.c;p.forEach(pt=>{for(let i=0;i<8;i++){const a=Math.random()*7,r=Math.random()*op.s*1.6;x.beginPath();x.arc(pt.x+Math.cos(a)*r,pt.y+Math.sin(a)*r,op.s*0.14+0.6,0,7);x.fill()}});return}
   if(op.t==='rainbow'){const p=op.pts;if(!p||p.length<2)return;x.lineWidth=op.s;for(let i=1;i<p.length;i++){const hue=(op.hue0+i*8)%360;x.strokeStyle='hsl('+hue+',85%,55%)';x.beginPath();x.moveTo(p[i-1].x,p[i-1].y);x.lineTo(p[i].x,p[i].y);x.stroke()}return}
+  if(op.t==='neon'){const p=op.pts;if(!p||p.length<2)return;
+    x.save();x.lineCap='round';x.lineJoin='round';
+    x.shadowColor=op.c;x.shadowBlur=op.s*2.2;x.strokeStyle=op.c;x.lineWidth=op.s;
+    x.beginPath();x.moveTo(p[0].x,p[0].y);for(let i=1;i<p.length;i++)x.lineTo(p[i].x,p[i].y);x.stroke();x.stroke();
+    x.shadowBlur=0;x.strokeStyle='rgba(255,255,255,.9)';x.lineWidth=Math.max(1,op.s*0.32);
+    x.beginPath();x.moveTo(p[0].x,p[0].y);for(let i=1;i<p.length;i++)x.lineTo(p[i].x,p[i].y);x.stroke();x.restore();return}
+  if(op.t==='glitter'){const p=op.pts;if(!p)return;x.save();
+    p.forEach(function(pt,pi){for(let i=0;i<6;i++){const a=((pi*7+i*53)%360)/57.3,r=((pi*13+i*29)%100)/100*op.s*1.5;
+      const gx=pt.x+Math.cos(a)*r,gy=pt.y+Math.sin(a)*r;const hue=(pi*24+i*47)%360;
+      x.fillStyle=(i%4===0)?'rgba(255,255,255,.95)':'hsl('+hue+',90%,62%)';
+      x.beginPath();x.arc(gx,gy,(i%4===0?op.s*0.10:op.s*0.16)+0.5,0,7);x.fill()}});
+    x.restore();return}
   if(op.t==='stamp'){x.font=(op.s*6)+'px serif';x.textAlign='center';x.textBaseline='middle';x.fillText(op.e,op.x,op.y);return}}
 function skStar(x,cx,cy,r,pts,color,fill){x.beginPath();for(let i=0;i<pts*2;i++){const rad=i%2?r*0.45:r;const a=(Math.PI/pts)*i-Math.PI/2;const px=cx+Math.cos(a)*rad,py=cy+Math.sin(a)*rad;i?x.lineTo(px,py):x.moveTo(px,py)}x.closePath();x.strokeStyle=color;x.fillStyle=color;fill?x.fill():x.stroke()}
 function skHeart(x,left,top,w,h,color){const cx=left+w/2;x.beginPath();x.moveTo(cx,top+h*0.28);x.bezierCurveTo(left+w*0.1,top-h*0.1,left-w*0.1,top+h*0.45,cx,top+h);x.bezierCurveTo(left+w*1.1,top+h*0.45,left+w*0.9,top-h*0.1,cx,top+h*0.28);x.closePath();x.strokeStyle=color;x.stroke()}
@@ -1790,11 +1823,12 @@ function skClear(){if(!sk.ops.length)return;sk.ops=[];sk.redo=[];skRedraw();toas
 function initSketch(){const c=document.getElementById('skCanvas');
   c.addEventListener('pointerdown',function(e){c.setPointerCapture(e.pointerId);const p=skPt(e,c);
     if(sk.tool==='fill'){sk.ops.push({t:'fill',c:sk.color});sk.redo=[];skRedraw();return}
-    if(sk.tool==='stamp'){sk.ops.push({t:'stamp',e:sk.stamp,x:p.x,y:p.y,s:sk.size});sk.redo=[];skRedraw();return}
+    if(sk.tool==='stamp'){sk.ops.push({t:'stamp',e:sk.stamp,x:p.x,y:p.y,s:sk.size,mir:sk.mirror,W:sk.W});sk.redo=[];skRedraw();return}
     if(sk.tool==='pen'||sk.tool==='erase')sk.cur={t:sk.tool,c:sk.color,s:sk.size,pts:[p]};
-    else if(sk.tool==='spray')sk.cur={t:'spray',c:sk.color,s:sk.size,pts:[p]};
+    else if(sk.tool==='spray'||sk.tool==='glitter'||sk.tool==='neon')sk.cur={t:sk.tool,c:sk.color,s:sk.size,pts:[p]};
     else if(sk.tool==='rainbow')sk.cur={t:'rainbow',s:sk.size,hue0:Math.floor(Math.random()*360),pts:[p]};
     else sk.cur={t:sk.tool,c:sk.color,s:sk.size,x0:p.x,y0:p.y,x1:p.x,y1:p.y,fill:sk.fillShape};
+    if(sk.cur){sk.cur.mir=sk.mirror;sk.cur.W=sk.W}
     skRedraw()});
   c.addEventListener('pointermove',function(e){if(!sk.cur)return;e.preventDefault();const p=skPt(e,c);
     if(sk.cur.pts){const l=sk.cur.pts[sk.cur.pts.length-1];
