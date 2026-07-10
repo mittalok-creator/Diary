@@ -8,10 +8,10 @@ p,li{color:#b9c0cc;font-size:15px}.gold{color:#D9A85C}.eyebrow{font-size:12px;fo
 a{color:#D9A85C}</style></head><body>
 <div class="eyebrow">ALOK OS</div>
 <h1>Privacy Policy</h1>
-<p>Effective date: 07-07-2026 · Contact: via <a href="https://alokmittal.net">alokmittal.net</a></p>
+<p>Effective date: 09-07-2026 · Contact: via <a href="https://alokmittal.net">alokmittal.net</a></p>
 
 <h2>The short version</h2>
-<p><b class="gold">We do not collect, store, see, or sell any of your data. There is no server.</b> ALOK OS is a static web application — everything you create stays with you.</p>
+<p><b class="gold">We do not collect, see, or sell your personal content.</b> Your tasks, notes, money, documents and attachments live only on your device and in your own Google Drive. The one exception is the optional closed-app reminder service described below, which stores only reminder times and short labels.</p>
 
 <h2>Where your data lives</h2>
 <p>1. <b>On your device</b> — all tasks, notes, expenses, meetings, documents and attachments are stored in your browser's local storage on your own phone, tablet or computer.</p>
@@ -20,8 +20,13 @@ a{color:#D9A85C}</style></head><body>
 <h2>Google account access</h2>
 <p>When you sign in with Google, the app requests: your basic profile (name, email, photo — shown only to you inside the app) and the <code>drive.appdata</code> permission (to store your sync file in your Drive). It cannot see your other Drive files, your Gmail, or anything else. Sign-in is handled entirely by Google; we never see your password.</p>
 
+<h2>Closed-app reminders (optional)</h2>
+<p>If you turn on <b>"Reminders when app is closed"</b> in Settings, the app can notify you about meetings, bills, renewals, medicines and birthdays even when ALOK OS is fully closed. To do this it uses Google Firebase Cloud Messaging.</p>
+<p>When enabled, the following is sent to a Firebase project controlled by ALOK OS: a device push token, your time zone, your verified Google email (used only to keep your reminders separate from anyone else's), and a list of upcoming <b>reminder times with a short label</b> (for example "Credit review call" or "Airtel bill due"). This lets a scheduled server send the reminder at the right moment.</p>
+<p><b class="gold">Your notes, expense amounts, documents, attachments and personal content are never sent to this service</b> — only the reminder time and its short title. Each device's reminders are stored under your own verified email and can never be read by another user. Turn the feature off in Settings to stop sending anything and delete your stored reminders. If you never enable it, nothing is ever sent.</p>
+
 <h2>What we collect on our side</h2>
-<p>Nothing. No analytics, no trackers, no ads, no cookies of ours, no data ever transmitted to us.</p>
+<p>No analytics, no trackers, no ads, no cookies of ours. Apart from the optional reminder service above (which you control and which only ever receives reminder times and short labels), no data is transmitted to us.</p>
 
 <h2>Data deletion</h2>
 <p>In the app: Settings → Clear all data (device) and Google Drive → Settings → Manage apps → ALOK OS → Delete app data (cloud). Signing out never deletes your data.</p>
