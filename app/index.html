@@ -214,7 +214,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 #loginSkip{margin-top:18px;color:var(--lo);font-size:13px;background:none;border:none;cursor:pointer;font-family:inherit;text-decoration:underline;text-underline-offset:3px}
 .desk-only{display:none!important}
 @media(min-width:1000px){
-  #app{max-width:1280px;border-left:1px solid var(--hair);border-right:1px solid var(--hair)}
+  #app{max-width:1600px;border-left:1px solid var(--hair);border-right:1px solid var(--hair)}
   nav{left:0;top:0;bottom:0;right:auto;width:232px;flex-direction:column;align-items:stretch;
     justify-content:flex-start;gap:4px;padding:100px 14px 22px;border-top:none;border-right:1px solid var(--hair)}
   nav button{flex-direction:row;justify-content:flex-start;gap:13px;font-size:14.5px;font-weight:600;
@@ -231,6 +231,13 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   main{margin-left:232px;padding:10px 44px 60px}
   .grid2{grid-template-columns:repeat(4,1fr)}
   .seg{max-width:680px}
+  /* use the wide canvas: multi-column lists on desktop */
+  #nList,#onList,#drawGallery,#vaultList,#blList,#cdList,#lnList{column-gap:16px}
+  #nList,#onList,#vaultList,#blList,#cdList,#lnList{columns:2}
+  #nList>*,#onList>*,#vaultList>*,#blList>*,#cdList>*,#lnList>*{break-inside:avoid;margin-bottom:12px}
+  #drawGallery{grid-template-columns:repeat(4,1fr) !important}
+  .launcher{grid-template-columns:repeat(5,1fr) !important}
+  main{max-width:1368px}
   #toast{bottom:36px}
 }
 @media(min-width:1000px){#waterCard{cursor:pointer}}
@@ -1153,7 +1160,13 @@ body.dark .tile-x{background:rgba(255,255,255,.06)}
     <label class="fld" style="margin-top:10px"><span>Username / ID</span><input class="inp" id="vaUser" placeholder="Login ID (optional)"></label>
     <label class="fld" style="margin-top:10px"><span>Password / PIN</span><input class="inp" id="vaPass" placeholder="Password"></label>
     <label class="fld" style="margin-top:10px"><span>Website (optional)</span><input class="inp" id="vaUrl" placeholder="netbanking.hdfcbank.com"></label>
-    <label class="fld" style="margin-top:10px"><span>Notes (optional)</span><textarea class="inp" id="vaNote" placeholder="Security question, recovery info…" style="min-height:60px"></textarea></label>
+    <div style="height:1px;background:var(--hair);margin:14px 0"></div>
+    <div class="stat-label" style="margin-bottom:8px">Recovery details (optional)</div>
+    <label class="fld"><span>Recovery email</span><input class="inp" id="vaRecEmail" placeholder="backup@gmail.com"></label>
+    <label class="fld" style="margin-top:10px"><span>Recovery phone</span><input class="inp" id="vaRecPhone" placeholder="Registered mobile"></label>
+    <label class="fld" style="margin-top:10px"><span>Security Q &amp; A</span><textarea class="inp" id="vaRecQA" placeholder="Mother&#39;s maiden name: ___" style="min-height:50px"></textarea></label>
+    <label class="fld" style="margin-top:10px"><span>Backup / recovery codes</span><textarea class="inp" id="vaRecCodes" placeholder="One per line" style="min-height:50px"></textarea></label>
+    <label class="fld" style="margin-top:10px"><span>Notes (optional)</span><textarea class="inp" id="vaNote" placeholder="Anything else…" style="min-height:60px"></textarea></label>
     <button class="btn btn-gold" style="width:100%;margin-top:14px" onclick="vaultSave()">Save</button>
     <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('vaultOv').classList.remove('open')">Cancel</button>
   </div></div>
@@ -3193,6 +3206,10 @@ function vaultEdit(id){_vaultId=id;const v=id?(S.vault||[]).find(x=>x.id===id):n
   document.getElementById('vaPass').value=v?v.pass||'':'';
   document.getElementById('vaUrl').value=v?v.url||'':'';
   document.getElementById('vaNote').value=v?v.note||'':'';
+  document.getElementById('vaRecEmail').value=v?v.recEmail||'':'';
+  document.getElementById('vaRecPhone').value=v?v.recPhone||'':'';
+  document.getElementById('vaRecQA').value=v?v.recQA||'':'';
+  document.getElementById('vaRecCodes').value=v?v.recCodes||'':'';
   document.getElementById('vaTtl').textContent=id?'Edit entry':'New entry';
   document.getElementById('vaultOv').classList.add('open');
   setTimeout(function(){document.getElementById('vaTitle').focus()},60)}
@@ -3201,7 +3218,12 @@ function vaultSave(){const title=document.getElementById('vaTitle').value.trim()
   const rec={title,user:document.getElementById('vaUser').value.trim(),
     pass:document.getElementById('vaPass').value,
     url:document.getElementById('vaUrl').value.trim(),
-    note:document.getElementById('vaNote').value.trim(),at:new Date().toISOString()};
+    note:document.getElementById('vaNote').value.trim(),
+    recEmail:document.getElementById('vaRecEmail').value.trim(),
+    recPhone:document.getElementById('vaRecPhone').value.trim(),
+    recQA:document.getElementById('vaRecQA').value.trim(),
+    recCodes:document.getElementById('vaRecCodes').value.trim(),
+    at:new Date().toISOString()};
   if(!S.vault)S.vault=[];
   if(_vaultId){const v=S.vault.find(x=>x.id===_vaultId);if(v)Object.assign(v,rec)}
   else{rec.id=uid();S.vault.unshift(rec)}
@@ -3226,6 +3248,10 @@ function vaultCard(v){
     +'<div class="va-row"><span class="va-k">Pass</span><span class="va-v" id="vp-'+v.id+'" data-shown="0">\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022</span>'
     +'<button class="va-cp" onclick="vaultReveal(\''+v.id+'\',this)">\U0001F441</button>'
     +'<button class="va-cp" onclick="vaultCopy(\''+v.id+'\',\'pass\')">\u29c9</button></div>'
+    +(v.recEmail?'<div class="va-row"><span class="va-k">Recovery</span><span class="va-v">'+esc(v.recEmail)+'</span></div>':'')
+    +(v.recPhone?'<div class="va-row"><span class="va-k">Phone</span><span class="va-v">'+esc(v.recPhone)+'</span></div>':'')
+    +(v.recQA?'<div class="row-meta" style="margin-top:8px"><b>Q&amp;A:</b> '+esc(v.recQA)+'</div>':'')
+    +(v.recCodes?'<div class="row-meta" style="margin-top:4px;font-family:ui-monospace,monospace;white-space:pre-wrap"><b>Codes:</b>\n'+esc(v.recCodes)+'</div>':'')
     +(v.note?'<div class="row-meta" style="margin-top:8px">'+esc(v.note)+'</div>':'')
     +'</div>';
 }
@@ -3398,10 +3424,18 @@ async function hashPin(pin,salt){const h=await crypto.subtle.digest('SHA-256',ne
   return btoa(String.fromCharCode.apply(null,new Uint8Array(h)))}
 function lkRender(){document.querySelectorAll('#lockOv .lk-dot').forEach((d,i)=>d.classList.toggle('on',i<lkBuf.length));
   const b=document.getElementById('lkBio');if(b)b.style.visibility=(lkMode==='verify'&&S.lock&&S.lock.bio)?'visible':'hidden'}
+let _lkKeyBound=false;
+function _lkKeyHandler(e){
+  if(!document.getElementById("lockOv").classList.contains("open"))return;
+  if(e.key>="0"&&e.key<="9"){e.preventDefault();lkKey(e.key)}
+  else if(e.key==="Backspace"){e.preventDefault();lkKey("b")}
+  else if(e.key==="Enter"){e.preventDefault();if(S.lock&&S.lock.bio&&lkMode==="verify")lkKey("f")}
+}
 function showLock(mode){lkMode=mode||'verify';lkBuf='';lkFirst='';
   document.getElementById('lkTitle').textContent=lkMode==='verify'?'Enter PIN':'Choose a 4-digit PIN';
   document.getElementById('lkSub').textContent=lkMode==='verify'?'ALOK OS is locked':'';
   document.getElementById('lockOv').classList.add('open');lkRender();
+  if(!_lkKeyBound){document.addEventListener('keydown',_lkKeyHandler);_lkKeyBound=true}
   if(lkMode==='verify'&&S.lock&&S.lock.bio)setTimeout(bioUnlock,500)}
 function hideLock(){document.getElementById('lockOv').classList.remove('open')}
 function lkFail(msg){document.getElementById('lkSub').textContent=msg;lkBuf='';lkRender();
