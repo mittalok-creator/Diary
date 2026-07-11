@@ -507,7 +507,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
     <div style="display:flex;gap:8px;margin-top:9px;align-items:center">
       <span class="chip on" id="qaLife" onclick="qaSpace('personal')">🏠 Life</span>
       <span class="chip" id="qaWork" onclick="qaSpace('office')">💼 Work</span>
-      <span class="stat-sub" style="margin-left:auto">Understands: kal · parso · 15 tarikh · 11 baje · 5 pm</span>
+      <span class="stat-sub" style="margin-left:auto">Try: tomorrow 11 am · 15th · 5 pm</span>
     </div>
   </div>
   <div class="qadd">
@@ -1404,7 +1404,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.2.1';
+const APP_VER='8.2.2';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -3504,9 +3504,9 @@ function qaParse(raw){
   const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   const setD=off=>{const d=new Date(base);d.setDate(d.getDate()+off);due=fmt(d)};
   if(/\b(aaj|today)\b/i.test(t)){setD(0);t=t.replace(/\b(aaj|today)\b/ig,' ')}
+  if(/\b(parso|day after tomorrow)\b/i.test(t)){setD(2);t=t.replace(/\b(parso|day after tomorrow)\b/ig,' ')}
   if(/\b(kal|tomorrow|tmrw)\b/i.test(t)){setD(1);t=t.replace(/\b(kal|tomorrow|tmrw)\b/ig,' ')}
-  if(/\bparso\b/i.test(t)){setD(2);t=t.replace(/\bparso\b/ig,' ')}
-  if(!due){const dm=/\b(\d{1,2})\s*(?:tarikh|tareekh|ko)\b/i.exec(t);
+  if(!due){const dm=/\b(\d{1,2})\s*(?:tarikh|tareekh|ko|st|nd|rd|th)\b/i.exec(t);
     if(dm){const day=+dm[1];if(day>=1&&day<=31){const d=new Date(base);d.setDate(day);
       if(d<base){d.setMonth(d.getMonth()+1)}
       due=fmt(d);t=t.replace(dm[0],' ')}}}
