@@ -625,6 +625,27 @@ html[data-theme="light"][data-accent="copper"]{--ink0:#F8F2ED;--ink1:#FFFFFF;--i
 .btn:focus-visible,.tile:focus-visible,.chip:focus-visible,.qa-act:focus-visible,.stat-chip:focus-visible{outline-offset:3px;border-radius:inherit}
 input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid color-mix(in srgb,var(--gold) 60%,transparent);outline-offset:1px}
 button,[onclick],.tile,.chip,.row,.stat-chip,.acc-dot,.sk-paper{cursor:pointer}
+/* ============ DESIGN TOKENS v2 (Wave 2) ============
+   Spacing: 4/8/12/16/20/24/32/44 · Type: 11/12.5/14.5/16/19/24/30/36
+   Radius: 10/16/22/999 · Elevation: e1 rest, e2 raised, e3 floating */
+:root{
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-7:32px;--sp-8:44px;
+  --fs-xs:11px;--fs-sm:12.5px;--fs-base:14.5px;--fs-md:16px;--fs-lg:19px;--fs-xl:24px;--fs-2xl:30px;--fs-display:36px;
+  --r-s:10px;--r-l:22px;--r-full:999px;
+}
+/* compact utility header on inner views — content gets the space */
+html[data-view]:not([data-view="today"]) .h-greet{display:none}
+html[data-view]:not([data-view="today"]) header{padding-top:10px;padding-bottom:8px}
+html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
+/* motion discipline: launcher cascade plays on tab ENTRY only (not on every re-render) */
+.launcher .tile{animation:none}
+.warp .launcher .tile{animation:tlin .42s cubic-bezier(.2,.75,.25,1) backwards}
+/* list rows: hover comfort + touch rhythm */
+.row{border-radius:var(--r-s);transition:background .18s}
+@media(hover:hover){.row:hover{background:color-mix(in srgb,var(--gold) 5%,transparent)}}
+/* inputs: focused = lit */
+.inp:focus{border-color:color-mix(in srgb,var(--gold) 55%,transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 13%,transparent);outline:none}
 </style>
 </head>
 <body>
@@ -1553,7 +1574,7 @@ button,[onclick],.tile,.chip,.row,.stat-chip,.acc-dot,.sk-paper{cursor:pointer}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.0.1';
+const APP_VER='9.1.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -1603,6 +1624,9 @@ function countUp(el,val,pre='',suf=''){const st=performance.now(),d=600,from=0;
 function go(v){
   if(v==='search'){const cur=document.querySelector('.view.active');if(cur){const id=cur.id.slice(2);if(id!=='search')_searchFrom=id}}document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
   document.getElementById('v-'+v).classList.add('active');
+  document.documentElement.dataset.view=v;
+  const _m=document.getElementById('main');
+  if(_m){_m.classList.add('warp');clearTimeout(window._warpT);window._warpT=setTimeout(function(){_m.classList.remove('warp')},700)}
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
   const nb=document.getElementById('nb-'+v);if(nb)nb.classList.add('on');
   document.getElementById('main').scrollTop=0;
