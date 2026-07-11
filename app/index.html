@@ -620,6 +620,11 @@ html[data-theme="light"][data-accent="copper"]{--ink0:#F8F2ED;--ink1:#FFFFFF;--i
 .stat-chip.hot{border-color:color-mix(in srgb,var(--risk) 45%,transparent)}
 .stat-chip.hot .v{color:var(--risk)}
 .stat-chip.gold .v{color:var(--gold)}
+/* ---- a11y polish (ui-ux-pro-max checklist) ---- */
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+.btn:focus-visible,.tile:focus-visible,.chip:focus-visible,.qa-act:focus-visible,.stat-chip:focus-visible{outline-offset:3px;border-radius:inherit}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid color-mix(in srgb,var(--gold) 60%,transparent);outline-offset:1px}
+button,[onclick],.tile,.chip,.row,.stat-chip,.acc-dot,.sk-paper{cursor:pointer}
 </style>
 </head>
 <body>
@@ -1548,7 +1553,7 @@ html[data-theme="light"][data-accent="copper"]{--ink0:#F8F2ED;--ink1:#FFFFFF;--i
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.0.0';
+const APP_VER='9.0.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
