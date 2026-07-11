@@ -1488,7 +1488,7 @@ html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--i
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.4.0';
+const APP_VER='8.4.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2755,24 +2755,35 @@ async function shareAtt(id,type,label){
     /* best mime: stored -> from extension -> from data URL -> generic */
     let mime=(meta&&meta.mime)||extToMime(fname)||'';
     const blob=dataUrlToBlob(d);
+    const dbg=[];
+    if(!navigator.share)dbg.push('no-api');
     if(blob&&navigator.share){
       if(!mime)mime=blob.type||'application/octet-stream';
-      /* candidates: real type, blank type, then a real ZIP wrap */
-      const cands=[new File([blob],fname,{type:mime}),new File([blob],fname,{type:''})];
-      if(blob.size<=60*1024*1024){
-        try{const raw=new Uint8Array(await blob.arrayBuffer());
-          cands.push(new File([zipWrap(fname,raw)],fname+'.zip',{type:'application/zip'}))}catch(e){}
+      /* prepared cache: second tap shares instantly inside a fresh user gesture */
+      let cands;
+      if(window._shareReady&&window._shareReady.id===id){cands=window._shareReady.cands}
+      else{
+        cands=[new File([blob],fname,{type:mime}),new File([blob],fname,{type:''})];
+        if(blob.size<=60*1024*1024){
+          try{const raw=new Uint8Array(await blob.arrayBuffer());
+            cands.push(new File([zipWrap(fname,raw)],fname+'.zip',{type:'application/zip'}))}catch(e){}
+        }
+        window._shareReady={id:id,cands:cands,at:Date.now()};
+        setTimeout(function(){if(window._shareReady&&Date.now()-window._shareReady.at>110000)window._shareReady=null},120000);
       }
+      let sawNotAllowed=false;
       for(let ci=0;ci<cands.length;ci++){
         const file=cands[ci];
-        const isZip=ci===cands.length-1&&file.name.endsWith('.zip');
-        /* trust canShare when it says yes; for the ZIP, attempt even if it says no (some browsers misreport) */
-        const ok=(navigator.canShare&&navigator.canShare({files:[file]}))||isZip||!navigator.canShare;
-        if(!ok)continue;
-        if(isZip)toast('Sharing as ZIP \u2014 this type can\u2019t go directly');
-        try{await navigator.share({files:[file],title:fname});return}
-        catch(err){if(err&&err.name==='AbortError')return; /* try next candidate */}
+        const isZip=file.name.endsWith('.zip');
+        const csOk=!navigator.canShare||navigator.canShare({files:[file]});
+        if(!csOk&&!isZip){dbg.push('cs0');continue}
+        try{await navigator.share({files:[file],title:fname});window._shareReady=null;return}
+        catch(err){const n=(err&&err.name)||'err';dbg.push(n);
+          if(n==='AbortError'){window._shareReady=null;return}
+          if(n==='NotAllowedError')sawNotAllowed=true;}
       }
+      /* activation likely expired while preparing — everything is cached, a fresh tap will share instantly */
+      if(sawNotAllowed){toast('Ready \u2014 tap Share once more to open the share sheet');return}
     }
   }catch(e){/* fall through to download */}
   // fallback: download the real file with its real name (laptops, share unsupported, or any error)
