@@ -462,10 +462,14 @@ html[data-accent="emerald"]{--gold:#43A97E;--goldb:#74D0A8;--plat:#8FBFA8}
 html[data-accent="blue"]{--gold:#5B8DEF;--goldb:#93B8FF;--plat:#93A8C9}
 html[data-accent="rose"]{--gold:#E0708F;--goldb:#F2A3B9;--plat:#C79AA8}
 html[data-accent="violet"]{--gold:#9A7BE0;--goldb:#C0A6F2;--plat:#A79AC9}
+html[data-accent="teal"]{--gold:#3BB3AC;--goldb:#7FD8D2;--plat:#8FBFBB}
+html[data-accent="copper"]{--gold:#C97B4A;--goldb:#E5A57A;--plat:#BF9A85}
 html[data-theme="light"][data-accent="emerald"]{--gold:#2E8A61;--goldb:#43A97E;--plat:#5E8A75}
 html[data-theme="light"][data-accent="blue"]{--gold:#3B6BD1;--goldb:#5B8DEF;--plat:#5E729A}
 html[data-theme="light"][data-accent="rose"]{--gold:#C05174;--goldb:#E0708F;--plat:#9A6B7A}
 html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--plat:#7A6B9A}
+html[data-theme="light"][data-accent="teal"]{--gold:#1F837C;--goldb:#3BB3AC;--plat:#5E8A87}
+html[data-theme="light"][data-accent="copper"]{--gold:#9E5426;--goldb:#C97B4A;--plat:#8A6B5E}
 .acc-dot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:transform .15s,border-color .2s}
 .acc-dot.on{border-color:var(--hi);transform:scale(1.12)}
 .acc-dot:active{transform:scale(.9)}
@@ -549,10 +553,14 @@ html[data-accent="emerald"]{--ink0:#0A100D;--ink1:#111A15;--ink2:#16221C}
 html[data-accent="blue"]{--ink0:#0A0E16;--ink1:#111827;--ink2:#162031}
 html[data-accent="rose"]{--ink0:#120D10;--ink1:#1C1418;--ink2:#241A20}
 html[data-accent="violet"]{--ink0:#0E0C14;--ink1:#16131F;--ink2:#1D1929}
+html[data-accent="teal"]{--ink0:#0A1211;--ink1:#101B1A;--ink2:#152322}
+html[data-accent="copper"]{--ink0:#130E0A;--ink1:#1C1511;--ink2:#251C15}
 html[data-theme="light"][data-accent="emerald"]{--ink0:#F1F5F0;--ink1:#FFFFFF;--ink2:#E9F0E8;--hair:#DCE5DA}
 html[data-theme="light"][data-accent="blue"]{--ink0:#F1F3F8;--ink1:#FFFFFF;--ink2:#E9EDF5;--hair:#DBE1EC}
 html[data-theme="light"][data-accent="rose"]{--ink0:#F8F1F2;--ink1:#FFFFFF;--ink2:#F2E7E9;--hair:#EADCDF}
 html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--ink2:#ECE8F4;--hair:#E0DAEC}
+html[data-theme="light"][data-accent="teal"]{--ink0:#EFF5F4;--ink1:#FFFFFF;--ink2:#E5EFEE;--hair:#D8E4E2}
+html[data-theme="light"][data-accent="copper"]{--ink0:#F8F2ED;--ink1:#FFFFFF;--ink2:#F1E7DE;--hair:#E9D9CB}
 .celeb{position:fixed;inset:0;pointer-events:none;z-index:320}
 .celeb span{position:absolute;left:50%;top:40%;width:9px;height:9px;border-radius:2.5px;opacity:1;
   animation:cel 1.5s cubic-bezier(.15,.6,.3,1) forwards}
@@ -562,6 +570,10 @@ html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--i
 @keyframes cel{0%{transform:translate(0,0) scale(1) rotate(0)}
   100%{transform:translate(var(--dx),var(--dy)) scale(.4) rotate(var(--r));opacity:0}}
 @media(prefers-reduced-motion:reduce){.celeb{display:none}}
+.grp-h{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--lo);margin:20px 2px 10px;display:flex;align-items:center;gap:12px}
+.grp-h::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 28%,transparent),transparent)}
+.grp-h:first-child{margin-top:4px}
+#lifeLauncher .launcher,#workLauncher .launcher{margin-bottom:4px}
 </style>
 </head>
 <body>
@@ -1131,6 +1143,8 @@ html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--i
         <span class="acc-dot" data-a="blue" style="background:linear-gradient(135deg,#5B8DEF,#93B8FF)" onclick="setAccent('blue')"></span>
         <span class="acc-dot" data-a="rose" style="background:linear-gradient(135deg,#E0708F,#F2A3B9)" onclick="setAccent('rose')"></span>
         <span class="acc-dot" data-a="violet" style="background:linear-gradient(135deg,#9A7BE0,#C0A6F2)" onclick="setAccent('violet')"></span>
+        <span class="acc-dot" data-a="teal" style="background:linear-gradient(135deg,#3BB3AC,#7FD8D2)" onclick="setAccent('teal')"></span>
+        <span class="acc-dot" data-a="copper" style="background:linear-gradient(135deg,#C97B4A,#E5A57A)" onclick="setAccent('copper')"></span>
       </div>
     </div>
 
@@ -1445,7 +1459,7 @@ html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--i
   <div class="sk-palette" id="skPalette">
   <div class="sk-swatches" id="skSwatches"></div>
   <div class="sk-stamps" id="skStamps" style="display:none"></div>
-  <div class="sk-papers" id="skPapers"><span class="stat-label" style="margin-right:2px">Paper</span><button class="sk-paper" style="background:#FFFFFF" onclick="skPaper('#FFFFFF')" title="White"></button><button class="sk-paper" style="background:#FFF6E3" onclick="skPaper('#FFF6E3')" title="Cream"></button><button class="sk-paper" style="background:#E8F4FF" onclick="skPaper('#E8F4FF')" title="Sky"></button><button class="sk-paper" style="background:#E9F9EE" onclick="skPaper('#E9F9EE')" title="Mint"></button><button class="sk-paper" style="background:#FFEDF3" onclick="skPaper('#FFEDF3')" title="Pink"></button><button class="sk-paper" style="background:#173428;border-color:rgba(255,255,255,.25)" onclick="skPaper('#173428')" title="Blackboard"></button></div>
+  <div class="sk-papers" id="skPapers"><span class="stat-label" style="margin-right:2px">Paper</span><button class="sk-paper" style="background:#FFFFFF" onclick="skPaper('#FFFFFF')" title="White"></button><button class="sk-paper" style="background:#FFF6E3" onclick="skPaper('#FFF6E3')" title="Cream"></button><button class="sk-paper" style="background:#E8F4FF" onclick="skPaper('#E8F4FF')" title="Sky"></button><button class="sk-paper" style="background:#E9F9EE" onclick="skPaper('#E9F9EE')" title="Mint"></button><button class="sk-paper" style="background:#FFEDF3" onclick="skPaper('#FFEDF3')" title="Pink"></button><button class="sk-paper" style="background:#FFF3C6" onclick="skPaper('#FFF3C6')" title="Sunshine"></button><button class="sk-paper" style="background:#1B1140;border-color:rgba(255,255,255,.25)" onclick="skPaper('#1B1140')" title="Galaxy"></button><button class="sk-paper" style="background:#173428;border-color:rgba(255,255,255,.25)" onclick="skPaper('#173428')" title="Blackboard"></button></div>
   <div class="sk-size">
     <span class="stat-label">Brush</span>
     <input type="range" id="skSize" min="2" max="40" value="5" oninput="skDot()">
@@ -1488,7 +1502,7 @@ html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--i
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.5.0';
+const APP_VER='8.6.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -1569,8 +1583,34 @@ function tileHtml(space,m){const [t,name,ic]=m;const _lk=modLocked(t)?'<span cla
   else if(b&&b.dot)badge='<span class="tile-dot" style="color:'+b.dot+'"></span>';
   return '<div class="tile" onclick="'+(space==='life'?'lifeTab':'workTab')+'(\''+t+'\')">'+badge+_lk
     +'<div class="tile-ic">'+ic+'</div><div class="tile-nm">'+name+'</div></div>'}
-function renderLifeLauncher(){const el=document.getElementById('lifeLauncher');if(el)el.innerHTML=LIFE_MODS.map(m=>tileHtml('life',m)).join('')}
-function renderWorkLauncher(){const el=document.getElementById('workLauncher');if(el)el.innerHTML=WORK_MODS.map(m=>tileHtml('work',m)).join('')}
+const LIFE_GROUPS=[
+  ['Daily',['tasks','notes','shopping','draw']],
+  ['Finance',['money','pay']],
+  ['Health & Home',['health','car','renew','bday']],
+  ['Documents',['docs','family','vault']]
+];
+const WORK_GROUPS=[
+  ['Flow',['tasks','follow','meet']],
+  ['Library',['circ','odoc','link','notes']]
+];
+function groupedLauncher(space,mods,groups){
+  const used={};let html='';
+  groups.forEach(function(g){
+    const items=mods.filter(function(m){return g[1].indexOf(m[0])>=0});
+    items.forEach(function(m){used[m[0]]=1});
+    if(!items.length)return;
+    html+='<div class="grp-h">'+g[0]+'</div><div class="launcher">'
+      +items.map(function(m){return tileHtml(space,m)}).join('')+'</div>';
+  });
+  const rest=mods.filter(function(m){return !used[m[0]]});
+  if(rest.length){html+='<div class="grp-h">More</div><div class="launcher">'
+    +rest.map(function(m){return tileHtml(space,m)}).join('')+'</div>'}
+  return html;
+}
+function renderLifeLauncher(){const el=document.getElementById('lifeLauncher');if(!el)return;
+  el.classList.remove('launcher');el.innerHTML=groupedLauncher('life',LIFE_MODS,LIFE_GROUPS)}
+function renderWorkLauncher(){const el=document.getElementById('workLauncher');if(!el)return;
+  el.classList.remove('launcher');el.innerHTML=groupedLauncher('work',WORK_MODS,WORK_GROUPS)}
 function lifeHome(){document.querySelectorAll('.ltab').forEach(x=>x.style.display='none');
   document.getElementById('lifeBar').style.display='none';
   document.getElementById('lifeLauncher').style.display='';
@@ -1920,15 +1960,22 @@ function skRedraw(){const c=document.getElementById('skCanvas'),x=c.getContext('
   x.setTransform(sk.dpr,0,0,sk.dpr,0,0);x.fillStyle='#fff';x.fillRect(0,0,sk.W,sk.H);
   x.lineCap='round';x.lineJoin='round';
   sk.ops.forEach(function(op){skPaint(x,op)});if(sk.cur)skPaint(x,sk.cur)}
-function skMirror(el){sk.mirror=!sk.mirror;el.classList.toggle('on',sk.mirror);
-  toast(sk.mirror?'\ud83e\udd8b Butterfly mirror ON \u2014 draws both sides':'Mirror off')}
+function skMirror(el){
+  sk.mirror=(sk.mirror===2)?4:((sk.mirror===4)?0:2);
+  el.classList.toggle('on',!!sk.mirror);
+  el.textContent=sk.mirror===4?'\u273b':'\ud83e\udd8b';
+  toast(sk.mirror===2?'\ud83e\udd8b Butterfly \u2014 mirrors left & right':(sk.mirror===4?'\u273b Kaleidoscope \u2014 mirrors four ways':'Mirror off'))}
 function skPaper(c){sk.ops.push({t:'fill',c:c});sk.redo=[];skRedraw()}
-function skMirrorOp(op){const W=op.W||sk.W;const o=Object.assign({},op,{mir:false});
-  if(op.pts)o.pts=op.pts.map(function(p){return {x:W-p.x,y:p.y}});
-  if(typeof op.x0==='number'){o.x0=W-op.x0;o.x1=W-op.x1}
-  if(typeof op.x==='number')o.x=W-op.x;
+function _skFlip(op,fx,fy){const W=op.W||sk.W,H=op.H||sk.H;const o=Object.assign({},op,{mir:false});
+  if(op.pts)o.pts=op.pts.map(function(p){return {x:fx?W-p.x:p.x,y:fy?H-p.y:p.y}});
+  if(typeof op.x0==='number'){if(fx){o.x0=W-op.x0;o.x1=W-op.x1}if(fy){o.y0=H-op.y0;o.y1=H-op.y1}}
+  if(typeof op.x==='number'&&fx)o.x=W-op.x;
+  if(typeof op.y==='number'&&fy)o.y=H-op.y;
   return o}
-function skPaint(x,op){skPaintCore(x,op);if(op&&op.mir)skPaintCore(x,skMirrorOp(op))}
+function skMirrorCopies(op){const m=(op.mir===true)?2:op.mir;const out=[_skFlip(op,true,false)];
+  if(m===4){out.push(_skFlip(op,false,true));out.push(_skFlip(op,true,true))}
+  return out}
+function skPaint(x,op){skPaintCore(x,op);if(op&&op.mir)skMirrorCopies(op).forEach(function(c){skPaintCore(x,c)})}
 function skPaintCore(x,op){
   if(op.t==='fill'){x.fillStyle=op.c;x.fillRect(0,0,sk.W,sk.H);return}
   x.strokeStyle=op.t==='erase'?'#fff':op.c;x.fillStyle=op.c;
@@ -1968,12 +2015,12 @@ function skClear(){if(!sk.ops.length)return;sk.ops=[];sk.redo=[];skRedraw();toas
 function initSketch(){const c=document.getElementById('skCanvas');
   c.addEventListener('pointerdown',function(e){c.setPointerCapture(e.pointerId);const p=skPt(e,c);
     if(sk.tool==='fill'){sk.ops.push({t:'fill',c:sk.color});sk.redo=[];skRedraw();return}
-    if(sk.tool==='stamp'){sk.ops.push({t:'stamp',e:sk.stamp,x:p.x,y:p.y,s:sk.size,mir:sk.mirror,W:sk.W});sk.redo=[];skRedraw();return}
+    if(sk.tool==='stamp'){sk.ops.push({t:'stamp',e:sk.stamp,x:p.x,y:p.y,s:sk.size,mir:sk.mirror,W:sk.W,H:sk.H});sk.redo=[];skRedraw();return}
     if(sk.tool==='pen'||sk.tool==='erase')sk.cur={t:sk.tool,c:sk.color,s:sk.size,pts:[p]};
     else if(sk.tool==='spray'||sk.tool==='glitter'||sk.tool==='neon')sk.cur={t:sk.tool,c:sk.color,s:sk.size,pts:[p]};
     else if(sk.tool==='rainbow')sk.cur={t:'rainbow',s:sk.size,hue0:Math.floor(Math.random()*360),pts:[p]};
     else sk.cur={t:sk.tool,c:sk.color,s:sk.size,x0:p.x,y0:p.y,x1:p.x,y1:p.y,fill:sk.fillShape};
-    if(sk.cur){sk.cur.mir=sk.mirror;sk.cur.W=sk.W}
+    if(sk.cur){sk.cur.mir=sk.mirror;sk.cur.W=sk.W;sk.cur.H=sk.H}
     skRedraw()});
   c.addEventListener('pointermove',function(e){if(!sk.cur)return;e.preventDefault();const p=skPt(e,c);
     if(sk.cur.pts){const l=sk.cur.pts[sk.cur.pts.length-1];
@@ -4538,7 +4585,7 @@ function migrate(){(S.circulars||[]).forEach(c=>{if(!c.versions){c.versions=[{id
      otherwise the very first sync would look like a divergence */
   if(S.baseRev===undefined||S.baseRev===null)S.baseRev=S.lastSync||0}
 function sysDark(){return !window.matchMedia||window.matchMedia('(prefers-color-scheme: dark)').matches}
-const ACC_NAMES={gold:'Gold',emerald:'Emerald',blue:'Royal Blue',rose:'Rose',violet:'Violet'};
+const ACC_NAMES={gold:'Gold',emerald:'Emerald',blue:'Royal Blue',rose:'Rose',violet:'Violet',teal:'Teal',copper:'Copper'};
 function setAccent(a){S.profile.accent=a;save();applyTheme();
   document.querySelectorAll('.acc-dot').forEach(function(d){d.classList.toggle('on',d.dataset.a===a)});
   const el=document.getElementById('accSub');if(el)el.textContent=ACC_NAMES[a]||'Gold';
