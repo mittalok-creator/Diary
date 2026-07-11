@@ -604,7 +604,7 @@ html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--i
 
   <div class="card focus-card" id="focusCard" style="margin-top:14px">
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-      <div><div class="stat-label">Today's Focus</div>
+      <div><div class="stat-label" style="display:flex;align-items:center;gap:10px">Today's Focus<button onclick="weeklyReview()" style="border:1px solid var(--hair);background:none;color:var(--gold);border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.05em">✦ REVIEW</button></div>
         <div id="focusHead" style="font-family:'Fraunces',serif;font-size:22px;margin-top:2px">—</div></div>
       <svg class="ring" width="60" height="60" viewBox="0 0 84 84" style="flex-shrink:0">
         <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--gold)"/><stop offset="1" style="stop-color:var(--goldb)"/></linearGradient></defs>
@@ -1488,7 +1488,7 @@ html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--i
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.4.2';
+const APP_VER='8.5.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2033,6 +2033,7 @@ function tglTask(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;
   if(!x.done&&el){buzz(14);el.classList.add('zapdone');setTimeout(function(){_tglCore(id)},230);return}
   _tglCore(id)}
 function _tglCore(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.done;
+  if(x.done)x.doneAt=new Date().toISOString();else delete x.doneAt;
   if(x.done&&x.rep&&x.due){const nd=nextDue(x.due,x.rep);
     if(nd){S.tasks.unshift({id:uid(),title:x.title,space:x.space,due:nd,time:x.time||null,rep:x.rep,done:false,at:new Date().toISOString()});
       x.rep=null;save();renderLife();renderWork();toast('✓ Done — next one on '+fmtD(nd));return}}
@@ -3710,6 +3711,39 @@ function celebrate(){
     toast('Day cleared \u2726 Everything done');
     setTimeout(function(){host.remove()},1800);
   }catch(e){}}
+
+function weeklyReview(){
+  const now=new Date();const t=today();
+  const d7=new Date(now);d7.setDate(d7.getDate()-7);
+  const d14=new Date(now);d14.setDate(d14.getDate()-14);
+  const iso=d=>d.toISOString();
+  const in7=x=>x&&x>=iso(d7);const inPrev7=x=>x&&x>=iso(d14)&&x<iso(d7);
+  /* done this week (doneAt going forward; fallback: due within week) */
+  const doneW=S.tasks.filter(x=>x.done&&((x.doneAt&&in7(x.doneAt))||(!x.doneAt&&x.due&&x.due>=iso(d7).slice(0,10)&&x.due<=t))).length;
+  const pend=S.tasks.filter(x=>!x.done&&x.due&&x.due<=t).length;
+  const spend=S.expenses.filter(e=>in7(e.at)).reduce((a,e)=>a+(+e.amount||0),0);
+  const spendPrev=S.expenses.filter(e=>inPrev7(e.at)).reduce((a,e)=>a+(+e.amount||0),0);
+  const trend=spendPrev?Math.round((spend-spendPrev)/spendPrev*100):null;
+  const catMap={};S.expenses.filter(e=>in7(e.at)).forEach(e=>{catMap[e.cat||'Other']=(catMap[e.cat||'Other']||0)+(+e.amount||0)});
+  const topCat=Object.entries(catMap).sort((a,b)=>b[1]-a[1])[0];
+  const nxt=new Date(now);nxt.setDate(nxt.getDate()+7);const nT=nxt.toISOString().slice(0,10);
+  const meetN=S.meetings.filter(m=>m.date&&m.date>t&&m.date<=nT).length;
+  const billN=S.bills.filter(b=>!b.paid&&b.due&&daysTo(b.due)>=0&&daysTo(b.due)<=7).length
+             +S.cards.filter(c=>c.due&&daysTo(c.due)>=0&&daysTo(c.due)<=7).length;
+  const renN=S.renewals.filter(r=>r.due&&daysTo(r.due)>=0&&daysTo(r.due)<=7).length;
+  const bdayN=S.events.filter(e=>{if(!e.date)return false;const d=new Date(e.date);d.setFullYear(now.getFullYear());
+    const dd=(d-now)/86400000;return dd>=0&&dd<=7}).length;
+  const habBest=Math.max(0,...S.habits.map(h=>h.streak||0));
+  const row=(ic,txt)=>'<div style="display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--hair)"><span style="font-size:18px;flex-shrink:0">'+ic+'</span><span style="font-size:14.5px;line-height:1.5">'+txt+'</span></div>';
+  let h='';
+  h+=row('\u2713','<b>'+doneW+'</b> task'+(doneW===1?'':'s')+' completed this week'+(pend?' \u00b7 <span style="color:var(--risk)">'+pend+' still pending</span>':' \u00b7 <span style="color:var(--good)">nothing pending</span>'));
+  h+=row('\u20b9','Spent <b>\u20b9'+spend.toLocaleString('en-IN')+'</b> in 7 days'+(trend===null?'':(trend>0?' \u00b7 <span style="color:var(--warn)">up '+trend+'%</span>':' \u00b7 <span style="color:var(--good)">down '+Math.abs(trend)+'%</span>')+' vs last week'));
+  if(topCat)h+=row('\ud83c\udff7','Top category: <b>'+esc(topCat[0])+'</b> (\u20b9'+Math.round(topCat[1]).toLocaleString('en-IN')+')');
+  h+=row('\ud83d\udcc5','Next 7 days: <b>'+meetN+'</b> meeting'+(meetN===1?'':'s')+' \u00b7 <b>'+billN+'</b> bill'+(billN===1?'':'s')+' \u00b7 <b>'+renN+'</b> renewal'+(renN===1?'':'s')+(bdayN?' \u00b7 <b>'+bdayN+'</b> birthday'+(bdayN===1?'':'s')+' \ud83c\udf82':''));
+  if(habBest)h+=row('\ud83d\udd25','Best habit streak: <b>'+habBest+' day'+(habBest===1?'':'s')+'</b>');
+  h+='<div class="stat-sub" style="margin-top:12px;text-align:center">Generated on-device \u00b7 nothing leaves your phone</div>';
+  showSheet('Your week at a glance',h);
+}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
