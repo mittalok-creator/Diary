@@ -313,7 +313,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 .cfov h2{color:var(--hi)}
 .cfov p{color:var(--lo)}
 .cfov.open{display:flex}
-.cfbox{max-width:380px;width:100%;text-align:center}
+.cfbox{max-width:380px;width:100%;text-align:center;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;border-radius:inherit;scrollbar-width:thin}
 #pvOv{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100vw;height:100vh;height:100dvh;z-index:130;display:none;flex-direction:column;background:var(--ink0)}
 #pvOv.open{display:flex}
 .pv-bar{display:flex;align-items:center;gap:6px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
@@ -1506,7 +1506,7 @@ html[data-theme="light"][data-accent="copper"]{--ink0:#F8F2ED;--ink1:#FFFFFF;--i
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.6.1';
+const APP_VER='8.6.2';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
