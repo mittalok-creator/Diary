@@ -1,400 +1,383 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>ALOK OS — Nothing slips. · by Alok Mittal</title>
-<meta name="description" content="Not a follow-up. Not a renewal. Not a birthday. One quiet system for your work and your life — private by design, on every device.">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ALOK OS — Your work. Your life. One system.</title>
+<meta name="description" content="ALOK OS brings tasks, meetings, money, family documents and reminders into one private app — synced to your own Google Drive, alerting you even when closed.">
 <meta name="theme-color" content="#0B0E13">
-<meta property="og:title" content="ALOK OS — Nothing slips.">
-<meta property="og:description" content="One quiet system for your work and your life. Private by design.">
-<link rel="icon" type="image/png" href="./app/icon-192.png">
+<meta property="og:title" content="ALOK OS — Your work. Your life. One system.">
+<meta property="og:description" content="Tasks, meetings, money, family documents and reminders in one private app. Your data stays in your own Google Drive.">
+<link rel="icon" href="/app/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --ink0:#0B0E13; --ink1:#12161e; --ink2:#1a2029; --hair:#262f3c;
-  --gold:#D9A85C; --goldb:#F0C27B; --golddim:rgba(217,168,92,.13);
-  --hi:#F3EFE6; --lo:#8A93A3; --good:#5FBF8A; --risk:#D96C6C; --warn:#E0A448;
+  --ink0:#0B0E13; --ink1:#12161E; --ink2:#181E28;
+  --gold:#D9A85C; --goldb:#F0C27B;
+  --hi:#F3EFE6; --lo:#98A0AC; --hair:rgba(243,239,230,.09);
+  --good:#5FB98E;
 }
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:var(--ink0);color:var(--hi);font-family:'Space Grotesk',system-ui,sans-serif;
-  font-size:16px;overflow-x:hidden;line-height:1.65}
-::selection{background:var(--gold);color:#12151b}
+  font-size:16px;line-height:1.6;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
-.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+.wrap{max-width:1120px;margin:0 auto;padding:0 22px}
 .serif{font-family:'Fraunces',serif}
-.goldtext{background:linear-gradient(115deg,#D9A85C 8%,#F7DCA4 42%,#D9A85C 78%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  background-size:220% 100%;animation:shimmer 7s linear infinite}
-@keyframes shimmer{to{background-position:-220% 0}}
-/* scroll progress */
-#prog{position:fixed;top:0;left:0;height:2px;width:0;z-index:60;
-  background:linear-gradient(90deg,var(--gold),var(--goldb));box-shadow:0 0 12px rgba(217,168,92,.6)}
-/* ambient */
-.orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:.34;pointer-events:none;z-index:0}
-#orbA{width:560px;height:560px;background:radial-gradient(circle,#3f3419,transparent 66%);top:-180px;left:-140px;animation:drift 24s ease-in-out infinite}
-#orbB{width:440px;height:440px;background:radial-gradient(circle,#1d2c41,transparent 66%);top:44vh;right:-170px;animation:drift 28s ease-in-out infinite reverse}
-#orbC{width:400px;height:400px;background:radial-gradient(circle,#33270f,transparent 66%);bottom:-140px;left:32vw;animation:drift 32s ease-in-out infinite}
-@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(44px,-54px)}}
-.grain{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.85'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E")}
-main{position:relative;z-index:2}
-/* nav */
-nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:all .35s}
-nav .bar{max-width:1140px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:space-between}
-nav.scrolled{background:rgba(11,14,19,.74);backdrop-filter:blur(20px) saturate(140%);border-bottom:1px solid var(--hair)}
+.gold{color:var(--gold)}
+.btn{display:inline-flex;align-items:center;gap:9px;border-radius:14px;padding:14px 26px;font-weight:600;
+  font-size:15.5px;cursor:pointer;transition:transform .15s,box-shadow .25s,border-color .25s;border:1px solid transparent}
+.btn-gold{background:linear-gradient(160deg,var(--goldb),var(--gold));color:#231a09;
+  box-shadow:0 8px 26px rgba(217,168,92,.28),inset 0 1px 0 rgba(255,255,255,.4)}
+.btn-gold:hover{transform:translateY(-2px)}
+.btn-ghost{border-color:var(--hair);color:var(--hi)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);
+  display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.eyebrow::after{content:'';flex:0 0 60px;height:1px;background:linear-gradient(90deg,rgba(217,168,92,.5),transparent)}
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(26px,4vw,38px);line-height:1.15;margin-bottom:14px}
+.sub{color:var(--lo);max-width:560px}
+section{padding:84px 0}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.3,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* ---------- nav ---------- */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(11,14,19,.72);border-bottom:1px solid var(--hair)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:66px}
 .brand{display:flex;align-items:center;gap:12px;font-weight:700;letter-spacing:.14em;font-size:13.5px}
-.mono{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;
-  font-family:'Fraunces',serif;color:var(--gold);font-size:14px;font-weight:600}
-.btn{display:inline-flex;align-items:center;gap:10px;border-radius:999px;padding:13px 26px;font-weight:700;font-size:14px;
-  letter-spacing:.03em;cursor:pointer;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s,border-color .3s;border:none;font-family:inherit}
-.btn:active{transform:scale(.96)}
-.btn-gold{background:linear-gradient(135deg,var(--gold),var(--goldb));color:#12151b;box-shadow:0 8px 30px rgba(217,168,92,.32)}
-.btn-gold:hover{transform:translateY(-2px);box-shadow:0 14px 44px rgba(217,168,92,.5)}
-.btn-ghost{background:transparent;color:var(--gold);border:1px solid var(--hair)}
-.btn-ghost:hover{border-color:var(--gold)}
-/* hero */
-.hero{min-height:100svh;display:flex;align-items:center;padding:132px 0 70px}
-.hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:52px;align-items:center}
-.hero h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(52px,7.6vw,104px);line-height:.98;
-  margin:22px 0 20px;letter-spacing:-.025em}
-.hero .not{font-family:'Fraunces',serif;font-size:clamp(17px,1.9vw,23px);color:var(--hi);opacity:.92;margin-bottom:20px;line-height:1.5}
-.hero .not b{color:var(--gold);font-weight:600}
-.hero p.sub{color:var(--lo);font-size:clamp(15px,1.5vw,17.5px);max-width:520px;margin-bottom:36px}
-.hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-.trust{margin-top:36px;color:var(--lo);font-size:12.5px;display:flex;gap:12px;flex-wrap:wrap}
-.trust span{display:flex;align-items:center;gap:7px}
-.trust i{font-style:normal;color:var(--gold)}
-.trust b{color:var(--hi);font-weight:600}
-.w{display:inline-block;opacity:0;transform:translateY(30px);animation:wordin .9s cubic-bezier(.22,1,.36,1) forwards}
-@keyframes wordin{to{opacity:1;transform:none}}
-.rule{height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:26px 0 22px;width:0;
-  animation:grow 1.2s .9s cubic-bezier(.22,1,.36,1) forwards}
-@keyframes grow{to{width:180px}}
-/* phone mock: timeline */
-.stage{display:flex;justify-content:center;position:relative}
-.halo{position:absolute;width:470px;height:470px;border-radius:50%;
-  background:radial-gradient(circle,var(--golddim),transparent 66%);animation:pulse 5.5s ease-in-out infinite}
-@keyframes pulse{0%,100%{transform:scale(1);opacity:.75}50%{transform:scale(1.07);opacity:1}}
-.ringy{position:absolute;width:530px;height:530px;border-radius:50%;border:1px solid rgba(217,168,92,.16);animation:spin 44s linear infinite}
-.ringy::before{content:'';position:absolute;top:-4px;left:50%;width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 14px var(--gold)}
-@keyframes spin{to{transform:rotate(360deg)}}
-.phone{position:relative;width:296px;height:616px;border-radius:44px;background:linear-gradient(160deg,#171c25,#0b0e13);
-  border:1px solid var(--hair);box-shadow:0 44px 96px rgba(0,0,0,.62),inset 0 1px 0 rgba(217,168,92,.16);
-  padding:13px;animation:floaty 8s ease-in-out infinite}
-@keyframes floaty{0%,100%{transform:translateY(0) rotate(-1.1deg)}50%{transform:translateY(-18px) rotate(1.1deg)}}
-.screen{width:100%;height:100%;border-radius:33px;background:#0B0E13;overflow:hidden;padding:20px 15px;position:relative}
-.notch{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:88px;height:22px;border-radius:12px;background:#000}
-.m-date{font-size:8.6px;font-weight:700;letter-spacing:.12em;color:var(--gold);margin-top:22px}
-.m-greet{font-family:'Fraunces',serif;font-size:18px;margin-top:3px}
-.m-card{background:#12161e;border:1px solid #232b37;border-radius:14px;padding:11px 12px;margin-top:11px;
-  opacity:0;transform:translateY(14px);animation:cardin .75s cubic-bezier(.22,1,.36,1) forwards}
-.m-card:nth-of-type(2){animation-delay:.45s}.m-card:nth-of-type(3){animation-delay:.75s}
-@keyframes cardin{to{opacity:1;transform:none}}
-.m-lab{font-size:8px;font-weight:700;letter-spacing:.13em;color:var(--lo);text-transform:uppercase}
-.m-num{font-family:'Fraunces',serif;font-size:19px;margin-top:3px}
-.m-ringwrap{display:flex;gap:11px;align-items:center}
-.m-ring circle.fg{stroke:url(#lg);stroke-linecap:round;stroke-dasharray:151;stroke-dashoffset:151;animation:ringdraw 1.7s .5s cubic-bezier(.22,1,.36,1) forwards}
-@keyframes ringdraw{to{stroke-dashoffset:52}}
-/* timeline in mock */
-.tl{position:relative;margin-top:4px}
-.tl::before{content:'';position:absolute;left:41px;top:6px;bottom:6px;width:1.4px;background:#232b37}
-.tl-row{display:flex;gap:9px;align-items:flex-start;padding:7px 0;opacity:0;animation:cardin .6s forwards}
-.tl-row:nth-child(1){animation-delay:.9s}.tl-row:nth-child(3){animation-delay:1.15s}
-.tl-row:nth-child(4){animation-delay:1.35s}.tl-row:nth-child(5){animation-delay:1.55s}
-.tl-row.past{opacity:.4}
-.tl-time{width:34px;flex-shrink:0;font-size:8.6px;font-weight:700;color:var(--lo);text-align:right;padding-top:3px;font-variant-numeric:tabular-nums}
-.tl-dot{width:9px;height:9px;border-radius:50%;border:1.4px solid var(--gold);background:#12161e;flex-shrink:0;margin-top:3px;z-index:1}
-.tl-dot.on{background:linear-gradient(135deg,var(--gold),var(--goldb))}
-.tl-t{font-size:10.6px;font-weight:500;line-height:1.35}
-.tl-m{font-size:8.4px;color:var(--lo);margin-top:1px}
-.tl-m b{color:var(--gold)}
-.tl-now{display:flex;align-items:center;gap:8px;margin:4px 0 4px 44px;position:relative;
-  opacity:0;animation:cardin .6s 1.25s forwards}
-.tl-now::before{content:'';position:absolute;left:-5px;width:8px;height:8px;border-radius:50%;background:var(--gold);
-  box-shadow:0 0 9px var(--gold);animation:nowp 2.6s ease-in-out infinite}
-@keyframes nowp{0%,100%{box-shadow:0 0 0 0 rgba(217,168,92,.5)}50%{box-shadow:0 0 0 7px rgba(217,168,92,0)}}
-.tl-now::after{content:'';flex:1;height:1.3px;background:linear-gradient(90deg,var(--gold),transparent)}
-.tl-now span{font-size:7.6px;font-weight:700;letter-spacing:.14em;color:var(--gold);margin-left:10px;white-space:nowrap}
-/* marquee */
-.marquee{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:19px 0;overflow:hidden;
-  background:rgba(18,22,30,.5);backdrop-filter:blur(8px)}
-.track{display:flex;gap:42px;white-space:nowrap;animation:scroll 38s linear infinite;width:max-content}
-.track span{font-family:'Fraunces',serif;font-size:16.5px;color:var(--lo);display:flex;align-items:center;gap:42px}
-.track i{font-style:normal;color:var(--gold);font-size:10px}
-@keyframes scroll{to{transform:translateX(-50%)}}
-/* sections */
-section{padding:112px 0;position:relative}
-.sec-head{max-width:700px;margin-bottom:60px}
-.sec-head h2{font-family:'Fraunces',serif;font-size:clamp(32px,4.5vw,54px);font-weight:600;line-height:1.1;margin:18px 0 16px;letter-spacing:-.015em}
-.sec-head p{color:var(--lo);font-size:17px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
-.feat{background:linear-gradient(165deg,#141922,#0f131a);border:1px solid var(--hair);border-radius:24px;padding:30px 26px;
-  position:relative;overflow:hidden;transition:transform .45s cubic-bezier(.22,1,.36,1),border-color .45s}
-.feat:hover{transform:translateY(-7px);border-color:rgba(217,168,92,.42)}
-.feat::before{content:'';position:absolute;inset:0;background:radial-gradient(460px 200px at var(--mx,50%) -18%,var(--golddim),transparent 62%);opacity:0;transition:opacity .45s}
-.feat:hover::before{opacity:1}
-.feat .ico{width:48px;height:48px;border-radius:15px;background:var(--golddim);border:1px solid rgba(217,168,92,.28);
-  display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:20px}
-.feat h3{font-family:'Fraunces',serif;font-size:20px;font-weight:600;margin-bottom:9px}
-.feat p{color:var(--lo);font-size:14.5px}
-.feat .tagx{display:inline-block;margin-top:15px;font-size:10.5px;font-weight:700;letter-spacing:.15em;color:var(--gold);text-transform:uppercase}
-/* steps */
-.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.step{padding:28px 0;border-top:1px solid var(--hair)}
-.step .n{font-family:'Fraunces',serif;font-size:40px;color:var(--gold);line-height:1}
-.step h4{font-family:'Fraunces',serif;font-size:19px;margin:12px 0 8px;font-weight:600}
-.step p{color:var(--lo);font-size:14.5px}
-/* privacy band */
-.band{border:1px solid var(--hair);border-radius:28px;padding:52px 44px;background:linear-gradient(150deg,#141922,#0e121a);position:relative;overflow:hidden}
-.band::after{content:'';position:absolute;top:-50%;right:-10%;width:420px;height:420px;border-radius:50%;
-  background:radial-gradient(circle,var(--golddim),transparent 66%)}
-.band h3{font-family:'Fraunces',serif;font-size:clamp(24px,3vw,34px);font-weight:600;margin:16px 0 14px;position:relative}
-.band p{color:var(--lo);max-width:620px;position:relative;font-size:15.5px}
-/* reveals */
-.rv{opacity:0;transform:translateY(34px);transition:opacity .95s cubic-bezier(.22,1,.36,1),transform .95s cubic-bezier(.22,1,.36,1)}
-.rv.in{opacity:1;transform:none}
-.rv:nth-child(2){transition-delay:.07s}.rv:nth-child(3){transition-delay:.14s}
-.rv:nth-child(4){transition-delay:.21s}.rv:nth-child(5){transition-delay:.28s}.rv:nth-child(6){transition-delay:.35s}
-/* statement + stats */
-.statement{text-align:center;padding:132px 0}
-.statement h2{font-family:'Fraunces',serif;font-size:clamp(32px,5.2vw,64px);font-weight:500;line-height:1.16;max-width:920px;margin:0 auto;letter-spacing:-.015em}
-.hairline{width:120px;height:1.5px;margin:36px auto 0;background:linear-gradient(90deg,transparent,var(--gold),transparent)}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;text-align:center}
-.stat h3{font-family:'Fraunces',serif;font-size:clamp(34px,4.4vw,56px);font-weight:600;color:var(--gold)}
-.stat p{color:var(--lo);font-size:12px;letter-spacing:.11em;text-transform:uppercase;font-weight:600;margin-top:6px}
-/* final */
-.final{text-align:center;padding:140px 0 118px}
-.final .mono{width:74px;height:74px;font-size:26px;margin:0 auto 32px;animation:pulse 5.5s ease-in-out infinite}
-.final h2{font-family:'Fraunces',serif;font-size:clamp(34px,5vw,62px);font-weight:600;margin-bottom:16px;letter-spacing:-.015em}
-.final p{color:var(--lo);margin-bottom:42px;font-size:17px}
-footer{border-top:1px solid var(--hair);padding:36px 0;color:var(--lo);font-size:13px}
-footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
-footer b{color:var(--gold);letter-spacing:.16em}
-@media(max-width:900px){
-  .hero-grid{grid-template-columns:1fr;gap:54px}
-  .hero{padding-top:112px}
-  .grid3,.steps{grid-template-columns:1fr}
-  .stats{grid-template-columns:repeat(2,1fr);gap:32px}
-  .stage{transform:scale(.9)}
-  section{padding:78px 0}
-  .band{padding:38px 26px}
+.dm{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;
+  justify-content:center;font-family:'Fraunces',serif;color:var(--gold);font-size:13px}
+.nav-links{display:flex;gap:26px;font-size:14px;color:var(--lo)}
+.nav-links a:hover{color:var(--gold)}
+@media(max-width:760px){.nav-links{display:none}}
+
+/* ---------- hero ---------- */
+.hero{position:relative;padding:90px 0 40px;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:-120px -60px auto;height:640px;pointer-events:none;
+  background:radial-gradient(640px 400px at 22% 8%,rgba(217,168,92,.14),transparent 68%),
+             radial-gradient(560px 380px at 82% 22%,rgba(240,194,123,.09),transparent 70%);
+  filter:blur(2px);animation:aur 18s ease-in-out infinite alternate}
+@keyframes aur{from{transform:translateX(-14px)}to{transform:translateX(16px) scale(1.03)}}
+.hero-grid{position:relative;display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+@media(max-width:920px){.hero-grid{grid-template-columns:1fr}}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(38px,6vw,62px);line-height:1.06;letter-spacing:-.01em}
+h1 .line2{background:linear-gradient(120deg,var(--goldb),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-sub{color:var(--lo);font-size:17.5px;margin:22px 0 30px;max-width:520px}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
+.hero-note{margin-top:18px;font-size:13px;color:var(--lo)}
+.hero-note b{color:var(--good);font-weight:600}
+
+/* product tableau */
+.tableau{position:relative;min-height:540px;display:flex;align-items:center;justify-content:center}
+.phone{position:relative;width:262px;height:540px;border-radius:38px;border:1px solid rgba(217,168,92,.35);
+  background:linear-gradient(170deg,#141A22,#0D1117);box-shadow:0 40px 90px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);
+  padding:18px 16px;overflow:hidden}
+.phone::before{content:'';position:absolute;top:10px;left:50%;transform:translateX(-50%);width:76px;height:5px;
+  border-radius:3px;background:rgba(255,255,255,.10)}
+.ph-date{font-size:9.5px;letter-spacing:.1em;color:var(--gold);font-weight:700;margin-top:16px}
+.ph-greet{font-family:'Fraunces',serif;font-size:21px;margin:2px 0 14px}
+.ph-card{border:1px solid var(--hair);border-radius:14px;background:rgba(255,255,255,.025);padding:11px 12px;margin-bottom:10px}
+.ph-lbl{font-size:8.5px;letter-spacing:.12em;color:var(--lo);font-weight:700}
+.ph-big{font-family:'Fraunces',serif;font-size:17px;margin-top:2px}
+.ph-chiprow{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.ph-chip{font-size:8.5px;font-weight:600;border-radius:99px;padding:3px 8px;background:rgba(217,168,92,.13);color:var(--goldb);border:1px solid rgba(217,168,92,.25)}
+.ph-chip.red{background:rgba(224,106,90,.13);color:#EFA79C;border-color:rgba(224,106,90,.3)}
+.ph-item{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid var(--hair);font-size:11px}
+.ph-item:last-child{border-bottom:none}
+.ph-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.ph-time{margin-left:auto;color:var(--lo);font-size:9.5px}
+/* floating glass chips around the phone */
+.orb{position:absolute;display:flex;align-items:center;gap:9px;border-radius:16px;padding:11px 15px;font-size:12.5px;font-weight:600;
+  background:rgba(18,22,30,.72);border:1px solid rgba(217,168,92,.3);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  box-shadow:0 18px 44px rgba(0,0,0,.45);animation:float 6s ease-in-out infinite}
+.orb svg{width:20px;height:20px;flex-shrink:0}
+.orb.o1{top:6%;left:-4%;animation-delay:0s}
+.orb.o2{top:24%;right:-8%;animation-delay:1.4s}
+.orb.o3{bottom:26%;left:-10%;animation-delay:2.6s}
+.orb.o4{bottom:6%;right:-4%;animation-delay:3.8s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+@media(max-width:920px){.tableau{min-height:0;margin-top:36px}.orb.o2{right:0}.orb.o3{left:0}.orb.o1{left:0}.orb.o4{right:0}}
+
+/* ---------- trust strip ---------- */
+.trust{border-block:1px solid var(--hair);background:linear-gradient(180deg,rgba(217,168,92,.045),transparent)}
+.trust-in{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;padding:30px 0;text-align:center}
+@media(max-width:760px){.trust-in{grid-template-columns:repeat(2,1fr)}}
+.t-num{font-family:'Fraunces',serif;font-size:26px;color:var(--goldb)}
+.t-lbl{font-size:12.5px;color:var(--lo);margin-top:2px}
+
+/* ---------- constellation ---------- */
+.constel{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-top:38px}
+@media(max-width:920px){.constel{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:560px){.constel{grid-template-columns:repeat(3,1fr)}}
+.mod{border:1px solid var(--hair);border-radius:18px;padding:16px 8px 13px;text-align:center;
+  background:linear-gradient(165deg,var(--ink1),var(--ink0));transition:transform .18s,border-color .25s,box-shadow .25s}
+.mod:hover{transform:translateY(-4px);border-color:rgba(217,168,92,.42);box-shadow:0 16px 34px rgba(217,168,92,.10)}
+.mod-ic{width:46px;height:46px;margin:0 auto 9px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-size:21px;background:linear-gradient(150deg,rgba(217,168,92,.17),rgba(217,168,92,.06));
+  border:1px solid rgba(217,168,92,.2);box-shadow:inset 0 1px 0 rgba(255,255,255,.12)}
+.mod-nm{font-size:11.5px;font-weight:600;color:var(--lo)}
+
+/* ---------- feature deep dives ---------- */
+.feat{display:grid;grid-template-columns:1fr 1fr;gap:54px;align-items:center;padding:40px 0}
+.feat.rev{direction:rtl}.feat.rev>*{direction:ltr}
+@media(max-width:860px){.feat{grid-template-columns:1fr;gap:26px}.feat.rev{direction:ltr}}
+.feat h3{font-family:'Fraunces',serif;font-size:clamp(22px,3vw,29px);font-weight:600;margin-bottom:10px}
+.feat p{color:var(--lo);max-width:460px}
+.feat ul{margin-top:14px;color:var(--lo);list-style:none}
+.feat li{padding:5px 0 5px 26px;position:relative;font-size:14.5px}
+.feat li::before{content:'';position:absolute;left:0;top:11px;width:14px;height:14px;border-radius:50%;
+  background:rgba(217,168,92,.15);border:1px solid rgba(217,168,92,.5)}
+.feat li::after{content:'';position:absolute;left:4.5px;top:14.5px;width:5px;height:3px;border-left:1.6px solid var(--gold);
+  border-bottom:1.6px solid var(--gold);transform:rotate(-45deg)}
+.art{position:relative;border:1px solid var(--hair);border-radius:24px;min-height:280px;overflow:hidden;
+  background:linear-gradient(165deg,var(--ink1),var(--ink0));display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+/* bell art */
+.bell-rings{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.ring{position:absolute;width:110px;height:110px;border:1px solid rgba(217,168,92,.35);border-radius:50%;animation:ringp 3s ease-out infinite}
+.ring.r2{animation-delay:1s}.ring.r3{animation-delay:2s}
+@keyframes ringp{from{transform:scale(1);opacity:.8}to{transform:scale(2.6);opacity:0}}
+/* bars art */
+.bars{display:flex;align-items:flex-end;gap:12px;height:170px}
+.bar{width:34px;border-radius:9px 9px 4px 4px;background:linear-gradient(180deg,var(--goldb),var(--gold));
+  box-shadow:0 10px 24px rgba(217,168,92,.25)}
+.b1{height:36%}.b2{height:58%}.b3{height:44%}.b4{height:78%}.b5{height:62%}.b6{height:92%}
+.in .bar{animation:grow 1s cubic-bezier(.2,.7,.3,1) backwards}
+.in .b2{animation-delay:.1s}.in .b3{animation-delay:.2s}.in .b4{animation-delay:.3s}.in .b5{animation-delay:.4s}.in .b6{animation-delay:.5s}
+@keyframes grow{from{transform:scaleY(0);transform-origin:bottom}to{transform:scaleY(1)}}
+/* vault art */
+.shield{filter:drop-shadow(0 16px 34px rgba(217,168,92,.22))}
+
+/* ---------- split ---------- */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px}
+@media(max-width:760px){.split{grid-template-columns:1fr}}
+.side{border:1px solid var(--hair);border-radius:22px;padding:28px;background:linear-gradient(165deg,var(--ink1),var(--ink0))}
+.side h4{font-family:'Fraunces',serif;font-size:21px;margin-bottom:6px}
+.side .tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.tag{font-size:12px;font-weight:600;border-radius:99px;padding:6px 13px;background:rgba(217,168,92,.10);
+  color:var(--goldb);border:1px solid rgba(217,168,92,.22)}
+
+/* ---------- privacy band ---------- */
+.privacy{border-block:1px solid var(--hair);background:
+  radial-gradient(700px 320px at 50% 0%,rgba(217,168,92,.07),transparent 70%)}
+.pv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+@media(max-width:760px){.pv-grid{grid-template-columns:1fr}}
+.pv-card{border:1px solid var(--hair);border-radius:20px;padding:24px;background:rgba(255,255,255,.02)}
+.pv-card h5{font-size:16px;margin:12px 0 6px;font-weight:600}
+.pv-card p{font-size:14px;color:var(--lo)}
+.pv-ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+  background:rgba(217,168,92,.12);border:1px solid rgba(217,168,92,.25)}
+
+/* ---------- kids strip ---------- */
+.kids{display:flex;align-items:center;gap:22px;border:1px solid var(--hair);border-radius:24px;padding:26px 30px;
+  background:linear-gradient(120deg,rgba(224,112,143,.07),rgba(91,141,239,.06),rgba(67,169,126,.07))}
+@media(max-width:700px){.kids{flex-direction:column;text-align:center}.kids .btn{margin:0 auto}}
+.kids .bfly{font-size:44px;animation:float 5s ease-in-out infinite}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--hair);padding:40px 0 60px;color:var(--lo);font-size:13.5px}
+.foot-in{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+@media(prefers-reduced-motion:reduce){
+  .hero::before,.orb,.ring,.in .bar,.kids .bfly{animation:none}
+  .reveal{opacity:1;transform:none;transition:none}
 }
-@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 </style>
 </head>
 <body>
-<div id="prog"></div>
-<div class="orb" id="orbA"></div><div class="orb" id="orbB"></div><div class="orb" id="orbC"></div>
-<div class="grain"></div>
 
-<nav id="nav"><div class="bar">
-  <a class="brand" href="#top"><span class="mono">AM</span> ALOK&nbsp;OS</a>
-  <a class="btn btn-gold" href="./app/">Login →</a>
+<nav><div class="wrap nav-in">
+  <a class="brand" href="/"><span class="dm">AM</span> ALOK&nbsp;OS</a>
+  <div class="nav-links">
+    <a href="#modules">Modules</a><a href="#features">Features</a><a href="#privacy">Privacy</a>
+  </div>
+  <a class="btn btn-gold" style="padding:11px 20px" href="/app/">Open app</a>
 </div></nav>
 
-<main id="top">
-
-<!-- ============ HERO ============ -->
 <header class="hero"><div class="wrap hero-grid">
   <div>
-    <div class="eyebrow w" style="animation-delay:.1s">✦ The Personal Operating System</div>
-    <h1><span class="w goldtext" style="animation-delay:.22s">Nothing</span>
-        <span class="w goldtext" style="animation-delay:.34s">slips.</span></h1>
-    <div class="not w" style="animation-delay:.5s">Not a <b>follow-up</b>. Not a <b>renewal</b>. Not a <b>birthday</b>.</div>
-    <div class="rule"></div>
-    <p class="sub w" style="animation-delay:.68s">Work, money, meetings, circulars, documents, health — everything a serious professional carries in their head, held in one quiet system that remembers for you.</p>
-    <div class="hero-cta w" style="animation-delay:.82s">
-      <a class="btn btn-gold" href="./app/">Login to ALOK OS →</a>
-      <a class="btn btn-ghost" href="#features">See what it holds</a>
+    <div class="eyebrow">Personal &amp; office operating system</div>
+    <h1>Your work. Your life.<br><span class="line2">One system.</span></h1>
+    <p class="hero-sub">ALOK OS brings tasks, meetings, follow-ups, money, family documents and reminders
+      into a single private app — synced to your own Google Drive, and alerting you even when the app is closed.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-gold" href="/app/">Open ALOK OS
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="btn btn-ghost" href="#privacy">How your data is protected</a>
     </div>
-    <div class="trust w" style="animation-delay:.96s">
-      <span><i>◆</i> <b>Your Google Drive</b> — never our servers</span>
-      <span><i>◆</i> <b>Works offline</b></span>
-      <span><i>◆</i> <b>Phone · Tablet · Laptop</b></span>
-    </div>
+    <div class="hero-note"><b>●</b>&nbsp; Free to use · installs on any phone or desktop · works offline</div>
   </div>
 
-  <div class="stage">
-    <div class="halo"></div><div class="ringy"></div>
-    <div class="phone"><div class="screen">
-      <div class="notch"></div>
-      <div class="m-date">TUESDAY · <span id="mDate">07-07-2026</span> &nbsp;<span style="color:#F3EFE6" id="mClock">09:41 AM</span></div>
-      <div class="m-greet">Good morning, Alok</div>
-
-      <div class="m-card"><div class="m-ringwrap">
-        <svg class="m-ring" width="50" height="50" viewBox="0 0 54 54">
-          <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#D9A85C"/><stop offset="1" stop-color="#F0C27B"/></linearGradient></defs>
-          <circle cx="27" cy="27" r="24" stroke="#232b37" stroke-width="4.5" fill="none"/>
-          <circle class="fg" cx="27" cy="27" r="24" stroke-width="4.5" fill="none" transform="rotate(-90 27 27)"/>
-        </svg>
-        <div><div class="m-lab">Today's Score</div><div class="m-num">66%</div>
-        <div class="tl-m">4 of 6 done today</div></div>
-      </div></div>
-
-      <div class="m-card">
-        <div class="m-lab" style="color:#D9A85C">✦ Your day</div>
-        <div class="tl">
-          <div class="tl-row past"><div class="tl-time">9:00 AM</div><div class="tl-dot on"></div>
-            <div><div class="tl-t">💊 Telma 40</div><div class="tl-m">taken ✓</div></div></div>
-          <div class="tl-now"><span id="mNow">NOW · 09:41 AM</span></div>
-          <div class="tl-row"><div class="tl-time">11:30 AM</div><div class="tl-dot"></div>
-            <div><div class="tl-t">🎥 Credit review call</div><div class="tl-m">R. Sharma · <b id="mCd1">in 1h 49m</b></div></div></div>
-          <div class="tl-row"><div class="tl-time">5:00 PM</div><div class="tl-dot"></div>
-            <div><div class="tl-t">💼 Submit branch report</div><div class="tl-m"><b id="mCd2">in 7h 19m</b></div></div></div>
-          <div class="tl-row"><div class="tl-time">—</div><div class="tl-dot"></div>
-            <div><div class="tl-t">↺ HDFC RM — rate confirm</div><div class="tl-m">Follow-up</div></div></div>
+  <div class="tableau">
+    <div class="phone">
+      <div class="ph-date">SATURDAY · 11-07-2026</div>
+      <div class="ph-greet">Good morning, Alok</div>
+      <div class="ph-card">
+        <div class="ph-lbl">TODAY'S FOCUS</div>
+        <div class="ph-big">3 due today</div>
+        <div class="ph-chiprow">
+          <span class="ph-chip red">1 overdue</span><span class="ph-chip">2 tasks</span><span class="ph-chip">1 meeting</span>
         </div>
       </div>
-
-      <div class="m-card">
-        <div class="m-lab" style="color:#D9A85C">🛡 Upcoming</div>
-        <div class="tl-row" style="padding:5px 0;animation:none;opacity:1">
-          <div style="flex:1"><div class="tl-t">Car insurance</div><div class="tl-m">14-07-2026</div></div>
-          <div style="font-size:8.6px;font-weight:700;color:#E0A448">in 7 days</div></div>
-        <div class="tl-row" style="padding:5px 0;animation:none;opacity:1">
-          <div style="flex:1"><div class="tl-t">🎂 Mom</div><div class="tl-m">20-07-2026</div></div>
-          <div style="font-size:8.6px;font-weight:700;color:#D9A85C">in 13 days</div></div>
+      <div class="ph-card">
+        <div class="ph-lbl">YOUR DAY</div>
+        <div class="ph-item"><span class="ph-dot"></span> Branch review call <span class="ph-time">11:00 AM</span></div>
+        <div class="ph-item"><span class="ph-dot" style="background:#8FA9C9"></span> Loan committee <span class="ph-time">2:30 PM</span></div>
+        <div class="ph-item"><span class="ph-dot" style="background:#5FB98E"></span> School fees <span class="ph-time">5:00 PM</span></div>
       </div>
-    </div></div>
+      <div class="ph-card">
+        <div class="ph-lbl">MONEY · JULY</div>
+        <div class="ph-item">Spend so far <span class="ph-time" style="color:var(--goldb)">₹ 9,840</span></div>
+        <div class="ph-item">Savings rate <span class="ph-time" style="color:var(--good)">96%</span></div>
+      </div>
+    </div>
+    <div class="orb o1"><svg viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.8"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M10.3 21a2 2 0 003.4 0"/></svg>Reminders when closed</div>
+    <div class="orb o2"><svg viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Encrypted vault</div>
+    <div class="orb o3"><svg viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>Family documents</div>
+    <div class="orb o4"><svg viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.8"><path d="M3 3v18h18"/><rect x="7" y="12" width="3" height="6" rx=".6"/><rect x="12" y="8" width="3" height="10" rx=".6"/><rect x="17" y="5" width="3" height="13" rx=".6"/></svg>Excel money dashboard</div>
   </div>
 </div></header>
 
-<!-- ============ MARQUEE ============ -->
-<div class="marquee"><div class="track" id="track">
-  <span>Timeline <i>✦</i> PDF Reader <i>✦</i> Follow-ups <i>✦</i> Circulars <i>✦</i> Renewals <i>✦</i> Meetings <i>✦</i> Money <i>✦</i> Excel Export <i>✦</i> Documents <i>✦</i> Links <i>✦</i> Car &amp; Fuel <i>✦</i> Health <i>✦</i> Habits <i>✦</i> Birthdays <i>✦</i> Sketch Pad <i>✦</i> Calendar <i>✦</i> Trash &amp; Restore <i>✦</i> Drive Sync <i>✦</i>&nbsp;</span>
+<div class="trust"><div class="wrap trust-in">
+  <div><div class="t-num">35+</div><div class="t-lbl">modules in one app</div></div>
+  <div><div class="t-num">0</div><div class="t-lbl">ads · trackers · analytics</div></div>
+  <div><div class="t-num">AES-256</div><div class="t-lbl">vault encryption</div></div>
+  <div><div class="t-num">Your Drive</div><div class="t-lbl">is the only cloud</div></div>
 </div></div>
 
-<!-- ============ FEATURES ============ -->
-<section id="features"><div class="wrap">
-  <div class="sec-head rv">
-    <div class="eyebrow">What it holds</div>
-    <h2>Not another to-do app.<br><span class="goldtext">A memory you can trust.</span></h2>
-    <p>Two dozen modules that speak to each other — one timeline, one search, one calendar over your entire life. Open Life or Work and every tool is a tap away.</p>
-  </div>
-  <div class="grid3">
-    <div class="feat rv"><div class="ico">◷</div><h3>Your day, as a timeline</h3>
-      <p>Meetings, tasks, doses and follow-ups on one vertical line — with a gold <b>NOW</b> marker that moves as the day does, and a live countdown on everything ahead.</p>
-      <span class="tagx">⏳ 2h 14m left</span></div>
-    <div class="feat rv"><div class="ico">🛡</div><h3>The renewal radar</h3>
-      <p>Car, life, health, PUC, FASTag, warranties — with policy numbers, premiums and the papers attached. Amber at 30 days, red at 7. It tells you before it hurts.</p>
-      <span class="tagx">Never expires unnoticed</span></div>
-    <div class="feat rv"><div class="ico">📑</div><h3>Circulars with memory</h3>
-      <p>Every circular by name, date and type. A revised version arrives? Add it — the older ones stay, date-sorted, readable and downloadable, forever.</p>
-      <span class="tagx">Full version history</span></div>
-    <div class="feat rv"><div class="ico">₹</div><h3>Money you can analyse</h3>
-      <p>Log in seconds, backdate old entries, attach receipts, set a monthly budget — then export the whole ledger to Excel when it's time to think properly.</p>
-      <span class="tagx">Excel export</span></div>
-    <div class="feat rv"><div class="ico">🚗</div><h3>The car, remembered</h3>
-      <p>Fuel entries compute your mileage and ₹/km on their own. Service history keeps every bill. The next service and the insurance both count down.</p>
-      <span class="tagx">15.2 km/l · ₹4.6/km</span></div>
-    <div class="feat rv"><div class="ico">🔒</div><h3>Yours, and only yours</h3>
-      <p>One tap of Google sign-in and everything syncs to a private folder in <b>your own Drive</b>. No servers of ours. No accounts to create.</p>
-      <span class="tagx">Private by architecture</span></div>
-    <div class="feat rv"><div class="ico">◱</div><h3>Read, don't download</h3>
-      <p>Open any PDF or scan right inside the app — pinch to zoom, scroll the pages, share to WhatsApp. Your circulars and policies stay readable even fully offline.</p>
-      <span class="tagx">Built-in document reader</span></div>
-    <div class="feat rv"><div class="ico">↺</div><h3>Nothing lost by accident</h3>
-      <p>Every delete asks first, then keeps the item in Trash for 30 days. Two devices out of step? It asks which copy to keep — and never quietly overwrites your work.</p>
-      <span class="tagx">Conflict-safe · 30-day restore</span></div>
+<section id="modules"><div class="wrap">
+  <div class="eyebrow reveal">Everything in one place</div>
+  <h2 class="reveal">One app replaces a dozen.</h2>
+  <p class="sub reveal">Life and work, side by side — each module simple on its own, powerful together.</p>
+  <div class="constel reveal">
+    <div class="mod"><div class="mod-ic">✓</div><div class="mod-nm">Tasks</div></div>
+    <div class="mod"><div class="mod-ic">🗒</div><div class="mod-nm">Notes &amp; voice</div></div>
+    <div class="mod"><div class="mod-ic">₹</div><div class="mod-nm">Money</div></div>
+    <div class="mod"><div class="mod-ic">💳</div><div class="mod-nm">Bills &amp; cards</div></div>
+    <div class="mod"><div class="mod-ic">🎥</div><div class="mod-nm">Meetings</div></div>
+    <div class="mod"><div class="mod-ic">↺</div><div class="mod-nm">Follow-ups</div></div>
+    <div class="mod"><div class="mod-ic">👪</div><div class="mod-nm">Family docs</div></div>
+    <div class="mod"><div class="mod-ic">🔐</div><div class="mod-nm">Password vault</div></div>
+    <div class="mod"><div class="mod-ic">🚗</div><div class="mod-nm">Car &amp; fuel</div></div>
+    <div class="mod"><div class="mod-ic">🛡</div><div class="mod-nm">Renewals</div></div>
+    <div class="mod"><div class="mod-ic">📄</div><div class="mod-nm">PDF reader</div></div>
+    <div class="mod"><div class="mod-ic">🎨</div><div class="mod-nm">Draw studio</div></div>
   </div>
 </div></section>
 
-<!-- ============ HOW ============ -->
-<section style="padding-top:0"><div class="wrap">
-  <div class="sec-head rv">
-    <div class="eyebrow">In sixty seconds</div>
-    <h2>Open it once.<br>It runs your life from there.</h2>
+<section id="features" style="padding-top:20px"><div class="wrap">
+  <div class="feat reveal">
+    <div>
+      <div class="eyebrow">Never miss what matters</div>
+      <h3>Reminders that reach you — even when the app is closed.</h3>
+      <p>Meetings, bills, renewals, medicines and birthdays arrive as real notifications, exactly on time.</p>
+      <ul>
+        <li>Works like a messaging app — closed or locked, it still rings</li>
+        <li>Only a time and a short title ever leave your device</li>
+        <li>A live timeline shows your whole day at a glance</li>
+      </ul>
+    </div>
+    <div class="art">
+      <div class="bell-rings"><span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span></div>
+      <svg class="shield" width="84" height="84" viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.5"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M10.3 21a2 2 0 003.4 0"/></svg>
+    </div>
   </div>
-  <div class="steps">
-    <div class="step rv"><div class="n">01</div><h4>Sign in with Google</h4>
-      <p>One tap. No password to invent, no account to create. Your data goes to your own Drive — encrypted in transit, invisible to us.</p></div>
-    <div class="step rv"><div class="n">02</div><h4>Install it like an app</h4>
-      <p>Phone, tablet, laptop — add to home screen and it opens full-screen, works offline, and sends you reminders like any native app.</p></div>
-    <div class="step rv"><div class="n">03</div><h4>Stop remembering</h4>
-      <p>Log a follow-up, a policy, a fuel bill. It counts down, it reminds, it files. You get to think about the work instead of the list.</p></div>
+
+  <div class="feat rev reveal">
+    <div>
+      <div class="eyebrow">Money, understood</div>
+      <h3>A finance dashboard a banker would approve of.</h3>
+      <p>Track income and spending in seconds — then export a live Excel workbook with month-wise and category-wise pivots, savings rate and in-cell charts. Edit a row in Excel and every sheet recalculates.</p>
+      <ul>
+        <li>Real formulas, not frozen numbers</li>
+        <li>₹-formatted, filter-ready transactions</li>
+        <li>Built entirely on your device</li>
+      </ul>
+    </div>
+    <div class="art"><div class="bars"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span><span class="bar b4"></span><span class="bar b5"></span><span class="bar b6"></span></div></div>
+  </div>
+
+  <div class="feat reveal">
+    <div>
+      <div class="eyebrow">The family's paperwork, safe</div>
+      <h3>Every Aadhaar, PAN and passport — one tap away, locked away.</h3>
+      <p>Give each family member their own space with a photo, keep their documents inside it, and put the whole area — plus your password vault — behind your PIN or fingerprint.</p>
+      <ul>
+        <li>Vault sealed with AES-256, keyed to your PIN</li>
+        <li>Share any document as-is to WhatsApp or email</li>
+        <li>Opens even password-protected PDFs</li>
+      </ul>
+    </div>
+    <div class="art">
+      <svg class="shield" width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><rect x="9" y="10" width="6" height="5" rx="1.2"/><path d="M10 10V8.6a2 2 0 014 0V10"/></svg>
+    </div>
   </div>
 </div></section>
 
-<!-- ============ PRIVACY BAND ============ -->
-<section style="padding-top:0"><div class="wrap rv">
-  <div class="band">
-    <div class="eyebrow" style="position:relative">Architecture, not a promise</div>
-    <h3>We couldn't read your data<br>even if we wanted to.</h3>
-    <p>ALOK OS has no back-end. Nothing you write ever reaches a server we control. It lives on your device and, if you sign in, in a hidden app folder inside your own Google Drive — the same place your phone backs up to. Each account sees only its own data; sign out and everything stays with you.</p>
+<section style="padding-top:10px"><div class="wrap">
+  <div class="eyebrow reveal">Two sides, one rhythm</div>
+  <h2 class="reveal">Made for both halves of your day.</h2>
+  <div class="split reveal">
+    <div class="side">
+      <h4>🏠 Life</h4>
+      <p class="sub" style="font-size:14.5px">Home, health, money and the people you look after.</p>
+      <div class="tags"><span class="tag">Shopping</span><span class="tag">Health &amp; medicines</span><span class="tag">Water</span><span class="tag">Birthdays</span><span class="tag">Car &amp; FASTag</span><span class="tag">Insurance renewals</span><span class="tag">Habits</span><span class="tag">Kids' drawing studio</span></div>
+    </div>
+    <div class="side">
+      <h4>💼 Work</h4>
+      <p class="sub" style="font-size:14.5px">The branch, the meetings, and everything you must chase.</p>
+      <div class="tags"><span class="tag">Office tasks</span><span class="tag">Daily follow-ups</span><span class="tag">Meeting planner</span><span class="tag">Circulars</span><span class="tag">Call notes</span><span class="tag">Quick notes</span><span class="tag">Office documents</span><span class="tag">Links</span></div>
+    </div>
   </div>
 </div></section>
 
-<!-- ============ STATEMENT ============ -->
-<section class="statement"><div class="wrap rv">
-  <div class="eyebrow">The AURUM design language</div>
-  <h2>Ink-dark calm.<br>Gold falls only on <span class="goldtext">what matters.</span></h2>
-  <div class="hairline"></div>
-</div></section>
-
-<!-- ============ STATS ============ -->
-<section style="padding-top:0"><div class="wrap">
-  <div class="stats">
-    <div class="stat rv"><h3><span class="cnt" data-n="28">0</span>+</h3><p>Modules</p></div>
-    <div class="stat rv"><h3><span class="cnt" data-n="100">0</span>%</h3><p>Works offline</p></div>
-    <div class="stat rv"><h3><span class="cnt" data-n="0">0</span></h3><p>Servers holding your data</p></div>
-    <div class="stat rv"><h3>∞</h3><p>Yours, forever</p></div>
+<section class="privacy" id="privacy"><div class="wrap">
+  <div class="eyebrow reveal">Private by architecture</div>
+  <h2 class="reveal">Your data never becomes our business.</h2>
+  <p class="sub reveal">There is no ALOK OS server holding your life. The app runs on your device and syncs to a hidden folder in <b style="color:var(--hi)">your own Google Drive</b> — a place only you can reach.</p>
+  <div class="pv-grid reveal">
+    <div class="pv-card">
+      <div class="pv-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <h5>Yours, on your Drive</h5><p>Everything lives on your device and in your own Drive's app folder. Sign in on any device and it's all there.</p>
+    </div>
+    <div class="pv-card">
+      <div class="pv-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.8"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+      <h5>Sealed vault</h5><p>Passwords are encrypted with AES-256 using a key derived from your PIN. Without the PIN, the stored data is unreadable — anywhere.</p>
+    </div>
+    <div class="pv-card">
+      <div class="pv-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#F0C27B" stroke-width="1.8"><path d="M13.7 3.9a2 2 0 00-3.4 0L2.4 17a2 2 0 001.7 3h15.8a2 2 0 001.7-3z"/><path d="M12 9v4M12 17h.01"/></svg></div>
+      <h5>Nothing collected</h5><p>No ads, no analytics, no trackers. The optional reminder service receives only a time and a short title — never your content. <a href="/privacy.html" class="gold">Read the policy →</a></p>
+    </div>
   </div>
 </div></section>
 
-<!-- ============ FINAL ============ -->
-<section class="final"><div class="wrap rv">
-  <div class="mono">AM</div>
-  <h2>Let it remember.<br><span class="goldtext">You get on with the work.</span></h2>
-  <p>Install once. Phone, tablet and laptop — even without internet.</p>
-  <a class="btn btn-gold" style="font-size:16px;padding:17px 38px" href="./app/">Login to ALOK OS →</a>
+<section style="padding-top:30px;padding-bottom:60px"><div class="wrap">
+  <div class="kids reveal">
+    <div class="bfly">🦋</div>
+    <div>
+      <h3 class="serif" style="font-size:22px;margin-bottom:4px">And when the day is done — the kids take over.</h3>
+      <p class="sub" style="font-size:14.5px">A full drawing studio with neon and glitter brushes, stickers, and a butterfly mirror that paints both sides at once.</p>
+    </div>
+    <a class="btn btn-ghost" style="margin-left:auto;flex-shrink:0" href="/app/">Try it</a>
+  </div>
 </div></section>
 
-</main>
-<footer><div class="wrap">
-  <span><b>BY ALOK MITTAL</b></span>
-  <span>alokmittal.net · ALOK OS · <a href="./privacy.html" style="color:var(--gold)">Privacy Policy</a></span>
+<section style="padding:0 0 90px"><div class="wrap" style="text-align:center">
+  <h2 class="reveal">Begin with today.</h2>
+  <p class="sub reveal" style="margin:0 auto 26px">Open the app, sign in with Google, and your system is ready — on this device and every next one.</p>
+  <a class="btn btn-gold reveal" style="font-size:16.5px;padding:16px 34px" href="/app/">Open ALOK OS</a>
+</div></section>
+
+<footer><div class="wrap foot-in">
+  <div class="brand"><span class="dm">AM</span> ALOK OS</div>
+  <div>Built by Alok Mittal · <a class="gold" href="/privacy.html">Privacy</a></div>
 </div></footer>
 
 <script>
-const nav=document.getElementById('nav'),prog=document.getElementById('prog');
-addEventListener('scroll',()=>{
-  nav.classList.toggle('scrolled',scrollY>24);
-  const h=document.documentElement.scrollHeight-innerHeight;
-  prog.style.width=(h>0?(scrollY/h*100):0)+'%';
-  document.getElementById('orbA').style.transform='translateY('+scrollY*.08+'px)';
-  document.getElementById('orbB').style.transform='translateY('+scrollY*-.06+'px)';
-},{passive:true});
-const tr=document.getElementById('track');tr.innerHTML+=tr.innerHTML;
-const io=new IntersectionObserver(es=>es.forEach(e=>{
-  if(!e.isIntersecting)return;e.target.classList.add('in');
-  e.target.querySelectorAll('.cnt').forEach(c=>{
-    if(c._done)return;c._done=1;const n=+c.dataset.n,st=performance.now();
-    (function f(t){const p=Math.min(1,(t-st)/1400),ease=1-Math.pow(1-p,3);
-      c.textContent=Math.round(n*ease);if(p<1)requestAnimationFrame(f)})(st)});
-  io.unobserve(e.target)}),{threshold:.16});
-document.querySelectorAll('.rv,.stat').forEach(el=>io.observe(el));
-/* phone mock: live clock, date, countdowns */
-const p2=n=>String(n).padStart(2,'0');
-const d0=new Date();
-document.getElementById('mDate').textContent=p2(d0.getDate())+'-'+p2(d0.getMonth()+1)+'-'+d0.getFullYear();
-function hm(d){let h=d.getHours();const ap=h>=12?'PM':'AM';h=h%12||12;return h+':'+p2(d.getMinutes())+' '+ap}
-function left(mins){const h=Math.floor(mins/60),m=mins%60;return 'in '+(h?h+'h ':'')+p2(m)+'m'}
-setInterval(()=>{
-  const d=new Date();
-  document.getElementById('mClock').textContent=hm(d);
-  document.getElementById('mNow').textContent='NOW · '+hm(d);
-  const mins=d.getHours()*60+d.getMinutes();
-  const to=(t)=>{let v=t-mins;if(v<=0)v+=1440;return v};
-  document.getElementById('mCd1').textContent=left(to(11*60+30));
-  document.getElementById('mCd2').textContent=left(to(17*60));
-},1000);
-document.querySelectorAll('.feat').forEach(f=>f.addEventListener('pointermove',e=>{
-  const r=f.getBoundingClientRect();f.style.setProperty('--mx',((e.clientX-r.left)/r.width*100)+'%')}));
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 </body>
 </html>
