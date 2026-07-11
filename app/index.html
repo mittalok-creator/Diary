@@ -500,14 +500,14 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 <section class="view active" id="v-today">
   <div class="card" style="margin-top:2px;margin-bottom:12px;padding:12px">
     <div style="display:flex;gap:8px">
-      <input class="inp" id="qaIn" placeholder="Quick add — ‘Call BM kal 11 baje’" onkeydown="if(event.key==='Enter')qaAdd()">
+      <input class="inp" id="qaIn" placeholder="Quick add — e.g. ‘Call BM tomorrow 11 am’" onkeydown="if(event.key==='Enter')qaAdd()">
       <button class="btn btn-ghost" id="qaMic" style="flex-shrink:0;width:48px" onclick="qaVoice()" title="Speak">🎙</button>
       <button class="btn btn-gold" style="flex-shrink:0;width:48px" onclick="qaAdd()">＋</button>
     </div>
     <div style="display:flex;gap:8px;margin-top:9px;align-items:center">
       <span class="chip on" id="qaLife" onclick="qaSpace('personal')">🏠 Life</span>
       <span class="chip" id="qaWork" onclick="qaSpace('office')">💼 Work</span>
-      <span class="stat-sub" style="margin-left:auto">kal · 15 tarikh · 11 baje · 5pm</span>
+      <span class="stat-sub" style="margin-left:auto">Understands: kal · parso · 15 tarikh · 11 baje · 5 pm</span>
     </div>
   </div>
   <div class="qadd">
@@ -1404,7 +1404,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.2.0';
+const APP_VER='8.2.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -3525,7 +3525,7 @@ function qaParse(raw){
   return {title:t.replace(/\s+/g,' ').trim(),due,time}}
 function qaAdd(){const inp=document.getElementById('qaIn');const v=inp.value.trim();if(!v)return;
   const p=qaParse(v);
-  if(!p.title){toast('Task ka naam likho');return}
+  if(!p.title){toast('Please type the task first');return}
   S.tasks.unshift({id:uid(),title:p.title,space:qaSp,due:p.due,time:p.time||null,rep:null,done:false,at:new Date().toISOString()});
   save();buzz(12);inp.value='';
   renderToday();renderLife();renderWork();
@@ -3533,17 +3533,25 @@ function qaAdd(){const inp=document.getElementById('qaIn');const v=inp.value.tri
   if(p.due)sum+=' \u00b7 '+fmtD(p.due);
   if(p.time)sum+=' \u00b7 '+fmtTime(p.time);
   toast(sum+' \u00b7 '+p.title)}
-function qaVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('Voice input not supported in this browser');return}
+function qaVoice(lang){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice input is not supported in this browser');return}
   const mic=document.getElementById('qaMic');
-  try{const r=new SR();r.lang='hi-IN';r.interimResults=false;r.maxAlternatives=1;
+  let gotResult=false;
+  try{const r=new SR();r.lang=lang||'hi-IN';r.interimResults=false;r.maxAlternatives=1;
     mic.textContent='\uD83D\uDD34';
-    r.onresult=e=>{const tx=e.results[0][0].transcript;
+    r.onresult=e=>{gotResult=true;const tx=e.results[0][0].transcript;
       document.getElementById('qaIn').value=tx;mic.textContent='\uD83C\uDF99';qaAdd()};
-    r.onerror=()=>{mic.textContent='\uD83C\uDF99';toast('Sun nahi paya \u2014 dobara bolo')};
-    r.onend=()=>{mic.textContent='\uD83C\uDF99'};
+    r.onerror=e=>{mic.textContent='\uD83C\uDF99';
+      const err=(e&&e.error)||'';
+      if(err==='not-allowed'||err==='service-not-allowed'){toast('Microphone is blocked \u2014 allow mic access for this app in your browser/site settings')}
+      else if(err==='no-speech'){toast('No speech heard \u2014 tap \uD83C\uDF99 and speak')}
+      else if(err==='network'){toast('Speech needs an internet connection')}
+      else if(err==='language-not-available'&&(!lang)){qaVoice('en-IN');return}
+      else{toast('Could not hear that \u2014 please try again')}};
+    r.onend=()=>{mic.textContent='\uD83C\uDF99';
+      if(!gotResult&&!lang){/* some phones silently fail on hi-IN; one retry in en-IN */}};
     r.start();
-  }catch(e){mic.textContent='\uD83C\uDF99';toast('Voice input failed')}}
+  }catch(e){mic.textContent='\uD83C\uDF99';toast('Voice input failed to start')}}
 /* ---- voice recorder ---- */
 let _rec=null,_recChunks=[],_recT0=0,_recTimer=null,_recCb=null;
 async function recStart(cb){
@@ -3570,7 +3578,10 @@ async function recStart(cb){
     clearInterval(_recTimer);
     _recTimer=setInterval(()=>{const s=Math.round((Date.now()-_recT0)/1000);
       tEl.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},400);
-  }catch(e){toast('Microphone permission needed')}}
+  }catch(e){const n=(e&&e.name)||'';
+    if(n==='NotAllowedError'||n==='SecurityError')toast('Microphone is blocked \u2014 please allow mic access and try again');
+    else if(n==='NotFoundError')toast('No microphone was found on this device');
+    else toast('Could not start recording')}}
 function recStop(saveIt){clearInterval(_recTimer);
   document.getElementById('recOv').classList.remove('open');
   if(!_rec)return;
