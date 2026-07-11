@@ -23,8 +23,8 @@
   --hi:#F3EFE6; --lo:#8A93A3;
   --good:#5FBF8A; --warn:#E0A448; --risk:#D96C6C;
   --r-s:12px; --r-m:20px; --r-l:28px;
-  --amb:radial-gradient(900px 620px at 50% -14%,#1b2331 0%,transparent 60%),
-        radial-gradient(760px 520px at 108% 104%,#16202c 0%,transparent 58%);
+  --amb:radial-gradient(900px 620px at 50% -14%,color-mix(in srgb,var(--gold) 9%,var(--ink0)) 0%,transparent 60%),
+        radial-gradient(760px 520px at 108% 104%,color-mix(in srgb,var(--gold) 6%,var(--ink0)) 0%,transparent 58%);
   --shadow:inset 0 1px 0 color-mix(in srgb,var(--gold) 7%,transparent), 0 1px 2px rgba(0,0,0,.32);
   --shadow-hi:inset 0 1px 0 color-mix(in srgb,var(--gold) 14%,transparent), 0 10px 32px rgba(0,0,0,.42);
   --glass:rgba(11,14,19,.74);
@@ -37,8 +37,8 @@ html[data-theme="light"]{
   --gold:#946420; --goldb:#B98A44; --plat:#7E6B42;
   --hi:#171C24; --lo:#5C636F;
   --good:#2F855A; --warn:#B7791F; --risk:#C0392B;
-  --amb:radial-gradient(900px 620px at 50% -14%,#FFFDF8 0%,transparent 62%),
-        radial-gradient(760px 520px at 0% 104%,#EFE8D9 0%,transparent 60%);
+  --amb:radial-gradient(900px 620px at 50% -14%,color-mix(in srgb,#FFFFFF 82%,var(--gold)) 0%,transparent 62%),
+        radial-gradient(760px 520px at 0% 104%,color-mix(in srgb,var(--ink0) 88%,var(--gold)) 0%,transparent 60%);
   --shadow:0 1px 2px rgba(23,28,36,.05), 0 8px 26px rgba(23,28,36,.055);
   --shadow-hi:0 2px 4px rgba(23,28,36,.07), 0 16px 40px rgba(23,28,36,.10);
   --glass:rgba(246,243,236,.78);
@@ -544,6 +544,15 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
   .view.active,.launcher .tile,#v-today::before,.em-ring{animation:none}
   .card::after{display:none}
 }
+/* ---- colour harmony: each accent is a full combination (bg + surfaces + ambience) ---- */
+html[data-accent="emerald"]{--ink0:#0A100D;--ink1:#111A15;--ink2:#16221C}
+html[data-accent="blue"]{--ink0:#0A0E16;--ink1:#111827;--ink2:#162031}
+html[data-accent="rose"]{--ink0:#120D10;--ink1:#1C1418;--ink2:#241A20}
+html[data-accent="violet"]{--ink0:#0E0C14;--ink1:#16131F;--ink2:#1D1929}
+html[data-theme="light"][data-accent="emerald"]{--ink0:#F1F5F0;--ink1:#FFFFFF;--ink2:#E9F0E8;--hair:#DCE5DA}
+html[data-theme="light"][data-accent="blue"]{--ink0:#F1F3F8;--ink1:#FFFFFF;--ink2:#E9EDF5;--hair:#DBE1EC}
+html[data-theme="light"][data-accent="rose"]{--ink0:#F8F1F2;--ink1:#FFFFFF;--ink2:#F2E7E9;--hair:#EADCDF}
+html[data-theme="light"][data-accent="violet"]{--ink0:#F4F2F8;--ink1:#FFFFFF;--ink2:#ECE8F4;--hair:#E0DAEC}
 </style>
 </head>
 <body>
@@ -1470,7 +1479,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.3.0';
+const APP_VER='8.3.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4463,7 +4472,8 @@ function applyTheme(){const m=S.profile.theme||'dark';
   if(acc==='gold')delete document.documentElement.dataset.accent;
   else document.documentElement.dataset.accent=acc;
   const mt=document.querySelector('meta[name="theme-color"]');
-  if(mt)mt.setAttribute('content',eff==='dark'?'#0B0E13':'#F6F3EC')}
+  if(mt)setTimeout(function(){var bg=getComputedStyle(document.documentElement).getPropertyValue('--ink0').trim();
+    mt.setAttribute('content',bg||(eff==='dark'?'#0B0E13':'#F6F3EC'))},40)}
 function renderAll(){renderHeader();renderToday();renderLife();renderWork();renderSettings()}
 (function viewportFix(){
   const set=()=>{const h=(window.visualViewport&&window.visualViewport.height)||window.innerHeight;
