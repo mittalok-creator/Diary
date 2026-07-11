@@ -1192,6 +1192,10 @@ html[data-theme="light"][data-accent="copper"]{--ink0:#F8F2ED;--ink1:#FFFFFF;--i
       <div><div class="set-name">👪 Lock Family Documents</div><div class="set-sub">Ask for PIN to open</div></div>
       <button class="btn btn-ghost btn-sm" id="lkFamily" onclick="toggleModLock('family')">—</button>
     </div>
+    <div class="set-row">
+      <div><div class="set-name">↗ Share diagnostics</div><div class="set-sub">Check if this device can share files</div></div>
+      <button class="btn btn-ghost btn-sm" onclick="shareSelfTest()">Run</button>
+    </div>
   </div>
 
   <div class="eyebrow">Dashboard cards</div>
@@ -1502,7 +1506,7 @@ html[data-theme="light"][data-accent="copper"]{--ink0:#F8F2ED;--ink1:#FFFFFF;--i
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.6.0';
+const APP_VER='8.6.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -3790,6 +3794,43 @@ function weeklyReview(){
   if(habBest)h+=row('\ud83d\udd25','Best habit streak: <b>'+habBest+' day'+(habBest===1?'':'s')+'</b>');
   h+='<div class="stat-sub" style="margin-top:12px;text-align:center">Generated on-device \u00b7 nothing leaves your phone</div>';
   showSheet('Your week at a glance',h);
+}
+
+async function shareSelfTest(){
+  const r=[];
+  const yn=v=>v?'<b style="color:var(--good)">yes</b>':'<b style="color:var(--risk)">no</b>';
+  const hasShare=!!navigator.share, hasCan=!!navigator.canShare;
+  r.push(['Share API',hasShare]);
+  r.push(['canShare API',hasCan]);
+  let f_txt=null,f_doc=null,f_zip=null;
+  try{
+    const bytes=new TextEncoder().encode('ALOK OS share test');
+    f_txt=new File([bytes],'alokos-test.txt',{type:'text/plain'});
+    f_doc=new File([bytes],'alokos-test.docx',{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    f_zip=new File([zipWrap('alokos-test.txt',bytes)],'alokos-test.zip',{type:'application/zip'});
+  }catch(e){}
+  if(hasCan){
+    r.push(['can share text file',f_txt&&navigator.canShare({files:[f_txt]})]);
+    r.push(['can share Word file',f_doc&&navigator.canShare({files:[f_doc]})]);
+    r.push(['can share ZIP file',f_zip&&navigator.canShare({files:[f_zip]})]);
+  }
+  const code='S'+(hasShare?1:0)+'C'+(hasCan?1:0)
+    +'T'+((hasCan&&f_txt&&navigator.canShare({files:[f_txt]}))?1:0)
+    +'D'+((hasCan&&f_doc&&navigator.canShare({files:[f_doc]}))?1:0)
+    +'Z'+((hasCan&&f_zip&&navigator.canShare({files:[f_zip]}))?1:0)
+    +' v'+APP_VER+' '+(navigator.userAgent.match(/Chrome\/[\d.]+/)||['?'])[0];
+  window._shareTestZip=f_zip;
+  const rows=r.map(x=>'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--hair);font-size:14px"><span>'+x[0]+'</span>'+yn(x[1])+'</div>').join('')
+    +'<div style="margin-top:12px;padding:10px;border:1px dashed var(--hair);border-radius:10px;font-family:ui-monospace,monospace;font-size:12.5px;text-align:center" id="stCode">'+esc(code)+'</div>'
+    +'<button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="navigator.clipboard.writeText(document.getElementById(\'stCode\').textContent).then(function(){toast(\'Copied \\u2014 send this to the developer\')})">\u29c9 Copy report</button>'
+    +'<button class="btn btn-gold" style="width:100%;margin-top:9px" onclick="shareTestNow()">Try a real share now</button>';
+  showSheet('Share diagnostics',rows);
+}
+async function shareTestNow(){
+  const f=window._shareTestZip;
+  if(!navigator.share){toast('No Share API in this browser');return}
+  try{await navigator.share({files:[f],title:'alokos-test.zip'});toast('\u2713 Share sheet opened \u2014 sharing works!')}
+  catch(e){toast('Share failed: '+((e&&e.name)||'unknown')+' \u2014 send me this exact message')}
 }
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
