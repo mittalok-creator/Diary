@@ -661,6 +661,16 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 .cmdk-it .k{margin-left:auto;font-size:11px;color:var(--lo);letter-spacing:.06em}
 .cmdk-it.sel{background:color-mix(in srgb,var(--gold) 12%,transparent)}
 .cmdk-foot{display:flex;gap:18px;padding:10px 18px;border-top:1px solid var(--hair);font-size:11.5px;color:var(--lo)}
+/* ---- desktop drag & drop uploads ---- */
+.ddveil{position:fixed;inset:0;z-index:360;display:none;align-items:center;justify-content:center;pointer-events:none;
+  background:color-mix(in srgb,var(--ink0) 55%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.ddveil.on{display:flex}
+.ddbox{border:2px dashed color-mix(in srgb,var(--gold) 65%,transparent);border-radius:24px;padding:34px 48px;text-align:center;
+  color:var(--gold);font-weight:600;font-size:16px;background:color-mix(in srgb,var(--ink1) 80%,transparent);
+  box-shadow:0 30px 80px rgba(0,0,0,.4);animation:ddp 1.6s ease-in-out infinite}
+@keyframes ddp{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
+.dd-target{outline:2px dashed color-mix(in srgb,var(--gold) 70%,transparent) !important;outline-offset:3px;
+  animation:ddp 1.6s ease-in-out infinite}
 </style>
 </head>
 <body>
@@ -1433,6 +1443,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
     <div class="cmdk-foot"><span>↑↓ navigate</span><span>↵ open</span><span>esc close</span></div>
   </div>
 </div>
+<div id="ddVeil" class="ddveil"><div class="ddbox"><div style="font-size:34px;margin-bottom:8px">⤓</div><div id="ddMsg">Drop to attach</div></div></div>
 <div id="renameOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
     <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">Rename</h2>
     <input class="inp" id="renameIn" placeholder="New name" onkeydown="if(event.key==='Enter')renameSave()">
@@ -1596,7 +1607,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.2.0';
+const APP_VER='9.3.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2992,6 +3003,10 @@ function pickFiles(cb,opt){opt=opt||{};const i=document.createElement('input');i
     i.remove();
     if(out.length)toast('📎 '+out.length+' file attached');
     cb(out)};
+  if(window._droppedFiles&&window._droppedFiles.length){
+    const dt=new DataTransfer();
+    (i.multiple?window._droppedFiles:[window._droppedFiles[0]]).forEach(f=>dt.items.add(f));
+    window._droppedFiles=null;i.files=dt.files;i.onchange();return}
   i.click()}
 function loadThumbs(){document.querySelectorAll('img.thumb[data-fid]').forEach(async im=>{
   if(im.dataset.done)return;im.dataset.done='1';
@@ -3992,6 +4007,37 @@ document.addEventListener('DOMContentLoaded',function(){
   const i=document.getElementById('cmdkIn');
   if(i)i.addEventListener('input',function(){cmdkFilter(this.value)})});
 
+/* ============ DRAG & DROP UPLOADS (desktop) ============ */
+let _ddN=0;
+const DD_SEL='[onclick*="pickFiles"],[onclick*="cropPhotoFor"],[onclick*="photoIn"],[onclick*="restoreIn"]';
+function _ddTargets(){return Array.from(document.querySelectorAll(DD_SEL)).filter(el=>el.offsetParent!==null)}
+function _ddShow(on){const v=document.getElementById('ddVeil');if(!v)return;
+  v.classList.toggle('on',on);
+  _ddTargets().forEach(el=>el.classList.toggle('dd-target',on));
+  if(on){const n=_ddTargets().length;
+    document.getElementById('ddMsg').textContent=n===0?'No upload spot on this screen':(n===1?'Drop anywhere to attach':'Drop on a highlighted button')}}
+window.addEventListener('dragover',e=>{
+  if(e.dataTransfer&&Array.from(e.dataTransfer.types).includes('Files'))e.preventDefault()});
+window.addEventListener('dragenter',e=>{
+  if(!e.dataTransfer||!Array.from(e.dataTransfer.types).includes('Files'))return;
+  _ddN++;if(_ddN===1)_ddShow(true)});
+window.addEventListener('dragleave',e=>{_ddN=Math.max(0,_ddN-1);if(_ddN===0)_ddShow(false)});
+window.addEventListener('drop',e=>{
+  if(!e.dataTransfer||!e.dataTransfer.files||!e.dataTransfer.files.length){_ddN=0;_ddShow(false);return}
+  e.preventDefault();_ddN=0;_ddShow(false);
+  const files=Array.from(e.dataTransfer.files);
+  let btn=e.target&&e.target.closest?e.target.closest(DD_SEL):null;
+  if(!btn){const ts=_ddTargets();if(ts.length===1)btn=ts[0];
+    else{toast(ts.length?'Drop it on one of the highlighted buttons':'Open a module with attachments first');return}}
+  const oc=btn.getAttribute('onclick')||'';
+  if(oc.indexOf('photoIn')>=0||oc.indexOf('restoreIn')>=0){
+    const id=oc.indexOf('photoIn')>=0?'photoIn':'restoreIn';
+    const inp=document.getElementById(id);if(!inp)return;
+    const dt=new DataTransfer();dt.items.add(files[0]);inp.files=dt.files;
+    inp.dispatchEvent(new Event('change',{bubbles:true}));return}
+  window._droppedFiles=files;btn.click();
+});
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
@@ -4730,6 +4776,11 @@ let _cropTarget=null;
 function cropPhotoFor(cb){_cropTarget=cb;const inp=document.createElement('input');inp.type='file';inp.accept='image/*';
   inp.onchange=()=>{const f=inp.files[0];if(!f){_cropTarget=null;return}const rd=new FileReader();
     rd.onload=e=>{const im=new Image();im.onload=()=>{crop.img=im;openCrop()};im.src=e.target.result};rd.readAsDataURL(f)};
+  if(window._droppedFiles&&window._droppedFiles.length){
+    const img=window._droppedFiles.find(f=>(f.type||'').indexOf('image/')===0);
+    window._droppedFiles=null;
+    if(!img){toast('Drop an image file for photos');_cropTarget=null;return}
+    const dt=new DataTransfer();dt.items.add(img);inp.files=dt.files;inp.onchange();return}
   inp.click()}
 function setPhoto(inp){const f=inp.files[0];if(!f)return;const rd=new FileReader();
   rd.onload=e=>{const im=new Image();im.onload=()=>{crop.img=im;openCrop()};im.src=e.target.result};
