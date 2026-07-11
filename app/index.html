@@ -469,6 +469,15 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 .acc-dot{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:transform .15s,border-color .2s}
 .acc-dot.on{border-color:var(--hi);transform:scale(1.12)}
 .acc-dot:active{transform:scale(.9)}
+.zapdone{animation:zapd .24s ease}
+@keyframes zapd{0%{background:transparent}45%{background:color-mix(in srgb,var(--gold) 20%,transparent);transform:scale(1.012)}100%{transform:scale(1)}}
+.zapdone .row-title{text-decoration:line-through;opacity:.5;transition:opacity .2s}
+.tile:active{transform:scale(.955)}
+.chip:active{transform:scale(.94)}
+.sync-pill{height:32px;padding:0 11px;border-radius:999px;border:1px solid var(--hair);background:var(--ink1);color:var(--lo);font-size:11.5px;font-weight:600;display:none;align-items:center;gap:4px;cursor:pointer;flex-shrink:0;font-family:inherit}
+.rec-dot{width:16px;height:16px;border-radius:50%;background:#E0524A;margin:6px auto 0;animation:recp 1.1s ease infinite}
+@keyframes recp{0%,100%{box-shadow:0 0 0 0 rgba(224,82,74,.5)}50%{box-shadow:0 0 0 12px rgba(224,82,74,0)}}
+.pv-audio{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 16px;color:var(--hi)}
 </style>
 </head>
 <body>
@@ -479,6 +488,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
     <div class="h-greet" id="hGreet"></div>
   </div>
   <div style="display:flex;align-items:center;gap:12px">
+    <button class="sync-pill" id="syncPill" onclick="go('settings')" title="Sync status"></button>
     <button class="hdr-search" onclick="go('search')" aria-label="Search" title="Search everything">🔍</button>
     <div class="avatar" id="hAvatar" onclick="go('settings')">A</div>
   </div>
@@ -488,6 +498,18 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 
 <!-- ================= TODAY ================= -->
 <section class="view active" id="v-today">
+  <div class="card" style="margin-top:2px;margin-bottom:12px;padding:12px">
+    <div style="display:flex;gap:8px">
+      <input class="inp" id="qaIn" placeholder="Quick add — ‘Call BM kal 11 baje’" onkeydown="if(event.key==='Enter')qaAdd()">
+      <button class="btn btn-ghost" id="qaMic" style="flex-shrink:0;width:48px" onclick="qaVoice()" title="Speak">🎙</button>
+      <button class="btn btn-gold" style="flex-shrink:0;width:48px" onclick="qaAdd()">＋</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:9px;align-items:center">
+      <span class="chip on" id="qaLife" onclick="qaSpace('personal')">🏠 Life</span>
+      <span class="chip" id="qaWork" onclick="qaSpace('office')">💼 Work</span>
+      <span class="stat-sub" style="margin-left:auto">kal · 15 tarikh · 11 baje · 5pm</span>
+    </div>
+  </div>
   <div class="qadd">
     <input class="inp" id="dashQ" placeholder="Search tasks, notes, money, circulars…"
       onfocus="openSearch()" onkeydown="if(event.key==='Enter')openSearch()">
@@ -609,7 +631,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
   </div>
 
   <div class="ltab" id="lt-notes" style="display:none">
-    <button class="btn btn-gold" style="width:100%" onclick="noteNew('personal')">✎ New note</button>
+    <div style="display:flex;gap:8px"><button class="btn btn-gold" style="flex:1" onclick="noteNew('personal')">✎ New note</button><button class="btn btn-ghost" style="width:52px" onclick="quickVoiceNote('personal')" title="Voice note">🎙</button></div>
     <div id="nList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
@@ -1211,6 +1233,14 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
     <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="document.getElementById('vaultOv').classList.remove('open')">Cancel</button>
   </div></div>
 
+<div id="recOv" class="cfov"><div class="cfbox" style="max-width:320px;text-align:center">
+    <div class="rec-dot"></div>
+    <h2 style="font-family:'Fraunces',serif;font-size:20px;margin:10px 0 4px">Recording…</h2>
+    <div id="recTime" style="font-size:26px;font-family:ui-monospace,monospace;margin-bottom:16px">0:00</div>
+    <button class="btn btn-gold" style="width:100%" onclick="recStop(true)">✓ Stop &amp; save</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="recStop(false)">Cancel</button>
+  </div></div>
+
 <div id="renameOv" class="cfov"><div class="cfbox" style="text-align:left;max-width:360px">
     <h2 style="font-family:'Fraunces',serif;font-size:20px;margin-bottom:14px">Rename</h2>
     <input class="inp" id="renameIn" placeholder="New name" onkeydown="if(event.key==='Enter')renameSave()">
@@ -1284,6 +1314,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
     <button class="ne-t" onclick="neCmd('italic')" title="Italic"><i>I</i></button>
     <button class="ne-t" onclick="neCmd('underline')" title="Underline"><u>U</u></button>
     <button class="ne-t" onclick="neCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
+    <button class="ne-t" onclick="neVoice()" title="Voice note">🎙</button>
     <span class="ne-div"></span>
     <button class="ne-t" onclick="neSize('5')" title="Large">Aᴺ</button>
     <button class="ne-t" onclick="neSize('3')" title="Normal">A</button>
@@ -1373,7 +1404,7 @@ html[data-theme="light"][data-accent="violet"]{--gold:#7455C4;--goldb:#9A7BE0;--
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='8.1.0';
+const APP_VER='8.2.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -1908,12 +1939,16 @@ function addTask(space,inputId,title,due,time){const inp=inputId?document.getEle
     if(tm&&!due)due=today(); if(dEl)dEl.value=''; if(tEl)tEl.value='';}
   S.tasks.unshift({id:uid(),title:t,space,due:due||null,time:tm,rep:rp||null,done:false,at:new Date().toISOString()});
   if(inp)inp.value='';save();renderLife();renderWork();toast('Task added'+(tm?' · '+fmtTime(tm):''));}
-function taskRow(x){return '<div class="row '+(x.done?'done':'')+'">'+
+function taskRow(x){return '<div class="row '+(x.done?'done':'')+'" id="trow-'+x.id+'">'+
   '<div class="chk '+(x.done?'on':'')+'" onclick="tglTask(\''+x.id+'\')"></div>'+
   '<div class="row-body" onclick="taskEdit(\''+x.id+'\')" style="cursor:pointer"><div class="row-title">'+esc(x.title)+'</div>'+
   ((x.due||x.time||x.rep)?'<div class="row-meta">'+dueLabel(x.due)+(x.time?(x.due?' · ':'')+fmtTime(x.time):'')+(x.rep?' · <span style="color:var(--gold)">🔁 '+REP_LBL[x.rep]+'</span>':'')+'</div>':'')+'</div>'+
   '<button class="ed" title="Edit" onclick="taskEdit(\''+x.id+'\')">✎</button><button class="del" onclick="delTask(\''+x.id+'\')">✕</button></div>'}
-function tglTask(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.done;
+function tglTask(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;
+  const el=document.getElementById('trow-'+id);
+  if(!x.done&&el){buzz(14);el.classList.add('zapdone');setTimeout(function(){_tglCore(id)},230);return}
+  _tglCore(id)}
+function _tglCore(id){const x=S.tasks.find(t=>t.id===id);if(!x)return;x.done=!x.done;
   if(x.done&&x.rep&&x.due){const nd=nextDue(x.due,x.rep);
     if(nd){S.tasks.unshift({id:uid(),title:x.title,space:x.space,due:nd,time:x.time||null,rep:x.rep,done:false,at:new Date().toISOString()});
       x.rep=null;save();renderLife();renderWork();toast('✓ Done — next one on '+fmtD(nd));return}}
@@ -2752,6 +2787,10 @@ async function openAtt(id,type,name){
   if(type==='file'||(type!=='img'&&type!=='pdf')){
     stage.innerHTML=fileOpenCard(pv.name,d);
     return}
+  if(type==='audio'){
+    stage.innerHTML='<div class="pv-audio"><div style="font-size:46px;margin-bottom:16px">\uD83C\uDF99</div>'
+      +'<audio controls autoplay style="width:min(420px,86vw)" src="'+d+'"></audio></div>';
+    return}
   if(type==='img'){
     const img=document.createElement('img');img.className='pv-img';img.src=d;img.alt='';
     img.onload=()=>{pv.base=img.naturalWidth;pvApplyZoom()};
@@ -3054,7 +3093,7 @@ function pdfPwCancel(){document.getElementById('pdfPwOv').classList.remove('open
   const cb=_pdfPwCb;_pdfPwCb=null;if(cb)cb(null)}
 /* ============ FILE ATTACHMENT HELPERS ============ */
 function fileExt(name){const m=/\.([a-z0-9]+)$/i.exec(name||'');return m?m[1].toLowerCase():''}
-function fileIcon(a){
+function fileIcon(a){if(a&&(a.type==='audio'||((a.mime||'').indexOf('audio/')===0)))return '\uD83C\uDF99';
   if(a.type==='pdf')return '\ud83d\udcc4';
   if(a.type==='img')return '\ud83d\uddbc\ufe0f';
   const e=fileExt(a.fname||a.name);
@@ -3439,6 +3478,109 @@ function renderVault(){const el=document.getElementById('vaultList');if(!el)retu
   el.innerHTML=list.length?list.map(vaultCard).join('')
     :'<div class="empty"><div class="em-ring">\U0001F510</div>No logins saved yet.<br>Keep bank logins, card PINs, wifi and app passwords here \u2014 safe behind your lock.</div>';
 }
+/* ============ FEEL PACK + QUICK ADD + VOICE NOTES ============ */
+function buzz(ms){try{if(navigator.vibrate)navigator.vibrate(ms||12)}catch(e){}}
+function updateSyncPill(){const el=document.getElementById('syncPill');if(!el)return;
+  if(!S.profile||!S.profile.google){el.style.display='none';return}
+  el.style.display='flex';
+  if(!navigator.onLine){el.textContent='\u26a0 offline';el.style.color='var(--warn)';return}
+  el.style.color='var(--lo)';
+  const msg=(typeof syncMsg==='string'?syncMsg:'')||'';
+  if(/ing/i.test(msg)&&!/synced/i.test(msg)){el.textContent='\u27f3 syncing';return}
+  if(S.lastSync){const m=Math.floor((Date.now()-S.lastSync)/60000);
+    el.textContent='\u2713 '+(m<1?'now':(m<60?m+'m':Math.floor(m/60)+'h'))}
+  else el.textContent='\u27f3'}
+window.addEventListener('online',()=>updateSyncPill());
+window.addEventListener('offline',()=>updateSyncPill());
+setInterval(()=>updateSyncPill(),60000);
+/* ---- quick add ---- */
+let qaSp='personal';
+function qaSpace(sp){qaSp=sp;
+  document.getElementById('qaLife').classList.toggle('on',sp==='personal');
+  document.getElementById('qaWork').classList.toggle('on',sp==='office')}
+function qaParse(raw){
+  let t=' '+raw+' ';let due=null,time=null;
+  const base=new Date();base.setHours(12,0,0,0);
+  const fmt=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  const setD=off=>{const d=new Date(base);d.setDate(d.getDate()+off);due=fmt(d)};
+  if(/\b(aaj|today)\b/i.test(t)){setD(0);t=t.replace(/\b(aaj|today)\b/ig,' ')}
+  if(/\b(kal|tomorrow|tmrw)\b/i.test(t)){setD(1);t=t.replace(/\b(kal|tomorrow|tmrw)\b/ig,' ')}
+  if(/\bparso\b/i.test(t)){setD(2);t=t.replace(/\bparso\b/ig,' ')}
+  if(!due){const dm=/\b(\d{1,2})\s*(?:tarikh|tareekh|ko)\b/i.exec(t);
+    if(dm){const day=+dm[1];if(day>=1&&day<=31){const d=new Date(base);d.setDate(day);
+      if(d<base){d.setMonth(d.getMonth()+1)}
+      due=fmt(d);t=t.replace(dm[0],' ')}}}
+  const morn=/\b(subah|morning)\b/i.test(t);
+  const eve=/\b(shaam|sham|raat|evening|night|dopahar|afternoon)\b/i.test(t);
+  let m=/\b(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)\b/i.exec(t);
+  if(m){let h=(+m[1])%12;if(/pm/i.test(m[3]))h+=12;
+    time=String(h).padStart(2,'0')+':'+(m[2]||'00');t=t.replace(m[0],' ')}
+  else{m=/\b(\d{1,2})(?:[:.](\d{2}))?\s*baje\b/i.exec(t);
+    if(m){let h=+m[1];if(h<12&&!morn&&(eve||h<8))h+=12;if(h===24)h=12;
+      time=String(h).padStart(2,'0')+':'+(m[2]||'00');t=t.replace(m[0],' ')}}
+  t=t.replace(/\b(subah|morning|shaam|sham|raat|evening|night|dopahar|afternoon|at)\b/ig,' ');
+  if(time&&!due){const n=new Date();
+    const cur=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+    setD(time<=cur?1:0)}
+  return {title:t.replace(/\s+/g,' ').trim(),due,time}}
+function qaAdd(){const inp=document.getElementById('qaIn');const v=inp.value.trim();if(!v)return;
+  const p=qaParse(v);
+  if(!p.title){toast('Task ka naam likho');return}
+  S.tasks.unshift({id:uid(),title:p.title,space:qaSp,due:p.due,time:p.time||null,rep:null,done:false,at:new Date().toISOString()});
+  save();buzz(12);inp.value='';
+  renderToday();renderLife();renderWork();
+  let sum='\u2713 Added';
+  if(p.due)sum+=' \u00b7 '+fmtD(p.due);
+  if(p.time)sum+=' \u00b7 '+fmtTime(p.time);
+  toast(sum+' \u00b7 '+p.title)}
+function qaVoice(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast('Voice input not supported in this browser');return}
+  const mic=document.getElementById('qaMic');
+  try{const r=new SR();r.lang='hi-IN';r.interimResults=false;r.maxAlternatives=1;
+    mic.textContent='\uD83D\uDD34';
+    r.onresult=e=>{const tx=e.results[0][0].transcript;
+      document.getElementById('qaIn').value=tx;mic.textContent='\uD83C\uDF99';qaAdd()};
+    r.onerror=()=>{mic.textContent='\uD83C\uDF99';toast('Sun nahi paya \u2014 dobara bolo')};
+    r.onend=()=>{mic.textContent='\uD83C\uDF99'};
+    r.start();
+  }catch(e){mic.textContent='\uD83C\uDF99';toast('Voice input failed')}}
+/* ---- voice recorder ---- */
+let _rec=null,_recChunks=[],_recT0=0,_recTimer=null,_recCb=null;
+async function recStart(cb){
+  if(!navigator.mediaDevices||!window.MediaRecorder){toast('Recording not supported here');return}
+  try{const st=await navigator.mediaDevices.getUserMedia({audio:true});
+    _recCb=cb;_recChunks=[];
+    _rec=new MediaRecorder(st);
+    _rec.ondataavailable=e=>{if(e.data&&e.data.size)_recChunks.push(e.data)};
+    _rec.onstop=()=>{st.getTracks().forEach(t=>t.stop());
+      if(!_recCb){_rec=null;return}
+      const blob=new Blob(_recChunks,{type:_rec.mimeType||'audio/webm'});_rec=null;
+      const rd=new FileReader();
+      rd.onload=async e=>{
+        const id=uid();const ok=await fileSave(id,e.target.result);
+        if(ok===false){toast('Could not save recording');_recCb=null;return}
+        const secs=Math.max(1,Math.round((Date.now()-_recT0)/1000));
+        const att={id,name:'Voice note \u00b7 '+Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0'),
+          type:'audio',mime:blob.type||'audio/webm',fname:'voice-'+Date.now()+'.webm'};
+        const cb=_recCb;_recCb=null;if(cb)cb(att)};
+      rd.readAsDataURL(blob)};
+    _rec.start();_recT0=Date.now();
+    document.getElementById('recOv').classList.add('open');
+    const tEl=document.getElementById('recTime');tEl.textContent='0:00';
+    clearInterval(_recTimer);
+    _recTimer=setInterval(()=>{const s=Math.round((Date.now()-_recT0)/1000);
+      tEl.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0')},400);
+  }catch(e){toast('Microphone permission needed')}}
+function recStop(saveIt){clearInterval(_recTimer);
+  document.getElementById('recOv').classList.remove('open');
+  if(!_rec)return;
+  if(!saveIt)_recCb=null;
+  try{_rec.stop()}catch(e){}}
+function neVoice(){recStart(att=>{neCtx.att.push(att);drawNePend();buzz(10);toast('\uD83C\uDF99 Voice note attached')})}
+function quickVoiceNote(space){recStart(att=>{
+  S.notes.unshift({id:uid(),title:att.name,html:'',body:'',space:space||'personal',pinned:false,att:[att],at:new Date().toISOString()});
+  save();buzz(10);renderLife();renderWork();toast('\uD83C\uDF99 Saved to Notes')})}
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
@@ -3971,7 +4113,7 @@ async function switchAccount(email){
   S=blank();S.owner=email;S.gAuth=keepA;S.profile.google=g;S.loginSkipped=keepSkip;
   S.updatedAt=0;S.baseRev=0; /* fresh baseline: this account's cloud data loads cleanly */
   save(true);applyTheme();renderAll()}
-function setSyncStatus(t){syncMsg=t;const el=document.getElementById('syncStatus');if(el)el.textContent=t}
+function setSyncStatus(t){syncMsg=t;const el=document.getElementById('syncStatus');if(el)el.textContent=t;updateSyncPill()}
 function cloudPushSoon(){if(!S.profile.google)return;clearTimeout(pushT);pushT=setTimeout(()=>cloudSync(),20000)}
 async function driveErr(r){let t='';try{t=await r.text()}catch(e){}
   if(r.status===403&&t.indexOf('accessNotConfigured')>-1)throw new Error('DRIVE_OFF');
@@ -4263,6 +4405,10 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   if(!S.deviceId){S.deviceId=uid();save(true)}
   if(S.water.date!==today())S.water={date:today(),count:0};
   applyTheme();renderAll();initCrop();initViewer();initSketch();initSwipe();
+  updateSyncPill();
+  try{const sv=localStorage.getItem('alokos-seen-ver');
+    if(sv&&sv!==APP_VER)setTimeout(function(){toast('Updated to v'+APP_VER+' \u2728')},900);
+    localStorage.setItem('alokos-seen-ver',APP_VER)}catch(e){}
   if(window.matchMedia){const mq=window.matchMedia('(prefers-color-scheme: dark)');
     const onSys=()=>{if((S.profile.theme||'dark')==='auto'){applyTheme();renderSettings()}};
     mq.addEventListener?mq.addEventListener('change',onSys):mq.addListener(onSys)}
