@@ -1637,7 +1637,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.3.1';
+const APP_VER='9.3.2';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2934,6 +2934,22 @@ function extToMime(fn){const m=/\.([a-z0-9]{1,8})$/i.exec(fn||'');if(!m)return''
 async function shareAtt(id,type,label){
   let d=null,fname='file';
   try{
+  const _desk=window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches;
+  if(window._shareReady&&window._shareReady.id===id&&navigator.share){
+    const R=window._shareReady;const dbg2=[];
+    for(let ci=0;ci<R.cands.length;ci++){const file=R.cands[ci];
+      const csOk=!navigator.canShare||navigator.canShare({files:[file]});
+      if(!csOk&&!file.name.endsWith('.zip')){dbg2.push('cs0');continue}
+      try{await navigator.share({files:[file],title:R.fname||file.name});window._shareReady=null;return}
+      catch(err){const n=(err&&err.name)||'err';dbg2.push(n);
+        if(n==='AbortError'){window._shareReady=null;return}}}
+    window._shareReady=null;
+    try{const f0=R.cands[0];const a=document.createElement('a');
+      a.href=URL.createObjectURL(f0);a.download=f0.name;
+      document.body.appendChild(a);a.click();a.remove();
+      setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+      toast('\u2193 '+f0.name+' \u00b7 v'+APP_VER+' \u00b7 '+dbg2.join('/'));return}catch(e2){}
+  }
     d=await fileGet(id);
     if(!d){toast('File not found');return}
     const meta=attMeta(id);
@@ -2954,7 +2970,7 @@ async function shareAtt(id,type,label){
           try{const raw=new Uint8Array(await blob.arrayBuffer());
             cands.push(new File([zipWrap(fname,raw)],fname+'.zip',{type:'application/zip'}))}catch(e){}
         }
-        window._shareReady={id:id,cands:cands,at:Date.now()};
+        window._shareReady={id:id,cands:cands,fname:fname,at:Date.now()};
         setTimeout(function(){if(window._shareReady&&Date.now()-window._shareReady.at>110000)window._shareReady=null},120000);
       }
       let sawNotAllowed=false;
@@ -2969,7 +2985,7 @@ async function shareAtt(id,type,label){
           if(n==='NotAllowedError')sawNotAllowed=true;}
       }
       /* activation likely expired while preparing — everything is cached, a fresh tap will share instantly */
-      if(sawNotAllowed){toast('Ready \u2014 tap Share once more to open the share sheet');return}
+      if(sawNotAllowed&&!_desk){toast('Ready \u2014 tap Share once more to open the share sheet');return}
     }
   }catch(e){/* fall through to download */}
   // fallback: download the real file with its real name (laptops, share unsupported, or any error)
@@ -4039,7 +4055,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 /* ============ DRAG & DROP UPLOADS (desktop) ============ */
 let _ddN=0;
-const DD_SEL='[onclick*="pickFiles"],[onclick*="cropPhotoFor"],[onclick*="photoIn"],[onclick*="restoreIn"]';
+const DD_SEL='[onclick*="pickFiles"],[onclick*="cropPhotoFor"],[onclick*="photoIn"],[onclick*="restoreIn"],[onclick*="addCircular"],[onclick*="addDocIn"],[onclick*="carPickPic"],[onclick*="famAddDoc"],[onclick*="famSetPhoto"],[onclick*="neAttach"],[onclick*="rnAddDoc"]';
 function _ddTargets(){return Array.from(document.querySelectorAll(DD_SEL)).filter(el=>el.offsetParent!==null)}
 function _ddShow(on){const v=document.getElementById('ddVeil');if(!v)return;
   v.classList.toggle('on',on);
