@@ -1679,7 +1679,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.5.0';
+const APP_VER='9.5.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2220,7 +2220,7 @@ function skSaveDrawing(){if(!sk.ops.length){toast('Draw something first');return
   if(sk.editId){const d=S.drawings.find(x=>x.id===sk.editId);
     if(d){d.ops=sk.ops;d.thumb=thumb;d.at=new Date().toISOString()}}
   else S.drawings.unshift({id:uid(),name:'Drawing '+fmtD(new Date()),ops:sk.ops,thumb:thumb,at:new Date().toISOString()});
-  save();renderLife();skClose();toast('\U0001F3A8 Saved to your gallery')}
+  save();renderLife();skClose();toast('🎨 Saved to your gallery')}
 function skShareDrawing(){if(!sk.ops.length){toast('Draw something first');return}
   const d=skToDataURL();
   try{const bin=atob(d.split(',')[1]);const arr=new Uint8Array(bin.length);
@@ -2233,7 +2233,7 @@ function delDrawing(id){const d=S.drawings.find(x=>x.id===id);askDelete(d&&d.nam
 function renderDraw(){const el=document.getElementById('drawGallery');if(!el)return;
   el.innerHTML=S.drawings.map(function(d){return '<div class="draw-cell"><img src="'+d.thumb+'" alt="" onclick="drawEdit(\''+d.id+'\')">'
     +'<div class="draw-actions"><span onclick="drawEdit(\''+d.id+'\')">\u270e Edit</span><span onclick="delDrawing(\''+d.id+'\')">\u2715</span></div></div>'}).join('')
-    ||'<div class="empty" style="grid-column:1/-1"><div class="em-ring">\U0001F3A8</div>No drawings yet \u2014 tap \u201cNew drawing\u201d<br>to start a colourful canvas</div>'}
+    ||'<div class="empty" style="grid-column:1/-1"><div class="em-ring">🎨</div>No drawings yet \u2014 tap \u201cNew drawing\u201d<br>to start a colourful canvas</div>'}
 /* ============ SEARCH ENTRY ============ */
 function openSearch(){const d=document.getElementById('dashQ');
   const v=d?d.value.trim():'';if(d)d.value='';
@@ -3781,25 +3781,25 @@ function vaultSave(){const title=document.getElementById('vaTitle').value.trim()
   if(_vaultId){const v=_va.find(x=>x.id===_vaultId);if(v)Object.assign(v,rec)}
   else{rec.id=uid();_va.unshift(rec)}
   document.getElementById('vaultOv').classList.remove('open');_vaultId=null;
-  save();renderVault();toast('\U0001F512 Saved')}
+  save();renderVault();toast('🔒 Saved')}
 function vaultDel(id){const v=VD().find(x=>x.id===id);askDelete(v&&v.title,function(){const a=VD();const i=a.findIndex(x=>x.id===id);if(i>=0)a.splice(i,1);vaultPersist();renderVault()})}
 function vaultReveal(id,el){const v=VD().find(x=>x.id===id);if(!v)return;
   const span=document.getElementById('vp-'+id);if(!span)return;
-  if(span.dataset.shown==='1'){span.textContent='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';span.dataset.shown='0';el.textContent='\U0001F441';}
-  else{span.textContent=v.pass||'(none)';span.dataset.shown='1';el.textContent='\U0001F648';}}
+  if(span.dataset.shown==='1'){span.textContent='\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022';span.dataset.shown='0';el.textContent='👁';}
+  else{span.textContent=v.pass||'(none)';span.dataset.shown='1';el.textContent='🙈';}}
 function vaultCopy(id,field){const v=VD().find(x=>x.id===id);if(!v)return;
   const val=field==='user'?v.user:v.pass;if(!val){toast('Nothing to copy');return}
   navigator.clipboard.writeText(val).then(function(){toast('Copied '+(field==='user'?'username':'password'))},function(){toast('Copy failed')})}
 function vaultCard(v){
   return '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">'
-    +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:17px">\U0001F511 '+esc(v.title)+'</div>'
+    +'<div style="flex:1;min-width:0"><div class="row-title" style="font-family:Fraunces,serif;font-size:17px">🔑 '+esc(v.title)+'</div>'
     +(v.url?'<div class="row-meta" style="margin-top:2px"><a href="'+esc(v.url.startsWith('http')?v.url:'https://'+v.url)+'" target="_blank" rel="noopener" style="color:var(--gold)">'+esc(v.url)+'</a></div>':'')
     +'</div>'
     +'<div style="display:flex;gap:4px"><button class="ed" title="Edit" onclick="vaultEdit(\''+v.id+'\')">\u270e</button>'
     +'<button class="del" onclick="vaultDel(\''+v.id+'\')">\u2715</button></div></div>'
     +(v.user?'<div class="va-row"><span class="va-k">User</span><span class="va-v">'+esc(v.user)+'</span><button class="va-cp" onclick="vaultCopy(\''+v.id+'\',\'user\')">\u29c9</button></div>':'')
     +'<div class="va-row"><span class="va-k">Pass</span><span class="va-v" id="vp-'+v.id+'" data-shown="0">\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022</span>'
-    +'<button class="va-cp" onclick="vaultReveal(\''+v.id+'\',this)">\U0001F441</button>'
+    +'<button class="va-cp" onclick="vaultReveal(\''+v.id+'\',this)">👁</button>'
     +'<button class="va-cp" onclick="vaultCopy(\''+v.id+'\',\'pass\')">\u29c9</button></div>'
     +(v.recEmail?'<div class="va-row"><span class="va-k">Recovery</span><span class="va-v">'+esc(v.recEmail)+'</span></div>':'')
     +(v.recPhone?'<div class="va-row"><span class="va-k">Phone</span><span class="va-v">'+esc(v.recPhone)+'</span></div>':'')
@@ -3812,7 +3812,7 @@ function renderVault(){const el=document.getElementById('vaultList');if(!el)retu
   const pinSet=!!(S.lock&&S.lock.pinHash);
   if(pinSet){
     if(!_sessionPin){
-      el.innerHTML='<div class="empty"><div class="em-ring">\U0001F510</div>Vault is encrypted.<br>Enter your PIN to open it.'
+      el.innerHTML='<div class="empty"><div class="em-ring">🔐</div>Vault is encrypted.<br>Enter your PIN to open it.'
         +'<br><button class="btn btn-gold" style="margin-top:14px" onclick="vaultUnlock()">Unlock vault</button></div>';
       return;
     }
@@ -3837,7 +3837,7 @@ function renderVault(){const el=document.getElementById('vaultList');if(!el)retu
   }
   const list=VD();
   el.innerHTML=list.length?list.map(vaultCard).join('')
-    :'<div class="empty"><div class="em-ring">\U0001F510</div>No logins saved yet.<br>Keep bank logins, card PINs, wifi and app passwords here \u2014 safe behind your lock.</div>';
+    :'<div class="empty"><div class="em-ring">🔐</div>No logins saved yet.<br>Keep bank logins, card PINs, wifi and app passwords here \u2014 safe behind your lock.</div>';
 }
 /* ============ FEEL PACK + QUICK ADD + VOICE NOTES ============ */
 function buzz(ms){try{if(navigator.vibrate)navigator.vibrate(ms||12)}catch(e){}}
@@ -4239,7 +4239,7 @@ function vtSpark(list){
 function renderVitals(){
   const el=document.getElementById('vtCards');if(!el)return;
   const V=S.vitals||[];const kinds=['sugar','bp','weight','sleep'];
-  const nm={sugar:'\U0001FA78 Sugar',bp:'\u2764\uFE0F BP',weight:'\u2696\uFE0F Weight',sleep:'\U0001F634 Sleep'};
+  const nm={sugar:'🩸 Sugar',bp:'\u2764\uFE0F BP',weight:'\u2696\uFE0F Weight',sleep:'😴 Sleep'};
   let h='';
   kinds.forEach(k=>{
     const list=V.filter(v=>v.k===k);if(!list.length)return;
@@ -4279,20 +4279,20 @@ function healthScore(){
 function coachTip(){
   const t=today();const V=S.vitals||[];
   const ad=medAdherenceToday();
-  if(ad!==null&&ad<1)return'\U0001F48A A medicine dose is pending \u2014 take it on time.';
+  if(ad!==null&&ad<1)return'💊 A medicine dose is pending \u2014 take it on time.';
   const ls=V.find(v=>v.k==='sugar');
-  if(ls&&vtFlag(ls)[0]==='risk')return'\U0001FA78 Last sugar reading was high \u2014 recheck fasting tomorrow morning.';
+  if(ls&&vtFlag(ls)[0]==='risk')return'🩸 Last sugar reading was high \u2014 recheck fasting tomorrow morning.';
   const lb=V.find(v=>v.k==='bp');
   if(lb&&vtFlag(lb)[0]==='risk')return'\u2764\uFE0F Last BP was high \u2014 rest, recheck, and consult if it stays up.';
   if(lb&&(Date.now()-Date.parse(lb.at))/86400000>14)return'\u2764\uFE0F No BP reading in two weeks \u2014 take one today.';
   const w=(S.water&&S.water.date===t)?S.water.count:0;
-  if(new Date().getHours()>=17&&w<5)return'\U0001F4A7 Only '+w+' glasses so far \u2014 catch up on water this evening.';
+  if(new Date().getHours()>=17&&w<5)return'💧 Only '+w+' glasses so far \u2014 catch up on water this evening.';
   const st=Math.max(0,...((S.habits||[]).map(h=>h.streak||0)));
-  if(st>=3)return'\U0001F525 '+st+'-day habit streak \u2014 keep the chain alive today.';
-  const tips=['\U0001F6B6 A 20-minute walk after lunch steadies post-meal sugar.',
-    '\U0001F634 A fixed sleep time does more than a longer lie-in.',
-    '\U0001F9C2 Half the salt, a week \u2014 your BP will notice.',
-    '\U0001F4A7 Start the day with a full glass of water.'];
+  if(st>=3)return'🔥 '+st+'-day habit streak \u2014 keep the chain alive today.';
+  const tips=['🚶 A 20-minute walk after lunch steadies post-meal sugar.',
+    '😴 A fixed sleep time does more than a longer lie-in.',
+    '🧂 Half the salt, a week \u2014 your BP will notice.',
+    '💧 Start the day with a full glass of water.'];
   return tips[new Date().getDate()%tips.length]}
 function renderHScore(){
   const n=document.getElementById('hsNum');if(!n)return;
@@ -4322,7 +4322,7 @@ function renderHReports(){
       const c=d<0?'var(--risk)':(d<=7?'var(--warn)':'var(--lo)');
       due='<span class="stat-sub" style="color:'+c+'">'+(d<0?'Checkup overdue':(d===0?'Checkup today':'Checkup in '+d+'d'))+'</span>'}
     return'<div class="card" style="padding:12px 14px;display:flex;align-items:center;gap:12px">'
-      +'<span style="font-size:22px;flex-shrink:0">'+(a?fileIcon(a):'\U0001F9EA')+'</span>'
+      +'<span style="font-size:22px;flex-shrink:0">'+(a?fileIcon(a):'🧪')+'</span>'
       +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.name)+'</div>'
       +'<div class="stat-sub">'+fmtD(r.at.slice(0,10))+(due?' \u00b7 ':'')+'</div>'+due+'</div>'
       +(a?'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
