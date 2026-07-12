@@ -4327,7 +4327,7 @@ function hrAddReport(){
     (S.hreports=S.hreports||[]).unshift({id:uid(),
       name:(nmEl.value.trim()||out[0].name),att:out,due:(duEl.value||null),at:new Date().toISOString()});
     nmEl.value='';duEl.value='';save();buzz(10);renderHealth()})}
-function hrDel(id){askConfirm('Delete this report?','The attached file will be removed too.',function(){
+function hrDel(id){askDelete('Delete this report?',function(){
   const i=(S.hreports||[]).findIndex(r=>r.id===id);if(i<0)return;
   (S.hreports[i].att||[]).forEach(a=>{try{fileDel(a.id)}catch(e){}});
   S.hreports.splice(i,1);save();renderHealth()})}
