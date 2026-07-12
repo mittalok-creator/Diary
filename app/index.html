@@ -1691,7 +1691,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.0.0';
+const APP_VER='10.0.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4353,11 +4353,23 @@ function renderHReports(){
 const AI_MODEL='gemini-2.0-flash';
 function aiReady(){return !!(S.profile&&S.profile.aiKey)}
 function aiKeyEdit(){
-  askPrompt2('Gemini API key','Paste your key from aistudio.google.com \u2192 Get API key. Leave empty to turn AI off.',
-    S.profile.aiKey||'',function(v){
-      v=(v||'').trim();
-      S.profile.aiKey=v||null;save();renderSettings();
-      toast(v?'\u2728 AI is on':'AI turned off')})}
+  showSheet('\u2728 Gemini API key',
+    '<div class="stat-sub" style="margin-bottom:12px;line-height:1.6;text-align:left">Get a free key: <b>aistudio.google.com</b> \u2192 Get API key \u2192 Create. Then paste it below.</div>'
+    +'<input class="inp" id="aiKeyIn" style="width:100%;font-family:ui-monospace,monospace;font-size:13px" placeholder="AIza..." value="'+esc(S.profile.aiKey||'')+'" autocomplete="off" spellcheck="false">'
+    +'<button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="aiKeySave()">\u2713 Save key</button>'
+    +(S.profile.aiKey?'<button class="btn btn-ghost" style="width:100%;margin-top:9px;color:var(--risk)" onclick="aiKeyClear()">Remove key \u00b7 turn AI off</button>':''));
+  setTimeout(function(){const i=document.getElementById('aiKeyIn');if(i){i.focus();i.select()}},80)}
+function aiKeySave(){
+  const v=(document.getElementById('aiKeyIn').value||'').trim();
+  if(!v){toast('Paste the key first');return}
+  if(v.length<20){toast('That does not look like a full key');return}
+  S.profile.aiKey=v;save();
+  document.getElementById('sheetOv').classList.remove('open');
+  renderSettings();toast('\u2728 AI is on')}
+function aiKeyClear(){
+  S.profile.aiKey=null;save();
+  document.getElementById('sheetOv').classList.remove('open');
+  renderSettings();toast('AI turned off')}
 function aiStatusDraw(){
   const el=document.getElementById('aiStatus');if(!el)return;
   el.textContent=aiReady()?'On \u00b7 '+AI_MODEL:'Off \u2014 add your free Gemini key';
