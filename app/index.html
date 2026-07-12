@@ -1637,7 +1637,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.3.2';
+const APP_VER='9.4.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2959,6 +2959,19 @@ async function shareAtt(id,type,label){
     const blob=dataUrlToBlob(d);
     const dbg=[];
     if(!navigator.share)dbg.push('no-api');
+    /* Android blocks non-media types in the web share sheet — offer a Drive link instead */
+    const SHAREOK=/^(image\/|video\/|audio\/|text\/(plain|csv)|application\/pdf)/i;
+    const _mimeEff=mime||(blob&&blob.type)||'';
+    if(!_desk&&blob&&!SHAREOK.test(_mimeEff)){
+      window._pendShare={id:id,fname:fname,mime:_mimeEff,d:d};
+      const signed=!!(S.profile&&S.profile.google);
+      showSheet('Send this file',
+        '<div class="stat-sub" style="margin-bottom:14px;line-height:1.6;text-align:left">Android\u2019s share sheet accepts only images, PDF, audio and video from web apps. For this file, share a <b>Drive link</b> \u2014 the receiver gets the original file.</div>'
+        +(signed
+          ?'<button class="btn btn-gold" style="width:100%" onclick="driveShareLink()">\ud83d\udd17 Share as Drive link</button>'
+          :'<div class="stat-sub" style="margin-bottom:10px">Sign in with Google (Settings) to enable link sharing.</div>')
+        +'<button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="dlPendShare()">\u2b07 Download instead</button>');
+      return}
     if(blob&&navigator.share){
       if(!mime)mime=blob.type||'application/octet-stream';
       /* prepared cache: second tap shares instantly inside a fresh user gesture */
@@ -4084,6 +4097,64 @@ window.addEventListener('drop',e=>{
   window._droppedFiles=files;btn.click();
 });
 
+/* ============ SHARE AS DRIVE LINK (Option A) ============ */
+function sheetOff(){document.getElementById('sheetOv').classList.remove('open')}
+async function driveShareFolder(){
+  if(S.profile.shareFolderId)return S.profile.shareFolderId;
+  const q=encodeURIComponent("name='ALOK OS Shared' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+  let r=await fetch('https://www.googleapis.com/drive/v3/files?q='+q+'&fields=files(id)',{headers:GH()});
+  if(r.ok){const j=await r.json();
+    if(j.files&&j.files.length){S.profile.shareFolderId=j.files[0].id;save();return j.files[0].id}}
+  r=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',
+    headers:Object.assign({'Content-Type':'application/json'},GH()),
+    body:JSON.stringify({name:'ALOK OS Shared',mimeType:'application/vnd.google-apps.folder'})});
+  if(!r.ok)throw new Error('folder '+r.status);
+  const j=await r.json();S.profile.shareFolderId=j.id;save();return j.id}
+async function _driveUpload(P,blob){
+  const fid=await driveShareFolder();
+  const boundary='alokos'+Date.now();
+  const head='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'
+    +JSON.stringify({name:P.fname,parents:[fid]})
+    +'\r\n--'+boundary+'\r\nContent-Type: '+(P.mime||'application/octet-stream')+'\r\n\r\n';
+  const body=new Blob([head,blob,'\r\n--'+boundary+'--']);
+  return fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',
+    {method:'POST',headers:Object.assign({'Content-Type':'multipart/related; boundary='+boundary},GH()),body:body})}
+async function driveShareLink(){
+  const P=window._pendShare;if(!P)return;sheetOff();
+  if(!S.profile||!S.profile.google){toast('Sign in with Google first (Settings)');return}
+  toast('\u2601 Uploading to your Drive\u2026');
+  try{
+    let ok=await ensureToken(false);if(!ok)ok=await ensureToken(true);
+    if(!ok){toast('Google sign-in needed');return}
+    const d=P.d||await fileGet(P.id);const blob=dataUrlToBlob(d);
+    if(!blob){toast('File not found');return}
+    if(blob.size>40*1024*1024){toast('Over 40 MB \u2014 too large for link share');return}
+    let r=await _driveUpload(P,blob);
+    if(r.status===401||r.status===403){
+      const ok2=await ensureToken(true);if(!ok2)throw new Error('auth');
+      r=await _driveUpload(P,blob)}
+    if(!r.ok)throw new Error('upload '+r.status);
+    const j=await r.json();
+    const pr=await fetch('https://www.googleapis.com/drive/v3/files/'+j.id+'/permissions',
+      {method:'POST',headers:Object.assign({'Content-Type':'application/json'},GH()),
+       body:JSON.stringify({role:'reader',type:'anyone'})});
+    if(!pr.ok)throw new Error('perm '+pr.status);
+    const link='https://drive.google.com/file/d/'+j.id+'/view?usp=sharing';
+    window._pendShare=null;
+    if(navigator.share){
+      try{await navigator.share({title:P.fname,text:P.fname,url:link});toast('\u2713 Link shared');return}
+      catch(e){if(e&&e.name==='AbortError')return}}
+    try{await navigator.clipboard.writeText(link);toast('\u2713 Link copied \u2014 paste it anywhere')}
+    catch(e){prompt('Copy this link:',link)}
+  }catch(e){toast('Drive share failed ('+(e&&e.message||'error')+') \u2014 downloading instead');dlPendShare(true)}}
+function dlPendShare(keep){const P=window._pendShare;if(!P)return;if(!keep)sheetOff();
+  (async()=>{const d=P.d||await fileGet(P.id);const blob=dataUrlToBlob(d);if(!blob)return;
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=P.fname;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+    window._pendShare=null;
+    toast('\u2193 '+P.fname)})()}
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
@@ -4552,7 +4623,7 @@ function scheduleRefresh(){clearTimeout(refreshT);
 function initGoogle(){if(!gConfigured()||typeof google==='undefined'||!google.accounts||tokenClient)return;
   tokenClient=google.accounts.oauth2.initTokenClient({
     client_id:GOOGLE_CLIENT_ID,
-    scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+    scope:'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
     error_callback:err=>{const w=tokenWait;tokenWait=null;needsInteract=true;
       if(w)w.resolve(false);else setSyncStatus('Reconnect needed — tap Sync now')},
     callback:async r=>{
