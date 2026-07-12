@@ -1691,7 +1691,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.0.1';
+const APP_VER='10.0.2';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4399,10 +4399,22 @@ function aiErrToast(e){
   else if(m==='RATE')toast('AI is catching its breath \u2014 try again in a minute');
   else if(m==='KEY')toast('Key rejected \u2014 check it in Settings \u2192 AI');
   else toast('AI could not answer \u2014 try again')}
-async function aiConsent(){
-  if(S.profile.aiConsent)return true;
-  return new Promise(res=>{askConfirm('Use AI?','Your question and the context you include will be sent to Google Gemini using your key.',
-    function(){S.profile.aiConsent=true;save();res(true)})})}
+function aiConsent(){
+  if(S.profile&&S.profile.aiConsent)return Promise.resolve(true);
+  return new Promise(function(res){
+    const ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:420;display:flex;align-items:center;justify-content:center;'
+      +'background:color-mix(in srgb,var(--ink0) 72%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:24px';
+    ov.innerHTML='<div style="max-width:340px;width:100%;background:var(--ink1);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);'
+      +'border-radius:20px;padding:20px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.5)">'
+      +'<div style="font-family:\'Fraunces\',serif;font-size:20px;margin-bottom:8px;color:var(--hi)">Use AI?</div>'
+      +'<div class="stat-sub" style="line-height:1.6;margin-bottom:16px">Your question and the context you include will be sent to Google Gemini using your key.</div>'
+      +'<button class="btn btn-gold" style="width:100%" id="aiCok">Agree &amp; continue</button>'
+      +'<button class="btn btn-ghost" style="width:100%;margin-top:9px" id="aiCno">Cancel</button></div>';
+    document.body.appendChild(ov);
+    ov.querySelector('#aiCok').onclick=function(){S.profile.aiConsent=true;save();ov.remove();res(true)};
+    ov.querySelector('#aiCno').onclick=function(){ov.remove();res(false)};
+  })}
 /* ---- context builder (compact, numbers over raw text) ---- */
 function aiContext(){
   const t=today();const L=[];
