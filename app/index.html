@@ -198,7 +198,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
   }
 }
 #loginOv{position:absolute;inset:0;z-index:98;display:none;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(700px 500px at 50% 20%,#161c26,var(--ink0) 70%);padding:32px;text-align:center}
+  background:var(--ink0);padding:32px;text-align:center}
 #loginOv.open{display:flex}
 .mono-big{width:84px;height:84px;border-radius:50%;border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;
   font-family:'Fraunces',serif;color:var(--gold);font-size:28px;margin-bottom:28px;animation:lpulse 4s ease-in-out infinite}
@@ -673,13 +673,13 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
   animation:ddp 1.6s ease-in-out infinite}
 /* ============ LOCK SCREEN v2 (theme & accent aware) ============ */
 #lockOv{background:var(--ink0)}
-#lockOv::before{content:'';position:absolute;inset:0;pointer-events:none;
+#lockOv::before,#loginOv::before{content:'';position:absolute;inset:0;pointer-events:none;
   background:radial-gradient(560px 380px at 50% 12%,color-mix(in srgb,var(--gold) 14%,transparent),transparent 70%),
              radial-gradient(460px 340px at 12% 92%,color-mix(in srgb,var(--gold) 7%,transparent),transparent 70%),
              radial-gradient(420px 300px at 92% 80%,color-mix(in srgb,var(--goldb) 6%,transparent),transparent 72%);
   animation:lkaur 14s ease-in-out infinite alternate}
 @keyframes lkaur{from{transform:translateX(-10px)}to{transform:translateX(12px) scale(1.03)}}
-#lockOv>*{position:relative}
+#lockOv>*,#loginOv>*{position:relative}
 .mono-big{background:color-mix(in srgb,var(--ink1) 85%,transparent);
   box-shadow:0 0 0 7px color-mix(in srgb,var(--gold) 8%,transparent),
              0 22px 50px color-mix(in srgb,var(--gold) 18%,rgba(0,0,0,.2)),
