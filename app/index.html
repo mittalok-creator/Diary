@@ -745,7 +745,8 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
     <button class="qa-sp on" id="qaLife" onclick="qaSpace('personal')" title="Life">🏠</button>
     <button class="qa-sp" id="qaWork" onclick="qaSpace('office')" title="Work">💼</button>
     <input id="qaIn" placeholder="Add anything — ‘Call BM tomorrow 11 am’" onkeydown="if(event.key==='Enter')qaAdd()">
-    <button class="qa-act" id="qaMic" onclick="qaVoice()" title="Speak">🎙</button>
+    <button class="qa-act" onclick="aiAskOpen()" title="Ask AI">✨</button>
+      <button class="qa-act" id="qaMic" onclick="qaVoice()" title="Speak">🎙</button>
     <button class="qa-act qa-go" onclick="qaAdd()" title="Add">＋</button>
   </div>
 
@@ -1362,6 +1363,16 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
       <button class="btn btn-ghost btn-sm" onclick="shareSelfTest()">Run</button>
     </div>
   </div>
+    <div class="eyebrow" style="margin-top:22px">✨ AI · Gemini</div>
+    <div class="card">
+      <div class="set-row">
+        <div><div class="set-name">✨ AI features</div><div class="set-sub" id="aiStatus">Off — add your free Gemini key</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="aiKeyEdit()" id="aiKeyBtn">Set up</button>
+      </div>
+      <div class="stat-sub" style="padding:2px 2px 8px;line-height:1.6">Get a free key at <b>aistudio.google.com</b> → Get API key. When you use an AI feature, your question (and any context you include) is sent to Google Gemini with your key — nothing else, nowhere else.</div>
+    </div>
+  <div class="card" style="display:none">
+  </div>
 
   <div class="eyebrow">Dashboard cards</div>
   <div class="card" id="dashToggles"></div>
@@ -1590,6 +1601,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
     <button class="ne-t" onclick="neCmd('underline')" title="Underline"><u>U</u></button>
     <button class="ne-t" onclick="neCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
     <button class="ne-t" onclick="neVoice()" title="Voice note">🎙</button>
+    <button class="ne-t" onclick="neAI()" title="AI">✨</button>
     <span class="ne-div"></span>
     <button class="ne-t" onclick="neSize('5')" title="Large">Aᴺ</button>
     <button class="ne-t" onclick="neSize('3')" title="Normal">A</button>
@@ -1679,7 +1691,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.5.1';
+const APP_VER='10.0.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -3884,9 +3896,13 @@ function qaParse(raw){
     const cur=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
     setD(time<=cur?1:0)}
   return {title:t.replace(/\s+/g,' ').trim(),due,time}}
-function qaAdd(){const inp=document.getElementById('qaIn');const v=inp.value.trim();if(!v)return;
-  const p=qaParse(v);
+async function qaAdd(){const inp=document.getElementById('qaIn');const v=inp.value.trim();if(!v)return;
+  let p=qaParse(v);
   if(!p.title){toast('Please type the task first');return}
+  if(!p.due&&!p.time&&aiReady()&&navigator.onLine&&v.split(' ').length>2){
+    toast('\u2728 Understanding\u2026');
+    const g=await qaAIParse(v);if(g&&g.title)p=g;
+  }
   S.tasks.unshift({id:uid(),title:p.title,space:qaSp,due:p.due,time:p.time||null,rep:null,done:false,at:new Date().toISOString()});
   save();buzz(12);inp.value='';
   renderToday();renderLife();renderWork();
@@ -4002,7 +4018,9 @@ function weeklyReview(){
   if(topCat)h+=row('\ud83c\udff7','Top category: <b>'+esc(topCat[0])+'</b> (\u20b9'+Math.round(topCat[1]).toLocaleString('en-IN')+')');
   h+=row('\ud83d\udcc5','Next 7 days: <b>'+meetN+'</b> meeting'+(meetN===1?'':'s')+' \u00b7 <b>'+billN+'</b> bill'+(billN===1?'':'s')+' \u00b7 <b>'+renN+'</b> renewal'+(renN===1?'':'s')+(bdayN?' \u00b7 <b>'+bdayN+'</b> birthday'+(bdayN===1?'':'s')+' \ud83c\udf82':''));
   if(habBest)h+=row('\ud83d\udd25','Best habit streak: <b>'+habBest+' day'+(habBest===1?'':'s')+'</b>');
-  h+='<div class="stat-sub" style="margin-top:12px;text-align:center">Generated on-device \u00b7 nothing leaves your phone</div>';
+  h+='<div id="aiRev" style="white-space:pre-wrap;font-size:14px;line-height:1.6;margin-top:12px"></div>';
+  h+='<button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="aiReviewGo()">\u2728 AI coach note</button>';
+  h+='<div class="stat-sub" style="margin-top:12px;text-align:center">Stats computed on-device \u00b7 AI only if you tap</div>';
   showSheet('Your week at a glance',h);
 }
 
@@ -4068,6 +4086,7 @@ let _ckIdx=0,_ckItems=[];
 function cmdkItems(){
   const it=[];
   const add=(t,ic,k,fn)=>it.push({t,ic,k,fn});
+  add('Ask AI','\u2728','run',()=>aiAskOpen());
   add('Today','\u2600\ufe0f','view',()=>go('today'));
   add('Calendar','\ud83d\udcc5','view',()=>go('cal'));
   add('Weekly review','\u2726','run',()=>weeklyReview());
@@ -4329,6 +4348,139 @@ function renderHReports(){
         +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name).replace(/'/g,'')+'\')">\u2197</button>':'')
       +'<button class="btn btn-ghost btn-sm" onclick="hrDel(\''+r.id+'\')" style="color:var(--risk)">\u2715</button>'
       +'</div>'}).join('')||'' }
+
+/* ============ AURUM INTELLIGENCE (Gemini, bring-your-own-key) ============ */
+const AI_MODEL='gemini-2.0-flash';
+function aiReady(){return !!(S.profile&&S.profile.aiKey)}
+function aiKeyEdit(){
+  askPrompt2('Gemini API key','Paste your key from aistudio.google.com \u2192 Get API key. Leave empty to turn AI off.',
+    S.profile.aiKey||'',function(v){
+      v=(v||'').trim();
+      S.profile.aiKey=v||null;save();renderSettings();
+      toast(v?'\u2728 AI is on':'AI turned off')})}
+function aiStatusDraw(){
+  const el=document.getElementById('aiStatus');if(!el)return;
+  el.textContent=aiReady()?'On \u00b7 '+AI_MODEL:'Off \u2014 add your free Gemini key';
+  const b=document.getElementById('aiKeyBtn');if(b)b.textContent=aiReady()?'Change':'Set up'}
+async function ai(prompt,opt){
+  opt=opt||{};
+  if(!aiReady())throw new Error('NO_KEY');
+  if(!navigator.onLine)throw new Error('OFFLINE');
+  const body={contents:[{parts:[{text:prompt}]}]};
+  if(opt.sys)body.systemInstruction={parts:[{text:opt.sys}]};
+  body.generationConfig={temperature:opt.temp==null?0.4:opt.temp,maxOutputTokens:opt.max||900};
+  if(opt.json)body.generationConfig.responseMimeType='application/json';
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+AI_MODEL+':generateContent?key='+encodeURIComponent(S.profile.aiKey),
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.status===429)throw new Error('RATE');
+  if(r.status===400||r.status===403)throw new Error('KEY');
+  if(!r.ok)throw new Error('HTTP'+r.status);
+  const j=await r.json();
+  const t=j&&j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts
+    ?j.candidates[0].content.parts.map(p=>p.text||'').join(''):'';
+  if(!t)throw new Error('EMPTY');
+  return t.trim()}
+function aiErrToast(e){
+  const m=(e&&e.message)||'';
+  if(m==='NO_KEY')toast('Add your Gemini key first \u2014 Settings \u2192 AI');
+  else if(m==='OFFLINE')toast('AI needs an internet connection');
+  else if(m==='RATE')toast('AI is catching its breath \u2014 try again in a minute');
+  else if(m==='KEY')toast('Key rejected \u2014 check it in Settings \u2192 AI');
+  else toast('AI could not answer \u2014 try again')}
+async function aiConsent(){
+  if(S.profile.aiConsent)return true;
+  return new Promise(res=>{askConfirm('Use AI?','Your question and the context you include will be sent to Google Gemini using your key.',
+    function(){S.profile.aiConsent=true;save();res(true)})})}
+/* ---- context builder (compact, numbers over raw text) ---- */
+function aiContext(){
+  const t=today();const L=[];
+  L.push('Today: '+t);
+  const od=(S.tasks||[]).filter(x=>!x.done&&x.due&&x.due<t);
+  const dt=(S.tasks||[]).filter(x=>!x.done&&x.due===t);
+  if(od.length)L.push('Overdue tasks: '+od.slice(0,6).map(x=>x.title).join('; '));
+  if(dt.length)L.push('Due today: '+dt.slice(0,8).map(x=>x.title+(x.time?' at '+x.time:'')).join('; '));
+  const mt=(S.meetings||[]).filter(m=>m.date===t);
+  if(mt.length)L.push('Meetings today: '+mt.map(m=>m.title+(m.time?' at '+m.time:'')).join('; '));
+  const sp=(S.expenses||[]).filter(e=>(e.at||'').slice(0,7)===t.slice(0,7)).reduce((a,e)=>a+(+e.amount||0),0);
+  L.push('Spend this month: \u20b9'+Math.round(sp));
+  const V=(S.vitals||[]);const ls=V.find(v=>v.k==='sugar');const lb=V.find(v=>v.k==='bp');
+  if(ls)L.push('Last sugar: '+ls.v1+' ('+(ls.tag||'')+')');
+  if(lb)L.push('Last BP: '+lb.v1+'/'+lb.v2);
+  return L.join('\n')}
+/* ---- Ask AI sheet ---- */
+function aiAskOpen(){
+  showSheet('\u2728 Ask AI',
+    '<textarea class="inp" id="aiQ" rows="3" placeholder="Ask anything \u2014 plan my day, draft a reply, explain something\u2026" style="width:100%;resize:vertical"></textarea>'
+    +'<div style="display:flex;gap:8px;align-items:center;margin:10px 0">'
+    +'<span class="chip on" id="aiCtx" onclick="this.classList.toggle(\'on\')">\uD83D\uDCCB Include my day</span>'
+    +'<button class="btn btn-gold" style="margin-left:auto" onclick="aiAskGo()">Ask</button></div>'
+    +'<div id="aiOut" style="white-space:pre-wrap;font-size:14.5px;line-height:1.65;padding:4px 2px"></div>');
+  setTimeout(function(){const q=document.getElementById('aiQ');if(q)q.focus()},80)}
+async function aiAskGo(){
+  const q=document.getElementById('aiQ').value.trim();if(!q)return;
+  if(!aiReady()){aiErrToast(new Error('NO_KEY'));return}
+  if(!(await aiConsent()))return;
+  const out=document.getElementById('aiOut');out.textContent='\u2728 Thinking\u2026';
+  const inc=document.getElementById('aiCtx').classList.contains('on');
+  try{
+    const sys='You are the assistant inside ALOK OS, a private personal+office app for a bank manager in India. '
+      +'Be concise, warm and practical. Use plain text (no markdown headers). Reply in the language the user wrote in.';
+    const p=(inc?('Context about my day:\n'+aiContext()+'\n\n'):'')+'Question: '+q;
+    out.textContent=await ai(p,{sys:sys,max:1000});
+  }catch(e){out.textContent='';aiErrToast(e)}}
+/* ---- note editor AI ---- */
+function neAI(){
+  if(!aiReady()){aiErrToast(new Error('NO_KEY'));return}
+  showSheet('\u2728 AI on this note',
+    '<button class="btn btn-ghost" style="width:100%" onclick="neAIGo(\'sum\')">\uD83D\uDCC4 Summarize</button>'
+    +'<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="neAIGo(\'imp\')">\u270D Improve writing</button>'
+    +'<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="neAIGo(\'hi\')">\uD83C\uDF10 Translate to Hindi</button>'
+    +'<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="neAIGo(\'en\')">\uD83C\uDF10 Translate to English</button>'
+    +'<div id="neAIOut" style="white-space:pre-wrap;font-size:14px;line-height:1.6;padding:10px 2px 2px"></div>')}
+async function neAIGo(mode){
+  const body=document.getElementById('neBody');
+  const txt=(body?body.innerText:'').trim();
+  if(!txt){toast('The note is empty');return}
+  if(!(await aiConsent()))return;
+  const out=document.getElementById('neAIOut');out.textContent='\u2728 Working\u2026';
+  const sys='You are a precise writing assistant. Return ONLY the result text, no preamble.';
+  const P={sum:'Summarize this note in 3-5 short bullet lines:\n\n',
+    imp:'Rewrite this note with clearer, professional wording. Keep the same language and meaning:\n\n',
+    hi:'Translate this note to natural Hindi:\n\n',
+    en:'Translate this note to natural English:\n\n'}[mode];
+  try{
+    const r=await ai(P+txt.slice(0,6000),{sys:sys,max:1200,temp:0.3});
+    out.innerHTML='<div style="white-space:pre-wrap">'+esc(r)+'</div>'
+      +'<button class="btn btn-gold" style="width:100%;margin-top:12px" onclick="neAIInsert()">\u2795 Add to note</button>';
+    window._neAIres=r;
+  }catch(e){out.textContent='';aiErrToast(e)}}
+function neAIInsert(){
+  const body=document.getElementById('neBody');if(!body||!window._neAIres)return;
+  const d=document.createElement('div');
+  d.innerHTML='<br><div style="border-left:3px solid var(--gold);padding-left:10px">'+esc(window._neAIres).replace(/\n/g,'<br>')+'</div>';
+  body.appendChild(d);window._neAIres=null;
+  document.getElementById('sheetOv').classList.remove('open');
+  toast('\u2728 Added to the note')}
+/* ---- AI weekly coach ---- */
+async function aiReviewGo(){
+  if(!aiReady()){aiErrToast(new Error('NO_KEY'));return}
+  if(!(await aiConsent()))return;
+  const el=document.getElementById('aiRev');if(!el)return;
+  el.textContent='\u2728 Writing your coach note\u2026';
+  try{
+    const sys='You are a supportive personal coach. 3 short sentences max: one observation, one win, one concrete suggestion for next week. Plain text.';
+    el.textContent=await ai('My week in numbers:\n'+aiContext(),{sys:sys,max:220,temp:0.6});
+  }catch(e){el.textContent='';aiErrToast(e)}}
+/* ---- quick-add AI fallback ---- */
+async function qaAIParse(raw){
+  try{
+    const r=await ai('Extract task fields from: "'+raw.replace(/"/g,'')+'"\nToday is '+today()
+      +'. Reply as JSON {"title":string,"date":"YYYY-MM-DD"|null,"time":"HH:MM"|null}. Understand Hindi/Hinglish.',
+      {json:true,max:120,temp:0});
+    const j=JSON.parse(r);
+    if(j&&j.title)return{title:j.title,due:j.date||null,time:j.time||null};
+  }catch(e){}
+  return null}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
@@ -5040,6 +5192,7 @@ function renderSettings(){
     vv.style.cssText='text-align:center;margin:18px 0 6px;opacity:.65';
     const host=document.getElementById('v-settings');if(host)host.appendChild(vv)}
   if(vv)vv.textContent='ALOK OS \u00b7 v'+APP_VER;
+  aiStatusDraw();
   const _acc=S.profile.accent||'gold';
   document.querySelectorAll('.acc-dot').forEach(function(d){d.classList.toggle('on',d.dataset.a===_acc)});
   const _as=document.getElementById('accSub');if(_as)_as.textContent=ACC_NAMES[_acc]||'Gold';
