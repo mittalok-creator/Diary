@@ -701,6 +701,27 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
   box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 22%,transparent)}
 .lk-key.ghost{background:none;border:none;box-shadow:none}
 @media(prefers-reduced-motion:reduce){#lockOv::before{animation:none}.lk-dot.on{animation:none}}
+/* ---- HUB (unified links) ---- */
+.hub-row{display:flex;align-items:center;gap:12px;padding:12px 13px;border:1px solid var(--hair);border-radius:16px;
+  background:var(--ink1);cursor:pointer;transition:transform .15s,border-color .2s}
+.hub-row:active{transform:scale(.985)}
+@media(hover:hover){.hub-row:hover{border-color:color-mix(in srgb,var(--gold) 35%,transparent)}}
+.hub-ic{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.hub-ic.t-sheet{background:#1F3320;color:#8FD498}
+.hub-ic.t-doc{background:#1D2937;color:#8FB6E8}
+.hub-ic.t-pdf{background:#33201F;color:#E89898}
+.hub-ic.t-image{background:#33291C;color:#E8B98A}
+.hub-ic.t-link{background:#29223A;color:#B4A6F0}
+html[data-theme="light"] .hub-ic.t-sheet{background:#E5F0E4;color:#3E7A3F}
+html[data-theme="light"] .hub-ic.t-doc{background:#E2ECF7;color:#22548E}
+html[data-theme="light"] .hub-ic.t-pdf{background:#F7E3E3;color:#983A3A}
+html[data-theme="light"] .hub-ic.t-image{background:#F5E9D6;color:#7A4B0E}
+html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
+.hub-cloud{display:inline-flex;align-items:center;gap:5px}
+.hub-cloud i{width:7px;height:7px;border-radius:50%;display:inline-block}
+.hub-act{border:none;background:none;color:var(--lo);font-size:15px;cursor:pointer;padding:6px;border-radius:8px;flex-shrink:0}
+.hub-act:active{transform:scale(.85)}
+.hub-act.pin.on{color:var(--gold)}
 </style>
 </head>
 <body>
@@ -1143,6 +1164,18 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
     <div id="famBody" style="margin-top:16px"></div>
   </div>
 
+  <div class="ltab" id="lt-hub" style="display:none">
+    <input class="inp" id="hubNameL" placeholder="Link name (HRMS, CBS, Sheet, Portal…)">
+    <input class="inp" id="hubUrlL" placeholder="Paste the link (https…)" inputmode="url" autocapitalize="off">
+    <button class="btn btn-gold" style="width:100%" onclick="hubAdd('L')">＋ Add link</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px" id="hubChipsL">
+      <span class="chip" data-f="all" onclick="hubFilter('L','all')">All</span>
+      <span class="chip" data-f="personal" onclick="hubFilter('L','personal')">🏠 Life</span>
+      <span class="chip" data-f="office" onclick="hubFilter('L','office')">💼 Work</span>
+      <span class="chip" data-f="pin" onclick="hubFilter('L','pin')">📌 Pinned</span>
+    </div>
+    <div id="hubListL" style="display:flex;flex-direction:column;gap:9px;margin-top:8px"></div>
+  </div>
   <div class="ltab" id="lt-vault" style="display:none">
     <button class="btn btn-gold" style="width:100%" onclick="vaultAdd()">🔑 Add login / password</button>
     <div class="stat-sub" style="margin-top:8px;text-align:center">Bank logins, cards, wifi passwords, app accounts — all locked behind your PIN</div>
@@ -1238,6 +1271,18 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
     <div id="odocList" style="margin-top:14px;display:flex;flex-direction:column;gap:10px"></div>
   </div>
 
+  <div class="wtab" id="wt-hub" style="display:none">
+    <input class="inp" id="hubNameW" placeholder="Link name (HRMS, CBS, Sheet, Portal…)">
+    <input class="inp" id="hubUrlW" placeholder="Paste the link (https…)" inputmode="url" autocapitalize="off">
+    <button class="btn btn-gold" style="width:100%" onclick="hubAdd('W')">＋ Add link</button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px" id="hubChipsW">
+      <span class="chip" data-f="all" onclick="hubFilter('W','all')">All</span>
+      <span class="chip" data-f="personal" onclick="hubFilter('W','personal')">🏠 Life</span>
+      <span class="chip" data-f="office" onclick="hubFilter('W','office')">💼 Work</span>
+      <span class="chip" data-f="pin" onclick="hubFilter('W','pin')">📌 Pinned</span>
+    </div>
+    <div id="hubListW" style="display:flex;flex-direction:column;gap:9px;margin-top:8px"></div>
+  </div>
   <div class="wtab" id="wt-link" style="display:none">
     <input class="inp" id="lkName" placeholder="Link name (HRMS portal, CBS login, Circular site…)">
     <input class="inp" id="lkUrl" placeholder="Paste the link (https://…)" style="margin-top:8px" onkeydown="if(event.key==='Enter')addLink()">
@@ -1691,7 +1736,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.0.4';
+const APP_VER='10.1.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -1751,10 +1796,10 @@ function go(v){
   if(v==='cal'){const c=document.getElementById('calDate');if(!c.value)c.value=today();renderCal()} if(v==='settings')renderSettings(); if(v==='search'){renderSearch();setTimeout(()=>qIn.focus(),150)}}
 const LIFE_MODS=[
   ['tasks','Tasks','✓'],['notes','Notes','🗒'],['draw','Draw','🎨'],['shopping','Shopping','🛒'],['money','Money','₹'],['pay','Payments','💳'],
-  ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄'],['family','Family Docs','👪'],['vault','Vault','🔐']];
+  ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄'],['family','Family Docs','👪'],['vault','Vault','🔐'],['hub','Links','🔗']];
 const WORK_MODS=[
   ['tasks','Tasks','✓'],['follow','Follow-ups','↺'],['meet','Meetings','🎥'],['circ','Circulars','📑'],
-  ['odoc','Docs','📄'],['link','Links','🔗'],['notes','Quick Notes','🗒']];
+  ['odoc','Docs','📄'],['hub','Links','🔗'],['notes','Quick Notes','🗒']];
 function lifeBadge(t){const d=today();
   if(t==='tasks')return {n:S.tasks.filter(x=>x.space!=='office'&&!x.done).length};
   if(t==='shopping')return {n:S.shopping.filter(s=>!s.done).length};
@@ -1779,11 +1824,11 @@ const LIFE_GROUPS=[
   ['Daily',['tasks','notes','shopping','draw']],
   ['Finance',['money','pay']],
   ['Health & Home',['health','car','renew','bday']],
-  ['Documents',['docs','family','vault']]
+  ['Documents',['docs','family','vault','hub']]
 ];
 const WORK_GROUPS=[
   ['Flow',['tasks','follow','meet']],
-  ['Library',['circ','odoc','link','notes']]
+  ['Library',['circ','odoc','hub','notes']]
 ];
 function groupedLauncher(space,mods,groups){
   const used={};let html='';
@@ -3318,7 +3363,7 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
   +'<button class="ed" title="Rename" onclick="askRename(\'doc\',\''+d.id+'\')">✎</button><button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
-function renderLife(){renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();renderFamily();renderVault();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
+function renderLife(){renderHub();renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();renderFamily();renderVault();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
@@ -3330,7 +3375,7 @@ function renderDocs(){setTimeout(loadThumbs,0);const el=document.getElementById(
   if(el)el.innerHTML=S.docs.filter(d=>d.space!=='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>PAN, RC, policy, warranty —<br>keep them all safe here (image or PDF)</div>';
   const oe=document.getElementById('odocList');
   if(oe)oe.innerHTML=S.docs.filter(d=>d.space==='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>Sanction letters, audit reports, statements —<br>save any office document by name</div>'}
-function renderWork(){renderWorkLauncher();listOr(otList,S.tasks.filter(t=>t.space==='office').sort(taskSort),taskRow,'No office tasks. Enjoy it while it lasts.');
+function renderWork(){renderHub();renderWorkLauncher();listOr(otList,S.tasks.filter(t=>t.space==='office').sort(taskSort),taskRow,'No office tasks. Enjoy it while it lasts.');
   fuList.innerHTML=S.followups.filter(f=>!f.done).map(fuCard).join('')+S.followups.filter(f=>f.done).slice(0,3).map(fuCard).join('')||'<div class="empty"><div class="em-ring">↺</div>No follow-ups. Add the first one above.</div>';
   if(document.getElementById('mtList'))mtList.innerHTML=S.meetings.slice().sort((a,b)=>((a.date||'')+'T'+(a.time||''))<((b.date||'')+'T'+(b.time||''))?-1:1).map(meetCard).join('')||'<div class="empty"><div class="em-ring">🎥</div>Add your first meeting above —<br>its name and time will show on the dashboard</div>';
   renderDocs();renderLinks();setTimeout(loadThumbs,0);
@@ -4505,6 +4550,76 @@ async function qaAIParse(raw){
     if(j&&j.title)return{title:j.title,due:j.date||null,time:j.time||null};
   }catch(e){}
   return null}
+
+/* ============ HUB — unified important links (Life + Work) ============ */
+function hubType(u){u=(u||'').toLowerCase();
+  if(/docs\.google\.com\/spreadsheets|\.xlsx?\b|sheet/.test(u))return'sheet';
+  if(/docs\.google\.com\/document|\.docx?\b/.test(u))return'doc';
+  if(/\.pdf\b/.test(u))return'pdf';
+  if(/\.(png|jpe?g|webp|gif|svg)\b/.test(u))return'image';
+  return'link'}
+function hubCloud(u){u=(u||'').toLowerCase();
+  if(/onedrive|1drv\.ms|sharepoint/.test(u))return['OneDrive','#4E8DF5'];
+  if(/drive\.google|docs\.google/.test(u))return['Google Drive','#5EBB63'];
+  return null}
+const HUB_ICON={sheet:'\ud83d\udcca',doc:'\ud83d\udcdd',pdf:'\ud83d\udcc4',image:'\ud83d\uddbc',link:'\ud83d\udd17'};
+function hubMigrate(){
+  if(S._hubMerged)return;
+  S.hub=S.hub||[];
+  (S.links||[]).forEach(function(l){
+    S.hub.push({id:l.id||uid(),name:l.name,url:l.url,type:hubType(l.url),space:'office',pin:false,at:l.at||new Date().toISOString()})});
+  S._hubMerged=true;save()}
+window._hubF={L:'all',W:'all'};
+function hubFilter(sfx,f){window._hubF[sfx]=f;renderHub()}
+function hubAdd(sfx){
+  const nEl=document.getElementById('hubName'+sfx),uEl=document.getElementById('hubUrl'+sfx);
+  const n=nEl.value.trim();let u=uEl.value.trim();
+  if(!n){toast('Give the link a name');nEl.focus();return}
+  if(!u){toast('Paste the link');uEl.focus();return}
+  if(!/^https?:\/\//i.test(u))u='https://'+u;
+  try{new URL(u)}catch(e){toast('That does not look like a valid link');return}
+  (S.hub=S.hub||[]).unshift({id:uid(),name:n,url:u,type:hubType(u),
+    space:(sfx==='W'?'office':'personal'),pin:false,at:new Date().toISOString()});
+  nEl.value='';uEl.value='';save();buzz(10);renderHub();toast('\u2713 Link added')}
+function hubPin(id){const x=(S.hub||[]).find(h=>h.id===id);if(!x)return;
+  x.pin=!x.pin;save();renderHub()}
+function hubDel(id){const x=(S.hub||[]).find(h=>h.id===id);if(!x)return;
+  askDelete(x.name,function(){S.hub=S.hub.filter(h=>h.id!==id);save();renderHub()})}
+function hubCopy(id){const x=(S.hub||[]).find(h=>h.id===id);if(!x)return;
+  navigator.clipboard.writeText(x.url).then(function(){toast('\u29c9 Link copied')})}
+function hubShare(id){const x=(S.hub||[]).find(h=>h.id===id);if(!x)return;
+  if(navigator.share){navigator.share({title:x.name,url:x.url}).catch(function(){})}
+  else hubCopy(id)}
+function hubOpen(id){const x=(S.hub||[]).find(h=>h.id===id);if(!x)return;
+  window.open(x.url,'_blank','noopener')}
+function hubRowHtml(x){
+  const cl=hubCloud(x.url);let host='';
+  try{host=new URL(x.url).hostname.replace(/^www\./,'')}catch(e){}
+  return '<div class="hub-row" onclick="hubOpen(\''+x.id+'\')">'
+    +'<span class="hub-ic t-'+x.type+'">'+HUB_ICON[x.type]+'</span>'
+    +'<div style="flex:1;min-width:0">'
+    +'<div style="font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+    +(x.pin?'\ud83d\udccc ':'')+esc(x.name)+'</div>'
+    +'<div class="stat-sub hub-cloud" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+    +(cl?'<i style="background:'+cl[1]+'"></i>'+cl[0]+' \u00b7 ':'')
+    +(x.space==='office'?'\ud83d\udcbc':'\ud83c\udfe0')+' '+esc(host)+'</div></div>'
+    +'<button class="hub-act pin'+(x.pin?' on':'')+'" onclick="event.stopPropagation();hubPin(\''+x.id+'\')" title="Pin">\ud83d\udccc</button>'
+    +'<button class="hub-act" onclick="event.stopPropagation();hubCopy(\''+x.id+'\')" title="Copy">\u29c9</button>'
+    +'<button class="hub-act" onclick="event.stopPropagation();hubShare(\''+x.id+'\')" title="Share">\u2197</button>'
+    +'<button class="hub-act" onclick="event.stopPropagation();hubDel(\''+x.id+'\')" title="Delete" style="color:var(--risk)">\u2715</button>'
+    +'</div>'}
+function renderHub(){
+  hubMigrate();
+  ['L','W'].forEach(function(sfx){
+    const el=document.getElementById('hubList'+sfx);if(!el)return;
+    const f=window._hubF[sfx];
+    document.querySelectorAll('#hubChips'+sfx+' .chip').forEach(function(c){c.classList.toggle('on',c.dataset.f===f)});
+    let list=(S.hub||[]).slice();
+    if(f==='personal'||f==='office')list=list.filter(x=>x.space===f);
+    if(f==='pin')list=list.filter(x=>x.pin);
+    list.sort(function(a,b){return (b.pin-a.pin)||((b.at||'').localeCompare(a.at||''))});
+    el.innerHTML=list.map(hubRowHtml).join('')
+      ||'<div class="stat-sub" style="padding:8px 2px">Add your first important link above \u2014 bank portals, sheets, HRMS, anything.</div>'})}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
