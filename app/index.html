@@ -919,6 +919,48 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
   </div>
 
   <div class="ltab" id="lt-health" style="display:none">
+
+    <!-- ✦ HEALTH 2.0 ✦ -->
+    <div class="card" style="padding:18px 18px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+        <div style="min-width:0">
+          <div class="stat-label">Health Score</div>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span id="hsNum" style="font-family:'Fraunces',serif;font-size:40px">—</span>
+            <span id="hsLbl" class="stat-sub"></span>
+          </div>
+          <div id="hsTip" class="stat-sub" style="margin-top:6px;line-height:1.5">—</div>
+        </div>
+        <svg class="ring" width="72" height="72" viewBox="0 0 84 84" style="flex-shrink:0">
+          <circle class="bg" cx="42" cy="42" r="36" stroke-width="7" fill="none"/>
+          <circle class="fg" id="hsRing" cx="42" cy="42" r="36" stroke-width="7" fill="none" stroke-dasharray="226" stroke-dashoffset="226"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="eyebrow">🩺 Vitals</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px" id="vtKinds">
+      <span class="chip on" data-k="sugar" onclick="vtPick(this,'sugar')">🩸 Sugar</span>
+      <span class="chip" data-k="bp" onclick="vtPick(this,'bp')">❤️ BP</span>
+      <span class="chip" data-k="weight" onclick="vtPick(this,'weight')">⚖️ Weight</span>
+      <span class="chip" data-k="sleep" onclick="vtPick(this,'sleep')">😴 Sleep</span>
+    </div>
+    <div class="dtrow" style="align-items:flex-end">
+      <label class="fld"><span id="vtL1">Sugar (mg/dL)</span><input type="number" inputmode="decimal" class="inp" id="vtV1" placeholder="98"></label>
+      <label class="fld" id="vtF2" style="display:none"><span>Diastolic</span><input type="number" inputmode="numeric" class="inp" id="vtV2" placeholder="80"></label>
+      <label class="fld" id="vtFT" style="flex:0 0 132px"><span>When</span><select class="inp" id="vtTag"><option value="F">Fasting</option><option value="PP">Post-meal</option><option value="R">Random</option></select></label>
+      <button class="btn btn-gold" style="flex:0 0 auto" onclick="vtAdd()">Save</button>
+    </div>
+    <div id="vtCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0 4px"></div>
+
+    <div class="eyebrow">🧪 Lab reports</div>
+    <div class="dtrow">
+      <label class="fld"><span>Report name</span><input class="inp" id="hrName" placeholder="CBC, Lipid profile, HbA1c…"></label>
+      <label class="fld" style="flex:0 0 150px"><span>Next checkup</span><input type="date" class="inp" id="hrDue"></label>
+    </div>
+    <button class="btn btn-gold" style="width:100%" onclick="hrAddReport()">📎 Attach report file</button>
+    <div id="hrList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+    <div class="stat-sub" style="margin:10px 2px 2px">Ranges are general guidance — always consult your doctor.</div>
     <div class="card" style="text-align:center;padding:28px">
       <div class="stat-label">Water today</div>
       <div class="stat-num" style="font-size:46px"><span id="wBig">0</span><span style="font-size:20px;color:var(--lo)"> / 8 glasses</span></div>
@@ -1637,7 +1679,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.4.0';
+const APP_VER='9.5.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2474,6 +2516,7 @@ function addBP(){const a=Number(bpS.value),b2=Number(bpD.value);if(!a||!b2)retur
 function delVital(id){askDelete('This reading',()=>_delVital(id));}
 function _delVital(id){const v=S.vitals.find(x=>x.id===id);trashPush('vital',v,'Vital reading');S.vitals=S.vitals.filter(x=>x.id!==id);save();renderLife()}
 function renderHealth(){if(!document.getElementById('medList'))return;
+  renderHScore();renderVitals();renderHReports();
   medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
   habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
   vitList.innerHTML=S.vitals.slice(0,6).map(v=>'<div class="row"><div class="row-body"><div class="row-title">'+(v.kind==='weight'?'⚖ '+v.v1+' kg':'🩺 '+v.v1+'/'+v.v2)+'</div><div class="row-meta">'+fmtD(v.at)+'</div></div><button class="del" onclick="delVital(\''+v.id+'\')">✕</button></div>').join('')||'<div class="empty" style="padding:12px">Log weight or BP to build history</div>'}
@@ -3232,7 +3275,7 @@ function initViewer(){const body=document.getElementById('pvBody');
     if(e.key==='Escape')pvClose();
     if(e.key==='+'||e.key==='=')pvZoomBy(1.2);
     if(e.key==='-')pvZoomBy(1/1.2)})}
-function allAttIds(){const ids=[];S.notes.forEach(n=>(n.att||[]).forEach(a=>ids.push(a.id)));
+function allAttIds(){const ids=[];(S.hreports||[]).forEach(r=>(r.att||[]).forEach(a=>ids.push(a.id)));S.notes.forEach(n=>(n.att||[]).forEach(a=>ids.push(a.id)));
   S.expenses.forEach(e=>(e.att||[]).forEach(a=>ids.push(a.id)));
   S.meetings.forEach(m=>(m.att||[]).forEach(a=>ids.push(a.id)));
   S.docs.forEach(d=>{if(d.att)ids.push(d.att.id)});S.circulars.forEach(c=>(c.versions||[]).forEach(v=>{if(v.att)ids.push(v.att.id)}));
@@ -4068,7 +4111,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 /* ============ DRAG & DROP UPLOADS (desktop) ============ */
 let _ddN=0;
-const DD_SEL='[onclick*="pickFiles"],[onclick*="cropPhotoFor"],[onclick*="photoIn"],[onclick*="restoreIn"],[onclick*="addCircular"],[onclick*="addDoc"],[onclick*="addOfficeDoc"],[onclick*="carPickPic"],[onclick*="famAddDoc"],[onclick*="famSetPhoto"],[onclick*="neAttach"],[onclick*="rnAddDoc"]';
+const DD_SEL='[onclick*="pickFiles"],[onclick*="cropPhotoFor"],[onclick*="photoIn"],[onclick*="restoreIn"],[onclick*="addCircular"],[onclick*="addDoc"],[onclick*="addOfficeDoc"],[onclick*="carPickPic"],[onclick*="famAddDoc"],[onclick*="famSetPhoto"],[onclick*="neAttach"],[onclick*="hrAddReport"],[onclick*="rnAddDoc"]';
 function _ddTargets(){return Array.from(document.querySelectorAll(DD_SEL)).filter(el=>el.offsetParent!==null)}
 function _ddShow(on){const v=document.getElementById('ddVeil');if(!v)return;
   v.classList.toggle('on',on);
@@ -4154,6 +4197,138 @@ function dlPendShare(keep){const P=window._pendShare;if(!P)return;if(!keep)sheet
     setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
     window._pendShare=null;
     toast('\u2193 '+P.fname)})()}
+
+/* ============ HEALTH 2.0 (vitals + score + coach + reports) ============ */
+let vtKind='sugar';
+const VT_META={sugar:{l:'Sugar (mg/dL)',u:'mg/dL',ph:'98'},bp:{l:'Systolic',u:'mmHg',ph:'120'},
+  weight:{l:'Weight (kg)',u:'kg',ph:'72.5'},sleep:{l:'Sleep (hours)',u:'hrs',ph:'7.5'}};
+function vtPick(el,k){vtKind=k;
+  document.querySelectorAll('#vtKinds .chip').forEach(c=>c.classList.toggle('on',c===el));
+  document.getElementById('vtL1').textContent=VT_META[k].l;
+  document.getElementById('vtV1').placeholder=VT_META[k].ph;
+  document.getElementById('vtF2').style.display=(k==='bp')?'':'none';
+  document.getElementById('vtFT').style.display=(k==='sugar')?'':'none'}
+function vtFlag(v){
+  if(v.k==='sugar'){const x=+v.v1;
+    if(v.tag==='F')return x<100?['good','Normal']:(x<126?['warn','Borderline']:['risk','High']);
+    return x<140?['good','Normal']:(x<200?['warn','Borderline']:['risk','High'])}
+  if(v.k==='bp'){const s=+v.v1,d=+v.v2;
+    if(s>=140||d>=90)return['risk','High'];
+    if(s>=120||d>=80)return['warn','Elevated'];
+    return['good','Normal']}
+  if(v.k==='sleep'){const h=+v.v1;return(h>=7&&h<=9)?['good','Good']:['warn',h<7?'Short':'Long']}
+  return['','']}
+function vtAdd(){
+  const v1=parseFloat(document.getElementById('vtV1').value);
+  if(isNaN(v1)||v1<=0){toast('Enter a value first');return}
+  const rec={id:uid(),k:vtKind,v1:v1,at:new Date().toISOString()};
+  if(vtKind==='bp'){const v2=parseFloat(document.getElementById('vtV2').value);
+    if(isNaN(v2)||v2<=0){toast('Enter the diastolic value too');return}rec.v2=v2}
+  if(vtKind==='sugar')rec.tag=document.getElementById('vtTag').value;
+  (S.vitals=S.vitals||[]).unshift(rec);save();buzz(10);
+  document.getElementById('vtV1').value='';const e2=document.getElementById('vtV2');if(e2)e2.value='';
+  const fl=vtFlag(rec);
+  toast('\u2713 Logged'+(fl[1]?' \u00b7 '+fl[1]:''));renderHealth()}
+function vtSpark(list){
+  const vs=list.slice(0,10).reverse().map(v=>+v.v1);
+  if(vs.length<2)return'';
+  const mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rg=(mx-mn)||1;
+  const pts=vs.map((v,i)=>((i/(vs.length-1))*96+2).toFixed(1)+','+(24-((v-mn)/rg)*20).toFixed(1)).join(' ');
+  return'<svg width="100" height="26" viewBox="0 0 100 26" style="display:block;margin-top:6px">'
+    +'<polyline points="'+pts+'" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".85"/></svg>'}
+function renderVitals(){
+  const el=document.getElementById('vtCards');if(!el)return;
+  const V=S.vitals||[];const kinds=['sugar','bp','weight','sleep'];
+  const nm={sugar:'\U0001FA78 Sugar',bp:'\u2764\uFE0F BP',weight:'\u2696\uFE0F Weight',sleep:'\U0001F634 Sleep'};
+  let h='';
+  kinds.forEach(k=>{
+    const list=V.filter(v=>v.k===k);if(!list.length)return;
+    const L=list[0],P=list[1];
+    const val=(k==='bp')?(L.v1+'/'+L.v2):(L.v1+'');
+    const fl=vtFlag(L);
+    const dcol=fl[0]==='risk'?'var(--risk)':(fl[0]==='warn'?'var(--warn)':'var(--good)');
+    let delta='';
+    if(P&&k!=='bp'){const d=+L.v1-(+P.v1);
+      if(Math.abs(d)>=0.1)delta='<span class="stat-sub"> '+(d>0?'\u2191':'\u2193')+Math.abs(Math.round(d*10)/10)+'</span>'}
+    h+='<div class="card" style="padding:13px 14px">'
+      +'<div class="stat-label" style="display:flex;justify-content:space-between;align-items:center">'+nm[k]
+      +(fl[1]?'<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:'+dcol+'"><span style="width:7px;height:7px;border-radius:50%;background:'+dcol+'"></span>'+fl[1]+'</span>':'')+'</div>'
+      +'<div style="display:flex;align-items:baseline;gap:4px;margin-top:3px">'
+      +'<span style="font-family:\'Fraunces\',serif;font-size:24px;font-variant-numeric:tabular-nums">'+val+'</span>'
+      +'<span class="stat-sub">'+VT_META[k].u+'</span>'+delta+'</div>'
+      +vtSpark(list)
+      +'<div class="stat-sub" style="margin-top:5px">'+list.length+' reading'+(list.length===1?'':'s')+' \u00b7 '+fmtD(L.at.slice(0,10))+'</div>'
+      +'</div>'});
+  el.innerHTML=h||'<div class="stat-sub" style="grid-column:1/-1;padding:6px 2px">Log your first reading above \u2014 sugar, BP, weight or sleep.</div>'}
+function medAdherenceToday(){
+  const t=today();let tot=0,done=0;
+  (S.meds||[]).forEach(m=>{if(!medActive(m,t))return;
+    const times=[m.t1,m.t2].filter(Boolean);
+    const now=new Date();const cur=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+    times.forEach((tm,i)=>{if(tm<=cur){tot++;if(((m.taken||{})[t]||[])[i])done++}})});
+  return tot?done/tot:null}
+function healthScore(){
+  const t=today();const parts=[];
+  parts.push(Math.min((S.water&&S.water.date===t?S.water.count:0)/8,1));
+  const ad=medAdherenceToday();if(ad!==null)parts.push(ad);
+  if((S.habits||[]).length){const hd=S.habits.filter(h=>(h.done||{})[t]).length;parts.push(hd/S.habits.length)}
+  const V=S.vitals||[];
+  if(V.length){const days=(Date.now()-Date.parse(V[0].at))/86400000;
+    parts.push(days<=3?1:(days<=7?0.6:0.2))}
+  return Math.round(parts.reduce((a,b)=>a+b,0)/parts.length*100)}
+function coachTip(){
+  const t=today();const V=S.vitals||[];
+  const ad=medAdherenceToday();
+  if(ad!==null&&ad<1)return'\U0001F48A A medicine dose is pending \u2014 take it on time.';
+  const ls=V.find(v=>v.k==='sugar');
+  if(ls&&vtFlag(ls)[0]==='risk')return'\U0001FA78 Last sugar reading was high \u2014 recheck fasting tomorrow morning.';
+  const lb=V.find(v=>v.k==='bp');
+  if(lb&&vtFlag(lb)[0]==='risk')return'\u2764\uFE0F Last BP was high \u2014 rest, recheck, and consult if it stays up.';
+  if(lb&&(Date.now()-Date.parse(lb.at))/86400000>14)return'\u2764\uFE0F No BP reading in two weeks \u2014 take one today.';
+  const w=(S.water&&S.water.date===t)?S.water.count:0;
+  if(new Date().getHours()>=17&&w<5)return'\U0001F4A7 Only '+w+' glasses so far \u2014 catch up on water this evening.';
+  const st=Math.max(0,...((S.habits||[]).map(h=>h.streak||0)));
+  if(st>=3)return'\U0001F525 '+st+'-day habit streak \u2014 keep the chain alive today.';
+  const tips=['\U0001F6B6 A 20-minute walk after lunch steadies post-meal sugar.',
+    '\U0001F634 A fixed sleep time does more than a longer lie-in.',
+    '\U0001F9C2 Half the salt, a week \u2014 your BP will notice.',
+    '\U0001F4A7 Start the day with a full glass of water.'];
+  return tips[new Date().getDate()%tips.length]}
+function renderHScore(){
+  const n=document.getElementById('hsNum');if(!n)return;
+  const sc=healthScore();
+  n.textContent=sc;
+  const lbl=sc>=80?'Excellent':(sc>=60?'Good':(sc>=40?'Fair':'Needs attention'));
+  document.getElementById('hsLbl').textContent=lbl;
+  document.getElementById('hsTip').textContent=coachTip();
+  const r=document.getElementById('hsRing');if(r)r.style.strokeDashoffset=(226*(1-sc/100)).toFixed(1)}
+function hrAddReport(){
+  pickFiles(function(out){if(!out||!out.length)return;
+    const nmEl=document.getElementById('hrName'),duEl=document.getElementById('hrDue');
+    (S.hreports=S.hreports||[]).unshift({id:uid(),
+      name:(nmEl.value.trim()||out[0].name),att:out,due:(duEl.value||null),at:new Date().toISOString()});
+    nmEl.value='';duEl.value='';save();buzz(10);renderHealth()})}
+function hrDel(id){askConfirm('Delete this report?','The attached file will be removed too.',function(){
+  const i=(S.hreports||[]).findIndex(r=>r.id===id);if(i<0)return;
+  (S.hreports[i].att||[]).forEach(a=>{try{fileDel(a.id)}catch(e){}});
+  S.hreports.splice(i,1);save();renderHealth()})}
+function renderHReports(){
+  const el=document.getElementById('hrList');if(!el)return;
+  const R=S.hreports||[];
+  el.innerHTML=R.map(r=>{
+    const a=(r.att||[])[0];
+    let due='';
+    if(r.due){const d=daysTo(r.due);
+      const c=d<0?'var(--risk)':(d<=7?'var(--warn)':'var(--lo)');
+      due='<span class="stat-sub" style="color:'+c+'">'+(d<0?'Checkup overdue':(d===0?'Checkup today':'Checkup in '+d+'d'))+'</span>'}
+    return'<div class="card" style="padding:12px 14px;display:flex;align-items:center;gap:12px">'
+      +'<span style="font-size:22px;flex-shrink:0">'+(a?fileIcon(a):'\U0001F9EA')+'</span>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.name)+'</div>'
+      +'<div class="stat-sub">'+fmtD(r.at.slice(0,10))+(due?' \u00b7 ':'')+'</div>'+due+'</div>'
+      +(a?'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name).replace(/'/g,'')+'\')">\u2197</button>':'')
+      +'<button class="btn btn-ghost btn-sm" onclick="hrDel(\''+r.id+'\')" style="color:var(--risk)">\u2715</button>'
+      +'</div>'}).join('')||'' }
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
