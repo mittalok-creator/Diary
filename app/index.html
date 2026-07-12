@@ -4055,7 +4055,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 /* ============ DRAG & DROP UPLOADS (desktop) ============ */
 let _ddN=0;
-const DD_SEL='[onclick*="pickFiles"],[onclick*="cropPhotoFor"],[onclick*="photoIn"],[onclick*="restoreIn"],[onclick*="addCircular"],[onclick*="addDocIn"],[onclick*="carPickPic"],[onclick*="famAddDoc"],[onclick*="famSetPhoto"],[onclick*="neAttach"],[onclick*="rnAddDoc"]';
+const DD_SEL='[onclick*="pickFiles"],[onclick*="cropPhotoFor"],[onclick*="photoIn"],[onclick*="restoreIn"],[onclick*="addCircular"],[onclick*="addDoc"],[onclick*="addOfficeDoc"],[onclick*="carPickPic"],[onclick*="famAddDoc"],[onclick*="famSetPhoto"],[onclick*="neAttach"],[onclick*="rnAddDoc"]';
 function _ddTargets(){return Array.from(document.querySelectorAll(DD_SEL)).filter(el=>el.offsetParent!==null)}
 function _ddShow(on){const v=document.getElementById('ddVeil');if(!v)return;
   v.classList.toggle('on',on);
