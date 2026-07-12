@@ -245,7 +245,7 @@ html[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator{f
 }
 @media(min-width:1000px){#waterCard{cursor:pointer}}
 #lockOv{position:absolute;inset:0;z-index:120;display:none;flex-direction:column;align-items:center;justify-content:center;
-  background:radial-gradient(700px 500px at 50% 18%,#161c26,var(--ink0) 70%);padding:30px;text-align:center}
+  background:var(--ink0);padding:30px;text-align:center}
 #lockOv.open{display:flex}
 .lk-title{font-family:'Fraunces',serif;font-size:22px;margin:18px 0 4px}
 .lk-sub{color:var(--lo);font-size:13px;margin-bottom:24px;min-height:18px}
@@ -671,6 +671,36 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 @keyframes ddp{0%,100%{transform:scale(1)}50%{transform:scale(1.025)}}
 .dd-target{outline:2px dashed color-mix(in srgb,var(--gold) 70%,transparent) !important;outline-offset:3px;
   animation:ddp 1.6s ease-in-out infinite}
+/* ============ LOCK SCREEN v2 (theme & accent aware) ============ */
+#lockOv{background:var(--ink0)}
+#lockOv::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(560px 380px at 50% 12%,color-mix(in srgb,var(--gold) 14%,transparent),transparent 70%),
+             radial-gradient(460px 340px at 12% 92%,color-mix(in srgb,var(--gold) 7%,transparent),transparent 70%),
+             radial-gradient(420px 300px at 92% 80%,color-mix(in srgb,var(--goldb) 6%,transparent),transparent 72%);
+  animation:lkaur 14s ease-in-out infinite alternate}
+@keyframes lkaur{from{transform:translateX(-10px)}to{transform:translateX(12px) scale(1.03)}}
+#lockOv>*{position:relative}
+.mono-big{background:color-mix(in srgb,var(--ink1) 85%,transparent);
+  box-shadow:0 0 0 7px color-mix(in srgb,var(--gold) 8%,transparent),
+             0 22px 50px color-mix(in srgb,var(--gold) 18%,rgba(0,0,0,.2)),
+             inset 0 1px 0 color-mix(in srgb,#fff 20%,transparent)}
+.lk-title{font-size:25px;letter-spacing:-.01em}
+.lk-sub{color:var(--lo)}
+.lk-dots{gap:16px}
+.lk-dot{width:13px;height:13px;border-color:color-mix(in srgb,var(--gold) 55%,transparent);background:color-mix(in srgb,var(--gold) 6%,transparent)}
+.lk-dot.on{background:linear-gradient(160deg,var(--goldb),var(--gold));border-color:var(--gold);
+  animation:dotpop .22s cubic-bezier(.2,.7,.3,1.4);box-shadow:0 4px 12px color-mix(in srgb,var(--gold) 40%,transparent)}
+@keyframes dotpop{from{transform:scale(.5)}to{transform:scale(1)}}
+.lk-key{background:linear-gradient(170deg,color-mix(in srgb,var(--ink1) 92%,var(--gold)),var(--ink1));
+  border:1px solid color-mix(in srgb,var(--gold) 16%,var(--hair));
+  box-shadow:0 10px 24px rgba(0,0,0,.10),inset 0 1px 0 color-mix(in srgb,#fff 25%,transparent);
+  transition:transform .14s,box-shadow .2s,border-color .2s}
+@media(hover:hover){.lk-key:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--gold) 45%,transparent);
+  box-shadow:0 14px 30px color-mix(in srgb,var(--gold) 14%,rgba(0,0,0,.12))}}
+.lk-key:active{transform:scale(.92);border-color:var(--gold);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 22%,transparent)}
+.lk-key.ghost{background:none;border:none;box-shadow:none}
+@media(prefers-reduced-motion:reduce){#lockOv::before{animation:none}.lk-dot.on{animation:none}}
 </style>
 </head>
 <body>
@@ -1607,7 +1637,7 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='9.3.0';
+const APP_VER='9.3.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
