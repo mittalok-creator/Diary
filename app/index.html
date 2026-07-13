@@ -726,6 +726,22 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 .hub-act:active{transform:scale(.85)}
 .hub-act.pin.on{color:var(--gold)}
 @keyframes alsh{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
+/* ---- Notion-lite notes: tables, checklists, dividers ---- */
+.nt-wrap{overflow-x:auto;margin:10px 0;border-radius:12px;-webkit-overflow-scrolling:touch}
+table.nt{border-collapse:collapse;min-width:100%;font-size:14px}
+.nt th,.nt td{border:1px solid var(--hair);padding:8px 10px;min-width:92px;text-align:left;vertical-align:top}
+.nt th{background:color-mix(in srgb,var(--gold) 11%,transparent);font-weight:700;color:var(--gold);white-space:nowrap}
+.nt tr.nt-sum td{background:color-mix(in srgb,var(--gold) 7%,transparent);font-weight:700;color:var(--gold);
+  border-top:2px solid color-mix(in srgb,var(--gold) 40%,transparent);font-variant-numeric:tabular-nums}
+.nt-hr{border:none;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px 0}
+.nt-check{display:flex;gap:9px;padding:3px 0;align-items:flex-start}
+.nt-check::before{content:'\2610';color:var(--gold);cursor:pointer;font-size:17px;line-height:1.35;flex-shrink:0}
+.nt-check.done::before{content:'\2611'}
+.nt-check.done{opacity:.6;text-decoration:line-through}
+.ntbar{display:flex;gap:6px;padding:7px 10px;border-bottom:1px solid var(--hair);flex-wrap:wrap;background:var(--ink1)}
+.ntbar button{border:1px solid var(--hair);background:var(--ink2);color:var(--hi);border-radius:8px;
+  padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
+.ntbar button:active{transform:scale(.94)}
 </style>
 </head>
 <body>
@@ -1660,6 +1676,9 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
     <button class="ne-t" onclick="neCmd('strikeThrough')" title="Strikethrough"><s>S</s></button>
     <button class="ne-t" onclick="neVoice()" title="Voice note">🎙</button>
     <button class="ne-t" onclick="neAI()" title="AI">✨</button>
+    <button class="ne-t" onclick="ntTable()" title="Insert table">⊞</button>
+    <button class="ne-t" onclick="ntCheck()" title="Checklist">☑</button>
+    <button class="ne-t" onclick="ntDivider()" title="Divider">─</button>
     <span class="ne-div"></span>
     <button class="ne-t" onclick="neSize('5')" title="Large">Aᴺ</button>
     <button class="ne-t" onclick="neSize('3')" title="Normal">A</button>
@@ -1671,7 +1690,8 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
     <span class="ne-colors" id="neColors"></span>
     <button class="ne-t" onclick="neCmd('removeFormat')" title="Clear formatting">⊘</button>
   </div>
-  <div class="ne-body"><div id="neEditor" contenteditable="true" spellcheck="false"></div></div>
+  <div class="ne-body"><div id="ntBar" class="ntbar" style="display:none" contenteditable="false"><button onclick="ntRow(1)">＋ Row</button><button onclick="ntRow(0)">− Row</button><button onclick="ntCol(1)">＋ Col</button><button onclick="ntCol(0)">− Col</button><button onclick="ntSum()">Σ Total</button><button onclick="ntDel()" style="color:var(--risk)">🗑 Table</button></div>
+    <div id="neEditor" contenteditable="true" spellcheck="false"></div></div>
   <div class="ne-foot">
     <button class="btn btn-ghost" title="Attach" onclick="neAttach()">📎</button>
     <button class="btn btn-ghost" onclick="noteExport()">⤓ Export</button>
@@ -1749,7 +1769,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.4.0';
+const APP_VER='10.5.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4542,7 +4562,7 @@ function neAI(){
     +'<button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="neAIGo(\'en\')">\uD83C\uDF10 Translate to English</button>'
     +'<div id="neAIOut" style="white-space:pre-wrap;font-size:14px;line-height:1.6;padding:10px 2px 2px"></div>')}
 async function neAIGo(mode){
-  const body=document.getElementById('neBody');
+  const body=document.getElementById('neEditor');
   const txt=(body?body.innerText:'').trim();
   if(!txt){toast('The note is empty');return}
   if(!(await aiConsent()))return;
@@ -4559,7 +4579,7 @@ async function neAIGo(mode){
     window._neAIres=r;
   }catch(e){out.textContent='';aiErrToast(e)}}
 function neAIInsert(){
-  const body=document.getElementById('neBody');if(!body||!window._neAIres)return;
+  const body=document.getElementById('neEditor');if(!body||!window._neAIres)return;
   const d=document.createElement('div');
   d.innerHTML='<br><div style="border-left:3px solid var(--gold);padding-left:10px">'+esc(window._neAIres).replace(/\n/g,'<br>')+'</div>';
   body.appendChild(d);window._neAIres=null;
@@ -4755,6 +4775,68 @@ function nagOverdue(){
   }catch(e){}}
 setInterval(nagOverdue,10*60000);
 setTimeout(nagOverdue,25000);
+
+/* ============ NOTION-LITE NOTES (tables + live totals + checklists) ============ */
+function ntInsertHTML(h){document.getElementById('neEditor').focus();
+  try{document.execCommand('insertHTML',false,h)}catch(e){}}
+function ntTable(){
+  ntInsertHTML('<div class="nt-wrap"><table class="nt"><tbody>'
+    +'<tr><th>Item</th><th>Amount</th><th>Note</th></tr>'
+    +'<tr><td><br></td><td><br></td><td><br></td></tr>'
+    +'<tr><td><br></td><td><br></td><td><br></td></tr>'
+    +'</tbody></table></div><p><br></p>')}
+function ntCheck(){ntInsertHTML('<div class="nt-check">&nbsp;</div>')}
+function ntDivider(){ntInsertHTML('<hr class="nt-hr"><p><br></p>')}
+function ntCurTable(){
+  const sel=window.getSelection();if(!sel||!sel.rangeCount)return null;
+  let n=sel.anchorNode;if(n&&n.nodeType===3)n=n.parentNode;
+  const t=(n&&n.closest)?n.closest('table.nt'):null;
+  const ed=document.getElementById('neEditor');
+  return (t&&ed&&ed.contains(t))?t:null}
+function ntBarSync(){const b=document.getElementById('ntBar');if(!b)return;
+  b.style.display=ntCurTable()?'flex':'none'}
+document.addEventListener('selectionchange',ntBarSync);
+function ntRow(add){const t=ntCurTable();if(!t)return;const tb=t.tBodies[0];
+  const sum=t.querySelector('tr.nt-sum');
+  if(add){const cols=tb.rows[0].cells.length;
+    const tr=document.createElement('tr');
+    for(let i=0;i<cols;i++){const td=document.createElement('td');td.innerHTML='<br>';tr.appendChild(td)}
+    tb.insertBefore(tr,sum||null)}
+  else{const rows=Array.from(tb.rows).filter(r=>r!==sum&&r.rowIndex>0);
+    if(rows.length>1)tb.removeChild(rows[rows.length-1])}
+  ntRecalc(t)}
+function ntCol(add){const t=ntCurTable();if(!t)return;
+  Array.from(t.tBodies[0].rows).forEach(function(r,i){
+    if(add){const c=document.createElement(i===0?'th':'td');c.innerHTML='<br>';r.appendChild(c)}
+    else if(r.cells.length>1)r.removeChild(r.cells[r.cells.length-1])});
+  ntRecalc(t)}
+function ntSum(){const t=ntCurTable();if(!t)return;
+  let sum=t.querySelector('tr.nt-sum');
+  if(sum){sum.remove();return}
+  sum=document.createElement('tr');sum.className='nt-sum';
+  const cols=t.tBodies[0].rows[0].cells.length;
+  for(let i=0;i<cols;i++){const td=document.createElement('td');
+    td.setAttribute('contenteditable','false');
+    td.textContent=(i===0?'\u03a3 Total':'');sum.appendChild(td)}
+  t.tBodies[0].appendChild(sum);ntRecalc(t)}
+function ntRecalc(t){const sum=t.querySelector('tr.nt-sum');if(!sum)return;
+  const rows=Array.from(t.tBodies[0].rows).filter(r=>r!==sum&&r.rowIndex>0);
+  for(let c=1;c<sum.cells.length;c++){
+    let s=0,any=false;
+    rows.forEach(function(r){const cell=r.cells[c];if(!cell)return;
+      const v=parseFloat((cell.textContent||'').replace(/[,\s\u20b9]/g,''));
+      if(!isNaN(v)){s+=v;any=true}});
+    sum.cells[c].textContent=any?(Math.round(s*100)/100).toLocaleString('en-IN'):''}}
+function ntDel(){const t=ntCurTable();if(!t)return;
+  const w=t.closest('.nt-wrap');(w||t).remove();ntBarSync()}
+(function(){
+  function wire(){const ed=document.getElementById('neEditor');if(!ed||ed._ntWired)return;ed._ntWired=true;
+    ed.addEventListener('input',function(e){
+      const t=(e.target&&e.target.closest)?e.target.closest('table.nt'):null;if(t)ntRecalc(t)});
+    ed.addEventListener('click',function(e){
+      const c=(e.target&&e.target.closest)?e.target.closest('.nt-check'):null;
+      if(c&&e.offsetX<26)c.classList.toggle('done')})}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire()})();
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
