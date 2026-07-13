@@ -1377,6 +1377,11 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
       <div><div class="set-name">⏰ Alarm sound</div><div class="set-sub">Ring + vibrate when the app is open (closed app: normal notification)</div></div>
       <button class="btn btn-ghost btn-sm" id="alSndBtn" onclick="alarmToggle()">On</button>
     </div>
+    <div class="set-row">
+      <div><div class="set-name">⏰ Overdue nag</div><div class="set-sub">Remind every 10 minutes until an overdue task is done</div></div>
+      <button class="btn btn-ghost btn-sm" id="nagBtn" onclick="nagToggle()">On</button>
+    </div>
+
 
   </div>
 
@@ -1744,7 +1749,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.3.1';
+const APP_VER='10.4.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4726,6 +4731,31 @@ function vtDel(id,k){
   if(left)vtHist(k);else document.getElementById('sheetOv').classList.remove('open');
   toast('Reading removed')}
 
+/* ============ OVERDUE NAG (every 10 min until done) ============ */
+function nagOn(){return !(S.profile&&S.profile.nag10===false)}
+function nagToggle(){S.profile.nag10=nagOn()?false:true;save();renderSettings();
+  toast(nagOn()?'\u23f0 Overdue nag on \u2014 every 10 min':'Overdue nag off')}
+function nagDraw(){const b=document.getElementById('nagBtn');if(b)b.textContent=nagOn()?'On':'Off'}
+function nagOverdue(){
+  try{
+    if(!nagOn())return;
+    const t=today();const n=new Date();
+    const cur=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+    const od=(S.tasks||[]).filter(x=>!x.done&&x.due&&(x.due<t||(x.due===t&&x.time&&x.time<cur)));
+    if(!od.length)return;
+    const names=od.slice(0,3).map(x=>x.title).join(' \u00b7 ')+(od.length>3?' \u00b7 +'+(od.length-3)+' more':'');
+    buzz([70,50,70]);
+    toast('\u23f0 '+od.length+' overdue \u2014 tick them off or reschedule');
+    if(('Notification' in window)&&Notification.permission==='granted'){
+      const title='\u23f0 '+od.length+' overdue task'+(od.length===1?'':'s');
+      if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+        navigator.serviceWorker.controller.postMessage({type:'notify',title:title,body:names,tag:'alokos-overdue'})}
+      else{try{new Notification(title,{body:names,icon:'./icon-192.png',tag:'alokos-overdue',renotify:true})}catch(e){}}
+    }
+  }catch(e){}}
+setInterval(nagOverdue,10*60000);
+setTimeout(nagOverdue,25000);
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
@@ -5437,7 +5467,7 @@ function renderSettings(){
     vv.style.cssText='text-align:center;margin:18px 0 6px;opacity:.65';
     const host=document.getElementById('v-settings');if(host)host.appendChild(vv)}
   if(vv)vv.textContent='ALOK OS \u00b7 v'+APP_VER;
-  aiStatusDraw();alarmDraw();
+  aiStatusDraw();alarmDraw();nagDraw();
   const _acc=S.profile.accent||'gold';
   document.querySelectorAll('.acc-dot').forEach(function(d){d.classList.toggle('on',d.dataset.a===_acc)});
   const _as=document.getElementById('accSub');if(_as)_as.textContent=ACC_NAMES[_acc]||'Gold';
