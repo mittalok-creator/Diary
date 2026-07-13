@@ -979,14 +979,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
     </div>
     <div id="vtCards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:12px 0 4px"></div>
 
-    <div class="eyebrow">🧪 Lab reports</div>
-    <div class="dtrow">
-      <label class="fld"><span>Report name</span><input class="inp" id="hrName" placeholder="CBC, Lipid profile, HbA1c…"></label>
-      <label class="fld" style="flex:0 0 150px"><span>Next checkup</span><input type="date" class="inp" id="hrDue"></label>
-    </div>
-    <button class="btn btn-gold" style="width:100%" onclick="hrAddReport()">📎 Attach report file</button>
-    <div id="hrList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
-    <div class="stat-sub" style="margin:10px 2px 2px">Ranges are general guidance — always consult your doctor.</div>
+    <div class="eyebrow">💧 Water</div>
     <div class="card" style="text-align:center;padding:28px">
       <div class="stat-label">Water today</div>
       <div class="stat-num" style="font-size:46px"><span id="wBig">0</span><span style="font-size:20px;color:var(--lo)"> / 8 glasses</span></div>
@@ -1011,10 +1004,16 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
     <div class="addbar" style="margin:0 0 12px"><input class="inp" id="habName" placeholder="New habit (morning walk, reading…)" onkeydown="if(event.key==='Enter')addHabit()"><button class="btn btn-gold" onclick="addHabit()">＋</button></div>
     <div id="habList" style="display:flex;flex-direction:column;gap:10px"></div>
 
-    <div class="eyebrow">🩺 Vitals</div>
-    <div class="dtrow" style="margin:0 0 8px"><input type="number" step="0.1" class="inp" id="wtIn" placeholder="Weight (kg)"><button class="btn btn-ghost" onclick="addWeight()">Log</button></div>
-    <div class="dtrow" style="margin:0 0 12px"><input type="number" class="inp" id="bpS" placeholder="BP systolic"><input type="number" class="inp" id="bpD" placeholder="BP diastolic"><button class="btn btn-ghost" onclick="addBP()">Log</button></div>
-    <div class="card" id="vitList" style="padding:6px 18px"></div>
+    <div class="eyebrow">🧪 Lab reports</div>
+    <div class="dtrow">
+      <label class="fld"><span>Report name</span><input class="inp" id="hrName" placeholder="CBC, Lipid profile, HbA1c…"></label>
+      <label class="fld" style="flex:0 0 150px"><span>Next checkup</span><input type="date" class="inp" id="hrDue"></label>
+    </div>
+    <button class="btn btn-gold" style="width:100%" onclick="hrAddReport()">📎 Attach report file</button>
+    <div id="hrList" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+    <div class="stat-sub" style="margin:10px 2px 2px">Ranges are general guidance — always consult your doctor.</div>
+
+
   </div>
 
   <div class="ltab" id="lt-car" style="display:none">
@@ -1745,7 +1744,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.2.2';
+const APP_VER='10.3.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2582,6 +2581,7 @@ function addBP(){const a=Number(bpS.value),b2=Number(bpD.value);if(!a||!b2)retur
 function delVital(id){askDelete('This reading',()=>_delVital(id));}
 function _delVital(id){const v=S.vitals.find(x=>x.id===id);trashPush('vital',v,'Vital reading');S.vitals=S.vitals.filter(x=>x.id!==id);save();renderLife()}
 function renderHealth(){if(!document.getElementById('medList'))return;
+  if(!S._vitNorm){let ch=false;(S.vitals||[]).forEach(v=>{if(v.kind&&!v.k){v.k=v.kind;delete v.kind;ch=true}});S._vitNorm=true;if(ch)save()}
   renderHScore();renderVitals();renderHReports();
   medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
   habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
@@ -4323,14 +4323,14 @@ function renderVitals(){
     let delta='';
     if(P&&k!=='bp'){const d=+L.v1-(+P.v1);
       if(Math.abs(d)>=0.1)delta='<span class="stat-sub"> '+(d>0?'\u2191':'\u2193')+Math.abs(Math.round(d*10)/10)+'</span>'}
-    h+='<div class="card" style="padding:13px 14px">'
+    h+='<div class="card" style="padding:13px 14px;cursor:pointer" onclick="vtHist(\''+k+'\')">'
       +'<div class="stat-label" style="display:flex;justify-content:space-between;align-items:center">'+nm[k]
       +(fl[1]?'<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:'+dcol+'"><span style="width:7px;height:7px;border-radius:50%;background:'+dcol+'"></span>'+fl[1]+'</span>':'')+'</div>'
       +'<div style="display:flex;align-items:baseline;gap:4px;margin-top:3px">'
       +'<span style="font-family:\'Fraunces\',serif;font-size:24px;font-variant-numeric:tabular-nums">'+val+'</span>'
       +'<span class="stat-sub">'+VT_META[k].u+'</span>'+delta+'</div>'
       +vtSpark(list)
-      +'<div class="stat-sub" style="margin-top:5px">'+list.length+' reading'+(list.length===1?'':'s')+' \u00b7 '+fmtD(L.at.slice(0,10))+'</div>'
+      +'<div class="stat-sub" style="margin-top:5px">'+list.length+' reading'+(list.length===1?'':'s')+' \u00b7 tap for history</div>'
       +'</div>'});
   el.innerHTML=h||'<div class="stat-sub" style="grid-column:1/-1;padding:6px 2px">Log your first reading above \u2014 sugar, BP, weight or sleep.</div>'}
 function medAdherenceToday(){
@@ -4701,6 +4701,30 @@ function alarmStop(){
 function alarmSnooze(){const t=window._alTitle;alarmStop();
   toast('\ud83d\ude34 Snoozed for 5 minutes');
   setTimeout(function(){alarmRing(t)},5*60000)}
+
+function vtHist(k){
+  const nm={sugar:'\ud83e\ude78 Sugar',bp:'\u2764\ufe0f Blood pressure',weight:'\u2696\ufe0f Weight',sleep:'\ud83d\ude34 Sleep'}[k]||k;
+  const list=(S.vitals||[]).filter(v=>v.k===k);
+  if(!list.length){toast('No readings yet');return}
+  const rows=list.map(v=>{
+    const fl=vtFlag(v);
+    const dcol=fl[0]==='risk'?'var(--risk)':(fl[0]==='warn'?'var(--warn)':'var(--good)');
+    const val=(k==='bp')?(v.v1+'/'+v.v2):v.v1;
+    const d=new Date(v.at);
+    const when=fmtD(v.at.slice(0,10))+' \u00b7 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair)">'
+      +(fl[1]?'<span style="width:9px;height:9px;border-radius:50%;background:'+dcol+';flex-shrink:0"></span>':'<span style="width:9px"></span>')
+      +'<b style="font-variant-numeric:tabular-nums;font-size:16px">'+val+'</b>'
+      +'<span class="stat-sub">'+VT_META[k].u+(v.tag?' \u00b7 '+v.tag:'')+'</span>'
+      +'<span class="stat-sub" style="margin-left:auto">'+when+'</span>'
+      +'<button class="hub-act" style="color:var(--risk)" onclick="vtDel(\''+v.id+'\',\''+k+'\')">\u2715</button>'
+      +'</div>'}).join('');
+  showSheet(nm+' \u00b7 history',rows)}
+function vtDel(id,k){
+  S.vitals=(S.vitals||[]).filter(v=>v.id!==id);save();renderHealth();
+  const left=(S.vitals||[]).filter(v=>v.k===k).length;
+  if(left)vtHist(k);else document.getElementById('sheetOv').classList.remove('open');
+  toast('Reading removed')}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
