@@ -706,7 +706,10 @@ html[data-view]:not([data-view="today"]) .h-date{margin-bottom:0}
   background:var(--ink1);cursor:pointer;transition:transform .15s,border-color .2s}
 .hub-row:active{transform:scale(.985)}
 @media(hover:hover){.hub-row:hover{border-color:color-mix(in srgb,var(--gold) 35%,transparent)}}
-.hub-ic{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.hub-ic{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;font-weight:800;letter-spacing:.01em}
+.hub-ic.t-pdf{font-size:11.5px}
+.hub-ic.t-ppt{background:#33251C;color:#F0A868}
+html[data-theme="light"] .hub-ic.t-ppt{background:#F7EBDD;color:#9A5B1F}
 .hub-ic.t-sheet{background:#1F3320;color:#8FD498}
 .hub-ic.t-doc{background:#1D2937;color:#8FB6E8}
 .hub-ic.t-pdf{background:#33201F;color:#E89898}
@@ -717,9 +720,9 @@ html[data-theme="light"] .hub-ic.t-doc{background:#E2ECF7;color:#22548E}
 html[data-theme="light"] .hub-ic.t-pdf{background:#F7E3E3;color:#983A3A}
 html[data-theme="light"] .hub-ic.t-image{background:#F5E9D6;color:#7A4B0E}
 html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
-.hub-cloud{display:inline-flex;align-items:center;gap:5px}
-.hub-cloud i{width:7px;height:7px;border-radius:50%;display:inline-block}
-.hub-act{border:none;background:none;color:var(--lo);font-size:15px;cursor:pointer;padding:6px;border-radius:8px;flex-shrink:0}
+.hub-cloud{display:block}
+.hub-cloud i{width:7px;height:7px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:5px}
+.hub-act{border:none;background:none;color:var(--lo);font-size:14px;cursor:pointer;padding:5px 4px;border-radius:8px;flex-shrink:0}
 .hub-act:active{transform:scale(.85)}
 .hub-act.pin.on{color:var(--gold)}
 @keyframes alsh{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
@@ -1742,7 +1745,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.2.1';
+const APP_VER='10.2.2';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4580,16 +4583,17 @@ async function qaAIParse(raw){
 
 /* ============ HUB — unified important links (Life + Work) ============ */
 function hubType(u){u=(u||'').toLowerCase();
-  if(/docs\.google\.com\/spreadsheets|\.xlsx?\b|sheet/.test(u))return'sheet';
-  if(/docs\.google\.com\/document|\.docx?\b/.test(u))return'doc';
-  if(/\.pdf\b/.test(u))return'pdf';
-  if(/\.(png|jpe?g|webp|gif|svg)\b/.test(u))return'image';
+  if(/\/:x:\/|docs\.google\.com\/spreadsheets|\.xlsx?\b/.test(u))return'sheet';
+  if(/\/:w:\/|docs\.google\.com\/document|\.docx?\b/.test(u))return'doc';
+  if(/\/:p:\/|docs\.google\.com\/presentation|\.pptx?\b/.test(u))return'ppt';
+  if(/\/:b:\/|\.pdf\b/.test(u))return'pdf';
+  if(/\/:i:\/|\.(png|jpe?g|webp|gif|svg)\b/.test(u))return'image';
   return'link'}
 function hubCloud(u){u=(u||'').toLowerCase();
   if(/onedrive|1drv\.ms|sharepoint/.test(u))return['OneDrive','#4E8DF5'];
   if(/drive\.google|docs\.google/.test(u))return['Google Drive','#5EBB63'];
   return null}
-const HUB_ICON={sheet:'\ud83d\udcca',doc:'\ud83d\udcdd',pdf:'\ud83d\udcc4',image:'\ud83d\uddbc',link:'\ud83d\udd17'};
+const HUB_ICON={sheet:'X',doc:'W',ppt:'P',pdf:'PDF',image:'\ud83d\uddbc',link:'\ud83d\udd17'};
 function hubMigrate(){
   if(S._hubMerged)return;
   S.hub=S.hub||[];
@@ -4622,8 +4626,9 @@ function hubOpen(id){const x=(S.hub||[]).find(h=>h.id===id);if(!x)return;
 function hubRowHtml(x){
   const cl=hubCloud(x.url);let host='';
   try{host=new URL(x.url).hostname.replace(/^www\./,'')}catch(e){}
+  const ty=hubType(x.url);
   return '<div class="hub-row" onclick="hubOpen(\''+x.id+'\')">'
-    +'<span class="hub-ic t-'+x.type+'">'+HUB_ICON[x.type]+'</span>'
+    +'<span class="hub-ic t-'+ty+'">'+(HUB_ICON[ty]||HUB_ICON.link)+'</span>'
     +'<div style="flex:1;min-width:0">'
     +'<div style="font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
     +(x.pin?'\ud83d\udccc ':'')+esc(x.name)+'</div>'
