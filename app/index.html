@@ -1744,7 +1744,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.3.0';
+const APP_VER='10.3.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2585,7 +2585,7 @@ function renderHealth(){if(!document.getElementById('medList'))return;
   renderHScore();renderVitals();renderHReports();
   medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
   habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
-  vitList.innerHTML=S.vitals.slice(0,6).map(v=>'<div class="row"><div class="row-body"><div class="row-title">'+(v.kind==='weight'?'⚖ '+v.v1+' kg':'🩺 '+v.v1+'/'+v.v2)+'</div><div class="row-meta">'+fmtD(v.at)+'</div></div><button class="del" onclick="delVital(\''+v.id+'\')">✕</button></div>').join('')||'<div class="empty" style="padding:12px">Log weight or BP to build history</div>'}
+  const _vl=document.getElementById('vitList');if(_vl)_vl.innerHTML=S.vitals.slice(0,6).map(v=>'<div class="row"><div class="row-body"><div class="row-title">'+(v.kind==='weight'?'⚖ '+v.v1+' kg':'🩺 '+v.v1+'/'+v.v2)+'</div><div class="row-meta">'+fmtD(v.at)+'</div></div><button class="del" onclick="delVital(\''+v.id+'\')">✕</button></div>').join('')||'<div class="empty" style="padding:12px">Log weight or BP to build history</div>'}
 /* ============ PAYMENT REMINDERS ============ */
 function payTab(p){document.querySelectorAll('#paySeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   ['bill','card','lend'].forEach(k=>{const el=document.getElementById('paysub-'+k);if(el)el.style.display=k===p?'block':'none'})}
