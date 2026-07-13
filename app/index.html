@@ -722,6 +722,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 .hub-act{border:none;background:none;color:var(--lo);font-size:15px;cursor:pointer;padding:6px;border-radius:8px;flex-shrink:0}
 .hub-act:active{transform:scale(.85)}
 .hub-act.pin.on{color:var(--gold)}
+@keyframes alsh{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
 </style>
 </head>
 <body>
@@ -1370,6 +1371,11 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
         <button class="btn btn-gold btn-sm" onclick="testNotify()">Test</button>
       </div>
     </div>
+    <div class="set-row">
+      <div><div class="set-name">⏰ Alarm sound</div><div class="set-sub">Ring + vibrate when the app is open (closed app: normal notification)</div></div>
+      <button class="btn btn-ghost btn-sm" id="alSndBtn" onclick="alarmToggle()">On</button>
+    </div>
+
   </div>
 
   <div class="eyebrow">Reminders when app is closed</div>
@@ -1736,7 +1742,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.1.1';
+const APP_VER='10.2.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4642,6 +4648,55 @@ function renderHub(){
     el.innerHTML=list.map(hubRowHtml).join('')
       ||'<div class="stat-sub" style="padding:8px 2px">Add your first important link above \u2014 bank portals, sheets, HRMS, anything.</div>'})}
 
+/* ============ ALARM MODE (rings while the app is open) ============ */
+function alarmOn(){return !(S.profile&&S.profile.alarmSound===false)}
+function alarmToggle(){S.profile.alarmSound=alarmOn()?false:true;save();renderSettings();
+  toast(alarmOn()?'\u23f0 Alarm sound on':'Alarm sound off')}
+function alarmDraw(){const b=document.getElementById('alSndBtn');
+  if(b)b.textContent=alarmOn()?'On':'Off'}
+function alarmRing(title){
+  if(!alarmOn())return;
+  if(document.getElementById('alarmOv'))return;
+  window._alTitle=title||'Reminder';
+  const ov=document.createElement('div');ov.id='alarmOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:440;display:flex;align-items:center;justify-content:center;'
+    +'background:color-mix(in srgb,var(--ink0) 80%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:24px';
+  ov.innerHTML='<div style="max-width:340px;width:100%;text-align:center;background:var(--ink1);'
+    +'border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:24px;padding:26px;box-shadow:0 30px 90px rgba(0,0,0,.5)">'
+    +'<div style="font-size:46px;display:inline-block;animation:alsh .55s ease-in-out infinite">\u23f0</div>'
+    +'<div style="font-family:\'Fraunces\',serif;font-size:21px;margin:10px 0 2px;color:var(--hi)">'+esc(window._alTitle)+'</div>'
+    +'<button class="btn btn-gold" style="width:100%;margin-top:16px" onclick="alarmStop()">Stop</button>'
+    +'<button class="btn btn-ghost" style="width:100%;margin-top:9px" onclick="alarmSnooze()">Snooze 5 min</button></div>';
+  document.body.appendChild(ov);
+  try{
+    const AC=window.AudioContext||window.webkitAudioContext;
+    const ctx=window._alCtx=window._alCtx||new AC();
+    if(ctx.state==='suspended')ctx.resume();
+    const g=ctx.createGain();g.gain.value=0.0001;g.connect(ctx.destination);
+    const o=ctx.createOscillator();o.type='sine';o.frequency.value=880;o.connect(g);o.start();
+    window._alOsc={o:o,g:g,ctx:ctx};
+    let step=0;
+    window._alTimer=setInterval(function(){
+      const t=ctx.currentTime,s=step%4;
+      if(s===0||s===1){
+        o.frequency.setValueAtTime(s===0?880:1174,t);
+        g.gain.cancelScheduledValues(t);
+        g.gain.setValueAtTime(0.0001,t);
+        g.gain.exponentialRampToValueAtTime(0.45,t+0.03);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+0.30)}
+      step++},360);
+  }catch(e){}
+  window._alVib=setInterval(function(){buzz([130,90,130])},1500);
+  window._alAuto=setTimeout(alarmStop,60000)}
+function alarmStop(){
+  clearInterval(window._alTimer);clearInterval(window._alVib);clearTimeout(window._alAuto);
+  try{if(window._alOsc){window._alOsc.g.gain.value=0;window._alOsc.o.stop()}}catch(e){}
+  window._alOsc=null;
+  const ov=document.getElementById('alarmOv');if(ov)ov.remove()}
+function alarmSnooze(){const t=window._alTitle;alarmStop();
+  toast('\ud83d\ude34 Snoozed for 5 minutes');
+  setTimeout(function(){alarmRing(t)},5*60000)}
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
@@ -4944,6 +4999,7 @@ async function fcmDeleteSchedule(){
       body:JSON.stringify({deviceId:S.deviceId,remove:true})})}catch(e){}}
 /* ============ NOTIFICATIONS ============ */
 function notify(title,body){toast(title+(body?' — '+body:''));
+  try{alarmRing(title)}catch(e){}
   if(!('Notification' in window)||Notification.permission!=='granted')return;
   if(navigator.serviceWorker&&navigator.serviceWorker.controller){
     navigator.serviceWorker.controller.postMessage({type:'notify',title,body});return}
@@ -5352,7 +5408,7 @@ function renderSettings(){
     vv.style.cssText='text-align:center;margin:18px 0 6px;opacity:.65';
     const host=document.getElementById('v-settings');if(host)host.appendChild(vv)}
   if(vv)vv.textContent='ALOK OS \u00b7 v'+APP_VER;
-  aiStatusDraw();
+  aiStatusDraw();alarmDraw();
   const _acc=S.profile.accent||'gold';
   document.querySelectorAll('.acc-dot').forEach(function(d){d.classList.toggle('on',d.dataset.a===_acc)});
   const _as=document.getElementById('accSub');if(_as)_as.textContent=ACC_NAMES[_acc]||'Gold';
