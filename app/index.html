@@ -1736,7 +1736,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.1.0';
+const APP_VER='10.1.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4395,8 +4395,23 @@ function renderHReports(){
       +'</div>'}).join('')||'' }
 
 /* ============ AURUM INTELLIGENCE (Gemini, bring-your-own-key) ============ */
-const AI_MODEL='gemini-2.0-flash';
+const AI_MODEL_FALLBACKS=['gemini-2.5-flash','gemini-2.0-flash','gemini-flash-latest'];
+function aiModel(){return (S.profile&&S.profile.aiModel)||AI_MODEL_FALLBACKS[0]}
 function aiReady(){return !!(S.profile&&S.profile.aiKey)}
+async function aiPickModel(){
+  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models?pageSize=50&key='+encodeURIComponent(S.profile.aiKey));
+  if(!r.ok)throw new Error('LIST'+r.status);
+  const j=await r.json();
+  const cands=(j.models||[]).filter(m=>(m.supportedGenerationMethods||[]).indexOf('generateContent')>=0)
+    .map(m=>(m.name||'').replace(/^models\//,''))
+    .filter(n=>/flash/i.test(n)&&!/lite|8b|tts|image|embed|audio|live/i.test(n));
+  const ver=n=>{const m=n.match(/(\d+)\.(\d+)/);return m?(+m[1]*100+ +m[2]):0};
+  cands.sort((a,b)=>(ver(b)-ver(a))||( /preview|exp/i.test(a)?1:-1 ));
+  const pick=cands[0]||((j.models||[]).map(m=>(m.name||'').replace(/^models\//,''))
+    .filter(n=>/gemini/i.test(n))[0]);
+  if(!pick)throw new Error('NOMODEL');
+  S.profile.aiModel=pick;save();
+  return pick}
 function aiKeyEdit(){
   showSheet('\u2728 Gemini API key',
     '<div class="stat-sub" style="margin-bottom:12px;line-height:1.6;text-align:left">Get a free key: <b>aistudio.google.com</b> \u2192 Get API key \u2192 Create. Then paste it below.</div>'
@@ -4417,7 +4432,7 @@ function aiKeyClear(){
   renderSettings();toast('AI turned off')}
 function aiStatusDraw(){
   const el=document.getElementById('aiStatus');if(!el)return;
-  el.textContent=aiReady()?'On \u00b7 '+AI_MODEL:'Off \u2014 add your free Gemini key';
+  el.textContent=aiReady()?'On \u00b7 '+aiModel():'Off \u2014 add your free Gemini key';
   const b=document.getElementById('aiKeyBtn');if(b)b.textContent=aiReady()?'Change':'Set up'}
 async function ai(prompt,opt){
   opt=opt||{};
@@ -4427,8 +4442,14 @@ async function ai(prompt,opt){
   if(opt.sys)body.systemInstruction={parts:[{text:opt.sys}]};
   body.generationConfig={temperature:opt.temp==null?0.4:opt.temp,maxOutputTokens:opt.max||900};
   if(opt.json)body.generationConfig.responseMimeType='application/json';
-  const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+AI_MODEL+':generateContent?key='+encodeURIComponent(S.profile.aiKey),
+  let mdl=aiModel();
+  let r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+mdl+':generateContent?key='+encodeURIComponent(S.profile.aiKey),
     {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.status===404){
+    mdl=await aiPickModel();
+    r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+mdl+':generateContent?key='+encodeURIComponent(S.profile.aiKey),
+      {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  }
   if(r.status===429)throw new Error('RATE');
   if(r.status===400||r.status===403)throw new Error('KEY');
   if(!r.ok)throw new Error('HTTP'+r.status);
@@ -4442,8 +4463,8 @@ function aiErrToast(e){
   if(m==='NO_KEY')toast('Add your Gemini key first \u2014 Settings \u2192 AI');
   else if(m==='OFFLINE')toast('AI needs an internet connection');
   else if(m==='RATE')toast('AI is catching its breath \u2014 try again in a minute');
-  else if(m==='KEY')toast('Key rejected \u2014 check it in Settings \u2192 AI');
-  else toast('AI could not answer \u2014 try again')}
+  else if(m==='KEY')toast('Key rejected \u2014 open aistudio.google.com, check the key & that Generative Language API is on');
+  else toast('AI error: '+(m||'unknown')+' \u2014 send me this code')}
 function aiConsent(){
   if(S.profile&&S.profile.aiConsent)return Promise.resolve(true);
   return new Promise(function(res){
