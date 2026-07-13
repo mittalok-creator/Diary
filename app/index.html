@@ -1742,7 +1742,7 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.2.0';
+const APP_VER='10.2.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -5005,8 +5005,8 @@ function notify(title,body){toast(title+(body?' — '+body:''));
     navigator.serviceWorker.controller.postMessage({type:'notify',title,body});return}
   if('serviceWorker' in navigator){navigator.serviceWorker.getRegistration().then(reg=>{
     if(reg)reg.showNotification(title,{body:body||'',icon:'./icon-192.png',badge:'./icon-192.png',vibrate:[90,40,90]});
-    else{try{new Notification(title,{body:body||''})}catch(e){}}});return}
-  try{new Notification(title,{body:body||''})}catch(e){}}
+    else{try{new Notification(title,{body:body||'',icon:'./icon-192.png',tag:'alokos-'+Date.now()})}catch(e){}}});return}
+  try{new Notification(title,{body:body||'',icon:'./icon-192.png',tag:'alokos-'+Date.now()})}catch(e){}}
 function askNotify(){if(!('Notification' in window)){toast('Notifications not supported in this browser');return}
   Notification.requestPermission().then(()=>renderSettings())}
 function testNotify(){

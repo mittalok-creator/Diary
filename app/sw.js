@@ -1,5 +1,5 @@
 /* ALOK OS service worker — offline shell + system notifications */
-const CACHE = 'alokos-v9.5.0';
+const CACHE = 'alokos-v10.2.1';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
   './vendor/pdf.min.js', './vendor/pdf.worker.min.js', './firebase-messaging-sw.js'];
 
@@ -57,7 +57,10 @@ self.addEventListener('message', e => {
   if (d.type === 'notify') {
     self.registration.showNotification(d.title || 'ALOK OS', {
       body: d.body || '', icon: './icon-192.png', badge: './icon-192.png',
-      tag: d.tag || 'alokos', renotify: true, vibrate: [90, 40, 90],
+      tag: d.tag || ('alokos-' + Date.now()),   /* unique tag: reminders STACK like emails */
+      renotify: true, vibrate: [90, 40, 90],
+      timestamp: Date.now(),
+      actions: [{ action: 'open', title: 'Open ALOK OS' }],
       data: { url: './' }
     });
   }

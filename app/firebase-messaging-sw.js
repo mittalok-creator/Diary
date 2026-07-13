@@ -25,7 +25,9 @@ messaging.onBackgroundMessage(function (payload) {
     badge: './icon-192.png',
     tag: d.tag || ('alokos-' + Date.now()),
     data: { url: './' },
-    vibrate: [80, 40, 80]
+    vibrate: [80, 40, 80],
+    timestamp: Date.now(),
+    actions: [{ action: 'open', title: 'Open ALOK OS' }]
   });
 });
 
