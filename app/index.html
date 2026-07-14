@@ -762,6 +762,11 @@ table.nt{table-layout:fixed}
 mark.shl{background:color-mix(in srgb,var(--gold) 40%,transparent);color:var(--hi);
   border-radius:3px;padding:0 2px;font-weight:600}
 html[data-theme="light"] mark.shl{background:color-mix(in srgb,var(--gold) 55%,transparent);color:#171C24}
+/* ---- Office Mode: hide Life everywhere ---- */
+html[data-mode="office"] #nb-life{display:none}
+html[data-mode="office"] .stat-chip.life-only{display:none}
+html[data-mode="office"] #qaLife{display:none}
+html[data-mode="office"] .life-dash{display:none}
 </style>
 </head>
 <body>
@@ -1467,6 +1472,15 @@ html[data-theme="light"] mark.shl{background:color-mix(in srgb,var(--gold) 55%,t
     </div>
   <div class="card" style="display:none">
   </div>
+
+      <div class="eyebrow" style="margin-top:22px">🗂 Workspace</div>
+    <div class="card">
+      <div class="set-row">
+        <div><div class="set-name">💼 Office mode</div><div class="set-sub" id="modeSub">Showing Life + Work</div></div>
+        <button class="btn btn-ghost btn-sm" id="modeBtn" onclick="modeToggle()">Full</button>
+      </div>
+      <div class="stat-sub" style="padding:2px 2px 8px;line-height:1.6">Office mode hides the Life tab and all personal data from the dashboard. Switch back anytime — nothing is deleted.</div>
+    </div>
 
   <div class="eyebrow">Dashboard cards</div>
   <div class="card" id="dashToggles"></div>
@@ -4195,14 +4209,14 @@ function renderStatStrip(){
   if(od)ch(od,'Overdue','hot',"go('life');lifeTab('tasks')");
   ch(dt||'\u2713','Due today',dt?'':'gold',"go('life');lifeTab('tasks')");
   const sp=(S.expenses||[]).filter(e=>(e.at||'').slice(0,10)===t).reduce((a,e)=>a+(+e.amount||0),0);
-  ch('\u20b9'+sp.toLocaleString('en-IN'),'Spent today',sp?'':'gold',"go('life');lifeTab('money')");
+  if(!officeMode())ch('\u20b9'+sp.toLocaleString('en-IN'),'Spent today',sp?'':'gold',"go('life');lifeTab('money')");
   const mt=(S.meetings||[]).filter(m=>m.date===t).length;
   if(mt)ch(mt,'Meetings',"", "go('work');workTab('meet')");
   const due3=((S.bills||[]).filter(b=>!b.paid&&b.due&&daysTo(b.due)>=0&&daysTo(b.due)<=3).length)
             +((S.cards||[]).filter(c=>c.due&&daysTo(c.due)>=0&&daysTo(c.due)<=3).length);
-  if(due3)ch(due3,'Bills \u22643d','hot',"go('life');lifeTab('pay')");
+  if(due3&&!officeMode())ch(due3,'Bills \u22643d','hot',"go('life');lifeTab('pay')");
   const st=Math.max(0,...((S.habits||[]).map(h=>h.streak||0)));
-  if(st)ch('\ud83d\udd25 '+st,'Best streak','gold',"go('life');lifeTab('health')");
+  if(st&&!officeMode())ch('\ud83d\udd25 '+st,'Best streak','gold',"go('life');lifeTab('health')");
   el.innerHTML=chips.join('');
 }
 
@@ -5040,6 +5054,25 @@ function _hlNode(root,q){
     span.appendChild(mk);span.appendChild(document.createTextNode(t.slice(i+q.length)));
     tn.parentNode.replaceChild(span,tn)})}
 
+/* ============ OFFICE MODE ============ */
+function officeMode(){return S.profile&&S.profile.mode==='office'}
+function applyMode(){
+  const off=officeMode();
+  document.documentElement.dataset.mode=off?'office':'full';
+  if(off){
+    /* force quick-add to Work, and bounce out of any Life view */
+    try{qaSp='office';const l=document.getElementById('qaLife'),w=document.getElementById('qaWork');
+      if(l)l.classList.remove('on');if(w)w.classList.add('on')}catch(e){}
+    const cur=document.querySelector('.view.active');
+    if(cur&&cur.id==='v-life')go('work');
+  }}
+function modeToggle(){
+  S.profile.mode=officeMode()?'full':'office';save();applyMode();
+  renderSettings&&renderSettings();renderToday&&renderToday();
+  toast(officeMode()?'\ud83d\udcbc Office mode \u2014 Life hidden':'\ud83c\udfe0 Full mode \u2014 Life restored')}
+function modeDraw(){const b=document.getElementById('modeBtn');if(b)b.textContent=officeMode()?'Office only':'Full';
+  const s=document.getElementById('modeSub');if(s)s.textContent=officeMode()?'Showing Work only \u00b7 Life hidden':'Showing Life + Work'}
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
@@ -5751,7 +5784,7 @@ function renderSettings(){
     vv.style.cssText='text-align:center;margin:18px 0 6px;opacity:.65';
     const host=document.getElementById('v-settings');if(host)host.appendChild(vv)}
   if(vv)vv.textContent='ALOK OS \u00b7 v'+APP_VER;
-  aiStatusDraw();alarmDraw();nagDraw();
+  aiStatusDraw();alarmDraw();nagDraw();modeDraw();
   const _acc=S.profile.accent||'gold';
   document.querySelectorAll('.acc-dot').forEach(function(d){d.classList.toggle('on',d.dataset.a===_acc)});
   const _as=document.getElementById('accSub');if(_as)_as.textContent=ACC_NAMES[_acc]||'Gold';
@@ -5873,6 +5906,7 @@ function renderAll(){renderHeader();renderToday();renderLife();renderWork();rend
   if(S.water.date!==today())S.water={date:today(),count:0};
   applyTheme();renderAll();initCrop();initViewer();initSketch();initSwipe();
   updateSyncPill();
+  try{applyMode()}catch(e){}
   try{const sv=localStorage.getItem('alokos-seen-ver');
     if(sv&&sv!==APP_VER)setTimeout(function(){toast('Updated to v'+APP_VER+' \u2728')},900);
     localStorage.setItem('alokos-seen-ver',APP_VER)}catch(e){}
