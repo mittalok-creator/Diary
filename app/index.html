@@ -2165,7 +2165,7 @@ function neWrapHtml(n){return '<div style="font-family:Georgia,serif;max-width:6
   +'<h1 style="font-family:Georgia,serif;font-size:26px;border-bottom:2px solid #B8863B;padding-bottom:10px;margin-bottom:18px">'+esc(n.title)+'</h1>'
   +'<div style="font-size:15px;line-height:1.8">'+n.html+'</div>'
   +'<div style="margin-top:28px;color:#9C6B26;font-size:12px;letter-spacing:.1em">BY ALOK MITTAL \u00b7 ALOK OS</div></div>'}
-async async function _noteToCanvas(n){
+async function _noteToCanvas(n){
   const html=neWrapHtml(n);
   const meas=document.createElement('div');
   meas.style.cssText='position:fixed;left:-9999px;top:0;width:680px';
