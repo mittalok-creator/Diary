@@ -1514,6 +1514,8 @@ html[data-mode="office"] .life-dash{display:none}
   <div class="card" style="text-align:center;padding:28px">
     <div style="font-family:Inter,system-ui,sans-serif;font-size:22px;letter-spacing:.05em">ALOK OS</div>
     <div class="stat-label" style="margin-top:10px;color:var(--gold);letter-spacing:.18em">BY ALOK MITTAL</div>
+    <button class="btn btn-gold" style="width:100%;margin-top:16px" onclick="forceUpdate()">↻ Update now</button>
+    <div class="stat-sub" style="margin-top:8px">Fetches the newest version instantly</div>
   </div>
 </section>
 
@@ -5072,6 +5074,25 @@ function modeToggle(){
 function modeDraw(){const b=document.getElementById('modeBtn');if(b)b.textContent=officeMode()?'Office only':'Full';
   const s=document.getElementById('modeSub');if(s)s.textContent=officeMode()?'Showing Work only \u00b7 Life hidden':'Showing Life + Work'}
 
+/* ============ FORCE UPDATE ============ */
+async function forceUpdate(){
+  toast('\u21bb Checking for the latest version\u2026');
+  try{
+    if('serviceWorker' in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r=>r.update().catch(()=>{})));
+    }
+    if(window.caches){
+      const keys=await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+  }catch(e){}
+  /* cache-busted reload guarantees fresh HTML+JS */
+  setTimeout(function(){
+    const u=new URL(location.href);u.searchParams.set('v',Date.now());
+    location.replace(u.toString());
+  },500);
+}
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
