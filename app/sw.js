@@ -1,5 +1,5 @@
 /* ALOK OS service worker — offline shell + system notifications */
-const CACHE = 'alokos-v10.6.3';
+const CACHE = 'alokos-v10.7.0';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png',
   './vendor/pdf.min.js', './vendor/pdf.worker.min.js', './firebase-messaging-sw.js'];
 

@@ -753,6 +753,9 @@ table.nt{table-layout:fixed}
   padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit}
 .nt-move button:active{transform:scale(.92)}
 .nt-move .gh{margin-left:auto;cursor:grab;padding:3px 8px;border-radius:7px;border:1px dashed var(--hair)}
+mark.shl{background:color-mix(in srgb,var(--gold) 40%,transparent);color:var(--hi);
+  border-radius:3px;padding:0 2px;font-weight:600}
+html[data-theme="light"] mark.shl{background:color-mix(in srgb,var(--gold) 55%,transparent);color:#171C24}
 </style>
 </head>
 <body>
@@ -3460,8 +3463,8 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
   if(!q){qOut.innerHTML='<div class="empty"><div class="em-ring">⌕</div>Search across your whole life —<br>tasks, notes, money, follow-ups, shopping.</div>';return}
   const hit=s=>String(s||'').toLowerCase().includes(q);
   const groups=[
-   ['Tasks',S.tasks.filter(t=>hit(t.title)).map(taskRow)],
-   ['Notes',S.notes.filter(n=>hit(n.title)||hit(n.body)).map(noteCard)],
+   ['Tasks',S.tasks.filter(t=>hit(t.title)).map(t=>taskRow(t).replace(esc(t.title),_hl(t.title,q)))],
+   ['Notes',S.notes.filter(n=>hit(n.title)||hit(n.body)||hit(n.html&&n.html.replace(/<[^>]+>/g,' '))).map(n=>noteHitCard(n,q))],
    ['Expenses',S.expenses.filter(e=>hit(e.note)||hit(e.cat)).map(e=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(e.note)+'</div><div class="row-meta">'+esc(e.cat)+'</div></div><div style="font-weight:700">'+fmtR(e.amount)+'</div></div>')],
    ['Income',S.income.filter(i=>hit(i.source)).map(i=>'<div class="row"><div class="row-body"><div class="row-title">'+esc(i.source)+'</div><div class="row-meta">'+fmtD(i.at)+'</div></div><div class="inc">+'+fmtR(i.amount)+'</div></div>')],
    ['Health',[...S.meds.filter(m=>hit(m.name)).map(m=>'<div class="row"><div class="row-body"><div class="row-title">💊 '+esc(m.name)+'</div></div></div>'),...S.habits.filter(h=>hit(h.name)).map(h=>'<div class="row"><div class="row-body"><div class="row-title">🔥 '+esc(h.name)+'</div><div class="row-meta">'+habitStreak(h)+' day streak</div></div></div>')]],
@@ -4988,6 +4991,48 @@ function ntCleanPasted(html){
         setTimeout(function(){if(window.ntEnhanceAll)ntEnhanceAll()},0)}
     })}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireP);else wireP()})();
+
+/* ============ SEARCH HIGHLIGHT + SNIPPETS ============ */
+function _hl(text,q){
+  text=String(text==null?'':text);
+  if(!q)return esc(text);
+  const i=text.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0)return esc(text);
+  return esc(text.slice(0,i))+'<mark class="shl">'+esc(text.slice(i,i+q.length))+'</mark>'+esc(text.slice(i+q.length))}
+function _snippet(text,q,pad){
+  text=String(text==null?'':text).replace(/\s+/g,' ').trim();
+  pad=pad||42;
+  if(!q)return esc(text.slice(0,pad*2));
+  const i=text.toLowerCase().indexOf(q.toLowerCase());
+  if(i<0)return esc(text.slice(0,pad*2));
+  let a=Math.max(0,i-pad), b=Math.min(text.length,i+q.length+pad);
+  return (a>0?'\u2026':'')+_hl(text.slice(a,b),q)+(b<text.length?'\u2026':'')}
+function noteHitCard(n,q){
+  const src=(n.body||'').trim()||(n.html?n.html.replace(/<[^>]+>/g,' '):'');
+  const titleHit=(n.title||'').toLowerCase().includes(q);
+  const snip=titleHit?esc((src||'').replace(/\s+/g,' ').trim().slice(0,90)):_snippet(src,q);
+  return '<div class="card diary-card" style="cursor:pointer" onclick="noteOpenAt(\''+n.id+'\',\''+encodeURIComponent(q)+'\')">'
+    +'<div class="row-title" style="font-family:Fraunces,serif;font-size:16px;padding-left:8px">'+_hl(n.title||'Untitled',q)+'</div>'
+    +'<div class="row-meta" style="padding:6px 8px 2px;line-height:1.55">'+snip+'</div></div>'}
+function noteOpenAt(id,q){noteOpen(id);
+  q=decodeURIComponent(q||'');
+  setTimeout(function(){try{
+    const ed=document.getElementById('neEditor');if(!ed||!q)return;
+    _hlNode(ed,q.toLowerCase());
+    const m=ed.querySelector('mark.shl');
+    if(m)m.scrollIntoView({block:'center',behavior:'smooth'});
+  }catch(e){}},260)}
+function _hlNode(root,q){
+  const walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null);
+  const hits=[];let node;
+  while(node=walk.nextNode()){if(node.nodeValue.toLowerCase().includes(q))hits.push(node)}
+  hits.forEach(function(tn){
+    const t=tn.nodeValue;const i=t.toLowerCase().indexOf(q);if(i<0)return;
+    const span=document.createElement('span');
+    span.appendChild(document.createTextNode(t.slice(0,i)));
+    const mk=document.createElement('mark');mk.className='shl';mk.textContent=t.slice(i,i+q.length);
+    span.appendChild(mk);span.appendChild(document.createTextNode(t.slice(i+q.length)));
+    tn.parentNode.replaceChild(span,tn)})}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
