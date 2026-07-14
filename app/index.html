@@ -728,8 +728,10 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 @keyframes alsh{0%,100%{transform:rotate(-9deg)}50%{transform:rotate(9deg)}}
 /* ---- Notion-lite notes: tables, checklists, dividers ---- */
 .nt-wrap{margin:10px 0;border-radius:12px;overflow:auto;max-height:56vh;-webkit-overflow-scrolling:touch;position:relative}
-table.nt{border-collapse:collapse;min-width:100%;font-size:14px}
-.nt th,.nt td{border:1px solid var(--hair);padding:8px 10px;min-width:92px;text-align:left;vertical-align:top}
+table.nt{border-collapse:separate;border-spacing:0;min-width:100%;font-size:14px}
+.nt th,.nt td{border-right:1px solid var(--hair);border-bottom:1px solid var(--hair);padding:8px 10px;min-width:92px;text-align:left;vertical-align:top}
+.nt th:first-child,.nt td:first-child{border-left:1px solid var(--hair)}
+.nt tr:first-child th{border-top:1px solid var(--hair)}
 .nt th:first-child,.nt td:first-child{position:sticky;left:0;z-index:2;background:var(--ink1)}
 .nt th:first-child{z-index:6}
 html[data-theme="light"] .nt th:first-child,html[data-theme="light"] .nt td:first-child{background:#fff}
@@ -1824,7 +1826,7 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='11.0.0';
+const APP_VER='11.0.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
