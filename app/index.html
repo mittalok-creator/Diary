@@ -1780,7 +1780,7 @@ table.nt{table-layout:fixed}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.5.2';
+const APP_VER='10.6.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4904,6 +4904,64 @@ function ntEnhanceAll(){const ed=document.getElementById('neEditor');if(!ed)retu
   ed.querySelectorAll('table.nt').forEach(ntEnhance);
   ed.querySelectorAll('tr.nt-sum td[data-agg]').forEach(function(td){
     if(td.getAttribute('data-agg')!=='label'&&!td.getAttribute('onclick')){td.setAttribute('onclick','ntCycle(this)');td.style.cursor='pointer'}})}
+
+/* ============ SMART PASTE (Excel / Word -> clean formatting + tables) ============ */
+function ntCleanPasted(html){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  doc.querySelectorAll('style,meta,link,title,script,o\\:p,xml').forEach(n=>n.remove());
+  const KEEP_TAGS={B:1,STRONG:1,I:1,EM:1,U:1,BR:1,P:1,DIV:1,SPAN:1,A:1,
+    UL:1,OL:1,LI:1,TABLE:1,THEAD:1,TBODY:1,TR:1,TH:1,TD:1,H1:1,H2:1,H3:1,H4:1};
+  function walk(node){
+    Array.from(node.children).forEach(function(el){
+      walk(el);
+      const tag=el.tagName;
+      /* strip all attributes except href on links and colspan/rowspan on cells */
+      Array.from(el.attributes).forEach(function(a){
+        const keep=(tag==='A'&&a.name==='href')||
+                   ((tag==='TD'||tag==='TH')&&(a.name==='colspan'||a.name==='rowspan'));
+        if(!keep)el.removeAttribute(a.name)});
+      /* keep bold/italic that Word encodes as spans -> convert inline weight/style to tags is overkill; drop unknown tags but keep text */
+      if(!KEEP_TAGS[tag]){
+        const parent=el.parentNode;
+        while(el.firstChild)parent.insertBefore(el.firstChild,el);
+        parent.removeChild(el)}
+    })}
+  walk(doc.body);
+  /* normalise any pasted table into our styled block */
+  doc.body.querySelectorAll('table').forEach(function(tb){
+    tb.className='nt';tb.removeAttribute('style');tb.removeAttribute('width');tb.removeAttribute('border');
+    /* first row -> header cells */
+    const first=tb.querySelector('tr');
+    if(first)Array.from(first.cells||first.children).forEach(function(c){
+      if(c.tagName==='TD'){const th=document.createElement('th');th.innerHTML=c.innerHTML||'<br>';c.replaceWith(th)}});
+    tb.querySelectorAll('td,th').forEach(function(c){if(!c.innerHTML.trim())c.innerHTML='<br>';c.removeAttribute('style')});
+    if(!tb.closest('.nt-wrap')){const w=document.createElement('div');w.className='nt-wrap';tb.replaceWith(w);w.appendChild(tb)}
+  });
+  return doc.body.innerHTML}
+(function(){
+  function wireP(){const ed=document.getElementById('neEditor');if(!ed||ed._pWired)return;ed._pWired=true;
+    ed.addEventListener('paste',function(e){
+      const cd=e.clipboardData;if(!cd)return;
+      const html=cd.getData('text/html');
+      if(html){e.preventDefault();
+        let clean='';try{clean=ntCleanPasted(html)}catch(err){clean=''}
+        if(clean){document.execCommand('insertHTML',false,clean);
+          setTimeout(function(){if(window.ntEnhanceAll)ntEnhanceAll();
+            ed.querySelectorAll('table.nt').forEach(function(t){if(window.ntRecalc)ntRecalc(t)})},0);
+          return}}
+      /* no HTML (plain Excel copy sometimes) -> build table from TSV */
+      const txt=cd.getData('text/plain');
+      if(txt&&/\t/.test(txt)&&/\n/.test(txt.trim())){e.preventDefault();
+        const rows=txt.replace(/\n+$/,'').split(/\r?\n/).map(r=>r.split('\t'));
+        let h='<div class="nt-wrap"><table class="nt"><tbody>';
+        rows.forEach(function(r,i){h+='<tr>';r.forEach(function(c){
+          const cell=(c||'').replace(/</g,'&lt;')||'<br>';
+          h+=(i===0?'<th>':'<td>')+cell+(i===0?'</th>':'</td>')});h+='</tr>'});
+        h+='</tbody></table></div><p><br></p>';
+        document.execCommand('insertHTML',false,h);
+        setTimeout(function(){if(window.ntEnhanceAll)ntEnhanceAll()},0)}
+    })}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireP);else wireP()})();
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
