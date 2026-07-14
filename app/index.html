@@ -766,6 +766,26 @@ html[data-mode="office"] #nb-life{display:none}
 html[data-mode="office"] .stat-chip.life-only{display:none}
 html[data-mode="office"] #qaLife{display:none}
 html[data-mode="office"] .life-dash{display:none}
+/* ---- slash command menu (note editor) ---- */
+.slashm{position:fixed;z-index:400;width:270px;max-height:340px;overflow-y:auto;
+  background:var(--ink1);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent);
+  border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.45),inset 0 1px 0 color-mix(in srgb,#fff 8%,transparent);
+  padding:7px;display:none;animation:slfade .13s ease}
+.slashm.on{display:block}
+@keyframes slfade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.slashm .sl-sec{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--lo);padding:8px 10px 4px}
+.slashm .sl-it{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:10px;cursor:pointer}
+.slashm .sl-it.sel{background:color-mix(in srgb,var(--gold) 13%,transparent)}
+.slashm .sl-ic{width:30px;height:30px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:700;color:var(--gold);
+  background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.slashm .sl-tx{min-width:0}
+.slashm .sl-lb{font-size:14px;font-weight:600;color:var(--hi)}
+.slashm .sl-hn{font-size:11.5px;color:var(--lo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slashm .sl-empty{padding:16px 12px;text-align:center;color:var(--lo);font-size:13px}
+blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 0 4px 14px;
+  color:var(--hi);font-style:italic;background:color-mix(in srgb,var(--gold) 5%,transparent);border-radius:0 8px 8px 0}
 </style>
 </head>
 <body>
@@ -1804,7 +1824,7 @@ html[data-mode="office"] .life-dash{display:none}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.6.0';
+const APP_VER='11.0.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2440,7 +2460,7 @@ function neSize(sz){document.getElementById('neEditor').focus();try{document.exe
 function neColor(c){document.getElementById('neEditor').focus();try{document.execCommand('foreColor',false,c)}catch(e){}}
 function noteNew(space){neCtx={id:null,space:space||'personal',att:[]};
   document.getElementById('neTitle').value='';
-  const ed=document.getElementById('neEditor');ed.innerHTML='';ed.setAttribute('data-ph','Start writing your thoughts\u2026');
+  const ed=document.getElementById('neEditor');ed.innerHTML='';ed.setAttribute('data-ph','Start writing\u2026  press / for blocks');
   neBuildColors();drawNePend();
   document.getElementById('noteOv').classList.add('open');
   setTimeout(()=>document.getElementById('neTitle').focus(),60)}
@@ -2449,7 +2469,7 @@ function noteOpen(id){const n=S.notes.find(x=>x.id===id);if(!n)return;
   document.getElementById('neTitle').value=n.title==='Untitled'?'':n.title;
   const ed=document.getElementById('neEditor');
   ed.innerHTML=n.html||(n.body?esc(n.body).replace(/\n/g,'<br>'):'');
-  ed.setAttribute('data-ph','Start writing your thoughts\u2026');
+  ed.setAttribute('data-ph','Start writing\u2026  press / for blocks');
   neBuildColors();drawNePend();
   document.getElementById('noteOv').classList.add('open')}
 function noteEditClose(){document.getElementById('noteOv').classList.remove('open')}
@@ -5093,6 +5113,94 @@ async function forceUpdate(){
     location.replace(u.toString());
   },500);
 }
+/* ============ SLASH COMMANDS (Notion-style, note editor) ============ */
+const _slash={open:false,node:null,start:0,query:'',idx:0,items:[]};
+function slashDefs(){return [
+  {sec:'Basic',k:'text',ic:'\u00b6',lb:'Text',hn:'Plain paragraph',kw:'text paragraph plain body',run:()=>neCmd('formatBlock','<p>')},
+  {sec:'Basic',k:'h1',ic:'H1',lb:'Heading 1',hn:'Big section title',kw:'heading title h1 large',run:()=>neCmd('formatBlock','<h1>')},
+  {sec:'Basic',k:'h2',ic:'H2',lb:'Heading 2',hn:'Medium heading',kw:'heading h2 subtitle',run:()=>neCmd('formatBlock','<h2>')},
+  {sec:'Basic',k:'h3',ic:'H3',lb:'Heading 3',hn:'Small heading',kw:'heading h3 minor',run:()=>neCmd('formatBlock','<h3>')},
+  {sec:'Basic',k:'ul',ic:'\u2022',lb:'Bulleted list',hn:'Simple bullet points',kw:'bullet list unordered points',run:()=>neCmd('insertUnorderedList')},
+  {sec:'Basic',k:'ol',ic:'1.',lb:'Numbered list',hn:'Ordered steps',kw:'number ordered list steps',run:()=>neCmd('insertOrderedList')},
+  {sec:'Basic',k:'quote',ic:'\u201d',lb:'Quote',hn:'Highlighted callout',kw:'quote callout note block',run:()=>ntInsertHTML('<blockquote class="nt-quote">Quote\u2026</blockquote><p><br></p>')},
+  {sec:'Blocks',k:'table',ic:'\u25a6',lb:'Table',hn:'Rows, columns & totals',kw:'table grid sheet excel data column',run:()=>ntTable()},
+  {sec:'Blocks',k:'check',ic:'\u2611',lb:'Checklist',hn:'Tick-off to-dos',kw:'checklist todo tasks tick check',run:()=>ntCheck()},
+  {sec:'Blocks',k:'div',ic:'\u2500',lb:'Divider',hn:'Section separator',kw:'divider line separator hr rule',run:()=>ntDivider()},
+  {sec:'Smart',k:'ai',ic:'\u2728',lb:'Ask AI',hn:'Summarize, improve, translate',kw:'ai gemini summarize improve translate smart',run:()=>neAI()},
+  {sec:'Smart',k:'voice',ic:'\ud83c\udf99',lb:'Voice note',hn:'Record and attach audio',kw:'voice audio record mic speak',run:()=>neVoice()}
+]}
+function slashClose(){_slash.open=false;const m=document.getElementById('slashMenu');if(m)m.classList.remove('on')}
+function _caretRect(){
+  const s=window.getSelection();if(!s||!s.rangeCount)return null;
+  let r=s.getRangeAt(0).getClientRects()[0];
+  if(!r){const sp=document.createElement('span');sp.textContent='\u200b';
+    const rg=s.getRangeAt(0).cloneRange();rg.insertNode(sp);r=sp.getBoundingClientRect();
+    const p=sp.parentNode;sp.remove();if(p)p.normalize()}
+  return r}
+function slashScan(){
+  const ed=document.getElementById('neEditor');
+  const s=window.getSelection();
+  if(!ed||!s||!s.rangeCount){slashClose();return}
+  const node=s.anchorNode;
+  if(!node||node.nodeType!==3||!ed.contains(node)){slashClose();return}
+  const before=node.nodeValue.slice(0,s.anchorOffset);
+  const m=before.match(/(?:^|\s)\/([\w-]*)$/);
+  if(!m){slashClose();return}
+  _slash.node=node;_slash.start=s.anchorOffset-(m[1].length+1);_slash.query=m[1].toLowerCase();
+  _slash.idx=0;slashRender();slashPos()}
+function slashRender(){
+  let m=document.getElementById('slashMenu');
+  if(!m){m=document.createElement('div');m.id='slashMenu';m.className='slashm';m.contentEditable='false';document.body.appendChild(m)}
+  const q=_slash.query;
+  const all=slashDefs().filter(x=>!q||(x.lb.toLowerCase()+' '+x.kw).indexOf(q)>=0);
+  _slash.items=all;_slash.open=true;
+  if(_slash.idx>=all.length)_slash.idx=Math.max(0,all.length-1);
+  if(!all.length){m.innerHTML='<div class="sl-empty">No block matches \u201c'+esc(q)+'\u201d</div>';m.classList.add('on');return}
+  let h='',lastSec='';
+  all.forEach(function(x,i){
+    if(x.sec!==lastSec){h+='<div class="sl-sec">'+x.sec+'</div>';lastSec=x.sec}
+    h+='<div class="sl-it'+(i===_slash.idx?' sel':'')+'" onmousedown="event.preventDefault();slashRun('+i+')">'
+      +'<span class="sl-ic">'+x.ic+'</span>'
+      +'<span class="sl-tx"><div class="sl-lb">'+esc(x.lb)+'</div><div class="sl-hn">'+esc(x.hn)+'</div></span></div>'});
+  m.innerHTML=h;m.classList.add('on')}
+function slashPos(){
+  const m=document.getElementById('slashMenu');if(!m)return;
+  const r=_caretRect();if(!r)return;
+  const vw=innerWidth,vh=innerHeight;
+  let x=Math.min(r.left,vw-286);if(x<8)x=8;
+  let y=r.bottom+6;
+  const mh=Math.min(340,m.scrollHeight||280);
+  if(y+mh>vh-8)y=Math.max(8,r.top-mh-6);
+  m.style.left=x+'px';m.style.top=y+'px'}
+function slashRun(i){
+  const it=_slash.items[i];if(!it)return;
+  const sel=window.getSelection();
+  try{
+    const rng=document.createRange();
+    rng.setStart(_slash.node,_slash.start);
+    rng.setEnd(_slash.node,Math.min(_slash.node.length,_slash.start+_slash.query.length+1));
+    rng.deleteContents();
+    sel.removeAllRanges();
+    const c=document.createRange();c.setStart(_slash.node,_slash.start);c.collapse(true);sel.addRange(c);
+  }catch(e){}
+  slashClose();
+  const ed=document.getElementById('neEditor');if(ed)ed.focus();
+  setTimeout(it.run,0)}
+(function(){
+  function wireSlash(){const ed=document.getElementById('neEditor');if(!ed||ed._sWired)return;ed._sWired=true;
+    ed.addEventListener('input',function(){setTimeout(slashScan,0)});
+    ed.addEventListener('keydown',function(e){
+      if(!_slash.open)return;
+      if(e.key==='ArrowDown'){e.preventDefault();_slash.idx=Math.min(_slash.idx+1,_slash.items.length-1);slashRender();slashPos()}
+      else if(e.key==='ArrowUp'){e.preventDefault();_slash.idx=Math.max(_slash.idx-1,0);slashRender();slashPos()}
+      else if(e.key==='Enter'){if(_slash.items.length){e.preventDefault();slashRun(_slash.idx)}}
+      else if(e.key==='Escape'){e.preventDefault();slashClose()}
+      else if(e.key==='Tab'){if(_slash.items.length){e.preventDefault();slashRun(_slash.idx)}}
+    });
+    ed.addEventListener('blur',function(){setTimeout(slashClose,120)});
+    ed.addEventListener('scroll',slashClose)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireSlash);else wireSlash()})();
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
