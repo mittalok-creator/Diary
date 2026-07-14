@@ -1780,7 +1780,7 @@ table.nt{table-layout:fixed}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.5.1';
+const APP_VER='10.5.2';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4822,6 +4822,8 @@ function ntCol(add){const t=ntCurTable();if(!t)return;
     if(add){const c=document.createElement(i===0?'th':'td');c.innerHTML='<br>';r.appendChild(c)}
     else if(r.cells.length>1)r.removeChild(r.cells[r.cells.length-1])});
   ntRecalc(t)}
+const NT_AGG=['sum','count','avg',''];
+const NT_AGL={sum:'\u03a3 Sum',count:'# Count',avg:'\u00b8 Avg','':''};
 function ntSum(){const t=ntCurTable();if(!t)return;
   let sum=t.querySelector('tr.nt-sum');
   if(sum){sum.remove();return}
@@ -4829,16 +4831,36 @@ function ntSum(){const t=ntCurTable();if(!t)return;
   const cols=t.tBodies[0].rows[0].cells.length;
   for(let i=0;i<cols;i++){const td=document.createElement('td');
     td.setAttribute('contenteditable','false');
-    td.textContent=(i===0?'\u03a3 Total':'');sum.appendChild(td)}
+    if(i===0){td.textContent='Totals';td.setAttribute('data-agg','label')}
+    else{td.setAttribute('data-agg','sum');td.title='Tap to change: Sum / Count / Avg';
+      td.style.cursor='pointer';
+      td.setAttribute('onclick','ntCycle(this)')}
+    sum.appendChild(td)}
   t.tBodies[0].appendChild(sum);ntRecalc(t)}
+function ntCycle(td){
+  const cur=td.getAttribute('data-agg')||'sum';
+  const nx=NT_AGG[(NT_AGG.indexOf(cur)+1)%NT_AGG.length];
+  td.setAttribute('data-agg',nx);
+  const t=td.closest('table.nt');if(t)ntRecalc(t);
+  try{document.getElementById('neEditor').dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
 function ntRecalc(t){const sum=t.querySelector('tr.nt-sum');if(!sum)return;
   const rows=Array.from(t.tBodies[0].rows).filter(r=>r!==sum&&r.rowIndex>0);
   for(let c=1;c<sum.cells.length;c++){
-    let s=0,any=false;
+    const cell0=sum.cells[c];if(!cell0)continue;
+    const agg=cell0.getAttribute('data-agg');
+    if(agg==='label'){continue}
+    if(agg===''||agg==null){cell0.textContent='';continue}
+    let s=0,n=0,filled=0;
     rows.forEach(function(r){const cell=r.cells[c];if(!cell)return;
-      const v=parseFloat((cell.textContent||'').replace(/[,\s\u20b9]/g,''));
-      if(!isNaN(v)){s+=v;any=true}});
-    sum.cells[c].textContent=any?(Math.round(s*100)/100).toLocaleString('en-IN'):''}}
+      const raw=(cell.textContent||'').trim();if(raw!=='')filled++;
+      const v=parseFloat(raw.replace(/[,\s\u20b9]/g,''));
+      if(!isNaN(v)){s+=v;n++}});
+    let out='';
+    if(agg==='count'){out=String(filled)}
+    else if(agg==='avg'){out=n?('\u00b8 '+(Math.round(s/n*100)/100).toLocaleString('en-IN')):''}
+    else{out=n?(Math.round(s*100)/100).toLocaleString('en-IN'):''}
+    if(agg==='count'&&filled)out='# '+out;
+    cell0.textContent=out}}
 function ntDel(){const t=ntCurTable();if(!t)return;
   const w=t.closest('.nt-wrap');(w||t).remove();ntBarSync()}
 (function(){
@@ -4879,7 +4901,9 @@ function ntMoveCtl(dir){const t=ntCurTable();if(!t)return;
   else{const n=w.nextElementSibling;if(n)w.parentNode.insertBefore(n,w)}
   try{document.getElementById('neEditor').dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
 function ntEnhanceAll(){const ed=document.getElementById('neEditor');if(!ed)return;
-  ed.querySelectorAll('table.nt').forEach(ntEnhance)}
+  ed.querySelectorAll('table.nt').forEach(ntEnhance);
+  ed.querySelectorAll('tr.nt-sum td[data-agg]').forEach(function(td){
+    if(td.getAttribute('data-agg')!=='label'&&!td.getAttribute('onclick')){td.setAttribute('onclick','ntCycle(this)');td.style.cursor='pointer'}})}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
