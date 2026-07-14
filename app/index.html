@@ -788,6 +788,9 @@ html[data-mode="office"] .life-dash{display:none}
 .slashm .sl-empty{padding:16px 12px;text-align:center;color:var(--lo);font-size:13px}
 blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 0 4px 14px;
   color:var(--hi);font-style:italic;background:color-mix(in srgb,var(--gold) 5%,transparent);border-radius:0 8px 8px 0}
+#toast.act{display:flex;align-items:center;gap:12px;padding-right:8px}
+#toast .tu{color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;padding:4px 8px;border-radius:8px;flex-shrink:0}
+#toast .tu:active{transform:scale(.92)}
 </style>
 </head>
 <body>
@@ -1483,7 +1486,15 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
       <button class="btn btn-ghost btn-sm" onclick="shareSelfTest()">Run</button>
     </div>
   </div>
-    <div class="eyebrow" style="margin-top:22px">✨ AI · Gemini</div>
+        <div class="eyebrow" style="margin-top:22px">☁ Backup health</div>
+    <div class="card">
+      <div class="set-row">
+        <div><div class="set-name" id="bkTitle">—</div><div class="set-sub" id="bkSub">—</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="pullNow?pullNow():toast('Sign in with Google to sync')">Sync now</button>
+      </div>
+    </div>
+
+  <div class="eyebrow" style="margin-top:22px">✨ AI · Gemini</div>
     <div class="card">
       <div class="set-row">
         <div><div class="set-name">✨ AI features</div><div class="set-sub" id="aiStatus">Off — add your free Gemini key</div></div>
@@ -1826,7 +1837,7 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='11.0.1';
+const APP_VER='11.1.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -2957,11 +2968,11 @@ function renderCar(){if(!document.getElementById('flList'))return;
     +'<div><div class="stat-label">Car spend · month</div><div class="stat-num">'+fmtR(carSpend)+'</div></div></div>'
     +(sk?'<div class="row-meta" style="margin-top:12px;color:'+(sk.remain<0?'var(--risk)':sk.remain<=500?'var(--warn)':'var(--gold)')+'">🔧 Service '+(sk.remain<0?('overdue by '+Math.abs(sk.remain).toLocaleString('en-IN')+' km'):('in '+sk.remain.toLocaleString('en-IN')+' km'))+' · at '+sk.due.toLocaleString('en-IN')+' km</div>':(ns?'<div class="row-meta" style="margin-top:12px;color:'+rnColor(daysTo(ns.next))+'">🔧 Next service '+rnLabel(daysTo(ns.next))+'</div>':''))
     +(carRen?'<div class="row-meta" style="margin-top:3px;color:'+rnColor(daysTo(carRen.expiry))+'">🛡 '+esc(carRen.name)+' '+rnLabel(daysTo(carRen.expiry))+'</div>':'<div class="row-meta" style="margin-top:3px">🛡 No car insurance tracked — add it under Renewals</div>');
-  document.getElementById('flList').innerHTML=desc.map((f,i)=>fuelCard(f,desc[i+1]&&desc[i+1]._kmpl)).join('')
+  document.getElementById('flList').innerHTML=desc.map((f,i)=>fuelCard(f,desc[i+1]&&desc[i+1]._kmpl)).join('')||'<div class="stat-sub" style="padding:8px 2px">Log your first fuel fill-up above — track mileage over time.</div>'
     ||'<div class="empty" style="padding:14px">Log a fill-up — mileage and ₹/km appear from the second entry</div>';
-  document.getElementById('svList').innerHTML=S.service.slice().sort((a,b)=>a.date<b.date?1:-1).map(svcCard).join('')
+  document.getElementById('svList').innerHTML=S.service.slice().sort((a,b)=>a.date<b.date?1:-1).map(svcCard).join('')||'<div class="stat-sub" style="padding:8px 2px">No service records yet — add one after your next visit.</div>'
     ||'<div class="empty" style="padding:14px">Oil change, brakes, insurance work — keep the full history with bills</div>';
-  document.getElementById('rnList').innerHTML=S.renewals.slice().sort((a,b)=>a.expiry<b.expiry?-1:1).map(rnCard).join('')
+  document.getElementById('rnList').innerHTML=S.renewals.slice().sort((a,b)=>a.expiry<b.expiry?-1:1).map(rnCard).join('')||'<div class="stat-sub" style="padding:8px 2px">Add a renewal — insurance, FASTag, subscriptions — and get reminded before it expires.</div>'
     ||'<div class="empty"><div class="em-ring">🛡</div>Car, life, health, PUC, FASTag —<br>never miss a renewal again</div>';
   setTimeout(loadThumbs,0)}
 /* ============ TRASH · UNDO DELETE (30 days) ============ */
@@ -2977,7 +2988,8 @@ function itemAttIds(kind,it){const out=[];
 function trashPush(kind,item,label){if(!item)return;
   S.trash.unshift({tid:uid(),kind,item,label:label||'Item',at:Date.now()});
   if(S.trash.length>200){const drop=S.trash.pop();itemAttIds(drop.kind,drop.item).forEach(fileDel)}
-  toast('Deleted — restore from Settings → Recently deleted')}
+  undoToast((label||'Item')+' deleted',S.trash[0].tid);
+  return S.trash[0].tid}
 function trashRestore(tid){const t=S.trash.find(x=>x.tid===tid);if(!t)return;
   const arr=TRASH_MAP[t.kind];if(!arr)return;
   S[arr].unshift(t.item);
@@ -5203,6 +5215,30 @@ function slashRun(i){
     ed.addEventListener('scroll',slashClose)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireSlash);else wireSlash()})();
 
+function undoToast(msg,tid){
+  const t=document.getElementById('toast');
+  clearTimeout(t._h);
+  t.classList.add('act');
+  t.innerHTML='<span style="flex:1">'+esc(msg)+'</span><span class="tu" onclick="_undoTap(\''+tid+'\')">UNDO</span>';
+  t.classList.add('show');
+  t._h=setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.classList.remove('act'),250)},4500)}
+function _undoTap(tid){
+  const t=document.getElementById('toast');clearTimeout(t._h);t.classList.remove('show');
+  setTimeout(()=>t.classList.remove('act'),250);
+  trashRestore(tid)}
+
+/* ============ BACKUP HEALTH ============ */
+function backupDraw(){
+  const t=document.getElementById('bkTitle'),su=document.getElementById('bkSub');
+  if(!t)return;
+  if(!S.profile||!S.profile.google){t.textContent='Not signed in';su.textContent='Sign in with Google (Settings \u2192 Account) to back up automatically';return}
+  if(!S.lastSync){t.textContent='No backup yet';su.textContent='Will sync on your next change, or tap Sync now';return}
+  const mins=Math.floor((Date.now()-S.lastSync)/60000);
+  const when=mins<1?'just now':(mins<60?mins+' min ago':(mins<1440?Math.floor(mins/60)+'h ago':Math.floor(mins/1440)+'d ago'));
+  const dataKB=Math.round((JSON.stringify(S).length)/1024);
+  t.textContent='\u2713 Backed up '+when;
+  su.textContent='Synced to your Google Drive \u00b7 ~'+dataKB.toLocaleString('en-IN')+' KB \u00b7 '+(S.trash||[]).length+' items in trash'}
+
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
 function zipMulti(files){
@@ -5914,7 +5950,7 @@ function renderSettings(){
     vv.style.cssText='text-align:center;margin:18px 0 6px;opacity:.65';
     const host=document.getElementById('v-settings');if(host)host.appendChild(vv)}
   if(vv)vv.textContent='ALOK OS \u00b7 v'+APP_VER;
-  aiStatusDraw();alarmDraw();nagDraw();modeDraw();
+  aiStatusDraw();alarmDraw();nagDraw();modeDraw();backupDraw();
   const _acc=S.profile.accent||'gold';
   document.querySelectorAll('.acc-dot').forEach(function(d){d.classList.toggle('on',d.dataset.a===_acc)});
   const _as=document.getElementById('accSub');if(_as)_as.textContent=ACC_NAMES[_acc]||'Gold';
