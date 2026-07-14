@@ -791,6 +791,16 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
 #toast.act{display:flex;align-items:center;gap:12px;padding-right:8px}
 #toast .tu{color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;padding:4px 8px;border-radius:8px;flex-shrink:0}
 #toast .tu:active{transform:scale(.92)}
+/* ---- Contacts + Branch dashboard ---- */
+.ct-row{display:flex;align-items:center;gap:11px;padding:11px 12px;border:1px solid var(--hair);border-radius:14px;background:var(--ink1)}
+.ct-av{width:38px;height:38px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:14px;color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.ct-act{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;
+  border:1px solid var(--hair);color:var(--hi);flex-shrink:0}
+.ct-act.call{color:var(--good)}
+.ct-act.wa{color:#4CC463}
+.np-row{padding:12px 13px;border-radius:14px;border:1px solid var(--hair);background:var(--ink1)}
+.np-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -1279,6 +1289,50 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
       <label class="fld"><span>Repeat</span><select class="inp" id="otRep"><option value="">No repeat</option><option value="daily">🔁 Daily</option><option value="weekly">🔁 Weekly</option><option value="monthly">🔁 Monthly</option><option value="yearly">🔁 Yearly</option></select></label>
     </div>
     <div class="card" id="otList" style="padding:6px 18px"></div>
+  </div>
+
+  <div class="wtab" id="wt-branch" style="display:none">
+    <div class="card" style="padding:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div><div class="stat-label">Collection this month</div>
+          <div style="font-family:Inter,system-ui,sans-serif;font-size:26px;margin-top:2px" id="brCollected">₹0</div></div>
+        <button class="btn btn-ghost btn-sm" onclick="brSetTarget()">🎯 Set target</button>
+      </div>
+      <div style="height:8px;border-radius:99px;background:var(--hair);margin-top:12px;overflow:hidden">
+        <div id="brBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--goldb));border-radius:99px;transition:width .4s"></div>
+      </div>
+      <div class="stat-sub" style="margin-top:6px" id="brTargetSub">No target set</div>
+    </div>
+    <div class="dtrow" style="margin-top:14px">
+      <label class="fld"><span>Date</span><input type="date" class="inp" id="brDate"></label>
+      <label class="fld"><span>Amount ₹</span><input type="number" inputmode="numeric" class="inp" id="brAmt" placeholder="50,000"></label>
+    </div>
+    <input class="inp" id="brNote" placeholder="Note (branch/scheme, optional)">
+    <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addCollection()">＋ Log collection entry</button>
+    <div id="brColList" style="margin-top:10px;display:flex;flex-direction:column;gap:8px"></div>
+
+    <div class="eyebrow" style="margin-top:22px">⚠ NPA follow-ups</div>
+    <div class="dtrow">
+      <input class="inp" id="npAcc" placeholder="Account no. / name" style="flex:1">
+      <input class="inp" id="npAmt" type="number" inputmode="numeric" placeholder="₹ Amount" style="flex:0 0 40%">
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="addNPA()">＋ Add NPA account</button>
+    <div id="npList" style="margin-top:12px;display:flex;flex-direction:column;gap:9px"></div>
+  </div>
+
+  <div class="wtab" id="wt-contacts" style="display:none">
+    <input class="inp" id="ctName" placeholder="Name">
+    <input class="inp" id="ctPhone" type="tel" placeholder="Phone number" style="margin-top:8px">
+    <div style="display:flex;gap:8px;margin:10px 0" id="ctChips">
+      <span class="chip on" data-k="Customer" onclick="pickCT(this)">🤝 Customer</span>
+      <span class="chip" data-k="Colleague" onclick="pickCT(this)">👔 Colleague</span>
+      <span class="chip" data-k="Vendor" onclick="pickCT(this)">📦 Vendor</span>
+      <span class="chip" data-k="Other" onclick="pickCT(this)">⭐ Other</span>
+    </div>
+    <input class="inp" id="ctNote" placeholder="Note (account no., context… optional)">
+    <button class="btn btn-gold" style="width:100%;margin-top:10px" onclick="addContact()">＋ Add contact</button>
+    <input class="inp" id="ctSearch" placeholder="Search contacts…" style="margin-top:16px" oninput="renderContacts()">
+    <div id="ctList" style="margin-top:12px;display:flex;flex-direction:column;gap:9px"></div>
   </div>
 
   <div class="wtab" id="wt-follow" style="display:none">
@@ -1837,7 +1891,7 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='11.1.0';
+const APP_VER='11.2.0';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -1900,7 +1954,7 @@ const LIFE_MODS=[
   ['health','Health','❤'],['car','Car','🚗'],['renew','Renewals','🛡'],['bday','Birthdays','🎂'],['docs','Docs','📄'],['family','Family Docs','👪'],['vault','Vault','🔐'],['hub','Links','🔗']];
 const WORK_MODS=[
   ['tasks','Tasks','✓'],['follow','Follow-ups','↺'],['meet','Meetings','🎥'],['circ','Circulars','📑'],
-  ['odoc','Docs','📄'],['hub','Links','🔗'],['notes','Quick Notes','🗒']];
+  ['odoc','Docs','📄'],['hub','Links','🔗'],['notes','Quick Notes','🗒'],['contacts','Contacts','📇'],['branch','Branch','🏦']];
 function lifeBadge(t){const d=today();
   if(t==='tasks')return {n:S.tasks.filter(x=>x.space!=='office'&&!x.done).length};
   if(t==='shopping')return {n:S.shopping.filter(s=>!s.done).length};
@@ -1928,7 +1982,9 @@ const LIFE_GROUPS=[
   ['Documents',['docs','family','vault','hub']]
 ];
 const WORK_GROUPS=[
+  ['Overview',['branch']],
   ['Flow',['tasks','follow','meet']],
+  ['People',['contacts']],
   ['Library',['circ','odoc','hub','notes']]
 ];
 function groupedLauncher(space,mods,groups){
@@ -2978,7 +3034,7 @@ function renderCar(){if(!document.getElementById('flList'))return;
 /* ============ TRASH · UNDO DELETE (30 days) ============ */
 const TRASH_MAP={task:'tasks',note:'notes',expense:'expenses',income:'income',shopping:'shopping',link:'links',
   followup:'followups',meeting:'meetings',circular:'circulars',doc:'docs',renewal:'renewals',
-  fuel:'fuel',service:'service',med:'meds',habit:'habits',goal:'goals',vital:'vitals',event:'events'};
+  fuel:'fuel',service:'service',med:'meds',habit:'habits',goal:'goals',vital:'vitals',event:'events',contact:'contacts',collection:'collections',npa:'npas'};
 function itemAttIds(kind,it){const out=[];
   if(!it)return out;
   if(kind==='circular')(it.versions||[]).forEach(v=>v.att&&out.push(v.att.id));
@@ -3504,7 +3560,7 @@ function renderDocs(){setTimeout(loadThumbs,0);const el=document.getElementById(
   if(el)el.innerHTML=S.docs.filter(d=>d.space!=='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>PAN, RC, policy, warranty —<br>keep them all safe here (image or PDF)</div>';
   const oe=document.getElementById('odocList');
   if(oe)oe.innerHTML=S.docs.filter(d=>d.space==='office').map(docCard).join('')||'<div class="empty"><div class="em-ring">📄</div>Sanction letters, audit reports, statements —<br>save any office document by name</div>'}
-function renderWork(){renderHub();renderWorkLauncher();listOr(otList,S.tasks.filter(t=>t.space==='office').sort(taskSort),taskRow,'No office tasks. Enjoy it while it lasts.');
+function renderWork(){renderHub();renderContacts();renderBranch();renderWorkLauncher();listOr(otList,S.tasks.filter(t=>t.space==='office').sort(taskSort),taskRow,'No office tasks. Enjoy it while it lasts.');
   fuList.innerHTML=S.followups.filter(f=>!f.done).map(fuCard).join('')+S.followups.filter(f=>f.done).slice(0,3).map(fuCard).join('')||'<div class="empty"><div class="em-ring">↺</div>No follow-ups. Add the first one above.</div>';
   if(document.getElementById('mtList'))mtList.innerHTML=S.meetings.slice().sort((a,b)=>((a.date||'')+'T'+(a.time||''))<((b.date||'')+'T'+(b.time||''))?-1:1).map(meetCard).join('')||'<div class="empty"><div class="em-ring">🎥</div>Add your first meeting above —<br>its name and time will show on the dashboard</div>';
   renderDocs();renderLinks();setTimeout(loadThumbs,0);
@@ -3537,7 +3593,8 @@ function runSearch(){const q=qIn.value.trim().toLowerCase();
    ['Office documents',S.docs.filter(d=>d.space==='office'&&hit(d.name)).map(docCard)],
    ['Meetings',S.meetings.filter(m=>hit(m.title)||hit(m.host)).map(meetCard)],
    ['Follow-ups',S.followups.filter(f=>hit(f.person)||hit(f.topic)).map(fuCard)],
-   ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')]];
+   ['Shopping',S.shopping.filter(s=>hit(s.name)).map(s=>'<div class="row"><div class="row-body"><div class="row-title">🛒 '+esc(s.name)+'</div></div></div>')],
+   ['Contacts',(S.contacts||[]).filter(c=>hit(c.name)||hit(c.phone)||hit(c.role)).map(ctCard)]];
   let html='';groups.forEach(([name,items])=>{if(items.length)html+='<div class="result-group"><div class="eyebrow">'+name+' · '+items.length+'</div>'+(name==='Notes'||name==='Follow-ups'||name==='Meetings'||name==='Documents'||name==='Office documents'||name==='Circulars'||name==='Renewals'||name==='Car'||name==='Birthdays'||name==='Links'||name==='Bills'||name==='Cards'||name==='Lent / Borrowed'||name==='Family Documents'||name==='Vault (logins)'?'<div style="display:flex;flex-direction:column;gap:10px">'+items.join('')+'</div>':'<div class="card" style="padding:6px 18px">'+items.join('')+'</div>')+'</div>'});
   qOut.innerHTML=html||'<div class="empty">Nothing found for “'+esc(q)+'”</div>';setTimeout(loadThumbs,0)}
 /* ============ CIRCULARS (with version history) ============ */
@@ -5238,6 +5295,93 @@ function backupDraw(){
   const dataKB=Math.round((JSON.stringify(S).length)/1024);
   t.textContent='\u2713 Backed up '+when;
   su.textContent='Synced to your Google Drive \u00b7 ~'+dataKB.toLocaleString('en-IN')+' KB \u00b7 '+(S.trash||[]).length+' items in trash'}
+
+/* ============ CONTACTS ============ */
+let curCT='Customer';
+function pickCT(el){curCT=el.dataset.k;document.querySelectorAll('#ctChips .chip').forEach(c=>c.classList.toggle('on',c===el))}
+function addContact(){const n=ctName.value.trim(),p=ctPhone.value.trim();
+  if(!n){toast('Enter a name');ctName.focus();return}
+  (S.contacts=S.contacts||[]).unshift({id:uid(),name:n,phone:p,role:curCT,note:ctNote.value.trim(),pin:false,at:new Date().toISOString()});
+  ['ctName','ctPhone','ctNote'].forEach(i=>document.getElementById(i).value='');
+  save();renderContacts();toast('\u2713 '+n+' added')}
+function ctPin(id){const c=(S.contacts||[]).find(x=>x.id===id);if(!c)return;c.pin=!c.pin;save();renderContacts()}
+function delContact(id){const c=(S.contacts||[]).find(x=>x.id===id);if(!c)return;
+  askDelete(c.name,function(){trashPush('contact',c,c.name);S.contacts=S.contacts.filter(x=>x.id!==id);save();renderContacts()})}
+function ctCall(phone){if(phone)location.href='tel:'+phone.replace(/[^\d+]/g,'')}
+function ctWa(phone){if(!phone)return;
+  let p=phone.replace(/[^\d+]/g,'');if(p.length===10)p='91'+p;
+  window.open('https://wa.me/'+p.replace('+',''),'_blank')}
+function ctCard(c){
+  const init=(c.name||'?').trim().slice(0,2).toUpperCase();
+  return '<div class="ct-row">'
+    +'<div class="ct-av">'+esc(init)+'</div>'
+    +'<div style="flex:1;min-width:0">'
+    +'<div style="font-weight:600;font-size:14.5px">'+(c.pin?'\ud83d\udccc ':'')+esc(c.name)+'</div>'
+    +'<div class="stat-sub">'+esc(c.role||'')+(c.phone?' \u00b7 '+esc(c.phone):'')+(c.note?' \u00b7 '+esc(c.note):'')+'</div></div>'
+    +(c.phone?'<span class="ct-act call" onclick="ctCall(\''+c.phone+'\')">\ud83d\udcde</span>'
+             +'<span class="ct-act wa" onclick="ctWa(\''+c.phone+'\')">\ud83d\udcac</span>':'')
+    +'<span class="ct-act" onclick="ctPin(\''+c.id+'\')">\ud83d\udccc</span>'
+    +'<span class="ct-act" onclick="delContact(\''+c.id+'\')" style="color:var(--risk)">\u2715</span>'
+    +'</div>'}
+function renderContacts(){
+  const el=document.getElementById('ctList');if(!el)return;
+  const q=(document.getElementById('ctSearch').value||'').toLowerCase();
+  let list=(S.contacts||[]).filter(c=>!q||(c.name+c.phone+c.role+(c.note||'')).toLowerCase().includes(q));
+  list=list.slice().sort((a,b)=>(b.pin-a.pin)||((b.at||'').localeCompare(a.at||'')));
+  el.innerHTML=list.map(ctCard).join('')
+    ||'<div class="stat-sub" style="padding:8px 2px">Add customers, colleagues or vendors above \u2014 call or WhatsApp them in one tap.</div>'}
+
+/* ============ BRANCH DASHBOARD ============ */
+function brSetTarget(){
+  askPrompt('Monthly collection target','Enter target amount in \u20b9',String(S.profile.branchTarget||''),function(v){
+    const n=parseFloat(v);if(isNaN(n)||n<=0){toast('Enter a valid amount');return}
+    S.profile.branchTarget=n;save();renderBranch();toast('\u2713 Target set')})}
+function addCollection(){
+  const amt=parseFloat(brAmt.value);
+  if(isNaN(amt)||amt<=0){toast('Enter a valid amount');brAmt.focus();return}
+  (S.collections=S.collections||[]).unshift({id:uid(),date:brDate.value||today(),amount:amt,note:brNote.value.trim()});
+  brAmt.value='';brNote.value='';save();renderBranch();toast('\u2713 '+fmtR(amt)+' logged')}
+function delCollection(id){const c=(S.collections||[]).find(x=>x.id===id);if(!c)return;
+  askDelete(fmtR(c.amount),function(){trashPush('collection',c,fmtR(c.amount));S.collections=S.collections.filter(x=>x.id!==id);save();renderBranch()})}
+function addNPA(){
+  const acc=npAcc.value.trim();if(!acc){toast('Enter account no. / name');npAcc.focus();return}
+  const amt=parseFloat(npAmt.value)||0;
+  (S.npas=S.npas||[]).unshift({id:uid(),acc:acc,amount:amt,lastFollow:today(),at:new Date().toISOString()});
+  npAcc.value='';npAmt.value='';save();renderBranch();toast('\u2713 NPA account added')}
+function npFollowed(id){const n=(S.npas||[]).find(x=>x.id===id);if(!n)return;
+  n.lastFollow=today();save();renderBranch();toast('\u2713 Marked followed today')}
+function delNPA(id){const n=(S.npas||[]).find(x=>x.id===id);if(!n)return;
+  askDelete(n.acc,function(){trashPush('npa',n,n.acc);S.npas=S.npas.filter(x=>x.id!==id);save();renderBranch()})}
+function npCard(n){
+  const d=daysTo(n.lastFollow);const ago=-d;
+  const col=ago>=30?'var(--risk)':(ago>=14?'var(--warn)':'var(--good)');
+  const lbl=ago<=0?'Followed today':(ago+' day'+(ago===1?'':'s')+' since last follow-up');
+  return '<div class="np-row">'
+    +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+    +'<div style="min-width:0"><div style="font-weight:600;font-size:14.5px">'+esc(n.acc)+'</div>'
+    +'<div class="stat-sub"><span class="np-dot" style="background:'+col+'"></span>'+lbl+(n.amount?' \u00b7 '+fmtR(n.amount):'')+'</div></div>'
+    +'<div style="display:flex;gap:6px;flex-shrink:0">'
+    +'<button class="btn btn-ghost btn-sm" onclick="npFollowed(\''+n.id+'\')">\u2713 Followed</button>'
+    +'<span class="ct-act" onclick="delNPA(\''+n.id+'\')" style="color:var(--risk)">\u2715</span></div></div></div>'}
+function renderBranch(){
+  const cEl=document.getElementById('brCollected');if(!cEl)return;
+  const mk=today().slice(0,7);
+  const rows=(S.collections||[]).filter(c=>(c.date||'').slice(0,7)===mk);
+  const tot=rows.reduce((a,b)=>a+b.amount,0);
+  cEl.textContent=fmtR(tot);
+  const tgt=S.profile.branchTarget||0;
+  const bar=document.getElementById('brBar'),sub=document.getElementById('brTargetSub');
+  if(tgt){const pct=Math.min(100,Math.round(tot/tgt*100));bar.style.width=pct+'%';
+    sub.textContent=pct+'% of '+fmtR(tgt)+' target this month'}
+  else{bar.style.width='0%';sub.textContent='No target set \u2014 tap \ud83c\udfaf Set target'}
+  document.getElementById('brColList').innerHTML=rows.slice(0,8).map(c=>
+    '<div class="row"><div class="row-body"><div class="row-title">'+fmtR(c.amount)+'</div>'
+    +'<div class="row-meta">'+fmtD(c.date)+(c.note?' \u00b7 '+esc(c.note):'')+'</div></div>'
+    +'<span class="ct-act" onclick="delCollection(\''+c.id+'\')" style="color:var(--risk)">\u2715</span></div>').join('')
+    ||'<div class="stat-sub" style="padding:6px 2px">No entries logged this month yet.</div>';
+  const nps=(S.npas||[]).slice().sort((a,b)=>a.lastFollow<b.lastFollow?-1:1);
+  document.getElementById('npList').innerHTML=nps.map(npCard).join('')
+    ||'<div class="stat-sub" style="padding:8px 2px">No NPA accounts tracked \u2014 add one above.</div>'}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
