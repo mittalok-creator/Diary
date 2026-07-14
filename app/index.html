@@ -2165,35 +2165,61 @@ function neWrapHtml(n){return '<div style="font-family:Georgia,serif;max-width:6
   +'<h1 style="font-family:Georgia,serif;font-size:26px;border-bottom:2px solid #B8863B;padding-bottom:10px;margin-bottom:18px">'+esc(n.title)+'</h1>'
   +'<div style="font-size:15px;line-height:1.8">'+n.html+'</div>'
   +'<div style="margin-top:28px;color:#9C6B26;font-size:12px;letter-spacing:.1em">BY ALOK MITTAL \u00b7 ALOK OS</div></div>'}
+async async function _noteToCanvas(n){
+  const html=neWrapHtml(n);
+  const meas=document.createElement('div');
+  meas.style.cssText='position:fixed;left:-9999px;top:0;width:680px';
+  meas.innerHTML=html;document.body.appendChild(meas);
+  const H=Math.max(240,meas.firstChild.scrollHeight+40);const W=680;
+  meas.remove();
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'"><foreignObject width="100%" height="100%"><div xmlns="http://www.w3.org/1999/xhtml">'+html+'</div></foreignObject></svg>';
+  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+  const img=new Image();
+  await new Promise(function(res,rej){img.onload=res;img.onerror=rej;img.src=url});
+  const sc=2;const cv=document.createElement('canvas');cv.width=W*sc;cv.height=H*sc;
+  const ctx=cv.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,cv.width,cv.height);ctx.scale(sc,sc);ctx.drawImage(img,0,0);
+  URL.revokeObjectURL(url);return cv}
+async function _shareOrSave(blob,fname,title,okmsg){
+  const file=new File([blob],fname,{type:blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:title});return}catch(e){if(e&&e.name==='AbortError')return}}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=fname;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast(okmsg)}
 async function neExpImage(){const n=neCurrent();neSheetClose();
-  setSyncStatus&&0;
-  const wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-9999px;top:0;width:680px';
-  wrap.innerHTML=neWrapHtml(n);document.body.appendChild(wrap);
-  try{
-    if(!window.html2canvas)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-    const canvas=await html2canvas(wrap.firstChild,{scale:2,backgroundColor:'#ffffff'});
-    const url=canvas.toDataURL('image/png');
-    const a=document.createElement('a');a.href=url;a.download=n.title.replace(/[^\w\- ]+/g,'').trim()+'.png';a.click();
-    toast('\ud83d\uddbc Image saved')}
-  catch(e){toast('Image export needs internet the first time')}
-  wrap.remove()}
+  try{const cv=await _noteToCanvas(n);
+    cv.toBlob(function(blob){if(!blob){toast('Could not render image');return}
+      _shareOrSave(blob,(n.title||'note').replace(/[^\w\- ]+/g,'').trim()+'.png',n.title,'\ud83d\uddbc Image saved')},'image/png')}
+  catch(e){toast('Image export failed \u2014 try Save as text')}}
 async function neExpPDF(){const n=neCurrent();neSheetClose();
-  const wrap=document.createElement('div');wrap.style.cssText='position:fixed;left:-9999px;top:0;width:680px';
-  wrap.innerHTML=neWrapHtml(n);document.body.appendChild(wrap);
-  try{
-    if(!window.html2canvas)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-    if(!window.jspdf)await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-    const canvas=await html2canvas(wrap.firstChild,{scale:2,backgroundColor:'#ffffff'});
-    const img=canvas.toDataURL('image/jpeg',0.92);
-    const {jsPDF}=window.jspdf;const pdf=new jsPDF('p','mm','a4');
-    const pw=210,ph=(canvas.height*pw)/canvas.width;
-    let left=ph,pos=0;const pageH=297;
-    pdf.addImage(img,'JPEG',0,pos,pw,ph);left-=pageH;
-    while(left>0){pos=left-ph;pdf.addPage();pdf.addImage(img,'JPEG',0,pos,pw,ph);left-=pageH}
-    pdf.save(n.title.replace(/[^\w\- ]+/g,'').trim()+'.pdf');
-    toast('\ud83d\udcc4 PDF exported')}
-  catch(e){toast('PDF export needs internet the first time')}
-  wrap.remove()}
+  try{const cv=await _noteToCanvas(n);
+    const jpg=cv.toDataURL('image/jpeg',0.9);
+    const blob=new Blob([_jpgPdf(jpg,cv.width,cv.height)],{type:'application/pdf'});
+    _shareOrSave(blob,(n.title||'note').replace(/[^\w\- ]+/g,'').trim()+'.pdf',n.title,'\ud83d\udcc4 PDF saved')}
+  catch(e){toast('PDF export failed \u2014 try Save as image')}}
+function _jpgPdf(dataUrl,iw,ih){
+  const bin=atob(dataUrl.split(',')[1]);const jpg=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)jpg[i]=bin.charCodeAt(i);
+  const PW=595,PH=842,margin=24,availW=PW-margin*2;
+  const dispW=availW,dispH=ih*(availW/iw);
+  const y=PH-margin-Math.min(dispH,PH-margin*2);
+  const objs=['<</Type/Catalog/Pages 2 0 R>>','<</Type/Pages/Kids[3 0 R]/Count 1>>',
+    '<</Type/Page/Parent 2 0 R/MediaBox[0 0 '+PW+' '+PH+']/Resources<</XObject<</Im0 5 0 R>>>>/Contents 4 0 R>>'];
+  const content='q '+dispW.toFixed(2)+' 0 0 '+dispH.toFixed(2)+' '+margin+' '+y.toFixed(2)+' cm /Im0 Do Q';
+  objs.push('<</Length '+content.length+'>>\nstream\n'+content+'\nendstream');
+  const enc=new TextEncoder();const parts=[];let cur=0;const offsets=[];
+  function push(u){parts.push(u);cur+=u.length}
+  function add(str){offsets.push(cur);push(enc.encode(str))}
+  push(enc.encode('%PDF-1.4\n'));
+  for(let i=0;i<4;i++)add((i+1)+' 0 obj\n'+objs[i]+'\nendobj\n');
+  offsets.push(cur);
+  push(enc.encode('5 0 obj\n<</Type/XObject/Subtype/Image/Width '+iw+'/Height '+ih+'/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length '+jpg.length+'>>\nstream\n'));
+  push(jpg);push(enc.encode('\nendstream\nendobj\n'));
+  const xrefStart=cur;let xref='xref\n0 6\n0000000000 65535 f \n';
+  for(let i=0;i<5;i++)xref+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+  push(enc.encode(xref+'trailer\n<</Size 6/Root 1 0 R>>\nstartxref\n'+xrefStart+'\n%%EOF'));
+  let total=0;parts.forEach(p=>total+=p.length);const buf=new Uint8Array(total);let o=0;
+  parts.forEach(p=>{buf.set(p,o);o+=p.length});return buf}
+
 function neExpWord(){const n=neCurrent();neSheetClose();
   const html='<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>'+esc(n.title)+'</title></head><body>'
     +'<h1 style="font-family:Georgia,serif;color:#171C24">'+esc(n.title)+'</h1>'+n.html
