@@ -742,6 +742,17 @@ table.nt{border-collapse:collapse;min-width:100%;font-size:14px}
 .ntbar button{border:1px solid var(--hair);background:var(--ink2);color:var(--hi);border-radius:8px;
   padding:5px 11px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit}
 .ntbar button:active{transform:scale(.94)}
+/* ---- free-hand tables: resizable columns + movable ---- */
+table.nt{table-layout:fixed}
+.nt th{position:relative}
+.nt .nt-grip{position:absolute;top:0;right:-3px;width:8px;height:100%;cursor:col-resize;z-index:2;touch-action:none}
+.nt .nt-grip::after{content:'';position:absolute;top:20%;bottom:20%;right:3px;width:2px;border-radius:2px;background:transparent}
+.nt th:hover .nt-grip::after{background:color-mix(in srgb,var(--gold) 55%,transparent)}
+.nt-move{display:flex;align-items:center;gap:6px;margin:10px 0 -4px;font-size:11.5px;color:var(--lo);user-select:none}
+.nt-move button{border:1px solid var(--hair);background:var(--ink2);color:var(--hi);border-radius:7px;
+  padding:3px 9px;font-size:12px;cursor:pointer;font-family:inherit}
+.nt-move button:active{transform:scale(.92)}
+.nt-move .gh{margin-left:auto;cursor:grab;padding:3px 8px;border-radius:7px;border:1px dashed var(--hair)}
 </style>
 </head>
 <body>
@@ -1690,7 +1701,7 @@ table.nt{border-collapse:collapse;min-width:100%;font-size:14px}
     <span class="ne-colors" id="neColors"></span>
     <button class="ne-t" onclick="neCmd('removeFormat')" title="Clear formatting">⊘</button>
   </div>
-  <div class="ne-body"><div id="ntBar" class="ntbar" style="display:none" contenteditable="false"><button onclick="ntRow(1)">＋ Row</button><button onclick="ntRow(0)">− Row</button><button onclick="ntCol(1)">＋ Col</button><button onclick="ntCol(0)">− Col</button><button onclick="ntSum()">Σ Total</button><button onclick="ntDel()" style="color:var(--risk)">🗑 Table</button></div>
+  <div class="ne-body"><div id="ntBar" class="ntbar" style="display:none" contenteditable="false"><button onclick="ntRow(1)">＋ Row</button><button onclick="ntRow(0)">− Row</button><button onclick="ntCol(1)">＋ Col</button><button onclick="ntCol(0)">− Col</button><button onclick="ntMoveCtl(-1)" title="Move up">↑</button><button onclick="ntMoveCtl(1)" title="Move down">↓</button><button onclick="ntSum()">Σ Total</button><button onclick="ntDel()" style="color:var(--risk)">🗑 Table</button></div>
     <div id="neEditor" contenteditable="true" spellcheck="false"></div></div>
   <div class="ne-foot">
     <button class="btn btn-ghost" title="Attach" onclick="neAttach()">📎</button>
@@ -1769,7 +1780,7 @@ table.nt{border-collapse:collapse;min-width:100%;font-size:14px}
 </div>
 <script>
 /* ============ STORAGE (works in Claude artifacts AND as standalone PWA) ============ */
-const APP_VER='10.5.0';
+const APP_VER='10.5.1';
 const KEY='alokos-v1'; let mem={};
 const store={
   async get(k=KEY){ if(window.storage){try{const r=await window.storage.get(k);return r?r.value:null}catch(e){return null}}
@@ -4784,7 +4795,8 @@ function ntTable(){
     +'<tr><th>Item</th><th>Amount</th><th>Note</th></tr>'
     +'<tr><td><br></td><td><br></td><td><br></td></tr>'
     +'<tr><td><br></td><td><br></td><td><br></td></tr>'
-    +'</tbody></table></div><p><br></p>')}
+    +'</tbody></table></div><p><br></p>');
+  setTimeout(ntEnhanceAll,0)}
 function ntCheck(){ntInsertHTML('<div class="nt-check">&nbsp;</div>')}
 function ntDivider(){ntInsertHTML('<hr class="nt-hr"><p><br></p>')}
 function ntCurTable(){
@@ -4833,10 +4845,41 @@ function ntDel(){const t=ntCurTable();if(!t)return;
   function wire(){const ed=document.getElementById('neEditor');if(!ed||ed._ntWired)return;ed._ntWired=true;
     ed.addEventListener('input',function(e){
       const t=(e.target&&e.target.closest)?e.target.closest('table.nt'):null;if(t)ntRecalc(t)});
+    const mo=new MutationObserver(function(){ntEnhanceAll()});mo.observe(ed,{childList:true,subtree:true});setTimeout(ntEnhanceAll,60);
     ed.addEventListener('click',function(e){
       const c=(e.target&&e.target.closest)?e.target.closest('.nt-check'):null;
       if(c&&e.offsetX<26)c.classList.toggle('done')})}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire()})();
+
+/* ---- table column resize + move (free-hand) ---- */
+function ntEnhance(t){
+  if(!t||t._enh)return;t._enh=true;
+  /* colgroup keeps widths */
+  const cols=t.tBodies[0].rows[0].cells.length;
+  if(!t.querySelector('colgroup')){
+    const cg=document.createElement('colgroup');
+    for(let i=0;i<cols;i++){const c=document.createElement('col');cg.appendChild(c)}
+    t.insertBefore(cg,t.firstChild)}
+  /* grips on header cells */
+  Array.from(t.tBodies[0].rows[0].cells).forEach(function(th,idx){
+    if(th.querySelector('.nt-grip'))return;
+    const g=document.createElement('span');g.className='nt-grip';g.contentEditable='false';
+    g.addEventListener('pointerdown',function(e){
+      e.preventDefault();e.stopPropagation();
+      const cg=t.querySelector('colgroup');const col=cg.children[idx];
+      const startX=e.clientX;const startW=th.getBoundingClientRect().width;
+      function mv(ev){const w=Math.max(46,startW+(ev.clientX-startX));col.style.width=w+'px'}
+      function up(){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);
+        try{document.getElementById('neEditor').dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
+      document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
+    th.appendChild(g)})}
+function ntMoveCtl(dir){const t=ntCurTable();if(!t)return;
+  const w=t.closest('.nt-wrap');if(!w)return;
+  if(dir<0){const p=w.previousElementSibling;if(p)w.parentNode.insertBefore(w,p)}
+  else{const n=w.nextElementSibling;if(n)w.parentNode.insertBefore(n,w)}
+  try{document.getElementById('neEditor').dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
+function ntEnhanceAll(){const ed=document.getElementById('neEditor');if(!ed)return;
+  ed.querySelectorAll('table.nt').forEach(ntEnhance)}
 
 /* ============ MONEY EXCEL DASHBOARD ============ */
 // ALOK OS — Money Excel dashboard generator (no libraries; pairs with crc32/zip writer)
