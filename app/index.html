@@ -791,6 +791,12 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
 #toast.act{display:flex;align-items:center;gap:12px;padding-right:8px}
 #toast .tu{color:var(--gold);font-weight:700;font-size:13px;cursor:pointer;padding:4px 8px;border-radius:8px;flex-shrink:0}
 #toast .tu:active{transform:scale(.92)}
+.dot14.off{background:none;border:1.5px solid color-mix(in srgb,var(--risk) 55%,transparent)}
+.hab-mk{flex:1;padding:9px 4px;border-radius:11px;font-size:12.5px;font-weight:700;text-align:center;
+  border:1px solid var(--hair);color:var(--lo);cursor:pointer;transition:transform .12s}
+.hab-mk:active{transform:scale(.95)}
+.hab-mk.yes.on{background:linear-gradient(160deg,var(--goldb),var(--gold));border-color:var(--gold);color:#231a09}
+.hab-mk.no.on{background:color-mix(in srgb,var(--risk) 16%,transparent);border-color:var(--risk);color:var(--risk)}
 </style>
 </head>
 <body>
@@ -2680,33 +2686,34 @@ function _delHabit(id){const h=S.habits.find(x=>x.id===id);trashPush('habit',h,h
 function habitStreak(h){let n=0;const d=new Date();h.done=h.done||{};
   if(!h.done[today()])d.setDate(d.getDate()-1);
   while(h.done[d.toISOString().slice(0,10)]){n++;d.setDate(d.getDate()-1)}return n}
-function habitToggle(id){const h=S.habits.find(x=>x.id===id);const t=today();h.done=h.done||{};
-  if(h.done[t])delete h.done[t];else h.done[t]=true;
+function habitMark(id,val){const h=S.habits.find(x=>x.id===id);if(!h)return;const t=today();h.done=h.done||{};
+  if(h.done[t]===val)delete h.done[t];else h.done[t]=val;
   save();renderLife();
-  if(h.done[t])toast('🔥 '+habitStreak(h)+' day streak — '+h.name)}
+  const v=h.done[t];
+  if(v===true)toast('🔥 '+habitStreak(h)+' day streak — '+h.name);
+  else if(v===false)toast('Marked not done — '+h.name);
+  else toast('Cleared for today')}
 function habitCard(h){const t=today();const days=[];const d=new Date();d.setDate(d.getDate()-13);
-  for(let i=0;i<14;i++){const k=d.toISOString().slice(0,10);
-    days.push('<div class="dot14 '+((h.done||{})[k]?'on':'')+'"></div>');d.setDate(d.getDate()+1)}
+  for(let i=0;i<14;i++){const k=d.toISOString().slice(0,10);const v=(h.done||{})[k];
+    days.push('<div class="dot14 '+(v===true?'on':(v===false?'off':''))+'"></div>');d.setDate(d.getDate()+1)}
   const on=(h.done||{})[t];
   return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
-  +'<div class="chk '+(on?'on':'')+'" onclick="habitToggle(\''+h.id+'\')" style="width:28px;height:28px;border-radius:9px"></div>'
-  +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(h.name)+'</div><div class="row-meta">🔥 '+habitStreak(h)+' day streak</div></div>'
+  +'<div style="flex:1;min-width:0"><div class="row-title">'+esc(h.name)+'</div>'
+  +'<div class="row-meta">'+(on===true?'✓ Done today · ':(on===false?'Not done today · ':''))+'🔥 '+habitStreak(h)+' day streak</div></div>'
   +'<button class="ed" title="Rename" onclick="askRename(\'habit\',\''+h.id+'\')">✎</button><button class="del" onclick="delHabit(\''+h.id+'\')">✕</button></div>'
-  +'<div class="dotstrip" style="margin-top:12px">'+days.join('')+'</div></div>'}
+  +'<div class="dotstrip" style="margin-top:12px">'+'<div style="display:flex;gap:8px;margin:10px 0 2px"><span class="hab-mk yes'+(on===true?' on':'')+'" onclick="habitMark(\''+h.id+'\',true)">✓ Done today</span><span class="hab-mk no'+(on===false?' on':'')+'" onclick="habitMark(\''+h.id+'\',false)">✕ Not today</span></div><div style="display:flex;gap:5px;flex-wrap:wrap">'+days.join('')+'</div>'+'</div></div>'}
 function addWeight(){const v=Number(wtIn.value);if(!v)return;
   S.vitals.unshift({id:uid(),kind:'weight',v1:v,at:new Date().toISOString()});
   wtIn.value='';save();renderLife();toast('⚖ '+v+' kg logged')}
 function addBP(){const a=Number(bpS.value),b2=Number(bpD.value);if(!a||!b2)return;
   S.vitals.unshift({id:uid(),kind:'bp',v1:a,v2:b2,at:new Date().toISOString()});
   bpS.value='';bpD.value='';save();renderLife();toast('🩺 '+a+'/'+b2+' logged')}
-function delVital(id){askDelete('This reading',()=>_delVital(id));}
-function _delVital(id){const v=S.vitals.find(x=>x.id===id);trashPush('vital',v,'Vital reading');S.vitals=S.vitals.filter(x=>x.id!==id);save();renderLife()}
 function renderHealth(){if(!document.getElementById('medList'))return;
   if(!S._vitNorm){let ch=false;(S.vitals||[]).forEach(v=>{if(v.kind&&!v.k){v.k=v.kind;delete v.kind;ch=true}});S._vitNorm=true;if(ch)save()}
   renderHScore();renderVitals();renderHReports();
   medList.innerHTML=S.meds.map(medCard).join('')||'<div class="empty" style="padding:14px">Add a medicine course — a reminder fires at every dose time</div>';
   habList.innerHTML=S.habits.map(habitCard).join('')||'<div class="empty" style="padding:14px">Track a habit — walk, reading, no-sugar…</div>';
-  const _vl=document.getElementById('vitList');if(_vl)_vl.innerHTML=S.vitals.slice(0,6).map(v=>'<div class="row"><div class="row-body"><div class="row-title">'+(v.kind==='weight'?'⚖ '+v.v1+' kg':'🩺 '+v.v1+'/'+v.v2)+'</div><div class="row-meta">'+fmtD(v.at)+'</div></div><button class="del" onclick="delVital(\''+v.id+'\')">✕</button></div>').join('')||'<div class="empty" style="padding:12px">Log weight or BP to build history</div>'}
+  }
 /* ============ PAYMENT REMINDERS ============ */
 function payTab(p){document.querySelectorAll('#paySeg button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));
   ['bill','card','lend'].forEach(k=>{const el=document.getElementById('paysub-'+k);if(el)el.style.display=k===p?'block':'none'})}
