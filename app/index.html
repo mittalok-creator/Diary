@@ -2587,7 +2587,8 @@ function addExpense(amt,note,cat){const a=amt??Number(exAmt.value);if(!a||a<=0){
   const when=(manual&&exDate.value)?new Date(exDate.value+'T12:00:00').toISOString():new Date().toISOString();
   S.expenses.unshift({id:uid(),amount:a,note:(note??exNote.value.trim())||curCat,cat:cat||curCat,att:manual?pend.exp.splice(0):[],at:when});
   if(manual){exAmt.value='';exNote.value='';exDate.value='';drawPend('exp')}
-  save();renderLife();toast(fmtR(a)+' logged'+(back?' · '+fmtD(when):''))}
+  save();renderLife();toast(fmtR(a)+' logged'+(back?' · '+fmtD(when):''));
+  if(manual)setTimeout(()=>checkRecurring(note??'',cat||curCat,a),2500)}
 function delExp(id){const x=S.expenses.find(e=>e.id===id);askDelete(x&&x.note,()=>_delExp(id));}
 function _delExp(id){const x=S.expenses.find(e=>e.id===id);trashPush('expense',x,x&&(x.note+' · '+fmtR(x.amount)));S.expenses=S.expenses.filter(e=>e.id!==id);save();renderLife()}
 /* ============ FOLLOW-UPS ============ */
@@ -4130,12 +4131,26 @@ function qaParse(raw){
 async function qaAdd(){const inp=document.getElementById('qaIn');const v=inp.value.trim();if(!v)return;
   let p=qaParse(v);
   if(!p.title){toast('Please type the task first');return}
+  let aiUsed=false;
   if(!p.due&&!p.time&&aiReady()&&navigator.onLine&&v.split(' ').length>2){
     toast('\u2728 Understanding\u2026');
-    const g=await qaAIParse(v);if(g&&g.title)p=g;
+    const g=await qaAIParse(v);if(g&&g.title){p=g;aiUsed=true}
   }
+  if(aiUsed&&(p.due||p.time)){
+    let sum='\u2728 '+esc(p.title);
+    if(p.due)sum+=' \u00b7 '+fmtD(p.due);
+    if(p.time)sum+=' \u00b7 '+fmtTime(p.time);
+    actionToast(sum,[
+      {label:'\u2713 SAVE',fn:()=>_qaCommit(p)},
+      {label:'\u270e EDIT',fn:()=>{inp.value=v;inp.focus()}}
+    ],7000);
+    return;
+  }
+  _qaCommit(p)}
+function _qaCommit(p){
   S.tasks.unshift({id:uid(),title:p.title,space:qaSp,due:p.due,time:p.time||null,rep:null,done:false,at:new Date().toISOString()});
-  save();buzz(12);inp.value='';
+  save();buzz(12);
+  const inp=document.getElementById('qaIn');if(inp)inp.value='';
   renderToday();renderLife();renderWork();
   let sum='\u2713 Added';
   if(p.due)sum+=' \u00b7 '+fmtD(p.due);
@@ -5271,6 +5286,41 @@ function slashRun(i){
     ed.addEventListener('blur',function(){setTimeout(slashClose,120)});
     ed.addEventListener('scroll',slashClose)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireSlash);else wireSlash()})();
+
+/* ============ ACTION TOAST (generic multi-button) ============ */
+function actionToast(msg,actions,ms){
+  const t=document.getElementById('toast');
+  clearTimeout(t._h);
+  t.classList.add('act');
+  let html='<span style="flex:1">'+msg+'</span>';
+  actions.forEach((a,i)=>{html+='<span class="tu" onclick="_toastAct('+i+')">'+esc(a.label)+'</span>'});
+  t.innerHTML=html;
+  window._toastFns=actions.map(a=>a.fn);
+  t.classList.add('show');
+  t._h=setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.classList.remove('act'),250)},ms||4500)}
+function _toastAct(i){
+  const t=document.getElementById('toast');clearTimeout(t._h);t.classList.remove('show');
+  setTimeout(()=>t.classList.remove('act'),250);
+  const fn=(window._toastFns||[])[i];if(fn)fn()}
+
+/* ============ RECURRING EXPENSE DETECT ============ */
+function checkRecurring(note,cat,amt){
+  const key=(note||cat||'').trim().toLowerCase();if(!key||!amt)return;
+  S.profile.recurSeen=S.profile.recurSeen||{};
+  if(S.profile.recurSeen[key])return;
+  const matches=S.expenses.filter(e=>((e.note||e.cat||'').trim().toLowerCase())===key);
+  const months=new Set(matches.map(e=>(e.at||'').slice(0,7)));
+  if(months.size<3)return;
+  const amts=matches.map(e=>e.amount);
+  const avg=amts.reduce((a,b)=>a+b,0)/amts.length;
+  if(!avg||Math.abs(amt-avg)/avg>0.35)return;
+  S.profile.recurSeen[key]=true;save();
+  actionToast('\ud83d\udd01 '+esc(note||cat)+' looks recurring \u2014 remind monthly?',
+    [{label:'REMIND ME',fn:()=>makeRecurBill(note||cat,Math.round(avg))}],7000)}
+function makeRecurBill(name,amt){
+  const d=new Date();d.setMonth(d.getMonth()+1);
+  S.bills.unshift({id:uid(),name:name,amount:amt,due:d.toISOString().slice(0,10),rep:'monthly',remind:3,paid:false,notified:{}});
+  save();renderLife();toast('\u2713 Monthly reminder set for '+esc(name))}
 
 function undoToast(msg,tid){
   const t=document.getElementById('toast');
