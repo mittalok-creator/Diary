@@ -730,7 +730,13 @@ html[data-theme="light"] .hub-ic.t-link{background:#E9E3F5;color:#4B3D8A}
 .nt-wrap{overflow-x:auto;margin:10px 0;border-radius:12px;-webkit-overflow-scrolling:touch}
 table.nt{border-collapse:collapse;min-width:100%;font-size:14px}
 .nt th,.nt td{border:1px solid var(--hair);padding:8px 10px;min-width:92px;text-align:left;vertical-align:top}
-.nt th{background:color-mix(in srgb,var(--gold) 11%,transparent);font-weight:700;color:var(--gold);white-space:nowrap}
+.nt th:first-child,.nt td:first-child{position:sticky;left:0;z-index:2;background:var(--ink1)}
+.nt th:first-child{z-index:4}
+html[data-theme="light"] .nt th:first-child,html[data-theme="light"] .nt td:first-child{background:#fff}
+.nt tr.nt-sum td:first-child{position:sticky;left:0;z-index:2}
+.nt th{background:var(--ink1);font-weight:700;color:var(--gold);white-space:nowrap;position:sticky;top:0;z-index:3;box-shadow:inset 0 -2px 0 color-mix(in srgb,var(--gold) 35%,transparent)}
+html[data-theme="light"] .nt th{background:#fff}
+.nt-wrap{max-height:60vh;overflow:auto}
 .nt tr.nt-sum td{background:color-mix(in srgb,var(--gold) 7%,transparent);font-weight:700;color:var(--gold);
   border-top:2px solid color-mix(in srgb,var(--gold) 40%,transparent);font-variant-numeric:tabular-nums}
 .nt-hr{border:none;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:14px 0}
