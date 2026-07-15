@@ -1865,7 +1865,8 @@ function save(skipTouch){if(!skipTouch){S.updatedAt=Date.now();cloudPushSoon()}
     if(ok===false&&!quotaWarned){quotaWarned=true;
       toast('Device storage is full — download a Backup, then remove old attachments')}},250)}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function today(){return new Date().toISOString().slice(0,10)}
+function localYmd(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function today(){return localYmd(new Date())}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
   clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
@@ -2685,7 +2686,7 @@ function delHabit(id){const h=S.habits.find(x=>x.id===id);askDelete(h&&h.name,()
 function _delHabit(id){const h=S.habits.find(x=>x.id===id);trashPush('habit',h,h&&h.name);S.habits=S.habits.filter(x=>x.id!==id);save();renderLife()}
 function habitStreak(h){let n=0;const d=new Date();h.done=h.done||{};
   if(!h.done[today()])d.setDate(d.getDate()-1);
-  while(h.done[d.toISOString().slice(0,10)]){n++;d.setDate(d.getDate()-1)}return n}
+  while(h.done[localYmd(d)]){n++;d.setDate(d.getDate()-1)}return n}
 function habitMark(id,val){const h=S.habits.find(x=>x.id===id);if(!h)return;const t=today();h.done=h.done||{};
   if(h.done[t]===val)delete h.done[t];else h.done[t]=val;
   save();renderLife();
@@ -2694,7 +2695,7 @@ function habitMark(id,val){const h=S.habits.find(x=>x.id===id);if(!h)return;cons
   else if(v===false)toast('Marked not done — '+h.name);
   else toast('Cleared for today')}
 function habitCard(h){const t=today();const days=[];const d=new Date();d.setDate(d.getDate()-13);
-  for(let i=0;i<14;i++){const k=d.toISOString().slice(0,10);const v=(h.done||{})[k];
+  for(let i=0;i<14;i++){const k=localYmd(d);const v=(h.done||{})[k];
     days.push('<div class="dot14 '+(v===true?'on':(v===false?'off':''))+'"></div>');d.setDate(d.getDate()+1)}
   const on=(h.done||{})[t];
   return '<div class="card"><div style="display:flex;align-items:center;gap:12px">'
@@ -2744,7 +2745,7 @@ function addCard(){const n=cdName.value.trim();
   save();renderLife();renderToday();toast('💳 Card bill added')}
 function cardPaid(id){const c=S.cards.find(x=>x.id===id);if(!c)return;
   const d=new Date(c.due+'T00:00');d.setMonth(d.getMonth()+1);
-  c.due=d.toISOString().slice(0,10);c.total=0;c.min=0;c.notified={};
+  c.due=localYmd(d);c.total=0;c.min=0;c.notified={};
   save();renderLife();renderToday();toast('✓ Paid — set next statement when it arrives')}
 function delCard(id){const c=S.cards.find(x=>x.id===id);askDelete(c&&c.name,()=>{S.cards=S.cards.filter(x=>x.id!==id);save();renderLife();renderToday()})}
 function cardCard(c){const n=daysTo(c.due),col=rnColor(n);
@@ -2810,7 +2811,7 @@ function renewPlus(id){const r=S.renewals.find(x=>x.id===id);if(!r)return;renewT
   const d=new Date(r.expiry+'T00:00');d.setFullYear(d.getFullYear()+1);
   document.getElementById('rwTitle').textContent=r.name;
   rwProv.value=r.provider||'';rwPrem.value='';rwNo.value=r.polno||'';
-  rwExp.value=d.toISOString().slice(0,10);
+  rwExp.value=localYmd(d);
   pend.rw=[];drawPend('rw');
   document.getElementById('renewOv').classList.add('open')}
 function rwCancel(){document.getElementById('renewOv').classList.remove('open');renewTarget=null;
@@ -3028,8 +3029,8 @@ function renderTrash(){const el=document.getElementById('trashList');if(!el)retu
 /* ============ RECURRING TASKS ============ */
 function ymd(y,m,d){const z=n=>String(n).padStart(2,'0');return y+'-'+z(m+1)+'-'+z(d)}
 function nextDue(d,rep){const x=new Date(d+'T00:00');
-  if(rep==='daily'){x.setDate(x.getDate()+1);return x.toISOString().slice(0,10)}
-  if(rep==='weekly'){x.setDate(x.getDate()+7);return x.toISOString().slice(0,10)}
+  if(rep==='daily'){x.setDate(x.getDate()+1);return localYmd(x)}
+  if(rep==='weekly'){x.setDate(x.getDate()+7);return localYmd(x)}
   if(rep==='monthly'||rep==='yearly'){
     const day=x.getDate();
     let y=x.getFullYear(),m=x.getMonth();
@@ -4200,7 +4201,7 @@ function weeklyReview(){
   const trend=spendPrev?Math.round((spend-spendPrev)/spendPrev*100):null;
   const catMap={};S.expenses.filter(e=>in7(e.at)).forEach(e=>{catMap[e.cat||'Other']=(catMap[e.cat||'Other']||0)+(+e.amount||0)});
   const topCat=Object.entries(catMap).sort((a,b)=>b[1]-a[1])[0];
-  const nxt=new Date(now);nxt.setDate(nxt.getDate()+7);const nT=nxt.toISOString().slice(0,10);
+  const nxt=new Date(now);nxt.setDate(nxt.getDate()+7);const nT=localYmd(nxt);
   const meetN=S.meetings.filter(m=>m.date&&m.date>t&&m.date<=nT).length;
   const billN=S.bills.filter(b=>!b.paid&&b.due&&daysTo(b.due)>=0&&daysTo(b.due)<=7).length
              +S.cards.filter(c=>c.due&&daysTo(c.due)>=0&&daysTo(c.due)<=7).length;
@@ -5270,7 +5271,7 @@ function checkRecurring(note,cat,amt){
     [{label:'REMIND ME',fn:()=>makeRecurBill(note||cat,Math.round(avg))}],7000)}
 function makeRecurBill(name,amt){
   const d=new Date();d.setMonth(d.getMonth()+1);
-  S.bills.unshift({id:uid(),name:name,amount:amt,due:d.toISOString().slice(0,10),rep:'monthly',remind:3,paid:false,notified:{}});
+  S.bills.unshift({id:uid(),name:name,amount:amt,due:localYmd(d),rep:'monthly',remind:3,paid:false,notified:{}});
   save();renderLife();toast('\u2713 Monthly reminder set for '+esc(name))}
 
 function undoToast(msg,tid){
