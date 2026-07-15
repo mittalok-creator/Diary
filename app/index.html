@@ -2045,8 +2045,8 @@ function renderToday(){renderStatStrip();renderHeader();
 
   /* --- Life column --- */
   const mk=t.slice(0,7);
-  const sT=S.expenses.filter(e=>e.at.slice(0,10)===t).reduce((a,b)=>a+b.amount,0);
-  const sM=S.expenses.filter(e=>e.at.slice(0,7)===mk).reduce((a,b)=>a+b.amount,0);
+  const sT=S.expenses.filter(e=>localYmd(new Date(e.at))===t).reduce((a,b)=>a+b.amount,0);
+  const sM=S.expenses.filter(e=>monthKey(e.at)===mk).reduce((a,b)=>a+b.amount,0);
   countUp(gSpend,sT,'₹');
   const bud=(S.money&&S.money.budget)||0;
   gSpendM.innerHTML=bud?(fmtR(sM)+' / '+fmtR(bud)+(sM>bud?' <span style="color:var(--risk)">over</span>':'')):(fmtR(sM)+' this month');
@@ -2611,7 +2611,7 @@ function goalAdd(id){const inp=document.getElementById('ga_'+id);const v=Number(
   toast(g.saved>=g.target?'🏆 '+g.name+' complete!':fmtR(v)+' saved toward '+g.name)}
 function delGoal(id){const g=S.goals.find(x=>x.id===id);askDelete(g&&g.name,()=>_delGoal(id));}
 function _delGoal(id){const g=S.goals.find(x=>x.id===id);trashPush('goal',g,g&&g.name);S.goals=S.goals.filter(x=>x.id!==id);save();renderLife()}
-function monthKey(d){return String(d).slice(0,7)}
+function monthKey(d){const dt=new Date(d);return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')}
 function renderMoney2(){if(!document.getElementById('budBar'))return;
   const t=today(),mk=t.slice(0,7);
   const spentM=S.expenses.filter(e=>monthKey(e.at)===mk).reduce((a,b)=>a+b.amount,0);
@@ -2626,7 +2626,7 @@ function renderMoney2(){if(!document.getElementById('budBar'))return;
   const wrap=document.getElementById('mChart');
   if(wrap){const vals=[];
     for(let k=5;k>=0;k--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-k);
-      const key=d.toISOString().slice(0,7);
+      const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
       vals.push({lbl:d.toLocaleDateString('en-IN',{month:'short'}),v:S.expenses.filter(e=>monthKey(e.at)===key).reduce((a,b)=>a+b.amount,0)})}
     const mx=Math.max(1,...vals.map(v=>v.v));
     wrap.innerHTML='<div class="bars">'+vals.map(v=>'<div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%"><div class="bar" data-h="'+(v.v/mx*100)+'" style="height:4px" title="'+fmtR(v.v)+'"></div></div>').join('')+'</div>'
@@ -2960,7 +2960,7 @@ function renderCar(){if(!document.getElementById('flList'))return;
   const withKm=l.filter(f=>f._kmpl);
   const avg=withKm.length?withKm.slice(-3).reduce((a,b)=>a+b._kmpl,0)/Math.min(3,withKm.length):0;
   const mk=today().slice(0,7);
-  const carSpend=S.expenses.filter(e=>(e.cat==='Fuel'||e.cat==='Car')&&e.at.slice(0,7)===mk).reduce((a,b)=>a+b.amount,0);
+  const carSpend=S.expenses.filter(e=>(e.cat==='Fuel'||e.cat==='Car')&&monthKey(e.at)===mk).reduce((a,b)=>a+b.amount,0);
   const lastOdo=l.length?l[l.length-1].odo:0;
   const ns=nextService();
   const carRen=S.renewals.filter(r=>['Car insurance','PUC','FASTag'].includes(r.kind)).sort((a,b)=>a.expiry<b.expiry?-1:1)[0];
@@ -3506,8 +3506,8 @@ function renderLife(){renderHub();renderLifeLauncher();renderDocs();renderMoney2
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
-  mToday&&countUp(mToday,S.expenses.filter(e=>e.at.slice(0,10)===t).reduce((a,b)=>a+b.amount,0),'₹');
-  mMonth&&countUp(mMonth,S.expenses.filter(e=>e.at.slice(0,7)===m).reduce((a,b)=>a+b.amount,0),'₹');
+  mToday&&countUp(mToday,S.expenses.filter(e=>localYmd(new Date(e.at))===t).reduce((a,b)=>a+b.amount,0),'₹');
+  mMonth&&countUp(mMonth,S.expenses.filter(e=>monthKey(e.at)===m).reduce((a,b)=>a+b.amount,0),'₹');
   
   wBig&&(wBig.textContent=S.water.count);wBigBar&&(wBigBar.style.width=Math.min(100,S.water.count/8*100)+'%')}
 function renderDocs(){setTimeout(loadThumbs,0);const el=document.getElementById('docList');
@@ -4541,7 +4541,7 @@ function renderHReports(){
     return'<div class="card" style="padding:12px 14px;display:flex;align-items:center;gap:12px">'
       +'<span style="font-size:22px;flex-shrink:0">'+(a?fileIcon(a):'🧪')+'</span>'
       +'<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(r.name)+'</div>'
-      +'<div class="stat-sub">'+fmtD(r.at.slice(0,10))+(due?' \u00b7 ':'')+'</div>'+due+'</div>'
+      +'<div class="stat-sub">'+fmtD(r.at)+(due?' \u00b7 ':'')+'</div>'+due+'</div>'
       +(a?'<button class="btn btn-ghost btn-sm" onclick="openAtt(\''+a.id+'\',\''+a.type+'\')">Open</button>'
         +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(r.name).replace(/'/g,'')+'\')">\u2197</button>':'')
       +'<button class="btn btn-ghost btn-sm" onclick="hrDel(\''+r.id+'\')" style="color:var(--risk)">\u2715</button>'
@@ -4855,7 +4855,7 @@ function vtHist(k){
     const dcol=fl[0]==='risk'?'var(--risk)':(fl[0]==='warn'?'var(--warn)':'var(--good)');
     const val=(k==='bp')?(v.v1+'/'+v.v2):v.v1;
     const d=new Date(v.at);
-    const when=fmtD(v.at.slice(0,10))+' \u00b7 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const when=fmtD(v.at)+' \u00b7 '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--hair)">'
       +(fl[1]?'<span style="width:9px;height:9px;border-radius:50%;background:'+dcol+';flex-shrink:0"></span>':'<span style="width:9px"></span>')
       +'<b style="font-variant-numeric:tabular-nums;font-size:16px">'+val+'</b>'
