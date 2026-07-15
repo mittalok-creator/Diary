@@ -4194,7 +4194,7 @@ function weeklyReview(){
   const iso=d=>d.toISOString();
   const in7=x=>x&&x>=iso(d7);const inPrev7=x=>x&&x>=iso(d14)&&x<iso(d7);
   /* done this week (doneAt going forward; fallback: due within week) */
-  const doneW=S.tasks.filter(x=>x.done&&((x.doneAt&&in7(x.doneAt))||(!x.doneAt&&x.due&&x.due>=iso(d7).slice(0,10)&&x.due<=t))).length;
+  const doneW=S.tasks.filter(x=>x.done&&((x.doneAt&&in7(x.doneAt))||(!x.doneAt&&x.due&&x.due>=localYmd(d7)&&x.due<=t))).length;
   const pend=S.tasks.filter(x=>!x.done&&x.due&&x.due<=t).length;
   const spend=S.expenses.filter(e=>in7(e.at)).reduce((a,e)=>a+(+e.amount||0),0);
   const spendPrev=S.expenses.filter(e=>inPrev7(e.at)).reduce((a,e)=>a+(+e.amount||0),0);
