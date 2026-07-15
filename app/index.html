@@ -2219,7 +2219,7 @@ function noteExport(){const title=document.getElementById('neTitle').value.trim(
   showSheet('Export \u201c'+title+'\u201d',rows)}
 function neSheetClose(){document.getElementById('sheetOv').classList.remove('open')}
 function neCurrent(){return {title:document.getElementById('neTitle').value.trim()||'Note',
-  html:document.getElementById('neEditor').innerHTML,
+  html:stripHl(document.getElementById('neEditor').innerHTML),
   text:(document.getElementById('neEditor').textContent||'').trim()}}
 async function neExpText(){const n=neCurrent();neSheetClose();
   const payload=n.title+'\n\n'+n.text+'\n\n\u2014 ALOK OS';
@@ -2479,13 +2479,14 @@ function neBuildColors(){const el=document.getElementById('neColors');
 function neCmd(cmd,val){document.getElementById('neEditor').focus();try{document.execCommand(cmd,false,val||null)}catch(e){}}
 function neSize(sz){document.getElementById('neEditor').focus();try{document.execCommand('fontSize',false,sz)}catch(e){}}
 function neColor(c){document.getElementById('neEditor').focus();try{document.execCommand('foreColor',false,c)}catch(e){}}
-function noteNew(space){neCtx={id:null,space:space||'personal',att:[]};
+function noteNew(space){try{slashClose()}catch(e){}neCtx={id:null,space:space||'personal',att:[]};
   document.getElementById('neTitle').value='';
   const ed=document.getElementById('neEditor');ed.innerHTML='';ed.setAttribute('data-ph','Start writing\u2026  press / for blocks');
   neBuildColors();drawNePend();
   document.getElementById('noteOv').classList.add('open');
   setTimeout(()=>document.getElementById('neTitle').focus(),60)}
 function noteOpen(id){const n=S.notes.find(x=>x.id===id);if(!n)return;
+  try{slashClose()}catch(e){}
   neCtx={id:n.id,space:n.space||'personal',att:(n.att||[]).slice()};
   document.getElementById('neTitle').value=n.title==='Untitled'?'':n.title;
   const ed=document.getElementById('neEditor');
@@ -2493,13 +2494,18 @@ function noteOpen(id){const n=S.notes.find(x=>x.id===id);if(!n)return;
   ed.setAttribute('data-ph','Start writing\u2026  press / for blocks');
   neBuildColors();drawNePend();
   document.getElementById('noteOv').classList.add('open')}
-function noteEditClose(){document.getElementById('noteOv').classList.remove('open')}
+function noteEditClose(){document.getElementById('noteOv').classList.remove('open');try{slashClose()}catch(e){}try{document.getElementById('sheetOv').classList.remove('open')}catch(e){}}
 function neAttach(){pickFiles(fs=>{neCtx.att.push(...fs);drawNePend()})}
 function drawNePend(){const el=document.getElementById('nePend');if(!el)return;
   el.innerHTML=neCtx.att.length?('<div style="padding:0 16px 12px">'+attChips(neCtx.att)+'</div>'):''}
 function plainFromHtml(h){const d=document.createElement('div');d.innerHTML=h;return (d.textContent||'').trim()}
+function stripHl(html){
+  const d=document.createElement('div');d.innerHTML=html;
+  d.querySelectorAll('mark.shl').forEach(function(m){
+    const p=m.parentNode;while(m.firstChild)p.insertBefore(m.firstChild,m);p.removeChild(m);p.normalize&&p.normalize()});
+  return d.innerHTML}
 function noteEditSave(){const title=document.getElementById('neTitle').value.trim();
-  const html=document.getElementById('neEditor').innerHTML;
+  const html=stripHl(document.getElementById('neEditor').innerHTML);
   const plain=plainFromHtml(html);
   if(!title&&!plain&&!neCtx.att.length){noteEditClose();return}
   if(neCtx.id){const n=S.notes.find(x=>x.id===neCtx.id);
@@ -4929,6 +4935,12 @@ function ntCol(add){const t=ntCurTable();if(!t)return;
   Array.from(t.tBodies[0].rows).forEach(function(r,i){
     if(add){const c=document.createElement(i===0?'th':'td');c.innerHTML='<br>';r.appendChild(c)}
     else if(r.cells.length>1)r.removeChild(r.cells[r.cells.length-1])});
+  /* keep colgroup + resize grips in sync with the new column count */
+  const cg=t.querySelector('colgroup');
+  if(cg){const want=t.tBodies[0].rows[0].cells.length;
+    while(cg.children.length<want)cg.appendChild(document.createElement('col'));
+    while(cg.children.length>want)cg.removeChild(cg.lastChild)}
+  t._enh=false;ntEnhance(t);
   ntRecalc(t)}
 const NT_AGG=['sum','count','avg',''];
 const NT_AGL={sum:'\u03a3 Sum',count:'# Count',avg:'\u00b8 Avg','':''};
@@ -4970,7 +4982,8 @@ function ntRecalc(t){const sum=t.querySelector('tr.nt-sum');if(!sum)return;
     if(agg==='count'&&filled)out='# '+out;
     cell0.textContent=out}}
 function ntDel(){const t=ntCurTable();if(!t)return;
-  const w=t.closest('.nt-wrap');(w||t).remove();ntBarSync()}
+  askDelete('This table',function(){const w=t.closest('.nt-wrap');(w||t).remove();ntBarSync();
+    try{document.getElementById('neEditor').dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}})}
 (function(){
   function wire(){const ed=document.getElementById('neEditor');if(!ed||ed._ntWired)return;ed._ntWired=true;
     ed.addEventListener('input',function(e){
@@ -5025,7 +5038,8 @@ function ntCleanPasted(html){
       const tag=el.tagName;
       /* strip all attributes except href on links and colspan/rowspan on cells */
       Array.from(el.attributes).forEach(function(a){
-        const keep=(tag==='A'&&a.name==='href')||
+        const safeHref=tag==='A'&&a.name==='href'&&/^(https?:|mailto:|tel:|#)/i.test((a.value||'').trim());
+        const keep=safeHref||
                    ((tag==='TD'||tag==='TH')&&(a.name==='colspan'||a.name==='rowspan'));
         if(!keep)el.removeAttribute(a.name)});
       /* keep bold/italic that Word encodes as spans -> convert inline weight/style to tags is overkill; drop unknown tags but keep text */
