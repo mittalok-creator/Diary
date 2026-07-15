@@ -796,6 +796,9 @@ blockquote.nt-quote{border-left:3px solid var(--gold);margin:10px 0;padding:4px 
 .hab-mk:active{transform:scale(.95)}
 .hab-mk.yes.on{background:linear-gradient(160deg,var(--goldb),var(--gold));border-color:var(--gold);color:#231a09}
 .hab-mk.no.on{background:color-mix(in srgb,var(--risk) 16%,transparent);border-color:var(--risk);color:var(--risk)}
+.nt-rgrip{position:absolute;left:0;bottom:-3px;width:100%;height:8px;cursor:row-resize;z-index:2;touch-action:none}
+.nt-rgrip::after{content:'';position:absolute;left:16px;right:16px;bottom:3px;height:2px;border-radius:2px;background:transparent}
+.nt tr:hover .nt-rgrip::after{background:color-mix(in srgb,var(--gold) 45%,transparent)}
 </style>
 </head>
 <body>
@@ -4936,6 +4939,7 @@ function ntRow(add){const t=ntCurTable();if(!t)return;const tb=t.tBodies[0];
     tb.insertBefore(tr,sum||null)}
   else{const rows=Array.from(tb.rows).filter(r=>r!==sum&&r.rowIndex>0);
     if(rows.length>1)tb.removeChild(rows[rows.length-1])}
+  t._enh=false;ntEnhance(t);
   ntRecalc(t)}
 function ntCol(add){const t=ntCurTable();if(!t)return;
   Array.from(t.tBodies[0].rows).forEach(function(r,i){
@@ -5021,7 +5025,21 @@ function ntEnhance(t){
       function up(){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);
         try{document.getElementById('neEditor').dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
       document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
-    th.appendChild(g)})}
+    th.appendChild(g)})
+  /* row-height grips — one per row, freely draggable, minimum keeps content readable */
+  Array.from(t.tBodies[0].rows).forEach(function(r){
+    if(r.querySelector('.nt-rgrip'))return;
+    const cell=r.cells[0];if(!cell)return;
+    if(cell.tagName==='TD')cell.style.position='relative';
+    const rg=document.createElement('span');rg.className='nt-rgrip';rg.contentEditable='false';
+    rg.addEventListener('pointerdown',function(e){
+      e.preventDefault();e.stopPropagation();
+      const startY=e.clientY;const startH=r.getBoundingClientRect().height;
+      function mv(ev){const h=Math.max(28,startH+(ev.clientY-startY));r.style.height=h+'px'}
+      function up(){document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);
+        try{document.getElementById('neEditor').dispatchEvent(new Event('input',{bubbles:true}))}catch(e){}}
+      document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
+    cell.appendChild(rg)})}
 function ntMoveCtl(dir){const t=ntCurTable();if(!t)return;
   const w=t.closest('.nt-wrap');if(!w)return;
   if(dir<0){const p=w.previousElementSibling;if(p)w.parentNode.insertBefore(w,p)}
