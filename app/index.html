@@ -2489,7 +2489,7 @@ function noteOpen(id){const n=S.notes.find(x=>x.id===id);if(!n)return;
   neCtx={id:n.id,space:n.space||'personal',att:(n.att||[]).slice()};
   document.getElementById('neTitle').value=n.title==='Untitled'?'':n.title;
   const ed=document.getElementById('neEditor');
-  ed.innerHTML=n.html||(n.body?esc(n.body).replace(/\n/g,'<br>'):'');
+  ed.innerHTML=stripHl(n.html||(n.body?esc(n.body).replace(/\n/g,'<br>'):''));
   ed.setAttribute('data-ph','Start writing\u2026  press / for blocks');
   neBuildColors();drawNePend();
   document.getElementById('noteOv').classList.add('open')}
@@ -3507,7 +3507,14 @@ function docCard(d){const a=d.att;return '<div class="card"><div style="display:
   +'<button class="btn btn-ghost btn-sm" onclick="shareAtt(\''+a.id+'\',\''+a.type+'\',\''+esc(d.name)+'\')" title="Share">↗</button>'
   +'<button class="ed" title="Rename" onclick="askRename(\'doc\',\''+d.id+'\')">✎</button><button class="del" onclick="delDoc(\''+d.id+'\')">✕</button></div></div>'}
 /* ============ RENDER LIFE / WORK ============ */
-function renderLife(){renderHub();renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();renderFamily();renderVault();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
+function _notesRepair(){
+  if(S._hlRepaired)return;
+  let ch=false;
+  (S.notes||[]).forEach(function(n){
+    if(n.html&&n.html.indexOf('shl')>=0){const clean=stripHl(n.html);
+      if(clean!==n.html){n.html=clean;n.body=plainFromHtml(clean);ch=true}}});
+  S._hlRepaired=true;if(ch)save()}
+function renderLife(){_notesRepair();renderHub();renderLifeLauncher();renderDocs();renderMoney2();renderHealth();renderCar();renderEvents();renderPay();renderDraw();renderFamily();renderVault();listOr(ptList,S.tasks.filter(t=>t.space==='personal').sort(taskSort),taskRow,'No personal tasks yet.<br>Add one above.');
   nList.innerHTML=S.notes.filter(n=>n.space==='personal').map(noteCard).join('')||'<div class="empty"><div class="em-ring">AM</div>Your first note goes here</div>';
   listOr(shList,S.shopping,s=>'<div class="row '+(s.done?'done':'')+'"><div class="chk '+(s.done?'on':'')+'" onclick="tglShop(\''+s.id+'\')"></div><div class="row-body"><div class="row-title">'+esc(s.name)+'</div></div></div>','List is empty. Add items above.');
   const t=today(),m=t.slice(0,7);
