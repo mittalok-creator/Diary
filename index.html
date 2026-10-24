@@ -234,7 +234,16 @@ textarea.free:focus{outline:none}
 
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;border-radius:12px;padding:10px 14px;display:flex;gap:14px;align-items:center;z-index:20;max-width:calc(100% - 32px)}
 .toast button{all:unset;cursor:pointer;font-weight:700;color:var(--paper);text-decoration:underline}
-@media (prefers-reduced-motion:no-preference){.sheet,.card{animation:in .22s ease-out}@keyframes in{from{transform:translateY(8px)}to{transform:none}}}
+@media (prefers-reduced-motion:no-preference){
+.enter-fwd{animation:inF .24s cubic-bezier(.2,.8,.2,1)}
+.enter-back{animation:inB .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes inF{from{opacity:.4;transform:translateX(18px)}to{opacity:1;transform:none}}
+@keyframes inB{from{opacity:.4;transform:translateX(-18px)}to{opacity:1;transform:none}}
+.lock{transition:opacity .2s ease}
+.lock.fade{opacity:0;pointer-events:none}
+.lock:not([hidden]){animation:lockIn .18s ease-out}
+@keyframes lockIn{from{opacity:0}to{opacity:1}}
+}
 </style>
 </head>
 <body>
@@ -303,7 +312,27 @@ let col=null, sync='local', syncErr='';
 const dirty=new Set((()=>{try{return JSON.parse(localStorage.getItem('sb-dirty'))||[]}catch(e){return []}})()); let writing=false, flushT;
 function keepDirty(){try{localStorage.setItem('sb-dirty',JSON.stringify([...dirty]))}catch(e){}}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function mark(...ids){const now=Date.now();ids.forEach(i=>{dirty.add(i);if(i==='meta')S.metaTs=now;else if(S.notes[i])S.notes[i]._ts=now});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500)}
+/* entry-level change tracking: every entry carries its own last-changed time (u); deleted entries leave a dated marker (del) */
+const SNAP=new WeakMap();
+const ij=i=>{const c=Object.assign({},i);delete c.u;return JSON.stringify(c)};
+function snapNote(k){const n=S.notes[k];if(n&&Array.isArray(n.items))SNAP.set(n,new Map(n.items.map(i=>[i.id,ij(i)])))}
+function snapAll(){Object.keys(S.notes).forEach(snapNote)}
+function stamp(k,now){const n=S.notes[k];if(!n||!Array.isArray(n.items))return;const prev=SNAP.get(n);
+  n.items.forEach(i=>{if(prev?prev.get(i.id)!==ij(i):!i.u)i.u=now});
+  if(prev){const ids=new Set(n.items.map(i=>i.id));prev.forEach((_,id)=>{if(!ids.has(id)){n.del=n.del||{};n.del[id]=now}})}
+  n._ts=now;snapNote(k)}
+function mergeNote(L,R){
+  const del=Object.assign({},R.del||{});for(const [k,v] of Object.entries(L.del||{}))del[k]=Math.max(del[k]||0,v);
+  const lm=new Map((L.items||[]).map(i=>[i.id,i])),rm=new Map((R.items||[]).map(i=>[i.id,i]));
+  const newer=(L._ts||0)>(R._ts||0)?L:R,other=newer===L?R:L;
+  const order=[],seen=new Set();
+  (newer.items||[]).forEach(i=>{seen.add(i.id);order.push(i.id)});
+  (other.items||[]).forEach((i,x)=>{if(!seen.has(i.id)){seen.add(i.id);order.splice(Math.min(x,order.length),0,i.id)}});
+  const items=order.map(id=>{const a=lm.get(id),b=rm.get(id);const w=a&&b?((a.u||0)>(b.u||0)?a:b):(a||b);return del[id]&&del[id]>=(w.u||0)?null:w}).filter(Boolean);
+  const cut=Date.now()-60*864e5;for(const k in del)if(del[k]<cut)delete del[k];
+  return Object.assign({items:[],text:''},other,newer,{items,del,_ts:Math.max(L._ts||0,R._ts||0)});
+}
+function mark(...ids){const now=Date.now();ids.forEach(i=>{dirty.add(i);if(i==='meta')S.metaTs=now;else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500)}
 const docName=id=>id==='meta'?'meta':'n_'+id;
 const body=id=>id==='meta'?{custom:S.custom,resetMonth:S.resetMonth,tags:S.tags,photo:S.photo||null,_ts:S.metaTs||0}:S.notes[id];
 async function flush(){
@@ -374,8 +403,10 @@ function render(preserve){
     if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
 }
 let navDepth=0;
-function go(v,fromPop){if(!fromPop&&v!==view){history.pushState({v},'',v==='home'?location.pathname:'#'+v);navDepth++}
-  view=v;memId=null;confirmDel=false;filterTag=null;newTagOpen=false;editId=null;render();window.scrollTo(0,0)}
+var navDir='';
+function setApp(html){if(app.__html===html)return;app.innerHTML=html;app.__html=html;if(navDir){const f=app.firstElementChild;if(f){f.classList.add('enter-'+navDir)}}}
+function go(v,fromPop){navDir=fromPop?'back':'fwd';if(!fromPop&&v!==view){history.pushState({v},'',v==='home'?location.pathname:'#'+v);navDepth++}
+  view=v;memId=null;confirmDel=false;filterTag=null;newTagOpen=false;editId=null;app.__html='';render();navDir='';window.scrollTo(0,0)}
 function goBack(fallback){if(navDepth>0)history.back();else go(fallback)}
 addEventListener('popstate',e=>{navDepth=Math.max(0,navDepth-1);let v=(e.state&&e.state.v)||'home';if(v==='review'&&!review)v='dump';go(v,true)});
 
@@ -392,7 +423,7 @@ function home(){
     results=hits.length?`<ul class="results">${hits.slice(0,60).map(h=>`<li><button data-open="${h.n.id}"><div class="where">${esc(h.n.title)}</div><div>${hl(h.t,q.trim())}</div></button></li>`).join('')}</ul>`
       :`<p class="empty">Nothing matches “${esc(q.trim())}”.</p>`;
   }
-  app.innerHTML=`
+  setApp(`
   <header class="hero">
     <button class="avatar" id="avBtn" type="button" aria-label="${S.photo?'Change your photo':'Add your photo'}">${S.photo?`<img src="${S.photo}" alt="">`:'<span>A</span><i>+</i>'}</button>
     <div class="hero-txt"><p class="hello">${greet()}, Alok</p><p class="date"><span>${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</span><span class="clock" id="clock" role="timer" aria-label="Current time"></span></p></div>
@@ -422,7 +453,7 @@ function home(){
   <form class="newnote" id="newF"><input id="newIn" placeholder="+ Create your own note" autocomplete="off" aria-label="New note title" maxlength="60"><button class="btn sm ghost">Create</button></form>
   </div>
   <p class="closing">The less time you spend trying to remember everything, the more time you have to enjoy your life.</p>`}
-  <p class="credit">Crafted by Alok</p>`;
+  <p class="credit">Crafted by Alok</p>`);
   $('cap').onsubmit=e=>{e.preventDefault();const v=$('capIn').value.trim();if(!v)return;
     S.notes.dump.items.unshift({id:uid(),t:v,tag:'Idea'});mark('dump');toast('Saved to Brain Dump');render();$('capIn').focus()};
   $('avBtn').onclick=()=>$('avIn').click();
@@ -479,7 +510,7 @@ function sheet(){
     tools=`<button class="btn ghost sm" id="uncheck" type="button">Start fresh this month</button><span class="note">Unchecks automatically on the 1st. Swipe left to remove an item.</span>`;
   }
   const mem=memId&&d.items.find(i=>i.id===memId);
-  app.innerHTML=`<div class="sheet">
+  setApp(`<div class="sheet">
    <div class="top"><button class="back" id="back">← All notes</button><span class="pill" style="background:${colorOf(n)}">${idx}/${notes.length}</span></div>
    <div><h2><span style="color:${colorOf(n)}">${idx}.</span> ${esc(n.title)}</h2><p class="line">${n.line}</p>${n.id==='admin'?'<p class="note" style="margin-top:8px">For account numbers, store only the last 4 digits here.</p>':''}</div>
    ${n.kind==='free'?`<textarea class="free" id="freeT" aria-label="Empty note" placeholder="…">${esc(d.text)}</textarea>`:
@@ -491,14 +522,14 @@ function sheet(){
    <div>${list||'<p class="empty">Nothing here yet. Write the first one above.</p>'}</div>
    ${hasEx?'<div><button class="linkbtn" id="clrEx" type="button">Remove the examples</button></div>':''}`}
    ${n.custom?`<div class="tools">${confirmDel?`<span class="note">Delete “${esc(n.title)}” and all its entries?</span><button class="btn warn sm" id="delYes" type="button">Delete note</button><button class="btn ghost sm" id="delNo" type="button">Keep it</button>`:'<button class="linkbtn" id="delNote" type="button">Delete this note</button>'}</div>`:''}
-  </div>`;
+  </div>`);
   $('back').onclick=()=>goBack('home');
   if(n.custom){
     if($('delNote'))$('delNote').onclick=()=>{confirmDel=true;render()};
     if($('delNo'))$('delNo').onclick=()=>{confirmDel=false;render()};
     if($('delYes'))$('delYes').onclick=()=>{S.custom=S.custom.filter(c=>c.id!==n.id);delete S.notes[n.id];mark('meta',n.id);toast('Note deleted');go('home')};
   }
-  if(n.kind==='free'){let t;$('freeT').oninput=()=>{d.text=$('freeT').value;saveLocal();clearTimeout(t);t=setTimeout(()=>mark(n.id),700)};return}
+  if(n.kind==='free'){let t;$('freeT').oninput=()=>{d.text=$('freeT').value;mark(n.id)};return}
   $('addF').onsubmit=e=>{e.preventDefault();const a=$('f1').value.trim(),b=$('f2')?$('f2').value.trim():'';
     let tag=null;
     if($('fT')){
@@ -556,20 +587,20 @@ function reviewView(){
   while(review.at<review.ids.length&&!d.items.find(i=>i.id===review.ids[review.at]))review.at++;
   const total=review.ids.length,lists=allNotes().filter(x=>x.kind==='list'&&x.id!=='dump');
   if(review.at>=total){
-    app.innerHTML=`<div class="sheet"><div class="top"><button class="back" id="back">← Brain Dump</button><span class="pill">${total}/${total}</span></div>
+    setApp(`<div class="sheet"><div class="top"><button class="back" id="back">← Brain Dump</button><span class="pill">${total}/${total}</span></div>
      <div class="card"><p class="eyebrow">Review finished</p><div class="txt">Brain Dump is sorted.</div>
      <p class="note">${review.moved} moved · ${review.deleted} cleared · ${total-review.moved-review.deleted} kept</p>
-     <div class="choices"><button class="btn" id="doneB" type="button">Back to all notes</button></div></div></div>`;
+     <div class="choices"><button class="btn" id="doneB" type="button">Back to all notes</button></div></div></div>`);
     $('back').onclick=()=>goBack('dump');$('doneB').onclick=()=>go('home');return;
   }
   const it=d.items.find(i=>i.id===review.ids[review.at]);
-  app.innerHTML=`<div class="sheet">
+  setApp(`<div class="sheet">
    <div class="top"><button class="back" id="back">← Brain Dump</button><span class="pill">${review.at+1}/${total}</span></div>
    <div class="progress" aria-hidden="true"><span style="width:${review.at/total*100}%"></span></div>
    <div class="card"><p class="eyebrow">Where does this belong?</p><div class="txt">${esc(it.t)}</div>
      <div class="choices">${lists.map(x=>`<button class="btn ghost sm" data-to="${x.id}" type="button">${esc(x.title)}</button>`).join('')}</div>
      <div class="choices"><button class="btn sm" id="keepB" type="button">Keep in Brain Dump</button><button class="btn warn sm" id="clearB" type="button">Done, clear it</button></div>
-   </div></div>`;
+   </div></div>`);
   $('back').onclick=()=>goBack('dump');
   app.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{moveItem(it.id,b.dataset.to);review.moved++;review.at++;render()});
   $('keepB').onclick=()=>{review.at++;render()};
@@ -583,6 +614,7 @@ undoBtn.onclick=()=>{if(!lastDeleted||!S.notes[lastDeleted.id])return;S.notes[la
   lastDeleted=null;toastEl.hidden=true;render()};
 
 const startMsg=monthlyReset();saveLocal();
+snapAll();
 history.replaceState({v:'home'},'',location.pathname);
 $('gear').onclick=()=>go('settings');
 $('fab').onclick=()=>{const el=$('f1')||$('capIn');if(!el)return;el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});el.focus({preventScroll:true})};
@@ -613,16 +645,20 @@ function makeCol(uid){return{doc:name=>({
 function applyRow(name,data){
   if(name==='settings'){if(data&&data.pinHash){pinRec=data;try{localStorage.setItem(PINKEY,JSON.stringify(data))}catch(e){}}return false}
   const k=name==='meta'?'meta':name.slice(2);
-  if(dirty.has(k)||!data)return false;
-  const localTs=k==='meta'?(S.metaTs||0):((S.notes[k]&&S.notes[k]._ts)||0);
-  if((data._ts||0)<localTs)return false;
+  if(!data)return false;
   if(k==='meta'){
+    if(dirty.has(k)||(data._ts||0)<(S.metaTs||0))return false;
     const cur=JSON.stringify(body('meta')),nxt=JSON.stringify({custom:data.custom||[],resetMonth:data.resetMonth||S.resetMonth,tags:data.tags||{},photo:data.photo||null,_ts:data._ts||0});
     if(cur!==nxt){S.metaTs=data._ts||0;S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};S.photo=data.photo||null;return true}
     return false;
   }
-  if(JSON.stringify(S.notes[k])!==JSON.stringify(data)){S.notes[k]=Object.assign({items:[],text:''},data);return true}
-  return false;
+  const local=S.notes[k];
+  if(!local||!local._ts){const before=JSON.stringify(local);S.notes[k]=Object.assign({items:[],text:''},data);snapNote(k);return before!==JSON.stringify(S.notes[k])}
+  const m=mergeNote(local,data),mj=JSON.stringify(m);
+  const changed=mj!==JSON.stringify(local);
+  if(changed){S.notes[k]=m;snapNote(k)}
+  if(mj!==JSON.stringify(Object.assign({items:[],text:''},data))&&!dirty.has(k)){dirty.add(k);keepDirty();clearTimeout(flushT);flushT=setTimeout(flush,800)}
+  return changed;
 }
 let pendingRender=false;
 function busyTyping(){const a=document.activeElement;return editId||(a&&app.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)&&(a.value||a.type==='date'||a.tagName==='SELECT'))}
@@ -651,8 +687,8 @@ function listen(){
 }
 setInterval(()=>{if(me&&col&&!document.hidden&&navigator.onLine){if(dirty.size&&!writing)flush();pullAll(false)}},20000);
 async function startSync(){
-  try{const {data:{session}}=await sb.auth.getSession();if(session&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(session.access_token)}catch(e){}
   col=makeCol(me.id);setSync('connecting');
+  try{const {data:{session}}=await sb.auth.getSession();if(session&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(session.access_token)}catch(e){}
   await pullAll(true);listen();
 }
 
@@ -664,8 +700,8 @@ async function savePin(pin){
   try{localStorage.setItem(PINKEY,JSON.stringify(pinRec))}catch(e){}
   try{await col.doc('settings').set(pinRec)}catch(e){toast('Passcode saved on this device. It will sync when online.')}
 }
-function unlock(){touchActive();lockMode='open';lockEl.hidden=true;document.documentElement.classList.remove('locked');render();setTimeout(maybeNotify,800)}
-function lock(mode,msg){if(mode==='pin'||mode==='forgot'||mode==='login')try{localStorage.setItem('sb-active','0')}catch(e){}
+function unlock(){touchActive();const was=lockMode;lockMode='open';document.documentElement.classList.remove('locked');render();if(!lockEl.hidden&&was!=='open'){lockEl.classList.add('fade');setTimeout(()=>{if(lockMode==='open'){lockEl.hidden=true}lockEl.classList.remove('fade')},200)}else lockEl.hidden=true;setTimeout(maybeNotify,800)}
+function lock(mode,msg){if(mode===lockMode&&mode==='pin'&&!lockEl.hidden&&!msg)return;lockEl.classList.remove('fade');if(mode==='pin'||mode==='forgot'||mode==='login')try{localStorage.setItem('sb-active','0')}catch(e){}
   const auto=mode==='pin'&&lockMode!=='pin';lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock();if(auto&&bioOn())setTimeout(()=>bioUnlock(true),250)}
 
 function drawLock(){
@@ -730,8 +766,9 @@ function drawLock(){
 
 async function onSignedIn(user,viaPassword){
   if(me&&me.id===user.id&&col){if(viaPassword&&pinRec)unlock();return}
+  const keepOpen=lockMode==='open'&&me&&me.id===user.id;
   const owner=localStorage.getItem(OWNKEY);
-  if(owner&&owner!==user.id){dirty.clear();keepDirty();S=fresh();S.tags={};saveLocal();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
+  if(owner&&owner!==user.id){dirty.clear();keepDirty();S=fresh();S.tags={};snapAll();saveLocal();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
   try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
   me=user;
   startSync();
@@ -739,6 +776,7 @@ async function onSignedIn(user,viaPassword){
     try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}
   }
   if(!pinRec)lock('setpin');
+  else if(keepOpen){me=user}
   else if(viaPassword||recentActive())unlock();
   else lock('pin');
 }
@@ -756,15 +794,15 @@ document.addEventListener('click',async e=>{
     if(chan)sb.removeChannel(chan);chan=null;col=null;
     await sb.auth.signOut();me=null;pinRec=null;
     dirty.clear();['sb-pin','sb-dirty',KEY,OLDKEY].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-    S=fresh();S.tags={};view='home';render();signupMode=false;lock('login');setSync('local');
+    S=fresh();S.tags={};snapAll();view='home';render();signupMode=false;lock('login');setSync('local');
   }
 });
 /* ---------- settings, photo crop, app update ---------- */
-const APP_VERSION='1.12';
+const APP_VERSION='1.14';
 function lockMin(){try{const v=localStorage.getItem('sb-lockmin');return v===null?2:+v}catch(e){return 2}}
 function settingsView(){
   const lm=lockMin();
-  app.innerHTML=`<div class="sheet">
+  setApp(`<div class="sheet">
    <div class="top"><button class="back" id="back">← All notes</button><span class="pill">Settings</span></div>
    <h2>Settings</h2>
    <section class="set"><p class="eyebrow">Profile</p>
@@ -801,7 +839,7 @@ function settingsView(){
    <section class="set"><div class="row"><button class="btn warn sm" id="signOut" type="button">Sign out</button></div>
      <p class="note">Signing out removes notes from this device only. They stay in your account.</p></section>
    <p class="credit">Crafted by Alok</p>
-  </div>`;
+  </div>`);
   $('back').onclick=()=>goBack('home');
   $('sPick').onclick=()=>$('avIn').click();
   if($('sAdjust'))$('sAdjust').onclick=()=>openCrop(S.photo);
@@ -998,16 +1036,19 @@ addEventListener('online',()=>{if(me&&col){flush();pullAll(false)}});
 addEventListener('offline',()=>setSync('offline'));
 
 (async()=>{
-  document.documentElement.classList.add('locked');drawLock();
+  const hasSess=(()=>{try{return Object.keys(localStorage).some(k=>/^sb-.+-auth-token$/.test(k))}catch(e){return false}})();
+  const owner=(()=>{try{return localStorage.getItem(OWNKEY)}catch(e){return null}})();
+  if(hasSess&&owner&&pinRec){me={id:owner,email:''};if(recentActive()){lockMode='open';lockEl.hidden=true;document.documentElement.classList.remove('locked')}else lock('pin')}
+  else{document.documentElement.classList.add('locked');drawLock()}
   if(!window.supabase){
     if(pinRec&&localStorage.getItem(OWNKEY)){me={id:localStorage.getItem(OWNKEY),email:''};if(recentActive())unlock();else lock('pin');setSync('offline')}
     else lock('login','No internet connection. Connect once to sign in.');
     return;
   }
   sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-  sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN'&&session&&!me)setTimeout(()=>{if(!me)onSignedIn(session.user,false)},0)});
+  sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN'&&session&&!col)setTimeout(()=>{if(!col)onSignedIn(session.user,false)},0)});
   const {data:{session}}=await sb.auth.getSession();
-  if(session&&!me)await onSignedIn(session.user,false);
+  if(session&&!col)await onSignedIn(session.user,false);
   else if(!session)lock('login');
 })();
 </script>
