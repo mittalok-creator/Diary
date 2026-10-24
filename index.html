@@ -133,7 +133,10 @@ li.kill .body{text-decoration:line-through}
 .crop .row{display:flex;gap:8px;justify-content:center}
 .acct{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
 .acct .row{display:flex;gap:8px;flex-wrap:wrap}
+html,body{overscroll-behavior-y:none}
 html.locked body{overflow:hidden}
+.lk-bio{display:flex;align-items:center;justify-content:center;gap:10px;padding:12px}
+.lk-bio svg{flex:0 0 auto}
 .lock{position:fixed;inset:0;z-index:50;background:var(--paper);display:grid;place-items:center;overflow-y:auto;
   padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
 .lk-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;align-items:stretch;text-align:center}
@@ -625,8 +628,9 @@ async function savePin(pin){
   try{localStorage.setItem(PINKEY,JSON.stringify(pinRec))}catch(e){}
   try{await col.doc('settings').set(pinRec)}catch(e){toast('Passcode saved on this device. It will sync when online.')}
 }
-function unlock(){lockMode='open';lockEl.hidden=true;document.documentElement.classList.remove('locked');render()}
-function lock(mode,msg){lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock()}
+function unlock(){touchActive();lockMode='open';lockEl.hidden=true;document.documentElement.classList.remove('locked');render()}
+function lock(mode,msg){if(mode==='pin'||mode==='forgot'||mode==='login')try{localStorage.setItem('sb-active','0')}catch(e){}
+  const auto=mode==='pin'&&lockMode!=='pin';lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock();if(auto&&bioOn())setTimeout(()=>bioUnlock(true),250)}
 
 function drawLock(){
   const brand=`${S.photo?`<img class="lk-av" src="${S.photo}" alt="">`:''}<p class="lk-brand">Alok’s Second Brain</p>`;
@@ -641,10 +645,11 @@ function drawLock(){
   if(lockMode==='check')h=`${brand}<h2 class="lk-h">Confirm your email</h2><p class="lk-sub">We sent a confirmation link to <b>${esc(lockMsg)}</b>. Tap it, then come back here and sign in.</p><button class="btn" id="lkBack" type="button">Back to sign in</button>`;
   if(lockMode==='setpin')h=`${brand}<h2 class="lk-h">${pinFirst?'Enter the passcode again':'Set a 4-digit passcode'}</h2><p class="lk-sub">${pinFirst?'To confirm it.':'You will enter it each time you open the app. It works on all your devices.'}</p>
     <form id="lkF" class="lk-form"><input id="lkPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" aria-label="Passcode" required><button class="btn">${pinFirst?'Save passcode':'Next'}</button></form>`;
-  if(lockMode==='pin')h=`${brand}<h2 class="lk-h">Enter passcode</h2><p class="lk-sub">${me?esc(me.email):''}</p>
+  if(lockMode==='pin')h=`${brand}<h2 class="lk-h">Welcome back, Alok</h2><p class="lk-sub">Enter your passcode${bioOn()?' or use fingerprint':''}.</p>
+    ${bioOn()?`<button class="btn lk-bio" id="lkBio" type="button"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M12 11v3.5c0 2-.6 3.9-1.7 5.5M8.5 9.5A3.5 3.5 0 0 1 15.5 11v1.5M15.5 15.5c-.2 1.6-.7 3.1-1.5 4.5M5.6 16.5c.6-1.6.9-3.3.9-5a5.5 5.5 0 0 1 9-4.2M18.2 9.5c.2.6.3 1.3.3 2 0 1.3-.1 2.6-.4 3.8M4 12.5V11a8 8 0 0 1 13.6-5.7"/></svg>Unlock with fingerprint</button>`:''}
     <form id="lkF" class="lk-form"><input id="lkPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" aria-label="Passcode" required><button class="btn">Unlock</button></form>
     <button class="linkbtn" id="lkForgot" type="button">Forgot passcode?</button>`;
-  if(lockMode==='forgot')h=`${brand}<h2 class="lk-h">Reset passcode</h2><p class="lk-sub">Enter your account password for ${me?esc(me.email):''}.</p>
+  if(lockMode==='forgot')h=`${brand}<h2 class="lk-h">Reset passcode</h2><p class="lk-sub">Enter your account password.</p>
     <form id="lkF" class="lk-form"><input id="lkP" type="password" placeholder="Password" autocomplete="current-password" required><button class="btn">Continue</button></form>
     <button class="linkbtn" id="lkBack2" type="button">Back</button>`;
   lockEl.innerHTML=`<div class="lk-card">${h}<p class="lk-err" id="lkErr" role="alert">${lockMode==='check'?'':esc(lockMsg)}</p></div>`;
@@ -655,6 +660,7 @@ function drawLock(){
   if($('lkBack'))$('lkBack').onclick=()=>{signupMode=false;lock('login')};
   if($('lkBack2'))$('lkBack2').onclick=()=>lock('pin');
   if($('lkForgot'))$('lkForgot').onclick=()=>lock('forgot');
+  if($('lkBio'))$('lkBio').onclick=()=>bioUnlock(false);
   if(f)f.onsubmit=async e=>{e.preventDefault();const err=$('lkErr');err.textContent='';const btn=f.querySelector('button');btn.disabled=true;
     try{
       if(lockMode==='login'){
@@ -696,7 +702,7 @@ async function onSignedIn(user,viaPassword){
     try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}
   }
   if(!pinRec)lock('setpin');
-  else if(viaPassword)unlock();
+  else if(viaPassword||recentActive())unlock();
   else lock('pin');
 }
 
@@ -717,7 +723,7 @@ document.addEventListener('click',async e=>{
   }
 });
 /* ---------- settings, photo crop, app update ---------- */
-const APP_VERSION='1.7';
+const APP_VERSION='1.8';
 function lockMin(){try{const v=localStorage.getItem('sb-lockmin');return v===null?2:+v}catch(e){return 2}}
 function settingsView(){
   const lm=lockMin();
@@ -730,6 +736,7 @@ function settingsView(){
    </section>
    <section class="set"><p class="eyebrow">Security</p>
      <label class="set-line" for="sLock"><span>Auto-lock after</span><select id="sLock">${[[0,'Immediately'],[1,'1 minute'],[2,'2 minutes'],[5,'5 minutes'],[15,'15 minutes']].map(([v,t])=>`<option value="${v}" ${v===lm?'selected':''}>${t}</option>`).join('')}</select></label>
+     <p class="set-line"><span>Fingerprint / face unlock</span><button class="btn sm ${bioOn()?'ghost':''}" id="sBio" type="button">${bioOn()?'Turn off':'Turn on'}</button></p>
      <div class="row"><button class="btn ghost sm" id="lockNow" type="button">Lock now</button><button class="btn ghost sm" id="chPin" type="button">Change passcode</button></div>
    </section>
    <section class="set"><p class="eyebrow">Sync</p>
@@ -750,6 +757,7 @@ function settingsView(){
   $('sPick').onclick=()=>$('avIn').click();
   if($('sAdjust'))$('sAdjust').onclick=()=>openCrop(S.photo);
   if($('sRemove'))$('sRemove').onclick=()=>{S.photo=null;mark('meta');render();toast('Photo removed')};
+  $('sBio').onclick=async()=>{if(bioOn()){try{localStorage.removeItem('sb-bio')}catch(e){}render();toast('Fingerprint unlock turned off');return}await bioEnable();render()};
   $('sLock').onchange=()=>{try{localStorage.setItem('sb-lockmin',$('sLock').value)}catch(e){}toast('Auto-lock updated')};
   $('sSync').onclick=async()=>{if(!me||!col){toast('Sign in to sync.');return}await flush();await pullAll(false);toast(sync==='synced'?'Everything is synced':'Sync will finish when you are online')};
   $('sUpdate').onclick=updateApp;
@@ -762,6 +770,36 @@ async function updateApp(){
     if(window.caches)for(const k of await caches.keys())await caches.delete(k);
   }catch(e){}
   location.reload();
+}
+
+/* recent-activity window: a reload or pull-down soon after use does not ask for the passcode again */
+function touchActive(){try{localStorage.setItem('sb-active',String(Date.now()))}catch(e){}}
+function recentActive(){try{const a=+localStorage.getItem('sb-active')||0,m=lockMin();return m>0&&a>0&&Date.now()-a<m*60000}catch(e){return false}}
+setInterval(()=>{if(lockMode==='open'&&!document.hidden)touchActive()},30000);
+addEventListener('pagehide',()=>{if(lockMode==='open')touchActive()});
+
+/* biometric unlock (WebAuthn platform authenticator on this device) */
+const b64=u=>btoa(String.fromCharCode(...new Uint8Array(u))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const unb64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+function bioOn(){try{return !!localStorage.getItem('sb-bio')&&!!window.PublicKeyCredential}catch(e){return false}}
+async function bioEnable(){
+  try{
+    if(!window.PublicKeyCredential||!(await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())){toast('This device has no fingerprint or face unlock available for the browser.');return}
+    const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Alok’s Second Brain',id:location.hostname},
+      user:{id:crypto.getRandomValues(new Uint8Array(16)),name:(me&&me.email)||'alok',displayName:'Alok'},
+      pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+      authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000,attestation:'none'}});
+    localStorage.setItem('sb-bio',b64(cred.rawId));toast('Fingerprint unlock is on for this device');
+  }catch(e){toast(e&&e.name==='NotAllowedError'?'Fingerprint setup was cancelled.':'Could not turn on fingerprint unlock on this device.')}
+}
+let bioBusy=false;
+async function bioUnlock(silent){
+  if(bioBusy||lockMode!=='pin')return;bioBusy=true;
+  try{
+    await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),allowCredentials:[{type:'public-key',id:unb64(localStorage.getItem('sb-bio'))}],userVerification:'required',timeout:60000,rpId:location.hostname}});
+    pinTry=0;unlock();
+  }catch(e){if(!silent){const er=$('lkErr');if(er)er.textContent='Fingerprint did not work. Use your passcode.'}}
+  finally{bioBusy=false}
 }
 
 /* photo crop */
@@ -791,7 +829,7 @@ $('cropOk').onclick=()=>{const O=256,o=document.createElement('canvas');o.width=
   S.photo=o.toDataURL('image/jpeg',.85);cropEl.hidden=true;ci=null;mark('meta');render();toast('Photo saved')};
 
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){hiddenAt=Date.now();return}
+  if(document.hidden){hiddenAt=Date.now();if(lockMode==='open')touchActive();return}
   if(me&&pinRec&&lockMode==='open'&&hiddenAt&&Date.now()-hiddenAt>=lockMin()*60000)lock('pin');
   if(me&&col)pullAll(false);
 });
@@ -801,7 +839,7 @@ addEventListener('offline',()=>setSync('offline'));
 (async()=>{
   document.documentElement.classList.add('locked');drawLock();
   if(!window.supabase){
-    if(pinRec&&localStorage.getItem(OWNKEY)){me={id:localStorage.getItem(OWNKEY),email:''};lock('pin');setSync('offline')}
+    if(pinRec&&localStorage.getItem(OWNKEY)){me={id:localStorage.getItem(OWNKEY),email:''};if(recentActive())unlock();else lock('pin');setSync('offline')}
     else lock('login','No internet connection. Connect once to sign in.');
     return;
   }
