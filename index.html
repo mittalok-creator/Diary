@@ -292,9 +292,9 @@ let col=null, sync='local', syncErr='';
 const dirty=new Set((()=>{try{return JSON.parse(localStorage.getItem('sb-dirty'))||[]}catch(e){return []}})()); let writing=false, flushT;
 function keepDirty(){try{localStorage.setItem('sb-dirty',JSON.stringify([...dirty]))}catch(e){}}
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
-function mark(...ids){ids.forEach(i=>dirty.add(i));keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500)}
+function mark(...ids){const now=Date.now();ids.forEach(i=>{dirty.add(i);if(i==='meta')S.metaTs=now;else if(S.notes[i])S.notes[i]._ts=now});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500)}
 const docName=id=>id==='meta'?'meta':'n_'+id;
-const body=id=>id==='meta'?{custom:S.custom,resetMonth:S.resetMonth,tags:S.tags,photo:S.photo||null}:S.notes[id];
+const body=id=>id==='meta'?{custom:S.custom,resetMonth:S.resetMonth,tags:S.tags,photo:S.photo||null,_ts:S.metaTs||0}:S.notes[id];
 async function flush(){
   if(!col||writing||!dirty.size)return;
   writing=true;setSync('saving');
@@ -603,15 +603,21 @@ function applyRow(name,data){
   if(name==='settings'){if(data&&data.pinHash){pinRec=data;try{localStorage.setItem(PINKEY,JSON.stringify(data))}catch(e){}}return false}
   const k=name==='meta'?'meta':name.slice(2);
   if(dirty.has(k)||!data)return false;
+  const localTs=k==='meta'?(S.metaTs||0):((S.notes[k]&&S.notes[k]._ts)||0);
+  if((data._ts||0)<localTs)return false;
   if(k==='meta'){
-    const cur=JSON.stringify(body('meta')),nxt=JSON.stringify({custom:data.custom||[],resetMonth:data.resetMonth||S.resetMonth,tags:data.tags||{},photo:data.photo||null});
-    if(cur!==nxt){S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};S.photo=data.photo||null;return true}
+    const cur=JSON.stringify(body('meta')),nxt=JSON.stringify({custom:data.custom||[],resetMonth:data.resetMonth||S.resetMonth,tags:data.tags||{},photo:data.photo||null,_ts:data._ts||0});
+    if(cur!==nxt){S.metaTs=data._ts||0;S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};S.photo=data.photo||null;return true}
     return false;
   }
   if(JSON.stringify(S.notes[k])!==JSON.stringify(data)){S.notes[k]=Object.assign({items:[],text:''},data);return true}
   return false;
 }
-function afterApply(changed){if(changed){ensure();const m=monthlyReset();saveLocal();render(true);if(m)toast(m)}}
+let pendingRender=false;
+function busyTyping(){const a=document.activeElement;return editId||(a&&app.contains(a)&&/^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)&&(a.value||a.type==='date'||a.tagName==='SELECT'))}
+function softRender(){if(busyTyping()||(cropEl&&!cropEl.hidden)){pendingRender=true;return}pendingRender=false;render(true)}
+document.addEventListener('focusout',()=>setTimeout(()=>{if(pendingRender&&!busyTyping())softRender()},400));
+function afterApply(changed){if(changed){ensure();const m=monthlyReset();saveLocal();softRender();if(m)toast(m)}}
 
 let pulling=false;
 async function pullAll(first){
@@ -743,7 +749,7 @@ document.addEventListener('click',async e=>{
   }
 });
 /* ---------- settings, photo crop, app update ---------- */
-const APP_VERSION='1.10';
+const APP_VERSION='1.11';
 function lockMin(){try{const v=localStorage.getItem('sb-lockmin');return v===null?2:+v}catch(e){return 2}}
 function settingsView(){
   const lm=lockMin();
