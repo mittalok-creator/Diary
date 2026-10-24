@@ -41,6 +41,17 @@ body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:var(--
 .avatar span{font-family:var(--sans);font-weight:700;font-size:22px;color:var(--accent)}
 .avatar i{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--paper);font:600 14px/20px var(--sans);font-style:normal;text-align:center}
 .hero-txt{min-width:0}
+.date{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}
+.clock{display:inline-flex;align-items:center;gap:2px;font-family:var(--sans);font-variant-numeric:tabular-nums}
+.fd{position:relative;display:inline-grid;place-items:center;width:1.05em;height:1.45em;border-radius:5px;background:var(--ink);color:var(--paper);font-size:14px;font-weight:600;line-height:1;perspective:200px;overflow:hidden}
+.fd::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:color-mix(in srgb,var(--paper) 30%,transparent)}
+.fd b{display:block;font-weight:600;transform-origin:50% 50%;backface-visibility:hidden}
+.fd.flip b{animation:flip .38s cubic-bezier(.3,.7,.4,1)}
+@keyframes flip{0%{transform:rotateX(90deg);opacity:.2}100%{transform:rotateX(0);opacity:1}}
+.csep{font-weight:700;color:var(--ink);font-size:14px;padding:0 1px;animation:blink 1s steps(2,start) infinite}
+@keyframes blink{50%{opacity:.25}}
+.ampm{font-size:11px;font-weight:600;color:var(--muted);margin-left:4px;letter-spacing:.04em}
+@media (prefers-reduced-motion:reduce){.fd.flip b,.csep{animation:none}}
 .hello{margin:0;font-family:var(--sans);font-weight:600;font-size:17px}
 .date{margin:0;color:var(--muted);font-size:16px}
 .thought{margin:10px 0 0;color:var(--muted);font-style:italic;font-size:18px;text-wrap:pretty}
@@ -384,7 +395,7 @@ function home(){
   app.innerHTML=`
   <header class="hero">
     <button class="avatar" id="avBtn" type="button" aria-label="${S.photo?'Change your photo':'Add your photo'}">${S.photo?`<img src="${S.photo}" alt="">`:'<span>A</span><i>+</i>'}</button>
-    <div class="hero-txt"><p class="hello">${greet()}, Alok</p><p class="date">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</p></div>
+    <div class="hero-txt"><p class="hello">${greet()}, Alok</p><p class="date"><span>${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</span><span class="clock" id="clock" role="timer" aria-label="Current time"></span></p></div>
   </header>
   <div>
     <h1><b>Write it down.</b><span class="l2">Free your mind.</span></h1>
@@ -749,7 +760,7 @@ document.addEventListener('click',async e=>{
   }
 });
 /* ---------- settings, photo crop, app update ---------- */
-const APP_VERSION='1.11';
+const APP_VERSION='1.12';
 function lockMin(){try{const v=localStorage.getItem('sb-lockmin');return v===null?2:+v}catch(e){return 2}}
 function settingsView(){
   const lm=lockMin();
@@ -939,6 +950,18 @@ async function backupXLSX(){
 var restoreData=null;
 function restorePick(){const f=document.createElement('input');f.type='file';f.accept='.json,application/json';f.onchange=async()=>{try{const j=JSON.parse(await f.files[0].text());const d=j.data||j;if(!d.notes)throw 0;restoreData=d;render();toast('Backup loaded. Confirm to restore.')}catch(e){toast('That file is not a Second Brain backup.')}};f.click()}
 function restoreNow(){if(!restoreData)return;S=restoreData;S.custom=S.custom||[];S.tags=S.tags||{};restoreData=null;ensure();saveLocal();mark('meta',...Object.keys(S.notes));render();toast('Backup restored')}
+
+/* live flip clock */
+function tickClock(){
+  const el=$('clock');if(!el)return;
+  const d=new Date();let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
+  const str=String(h).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0')+String(d.getSeconds()).padStart(2,'0');
+  if(!el.firstChild){el.innerHTML=[0,1,'s',2,3,'s',4,5].map(x=>x==='s'?'<span class="csep" aria-hidden="true">:</span>':`<span class="fd" aria-hidden="true"><b></b></span>`).join('')+'<span class="ampm"></span>'}
+  el.querySelectorAll('.fd').forEach((f,i)=>{const v=str[i];if(f.dataset.v!==v){f.dataset.v=v;f.firstChild.textContent=v;if(f.dataset.init){f.classList.remove('flip');void f.offsetWidth;f.classList.add('flip')}f.dataset.init='1'}});
+  el.querySelector('.ampm').textContent=ap;
+  el.setAttribute('aria-label','Current time '+str.slice(0,2)+':'+str.slice(2,4)+' '+ap);
+}
+(function loop(){tickClock();setTimeout(loop,1000-Date.now()%1000+5)})();
 
 /* photo crop */
 const cropEl=document.createElement('div');cropEl.className='crop';cropEl.hidden=true;
