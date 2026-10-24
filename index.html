@@ -82,6 +82,7 @@ button{cursor:pointer}
 .results .where{font-family:var(--sans);font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .results mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:2px}
 .closing{font-weight:600;font-size:21px;line-height:1.3;color:var(--ink);margin:8px 0 0;text-wrap:balance}
+.credit{text-align:center;font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
 .note{font-size:13.5px;color:var(--muted);font-family:var(--sans)}
 
 /* sheet view */
@@ -312,9 +313,9 @@ function home(){
       :`<p class="empty">Nothing matches “${esc(q.trim())}”.</p>`;
   }
   app.innerHTML=`
-  <div class="handle"><span>your second brain</span><span id="syncEl" class="sync ${sync}">${esc(syncLabel())}</span></div>
+  <div class="handle"><span>Alok’s Second Brain</span><span id="syncEl" class="sync ${sync}">${esc(syncLabel())}</span></div>
   <div>
-    <h1>Open your <b>Notes app.</b><span class="l2">Let’s organize your life.</span></h1>
+    <h1><b>Write it down.</b><span class="l2">Free your mind.</span></h1>
     <p class="sub">${total} things written down so far. Don’t trust your memory. Trust your system.</p>
   </div>
   <form class="bar" id="cap"><input id="capIn" placeholder="Quick capture to Brain Dump…" autocomplete="off" aria-label="Quick capture"><button class="btn">Save</button></form>
@@ -331,7 +332,8 @@ function home(){
     return `<li><button data-open="${n.id}"><span class="n">${i+1}.</span><span class="t">${esc(n.title)}</span><span class="c">${c}</span><span class="h">${esc(n.hint)}${al}</span></button></li>`}).join('')}</ol>
   <form class="newnote" id="newF"><input id="newIn" placeholder="+ Create your own note" autocomplete="off" aria-label="New note title" maxlength="60"><button class="btn sm ghost">Create</button></form>
   </div>
-  <p class="closing">The less time you spend trying to remember everything, the more time you have to enjoy your life.</p>`}`;
+  <p class="closing">The less time you spend trying to remember everything, the more time you have to enjoy your life.</p>`}
+  <p class="credit">Crafted by Alok</p>`;
   $('cap').onsubmit=e=>{e.preventDefault();const v=$('capIn').value.trim();if(!v)return;
     S.notes.dump.items.unshift({id:uid(),t:v,tag:'Idea'});mark('dump');toast('Saved to Brain Dump');render();$('capIn').focus()};
   $('qIn').oninput=()=>{q=$('qIn').value;render(true)};
