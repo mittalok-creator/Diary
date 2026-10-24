@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#e5dbc9" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1d1a16" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Second Brain Notes: Brain Dump, Life Admin, People, Monthly Reset and more.">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -83,6 +84,22 @@ button{cursor:pointer}
 .results mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:2px}
 .closing{font-weight:600;font-size:21px;line-height:1.3;color:var(--ink);margin:8px 0 0;text-wrap:balance}
 .credit{text-align:center;font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+.acct{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.acct .row{display:flex;gap:8px;flex-wrap:wrap}
+html.locked body{overflow:hidden}
+.lock{position:fixed;inset:0;z-index:50;background:var(--paper);display:grid;place-items:center;overflow-y:auto;
+  padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lk-card{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px;align-items:stretch;text-align:center}
+.lk-brand{font-family:var(--sans);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0}
+.lk-h{font-family:var(--sans);font-size:24px;font-weight:700;margin:0;text-wrap:balance}
+.lk-sub{color:var(--muted);margin:0;font-size:17px}
+.lk-form{display:flex;flex-direction:column;gap:10px}
+.lk-form input{background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:17px;color:var(--ink);width:100%}
+.lk-form input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.lk-form input.pin{text-align:center;font-family:var(--sans);font-size:30px;letter-spacing:.6em;padding-left:.6em}
+.lk-form .btn{padding:12px}
+.lk-form .btn:disabled{opacity:.6}
+.lk-err{color:var(--accent);font-family:var(--sans);font-size:13.5px;margin:0;min-height:1.2em}
 .note{font-size:13.5px;color:var(--muted);font-family:var(--sans)}
 
 /* sheet view */
@@ -222,14 +239,14 @@ async function flush(){
     const b=body(id);
     try{ b? await col.doc(docName(id)).set(JSON.parse(JSON.stringify(b))) : await col.doc(docName(id)).delete() }
     catch(e){
-      if(e&&e.code==='unavailable'){dirty.add(id);writing=false;setTimeout(flush,2000+Math.random()*1500);return}
+      if(e&&e.code==='unavailable'){dirty.add(id);writing=false;setSync('offline');setTimeout(flush,5000+Math.random()*3000);return}
       setSync('error',e&&e.message?e.message:'Could not save to sync.');writing=false;return;
     }
   }
   writing=false;setSync('synced');
 }
 function setSync(s,msg){sync=s;syncErr=msg||'';const el=$('syncEl');if(el){el.className='sync '+s;el.textContent=syncLabel()}}
-function syncLabel(){return sync==='synced'?'Synced to your account':sync==='saving'?'Saving…':sync==='error'?'Sync paused: '+syncErr:sync==='connecting'?'Connecting…':'Saved on this device only'}
+function syncLabel(){return sync==='synced'?'Synced · all devices':sync==='offline'?'Offline · will sync later':sync==='saving'?'Saving…':sync==='error'?'Sync paused: '+syncErr:sync==='connecting'?'Connecting…':'Saved on this device only'}
 
 function monthlyReset(){
   if(S.resetMonth!==month()){S.notes.reset.items.forEach(i=>i.done=false);S.resetMonth=month();mark('reset','meta');
@@ -237,35 +254,7 @@ function monthlyReset(){
   return '';
 }
 
-(async()=>{
-  if(!window.claude||!claude.use){return}
-  setSync('connecting');
-  const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
-  const id=user?await user.id():null;
-  if(!db||!id){setSync('local');return}
-  col=db.collection('data/users/'+id);
-  let first=true;
-  col.onSnapshot(snap=>{
-    if(first){
-      first=false;
-      if(snap.empty){mark('meta',...Object.keys(S.notes));return}
-    }
-    let changed=false;
-    snap.docs.forEach(d=>{
-      if(d.metadata&&d.metadata.hasPendingWrites)return;
-      const k=d.id==='meta'?'meta':d.id.slice(2);
-      if(dirty.has(k))return;
-      const data=d.data();if(!data)return;
-      if(k==='meta'){
-        const cur=JSON.stringify(body('meta')),nxt=JSON.stringify({custom:data.custom||[],resetMonth:data.resetMonth||S.resetMonth,tags:data.tags||{}});
-        if(cur!==nxt){S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};changed=true}
-      }else if(JSON.stringify(S.notes[k])!==JSON.stringify(data)){S.notes[k]={items:data.items||[],text:data.text||''};changed=true}
-    });
-    if(changed){ensure();const m=monthlyReset();saveLocal();render(true);if(m)toast(m)}
-    if(dirty.size&&!writing)flush();
-    else if(!writing&&!dirty.size)setSync('synced');
-  },e=>setSync('error',e&&e.message?e.message:'Connection lost. Reload the page.'));
-})();
+
 
 /* ---------- helpers ---------- */
 function daysLeft(d){return Math.round((new Date(d+'T00:00')-new Date(today()+'T00:00'))/864e5)}
@@ -333,6 +322,7 @@ function home(){
   <form class="newnote" id="newF"><input id="newIn" placeholder="+ Create your own note" autocomplete="off" aria-label="New note title" maxlength="60"><button class="btn sm ghost">Create</button></form>
   </div>
   <p class="closing">The less time you spend trying to remember everything, the more time you have to enjoy your life.</p>`}
+  ${acctHtml()}
   <p class="credit">Crafted by Alok</p>`;
   $('cap').onsubmit=e=>{e.preventDefault();const v=$('capIn').value.trim();if(!v)return;
     S.notes.dump.items.unshift({id:uid(),t:v,tag:'Idea'});mark('dump');toast('Saved to Brain Dump');render();$('capIn').focus()};
@@ -485,6 +475,175 @@ undoBtn.onclick=()=>{if(!lastDeleted||!S.notes[lastDeleted.id])return;S.notes[la
 const startMsg=monthlyReset();saveLocal();
 render();
 if(startMsg)toast(startMsg);
+/* ---------- Supabase account sync + passcode lock (website build) ---------- */
+const SB_URL='https://xqbsdvwlspstejymrzhs.supabase.co';
+const SB_KEY='sb_publishable_JHOtsho3yrPdZlBe94voBQ_CcH-wAIa';
+const PINKEY='sb-pin', OWNKEY='sb-owner', LOCK_AFTER=2*60*1000;
+var sb=null, me=null, pinRec=null, lockMode='loading', lockMsg='', pinTry=0, hiddenAt=0, chan=null, signupMode=false, pinFirst='';
+try{pinRec=JSON.parse(localStorage.getItem(PINKEY))}catch(e){}
+const lockEl=document.createElement('div');lockEl.id='lock';lockEl.className='lock';document.body.appendChild(lockEl);
+
+function isNet(err){return !navigator.onLine||/fetch|network|timeout|load failed/i.test(String(err&&err.message||err))}
+function makeCol(uid){return{doc:name=>({
+  set:async b=>{const {error}=await sb.from('notes').upsert({user_id:uid,note_id:name,data:b,updated_at:new Date().toISOString()});if(error)throw{code:isNet(error)?'unavailable':'x',message:error.message}},
+  delete:async()=>{const {error}=await sb.from('notes').delete().eq('user_id',uid).eq('note_id',name);if(error)throw{code:isNet(error)?'unavailable':'x',message:error.message}}
+})}}
+
+function applyRow(name,data){
+  if(name==='settings'){if(data&&data.pinHash){pinRec=data;try{localStorage.setItem(PINKEY,JSON.stringify(data))}catch(e){}}return false}
+  const k=name==='meta'?'meta':name.slice(2);
+  if(dirty.has(k)||!data)return false;
+  if(k==='meta'){
+    const cur=JSON.stringify(body('meta')),nxt=JSON.stringify({custom:data.custom||[],resetMonth:data.resetMonth||S.resetMonth,tags:data.tags||{}});
+    if(cur!==nxt){S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};return true}
+    return false;
+  }
+  if(JSON.stringify(S.notes[k])!==JSON.stringify(data)){S.notes[k]={items:data.items||[],text:data.text||''};return true}
+  return false;
+}
+function afterApply(changed){if(changed){ensure();const m=monthlyReset();saveLocal();render(true);if(m)toast(m)}}
+
+async function pullAll(first){
+  const {data,error}=await sb.from('notes').select('note_id,data');
+  if(error){setSync(isNet(error)?'offline':'error',error.message);return}
+  const rows=data||[];
+  if(first&&!rows.some(r=>r.note_id!=='settings')){mark('meta',...Object.keys(S.notes));}
+  let changed=false;rows.forEach(r=>{if(applyRow(r.note_id,r.data))changed=true});
+  afterApply(changed);
+  if(dirty.size)flush();else if(!writing)setSync('synced');
+}
+function listen(){
+  if(chan)sb.removeChannel(chan);
+  chan=sb.channel('notes-'+me.id).on('postgres_changes',{event:'*',schema:'public',table:'notes',filter:'user_id=eq.'+me.id},p=>{
+    if(p.eventType==='DELETE'){const k=(p.old&&p.old.note_id||'').slice(2);if(k&&S.notes[k]&&allNotes().every(n=>n.id!==k)){delete S.notes[k];afterApply(true)}return}
+    afterApply(applyRow(p.new.note_id,p.new.data));
+  }).subscribe();
+}
+async function startSync(){
+  col=makeCol(me.id);setSync('connecting');
+  await pullAll(true);listen();
+}
+
+/* passcode */
+async function hashPin(pin,salt){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin+':'+me.id));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+async function savePin(pin){
+  const salt=[...crypto.getRandomValues(new Uint8Array(12))].map(x=>x.toString(16).padStart(2,'0')).join('');
+  pinRec={salt,pinHash:await hashPin(pin,salt)};
+  try{localStorage.setItem(PINKEY,JSON.stringify(pinRec))}catch(e){}
+  try{await col.doc('settings').set(pinRec)}catch(e){toast('Passcode saved on this device. It will sync when online.')}
+}
+function unlock(){lockMode='open';lockEl.hidden=true;document.documentElement.classList.remove('locked');render()}
+function lock(mode,msg){lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock()}
+
+function drawLock(){
+  const brand=`<p class="lk-brand">Alok’s Second Brain</p>`;
+  let h='';
+  if(lockMode==='loading')h=`${brand}<p class="lk-sub">Opening…</p>`;
+  if(lockMode==='login')h=`${brand}<h2 class="lk-h">${signupMode?'Create your account':'Sign in to sync'}</h2>
+    <p class="lk-sub">${signupMode?'One account keeps your notes on every phone and laptop.':'Use the same account on every device.'}</p>
+    <form id="lkF" class="lk-form"><input id="lkE" type="email" placeholder="Email" autocomplete="email" required>
+    <input id="lkP" type="password" placeholder="Password (min 6 characters)" autocomplete="${signupMode?'new-password':'current-password'}" minlength="6" required>
+    <button class="btn">${signupMode?'Create account':'Sign in'}</button></form>
+    <button class="linkbtn" id="lkSw" type="button">${signupMode?'Already have an account? Sign in':'New here? Create an account'}</button>`;
+  if(lockMode==='check')h=`${brand}<h2 class="lk-h">Confirm your email</h2><p class="lk-sub">We sent a confirmation link to <b>${esc(lockMsg)}</b>. Tap it, then come back here and sign in.</p><button class="btn" id="lkBack" type="button">Back to sign in</button>`;
+  if(lockMode==='setpin')h=`${brand}<h2 class="lk-h">${pinFirst?'Enter the passcode again':'Set a 4-digit passcode'}</h2><p class="lk-sub">${pinFirst?'To confirm it.':'You will enter it each time you open the app. It works on all your devices.'}</p>
+    <form id="lkF" class="lk-form"><input id="lkPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" aria-label="Passcode" required><button class="btn">${pinFirst?'Save passcode':'Next'}</button></form>`;
+  if(lockMode==='pin')h=`${brand}<h2 class="lk-h">Enter passcode</h2><p class="lk-sub">${me?esc(me.email):''}</p>
+    <form id="lkF" class="lk-form"><input id="lkPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" aria-label="Passcode" required><button class="btn">Unlock</button></form>
+    <button class="linkbtn" id="lkForgot" type="button">Forgot passcode?</button>`;
+  if(lockMode==='forgot')h=`${brand}<h2 class="lk-h">Reset passcode</h2><p class="lk-sub">Enter your account password for ${me?esc(me.email):''}.</p>
+    <form id="lkF" class="lk-form"><input id="lkP" type="password" placeholder="Password" autocomplete="current-password" required><button class="btn">Continue</button></form>
+    <button class="linkbtn" id="lkBack2" type="button">Back</button>`;
+  lockEl.innerHTML=`<div class="lk-card">${h}<p class="lk-err" id="lkErr" role="alert">${lockMode==='check'?'':esc(lockMsg)}</p></div>`;
+  const f=$('lkF'),pin=$('lkPin');
+  if(pin){pin.focus();pin.oninput=()=>{pin.value=pin.value.replace(/\D/g,'').slice(0,4);if(pin.value.length===4)f.requestSubmit()}}
+  else if($('lkE'))$('lkE').focus();
+  if($('lkSw'))$('lkSw').onclick=()=>{signupMode=!signupMode;lock('login')};
+  if($('lkBack'))$('lkBack').onclick=()=>{signupMode=false;lock('login')};
+  if($('lkBack2'))$('lkBack2').onclick=()=>lock('pin');
+  if($('lkForgot'))$('lkForgot').onclick=()=>lock('forgot');
+  if(f)f.onsubmit=async e=>{e.preventDefault();const err=$('lkErr');err.textContent='';const btn=f.querySelector('button');btn.disabled=true;
+    try{
+      if(lockMode==='login'){
+        const email=$('lkE').value.trim(),pw=$('lkP').value;
+        if(signupMode){
+          const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.origin+location.pathname}});
+          if(error)throw error;
+          if(!data.session){signupMode=false;lock('check',email);return}
+          await onSignedIn(data.session.user,true);
+        }else{
+          const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
+          if(error)throw new Error(/confirm/i.test(error.message)?'Confirm your email first. Check your inbox for the link.':/invalid/i.test(error.message)?'Wrong email or password.':error.message);
+          await onSignedIn(data.user,true);
+        }
+      }else if(lockMode==='setpin'){
+        const v=pin.value;if(!/^\d{4}$/.test(v))throw new Error('Enter exactly 4 digits.');
+        if(!pinFirst){pinFirst=v;lock('setpin');return}
+        if(v!==pinFirst){pinFirst='';lock('setpin','The two passcodes did not match. Set it again.');return}
+        pinFirst='';await savePin(v);toast('Passcode set');unlock();
+      }else if(lockMode==='pin'){
+        if(await hashPin(pin.value,pinRec.salt)===pinRec.pinHash){pinTry=0;unlock()}
+        else{pinTry++;if(pinTry>=5){pinTry=0;lock('forgot','Too many wrong tries. Enter your password to continue.')}else lock('pin',`Wrong passcode. ${5-pinTry} tries left.`)}
+      }else if(lockMode==='forgot'){
+        const {error}=await sb.auth.signInWithPassword({email:me.email,password:$('lkP').value});
+        if(error)throw new Error(isNet(error)?'You are offline. Connect to the internet to reset the passcode.':'Wrong password.');
+        pinFirst='';lock('setpin');
+      }
+    }catch(x){err.textContent=isNet(x)?'No internet connection. Try again when online.':(x.message||'Something went wrong. Try again.');btn.disabled=false}
+  };
+}
+
+async function onSignedIn(user,viaPassword){
+  const owner=localStorage.getItem(OWNKEY);
+  if(owner&&owner!==user.id){S=fresh();S.tags={};saveLocal();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
+  try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
+  me=user;
+  startSync();
+  if(!pinRec){
+    try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}
+  }
+  if(!pinRec)lock('setpin');
+  else if(viaPassword)unlock();
+  else lock('pin');
+}
+
+function acctHtml(){
+  if(!me)return '';
+  return `<div class="acct"><span class="note">Signed in as ${esc(me.email)}</span><div class="row"><button class="btn ghost sm" id="lockNow" type="button">Lock now</button><button class="btn ghost sm" id="chPin" type="button">Change passcode</button><button class="btn ghost sm" id="signOut" type="button">Sign out</button></div></div>`;
+}
+document.addEventListener('click',async e=>{
+  const id=e.target&&e.target.id;
+  if(id==='lockNow')lock('pin');
+  if(id==='chPin'){pinFirst='';lock('forgot','Enter your password to set a new passcode.')}
+  if(id==='signOut'){
+    if(dirty.size){toast('Still saving. Try again in a moment.');return}
+    if(chan)sb.removeChannel(chan);chan=null;col=null;
+    await sb.auth.signOut();me=null;pinRec=null;
+    ['sb-pin',KEY,OLDKEY].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
+    S=fresh();S.tags={};render();signupMode=false;lock('login');setSync('local');
+  }
+});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){hiddenAt=Date.now();return}
+  if(me&&pinRec&&lockMode==='open'&&hiddenAt&&Date.now()-hiddenAt>LOCK_AFTER)lock('pin');
+  if(me&&col)pullAll(false);
+});
+addEventListener('online',()=>{if(me&&col){flush();pullAll(false)}});
+addEventListener('offline',()=>setSync('offline'));
+
+(async()=>{
+  document.documentElement.classList.add('locked');drawLock();
+  if(!window.supabase){
+    if(pinRec&&localStorage.getItem(OWNKEY)){me={id:localStorage.getItem(OWNKEY),email:''};lock('pin');setSync('offline')}
+    else lock('login','No internet connection. Connect once to sign in.');
+    return;
+  }
+  sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN'&&session&&!me)onSignedIn(session.user,false)});
+  const {data:{session}}=await sb.auth.getSession();
+  if(session&&!me)await onSignedIn(session.user,false);
+  else if(!session)lock('login');
+})();
 </script>
 <script>if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));</script>
 </body>
