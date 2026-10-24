@@ -34,7 +34,22 @@ body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size
 body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:var(--grain);mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .35 0 0 0 0 .28 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:22px;position:relative;z-index:1}
-.handle{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--sans);color:var(--muted);font-size:12px}
+.hero{display:flex;align-items:center;gap:14px}
+.avatar{position:relative;width:56px;height:56px;border-radius:50%;border:1.5px solid var(--ink);background:var(--sheet);padding:0;flex:0 0 auto;display:grid;place-items:center;overflow:visible}
+.avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.avatar span{font-family:var(--sans);font-weight:700;font-size:22px;color:var(--accent)}
+.avatar i{position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:var(--ink);color:var(--paper);font:600 14px/20px var(--sans);font-style:normal;text-align:center}
+.hero-txt{min-width:0}
+.hello{margin:0;font-family:var(--sans);font-weight:600;font-size:17px}
+.date{margin:0;color:var(--muted);font-size:16px}
+.thought{margin:10px 0 0;color:var(--muted);font-style:italic;font-size:18px;text-wrap:pretty}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--line)}
+.stats div{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 4px;text-align:center}
+.stats div+div{border-left:1px solid var(--line)}
+.stats b{font-family:var(--sans);font-size:22px;font-variant-numeric:tabular-nums;line-height:1.1}
+.stats span{font-family:var(--sans);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.syncline{margin:-12px 0 0;font-family:var(--sans);font-size:12px;color:var(--muted);text-align:right}
+.lk-av{width:72px;height:72px;border-radius:50%;object-fit:cover;margin:0 auto;border:1.5px solid var(--ink)}
 .sync{display:inline-flex;align-items:center;gap:6px}
 .sync::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--muted)}
 .sync.synced::before{background:var(--ok)} .sync.error::before{background:var(--accent)}
@@ -230,7 +245,7 @@ const dirty=new Set(); let writing=false, flushT;
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function mark(...ids){ids.forEach(i=>dirty.add(i));saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500)}
 const docName=id=>id==='meta'?'meta':'n_'+id;
-const body=id=>id==='meta'?{custom:S.custom,resetMonth:S.resetMonth,tags:S.tags}:S.notes[id];
+const body=id=>id==='meta'?{custom:S.custom,resetMonth:S.resetMonth,tags:S.tags,photo:S.photo||null}:S.notes[id];
 async function flush(){
   if(!col||writing||!dirty.size)return;
   writing=true;setSync('saving');
@@ -269,6 +284,9 @@ function upcoming(){
 function tagsFor(n){const own=(S.tags[n.id]||[]).filter(t=>!n.tags.some(b=>b.toLowerCase()===t.toLowerCase()));return n.tags.concat(own)}
 function tagSel(n){const cur=selTag[n.id]||'';
   return `<select id="fT" aria-label="Type">${tagsFor(n).map(t=>`<option ${!newTagOpen&&t===cur?'selected':''}>${esc(t)}</option>`).join('')}<option value="__new" ${newTagOpen?'selected':''}>+ New type…</option></select><input id="f4" placeholder="New type name" maxlength="24" autocomplete="off" aria-label="New type name" ${newTagOpen?'':'hidden'} style="flex:1 1 140px">`}
+function greet(){const h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night'}
+const THOUGHTS=['If you think you’ll remember it later, write it down now.','Some moments deserve words, not photos.','Remembering small things makes people feel valued.','Not everything needs to happen this month.','A few minutes of reset makes life feel less messy.','The best ideas arrive when you least expect them.','Don’t trust your memory. Trust your system.','Less time remembering means more time living.'];
+function thought(){const d=new Date(),start=new Date(d.getFullYear(),0,0);return THOUGHTS[Math.floor((d-start)/864e5)%THOUGHTS.length]}
 const pinSort=arr=>arr.map((x,i)=>[x,i]).sort((a,b)=>(b[0].pin?1:0)-(a[0].pin?1:0)||a[1]-b[1]).map(p=>p[0]);
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 
@@ -281,12 +299,17 @@ function render(preserve){
   const keep={},ae=document.activeElement;let aid=null,sel=null;
   if(preserve){app.querySelectorAll('input[id],textarea[id],select[id]').forEach(e=>{if(e.type!=='checkbox')keep[e.id]=e.value});
     if(ae&&ae.id){aid=ae.id;try{sel=[ae.selectionStart,ae.selectionEnd]}catch(e){}}}
+  if(view==='review'&&!review)view='dump';
   if(view!=='home'&&!S.notes[view]&&view!=='review')view='home';
   view==='home'?home():view==='review'?reviewView():sheet();
   if(preserve){for(const k in keep){const e=$(k);if(e&&(k!=='freeT'||k===aid))e.value=keep[k]}
     if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
 }
-function go(v){view=v;memId=null;confirmDel=false;filterTag=null;newTagOpen=false;render();window.scrollTo(0,0)}
+let navDepth=0;
+function go(v,fromPop){if(!fromPop&&v!==view){history.pushState({v},'',v==='home'?location.pathname:'#'+v);navDepth++}
+  view=v;memId=null;confirmDel=false;filterTag=null;newTagOpen=false;render();window.scrollTo(0,0)}
+function goBack(fallback){if(navDepth>0)history.back();else go(fallback)}
+addEventListener('popstate',e=>{navDepth=Math.max(0,navDepth-1);let v=(e.state&&e.state.v)||'home';if(v==='review'&&!review)v='dump';go(v,true)});
 
 function home(){
   const notes=allNotes();
@@ -302,11 +325,21 @@ function home(){
       :`<p class="empty">Nothing matches “${esc(q.trim())}”.</p>`;
   }
   app.innerHTML=`
-  <div class="handle"><span>Alok’s Second Brain</span><span id="syncEl" class="sync ${sync}">${esc(syncLabel())}</span></div>
+  <header class="hero">
+    <button class="avatar" id="avBtn" type="button" aria-label="${S.photo?'Change your photo':'Add your photo'}">${S.photo?`<img src="${S.photo}" alt="">`:'<span>A</span><i>+</i>'}</button>
+    <div class="hero-txt"><p class="hello">${greet()}, Alok</p><p class="date">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</p></div>
+  </header>
+  <input type="file" id="avIn" accept="image/*" hidden>
   <div>
     <h1><b>Write it down.</b><span class="l2">Free your mind.</span></h1>
-    <p class="sub">${total} things written down so far. Don’t trust your memory. Trust your system.</p>
+    <p class="thought">“${esc(thought())}”</p>
   </div>
+  <div class="stats">
+    <div><b>${total}</b><span>things saved</span></div>
+    <div><b>${up.length}</b><span>coming up</span></div>
+    <div><b>${S.notes.reset.items.filter(i=>i.done).length}/${S.notes.reset.items.length}</b><span>monthly reset</span></div>
+  </div>
+  <p class="syncline"><span id="syncEl" class="sync ${sync}">${esc(syncLabel())}</span></p>
   <form class="bar" id="cap"><input id="capIn" placeholder="Quick capture to Brain Dump…" autocomplete="off" aria-label="Quick capture"><button class="btn">Save</button></form>
   <div class="bar search"><span class="lbl">Search</span><input id="qIn" type="search" placeholder="Find anything in all notes" value="${esc(q)}" autocomplete="off" aria-label="Search all notes"></div>
   ${q.trim()?results:`
@@ -326,6 +359,12 @@ function home(){
   <p class="credit">Crafted by Alok</p>`;
   $('cap').onsubmit=e=>{e.preventDefault();const v=$('capIn').value.trim();if(!v)return;
     S.notes.dump.items.unshift({id:uid(),t:v,tag:'Idea'});mark('dump');toast('Saved to Brain Dump');render();$('capIn').focus()};
+  $('avBtn').onclick=()=>$('avIn').click();
+  $('avIn').onchange=()=>{const f=$('avIn').files[0];if(!f)return;const img=new Image();const u=URL.createObjectURL(f);
+    img.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const m=Math.min(img.width,img.height);
+      c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,192,192);URL.revokeObjectURL(u);
+      S.photo=c.toDataURL('image/jpeg',.82);mark('meta');render();toast('Photo updated')};
+    img.onerror=()=>toast('That file is not a picture. Choose a JPG or PNG.');img.src=u};
   $('qIn').oninput=()=>{q=$('qIn').value;render(true)};
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>go(b.dataset.open));
   if($('newF'))$('newF').onsubmit=e=>{e.preventDefault();const t=$('newIn').value.trim();if(!t)return;
@@ -385,7 +424,7 @@ function sheet(){
    ${hasEx?'<div><button class="linkbtn" id="clrEx" type="button">Remove the examples</button></div>':''}`}
    ${n.custom?`<div class="tools">${confirmDel?`<span class="note">Delete “${esc(n.title)}” and all its entries?</span><button class="btn warn sm" id="delYes" type="button">Delete note</button><button class="btn ghost sm" id="delNo" type="button">Keep it</button>`:'<button class="linkbtn" id="delNote" type="button">Delete this note</button>'}</div>`:''}
   </div>`;
-  $('back').onclick=()=>go('home');
+  $('back').onclick=()=>goBack('home');
   if(n.custom){
     if($('delNote'))$('delNote').onclick=()=>{confirmDel=true;render()};
     if($('delNo'))$('delNo').onclick=()=>{confirmDel=false;render()};
@@ -450,7 +489,7 @@ function reviewView(){
      <div class="card"><p class="eyebrow">Review finished</p><div class="txt">Brain Dump is sorted.</div>
      <p class="note">${review.moved} moved · ${review.deleted} cleared · ${total-review.moved-review.deleted} kept</p>
      <div class="choices"><button class="btn" id="doneB" type="button">Back to all notes</button></div></div></div>`;
-    $('back').onclick=()=>go('dump');$('doneB').onclick=()=>go('home');return;
+    $('back').onclick=()=>goBack('dump');$('doneB').onclick=()=>go('home');return;
   }
   const it=d.items.find(i=>i.id===review.ids[review.at]);
   app.innerHTML=`<div class="sheet">
@@ -460,7 +499,7 @@ function reviewView(){
      <div class="choices">${lists.map(x=>`<button class="btn ghost sm" data-to="${x.id}" type="button">${esc(x.title)}</button>`).join('')}</div>
      <div class="choices"><button class="btn sm" id="keepB" type="button">Keep in Brain Dump</button><button class="btn warn sm" id="clearB" type="button">Done, clear it</button></div>
    </div></div>`;
-  $('back').onclick=()=>go('dump');
+  $('back').onclick=()=>goBack('dump');
   app.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{moveItem(it.id,b.dataset.to);review.moved++;review.at++;render()});
   $('keepB').onclick=()=>{review.at++;render()};
   $('clearB').onclick=()=>{const i=d.items.indexOf(it);lastDeleted={id:'dump',item:it,at:i};d.items.splice(i,1);review.deleted++;review.at++;mark('dump');render();toast('Cleared',true)};
@@ -473,6 +512,7 @@ undoBtn.onclick=()=>{if(!lastDeleted||!S.notes[lastDeleted.id])return;S.notes[la
   lastDeleted=null;toastEl.hidden=true;render()};
 
 const startMsg=monthlyReset();saveLocal();
+history.replaceState({v:'home'},'',location.pathname);
 render();
 if(startMsg)toast(startMsg);
 /* ---------- Supabase account sync + passcode lock (website build) ---------- */
@@ -494,8 +534,8 @@ function applyRow(name,data){
   const k=name==='meta'?'meta':name.slice(2);
   if(dirty.has(k)||!data)return false;
   if(k==='meta'){
-    const cur=JSON.stringify(body('meta')),nxt=JSON.stringify({custom:data.custom||[],resetMonth:data.resetMonth||S.resetMonth,tags:data.tags||{}});
-    if(cur!==nxt){S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};return true}
+    const cur=JSON.stringify(body('meta')),nxt=JSON.stringify({custom:data.custom||[],resetMonth:data.resetMonth||S.resetMonth,tags:data.tags||{},photo:data.photo||null});
+    if(cur!==nxt){S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};S.photo=data.photo||null;return true}
     return false;
   }
   if(JSON.stringify(S.notes[k])!==JSON.stringify(data)){S.notes[k]={items:data.items||[],text:data.text||''};return true}
@@ -536,7 +576,7 @@ function unlock(){lockMode='open';lockEl.hidden=true;document.documentElement.cl
 function lock(mode,msg){lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock()}
 
 function drawLock(){
-  const brand=`<p class="lk-brand">Alok’s Second Brain</p>`;
+  const brand=`${S.photo?`<img class="lk-av" src="${S.photo}" alt="">`:''}<p class="lk-brand">Alok’s Second Brain</p>`;
   let h='';
   if(lockMode==='loading')h=`${brand}<p class="lk-sub">Opening…</p>`;
   if(lockMode==='login')h=`${brand}<h2 class="lk-h">${signupMode?'Create your account':'Sign in to sync'}</h2>
