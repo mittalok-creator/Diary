@@ -23,14 +23,15 @@
   --serif:'EB Garamond',Georgia,'Times New Roman',serif;
   --sans:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
   --grain:.35;
+  --c1:#a8472f; --c2:#a87518; --c3:#5e7a3c; --c4:#2f6f78; --c5:#4c5f99; --c6:#7d4a8f; --c7:#a5506c; --c8:#6d5c45;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--c1:#e08a6f;--c2:#dcae55;--c3:#9dbb78;--c4:#6fb3bb;--c5:#93a6dd;--c6:#c393d3;--c7:#e293ae;--c8:#c0ab8c;
   --paper:#1d1a16; --sheet:#26221c; --ink:#ebe3d4; --muted:#a49885; --line:#3c352c; --accent:#dd6a60; --ok:#9cbc7f; --star:#e0b04a; --grain:.12; color-scheme:dark}}
-:root[data-theme="dark"]{--paper:#1d1a16; --sheet:#26221c; --ink:#ebe3d4; --muted:#a49885; --line:#3c352c; --accent:#dd6a60; --ok:#9cbc7f; --star:#e0b04a; --grain:.12; color-scheme:dark}
+:root[data-theme="dark"]{--c1:#e08a6f;--c2:#dcae55;--c3:#9dbb78;--c4:#6fb3bb;--c5:#93a6dd;--c6:#c393d3;--c7:#e293ae;--c8:#c0ab8c;--paper:#1d1a16; --sheet:#26221c; --ink:#ebe3d4; --muted:#a49885; --line:#3c352c; --accent:#dd6a60; --ok:#9cbc7f; --star:#e0b04a; --grain:.12; color-scheme:dark}
 
 *{box-sizing:border-box}
 body{background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:19px;line-height:1.45;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 70px;min-height:100%}
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 110px;min-height:100%}
 body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:var(--grain);mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .4 0 0 0 0 .35 0 0 0 0 .28 0 0 0 .5 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:22px;position:relative;z-index:1}
@@ -99,6 +100,37 @@ button{cursor:pointer}
 .results mark{background:color-mix(in srgb,var(--accent) 22%,transparent);color:inherit;border-radius:2px}
 .closing{font-weight:600;font-size:21px;line-height:1.3;color:var(--ink);margin:8px 0 0;text-wrap:balance}
 .credit{text-align:center;font-family:var(--sans);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:10px 0 0}
+.fab{position:fixed;z-index:15;right:calc(max(16px,env(safe-area-inset-right,0px)) + 4px);bottom:calc(20px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;border:0;background:var(--ink);color:var(--paper);font:300 32px/1 var(--sans);box-shadow:0 6px 18px color-mix(in srgb,var(--ink) 30%,transparent);display:grid;place-items:center}
+.fab:active{transform:scale(.95)}
+.items li[data-swipe],.person li[data-swipe]{touch-action:pan-y;background:var(--paper);transition:transform .18s ease}
+li.dragging{transition:none!important}
+li.kill{color:var(--accent)}
+li.kill .body{text-decoration:line-through}
+.upcoming li{display:block}
+.upcoming button{all:unset;cursor:pointer;display:flex;justify-content:space-between;gap:12px;width:100%}
+.upcoming button:focus-visible{outline:2px solid var(--accent)}
+.rprog{display:flex;flex-direction:column;gap:6px}
+.rbar{display:block;height:8px;border-radius:8px;background:var(--line);overflow:hidden}
+.rbar>span{display:block;height:100%;border-radius:8px;background:var(--ink)}
+.sugg,.hist{border-top:1px solid var(--line);padding-top:14px}
+.hist ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.hist li{display:grid;grid-template-columns:5.5em 1fr 3em;gap:10px;align-items:center;font-size:16px}
+.hist .rbar{height:6px}
+.hist .note{text-align:right;font-variant-numeric:tabular-nums}
+.gear{position:fixed;z-index:15;left:calc(max(16px,env(safe-area-inset-left,0px)) + 4px);bottom:calc(24px + env(safe-area-inset-bottom,0px));width:48px;height:48px;border-radius:50%;border:1px solid var(--line);background:var(--sheet);color:var(--ink);display:grid;place-items:center;box-shadow:0 4px 14px color-mix(in srgb,var(--ink) 14%,transparent)}
+.set{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line);padding-top:14px}
+.set .row{display:flex;gap:8px;flex-wrap:wrap}
+.set-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.avatar.big{width:72px;height:72px}
+.set-line{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0;font-size:17px;flex-wrap:wrap}
+.set-line b{font-family:var(--sans);font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.set-line select{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-family:var(--sans);font-size:14px}
+.crop{position:fixed;inset:0;z-index:60;background:color-mix(in srgb,var(--paper) 92%,transparent);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.crop-card{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center;background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:18px}
+#cropC{width:280px;max-width:100%;aspect-ratio:1;border-radius:12px;touch-action:none;cursor:grab;background:var(--paper)}
+.zoom{display:flex;align-items:center;gap:10px;width:100%;font-family:var(--sans);font-size:13px;color:var(--muted)}
+.zoom input{flex:1;accent-color:var(--ink)}
+.crop .row{display:flex;gap:8px;justify-content:center}
 .acct{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
 .acct .row{display:flex;gap:8px;flex-wrap:wrap}
 html.locked body{overflow:hidden}
@@ -176,13 +208,16 @@ textarea.free:focus{outline:none}
 .progress{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
 .progress span{display:block;height:100%;background:var(--ink)}
 
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;border-radius:12px;padding:10px 14px;display:flex;gap:14px;align-items:center;z-index:20;max-width:calc(100% - 32px)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);font-family:var(--sans);font-size:14px;border-radius:12px;padding:10px 14px;display:flex;gap:14px;align-items:center;z-index:20;max-width:calc(100% - 32px)}
 .toast button{all:unset;cursor:pointer;font-weight:700;color:var(--paper);text-decoration:underline}
 @media (prefers-reduced-motion:no-preference){.sheet,.card{animation:in .22s ease-out}@keyframes in{from{transform:translateY(8px)}to{transform:none}}}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
+<input type="file" id="avIn" accept="image/*" hidden>
+<button class="gear" id="gear" type="button" aria-label="Settings" hidden><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg></button>
+<button class="fab" id="fab" type="button" aria-label="Add new entry" hidden>+</button>
 <div class="toast" id="toast" hidden><span id="toastMsg"></span><button id="undo" type="button">Undo</button></div>
 
 <script>
@@ -264,7 +299,7 @@ function setSync(s,msg){sync=s;syncErr=msg||'';const el=$('syncEl');if(el){el.cl
 function syncLabel(){return sync==='synced'?'Synced · all devices':sync==='offline'?'Offline · will sync later':sync==='saving'?'Saving…':sync==='error'?'Sync paused: '+syncErr:sync==='connecting'?'Connecting…':'Saved on this device only'}
 
 function monthlyReset(){
-  if(S.resetMonth!==month()){S.notes.reset.items.forEach(i=>i.done=false);S.resetMonth=month();mark('reset','meta');
+  if(S.resetMonth!==month()){const r=S.notes.reset;r.history=r.history||{};if(S.resetMonth)r.history[S.resetMonth]={done:r.items.filter(i=>i.done).length,total:r.items.length};r.items.forEach(i=>i.done=false);S.resetMonth=month();mark('reset','meta');
     return 'Checklist reset for '+new Date().toLocaleString('en-IN',{month:'long'})+'.'}
   return '';
 }
@@ -279,6 +314,8 @@ function upcoming(){
   const out=[];
   S.notes.admin.items.forEach(i=>{if(i.due&&!i.ex){const n=daysLeft(i.due);if(n<=60)out.push({t:i.t,n,w:dueTxt(i.due),soon:n<=30,go:'admin'})}});
   S.notes.people.items.forEach(i=>{if(i.bday&&!i.ex){const n=bdayIn(i.bday);if(n<=30)out.push({t:i.who+'’s birthday',n,w:n===0?'today':`${fmtMD(i.bday)} · in ${n} days`,soon:n<=7,go:'people'})}});
+  const r=S.notes.reset.items,left=r.filter(i=>!i.done).length;
+  if(r.length&&left&&+today().slice(8)<=10)out.push({t:'Monthly Reset',n:-1,w:`${left} of ${r.length} left`,soon:true,go:'reset'});
   return out.sort((a,b)=>a.n-b.n);
 }
 function tagsFor(n){const own=(S.tags[n.id]||[]).filter(t=>!n.tags.some(b=>b.toLowerCase()===t.toLowerCase()));return n.tags.concat(own)}
@@ -287,6 +324,9 @@ function tagSel(n){const cur=selTag[n.id]||'';
 function greet(){const h=new Date().getHours();return h<5?'Good night':h<12?'Good morning':h<17?'Good afternoon':h<21?'Good evening':'Good night'}
 const THOUGHTS=['If you think you’ll remember it later, write it down now.','Some moments deserve words, not photos.','Remembering small things makes people feel valued.','Not everything needs to happen this month.','A few minutes of reset makes life feel less messy.','The best ideas arrive when you least expect them.','Don’t trust your memory. Trust your system.','Less time remembering means more time living.'];
 function thought(){const d=new Date(),start=new Date(d.getFullYear(),0,0);return THOUGHTS[Math.floor((d-start)/864e5)%THOUGHTS.length]}
+function colorOf(n){return `var(--c${allNotes().findIndex(x=>x.id===n.id)%8+1})`}
+function delItem(noteId,itemId){const d=S.notes[noteId];if(!d)return;const i=d.items.findIndex(x=>x.id===itemId);if(i<0)return;lastDeleted={id:noteId,item:d.items[i],at:i};d.items.splice(i,1);mark(noteId);render();toast('Deleted',true)}
+const RESET_SUGG=[['Sort the Brain Dump','review'],['Check Life Admin dates','admin'],['Review the Someday List','someday'],['Pay credit card bills'],['Check bank statements'],['Update the budget sheet'],['Back up phone photos'],['Clear WhatsApp media'],['Clean the email inbox'],['Check car PUC and service'],['Recharge and pay utility bills'],['Plan one family outing']];
 const pinSort=arr=>arr.map((x,i)=>[x,i]).sort((a,b)=>(b[0].pin?1:0)-(a[0].pin?1:0)||a[1]-b[1]).map(p=>p[0]);
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 
@@ -300,8 +340,10 @@ function render(preserve){
   if(preserve){app.querySelectorAll('input[id],textarea[id],select[id]').forEach(e=>{if(e.type!=='checkbox')keep[e.id]=e.value});
     if(ae&&ae.id){aid=ae.id;try{sel=[ae.selectionStart,ae.selectionEnd]}catch(e){}}}
   if(view==='review'&&!review)view='dump';
-  if(view!=='home'&&!S.notes[view]&&view!=='review')view='home';
-  view==='home'?home():view==='review'?reviewView():sheet();
+  if(view!=='home'&&!S.notes[view]&&view!=='review'&&view!=='settings')view='home';
+  view==='home'?home():view==='review'?reviewView():view==='settings'?settingsView():sheet();
+  const gear=$('gear');if(gear)gear.hidden=view!=='home';
+  const fab=$('fab');if(fab)fab.hidden=!(view==='home'?!q.trim():!!$('f1'));
   if(preserve){for(const k in keep){const e=$(k);if(e&&(k!=='freeT'||k===aid))e.value=keep[k]}
     if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
 }
@@ -329,7 +371,6 @@ function home(){
     <button class="avatar" id="avBtn" type="button" aria-label="${S.photo?'Change your photo':'Add your photo'}">${S.photo?`<img src="${S.photo}" alt="">`:'<span>A</span><i>+</i>'}</button>
     <div class="hero-txt"><p class="hello">${greet()}, Alok</p><p class="date">${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</p></div>
   </header>
-  <input type="file" id="avIn" accept="image/*" hidden>
   <div>
     <h1><b>Write it down.</b><span class="l2">Free your mind.</span></h1>
     <p class="thought">“${esc(thought())}”</p>
@@ -343,7 +384,7 @@ function home(){
   <form class="bar" id="cap"><input id="capIn" placeholder="Quick capture to Brain Dump…" autocomplete="off" aria-label="Quick capture"><button class="btn">Save</button></form>
   <div class="bar search"><span class="lbl">Search</span><input id="qIn" type="search" placeholder="Find anything in all notes" value="${esc(q)}" autocomplete="off" aria-label="Search all notes"></div>
   ${q.trim()?results:`
-  ${up.length?`<section class="upcoming" aria-label="Coming up"><p class="eyebrow">Coming up</p><ul>${up.map(u=>`<li><span>${esc(u.t)}</span><span class="when ${u.soon?'soon':''}">${esc(u.w)}</span></li>`).join('')}</ul></section>`:''}
+  ${up.length?`<section class="upcoming" aria-label="Coming up"><p class="eyebrow">Coming up</p><ul>${up.map(u=>`<li><button data-open="${u.go}" type="button"><span>${esc(u.t)}</span><span class="when ${u.soon?'soon':''}">${esc(u.w)}</span></button></li>`).join('')}</ul></section>`:''}
   <div>
   <ol class="index">${notes.map((n,i)=>{
     const d=S.notes[n.id];let c;
@@ -351,20 +392,15 @@ function home(){
     else if(n.kind==='check')c=d.items.filter(x=>x.done).length+'/'+d.items.length+' done';
     else{const r=d.items.filter(x=>!x.ex).length;c=r+(r===1?' entry':' entries')}
     const al=n.id==='admin'&&up.some(u=>u.go==='admin'&&u.soon)?` <span class="alert">· ${up.filter(u=>u.go==='admin'&&u.soon).length} due within 30 days</span>`:'';
-    return `<li><button data-open="${n.id}"><span class="n">${i+1}.</span><span class="t">${esc(n.title)}</span><span class="c">${c}</span><span class="h">${esc(n.hint)}${al}</span></button></li>`}).join('')}</ol>
+    return `<li><button data-open="${n.id}"><span class="n" style="color:${colorOf(n)}">${i+1}.</span><span class="t">${esc(n.title)}</span><span class="c">${c}</span><span class="h">${esc(n.hint)}${al}</span></button></li>`}).join('')}</ol>
   <form class="newnote" id="newF"><input id="newIn" placeholder="+ Create your own note" autocomplete="off" aria-label="New note title" maxlength="60"><button class="btn sm ghost">Create</button></form>
   </div>
   <p class="closing">The less time you spend trying to remember everything, the more time you have to enjoy your life.</p>`}
-  ${acctHtml()}
   <p class="credit">Crafted by Alok</p>`;
   $('cap').onsubmit=e=>{e.preventDefault();const v=$('capIn').value.trim();if(!v)return;
     S.notes.dump.items.unshift({id:uid(),t:v,tag:'Idea'});mark('dump');toast('Saved to Brain Dump');render();$('capIn').focus()};
   $('avBtn').onclick=()=>$('avIn').click();
-  $('avIn').onchange=()=>{const f=$('avIn').files[0];if(!f)return;const img=new Image();const u=URL.createObjectURL(f);
-    img.onload=()=>{const c=document.createElement('canvas');c.width=c.height=192;const m=Math.min(img.width,img.height);
-      c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,192,192);URL.revokeObjectURL(u);
-      S.photo=c.toDataURL('image/jpeg',.82);mark('meta');render();toast('Photo updated')};
-    img.onerror=()=>toast('That file is not a picture. Choose a JPG or PNG.');img.src=u};
+  $('avIn').onchange=()=>{const f=$('avIn').files[0];$('avIn').value='';if(!f)return;const u=URL.createObjectURL(f);openCrop(u)};
   $('qIn').oninput=()=>{q=$('qIn').value;render(true)};
   app.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>go(b.dataset.open));
   if($('newF'))$('newF').onsubmit=e=>{e.preventDefault();const t=$('newIn').value.trim();if(!t)return;
@@ -389,7 +425,7 @@ function sheet(){
   }
   if(n.kind==='list'){
     form=`<input class="grow" id="f1" placeholder="${esc(n.ph)}" autocomplete="off" aria-label="Entry">${tagSel(n)}<button class="btn">Add</button>`;
-    list=d.items.length?`<ul class="items">${pinSort(d.items).filter(fil).map(i=>`<li class="${i.ex?'ex':''}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta"><span class="tag">${esc(i.tag||'')}</span>${i.date?`<span>${fmt(i.date)}</span>`:''}</div></div>${n.id==='dump'&&!i.ex?`<select class="mv" data-mv="${i.id}" aria-label="Move to note"><option value="">Move…</option>${lists.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`).join('')}</select>`:''}${delBtn(i)}</li>`).join('')}</ul>`:'';
+    list=d.items.length?`<ul class="items">${pinSort(d.items).filter(fil).map(i=>`<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta"><span class="tag">${esc(i.tag||'')}</span>${i.date?`<span>${fmt(i.date)}</span>`:''}</div></div>${n.id==='dump'&&!i.ex?`<select class="mv" data-mv="${i.id}" aria-label="Move to note"><option value="">Move…</option>${lists.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`).join('')}</select>`:''}${delBtn(i)}</li>`).join('')}</ul>`:'';
     const real=d.items.filter(i=>!i.ex).length;
     if(n.id==='dump'&&real)tools=`<button class="btn sm" id="revB" type="button">Review & sort ${real} ${real===1?'item':'items'}</button>`;
     if(n.id==='smile'&&d.items.length)tools=`<button class="btn sm" id="memB" type="button">Show a random memory</button>`;
@@ -397,23 +433,29 @@ function sheet(){
   if(n.kind==='admin'){
     form=`<input class="grow" id="f1" placeholder="${esc(n.ph)}" autocomplete="off" aria-label="What">${tagSel(n)}<label class="d">Date <input type="date" id="f2"></label><button class="btn">Add</button>`;
     const it=[...d.items].filter(fil).sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||((a.due||'9')<(b.due||'9')?-1:1));
-    list=it.length?`<ul class="items">${it.map(i=>{const dl=i.due?daysLeft(i.due):null;return `<li class="${i.ex?'ex':''}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta">${i.tag?`<span class="tag">${esc(i.tag)}</span>`:''}${i.due?`<span>${fmt(i.due)}</span><span class="due ${dl<=30?'soon':'ok'}">${dueTxt(i.due)}</span>`:'<span>no date</span>'}</div></div>${delBtn(i)}</li>`}).join('')}</ul>`:'';
+    list=it.length?`<ul class="items">${it.map(i=>{const dl=i.due?daysLeft(i.due):null;return `<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta">${i.tag?`<span class="tag">${esc(i.tag)}</span>`:''}${i.due?`<span>${fmt(i.due)}</span><span class="due ${dl<=30?'soon':'ok'}">${dueTxt(i.due)}</span>`:'<span>no date</span>'}</div></div>${delBtn(i)}</li>`}).join('')}</ul>`:'';
   }
   if(n.kind==='people'){
     form=`<input id="f1" placeholder="Name" autocomplete="off" aria-label="Name" list="names" style="flex:1 1 110px"><datalist id="names">${[...new Set(d.items.map(i=>i.who))].map(w=>`<option value="${esc(w)}">`).join('')}</datalist><input class="grow" id="f2" placeholder="Coffee, book, goal…" autocomplete="off" aria-label="Detail"><label class="d">Birthday <input type="date" id="f3"></label><button class="btn">Add</button>`;
     const g={};pinSort(d.items).forEach(i=>(g[i.who]=g[i.who]||[]).push(i));
     const names=Object.keys(g).sort((a,b)=>(g[b].some(i=>i.pin)?1:0)-(g[a].some(i=>i.pin)?1:0)||a.localeCompare(b));
-    list=names.map(w=>{const b=g[w].find(i=>i.bday);return `<div class="person"><h3>${esc(w)}${b?`<span class="meta"><span class="tag">Birthday · ${fmtMD(b.bday)} · in ${bdayIn(b.bday)} days</span></span>`:''}</h3><ul>${g[w].map(i=>`<li class="${i.ex?'ex':''}">${starBtn(i)}<span class="body">${exm(i)}${esc(i.t)}</span>${delBtn(i)}</li>`).join('')}</ul></div>`}).join('');
+    list=names.map(w=>{const b=g[w].find(i=>i.bday);return `<div class="person"><h3>${esc(w)}${b?`<span class="meta"><span class="tag">Birthday · ${fmtMD(b.bday)} · in ${bdayIn(b.bday)} days</span></span>`:''}</h3><ul>${g[w].map(i=>`<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<span class="body">${exm(i)}${esc(i.t)}</span>${delBtn(i)}</li>`).join('')}</ul></div>`}).join('');
   }
   if(n.kind==='check'){
     form=`<input class="grow" id="f1" placeholder="${esc(n.ph)}" autocomplete="off" aria-label="Item"><button class="btn">Add</button>`;
-    list=`<ul class="items">${d.items.map(i=>`<li class="${i.done?'done':''}"><input type="checkbox" class="chk" id="c${i.id}" data-chk="${i.id}" ${i.done?'checked':''}><label class="body" for="c${i.id}">${esc(i.t)}</label>${delBtn(i)}</li>`).join('')}</ul>`;
-    tools=`<button class="btn ghost sm" id="uncheck" type="button">Start fresh this month</button><span class="note">Unchecks automatically on the 1st.</span>`;
+    const dn=d.items.filter(i=>i.done).length,tt=d.items.length,pct=tt?Math.round(dn/tt*100):0;
+    const have=new Set(d.items.map(i=>i.t.toLowerCase())),sug=RESET_SUGG.filter(x=>!have.has(x[0].toLowerCase()));
+    const hist=Object.entries(d.history||{}).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,6);
+    list=`<div class="rprog"><div class="rbar"><span style="width:${pct}%;background:${colorOf(n)}"></span></div><span class="note">${dn} of ${tt} done${tt&&dn===tt?' · all clear this month':''}</span></div>
+    <ul class="items">${d.items.map(i=>`<li class="${i.done?'done':''}" data-swipe="${i.id}"><input type="checkbox" class="chk" id="c${i.id}" data-chk="${i.id}" ${i.done?'checked':''}><label class="body" for="c${i.id}">${esc(i.t)}</label>${i.link?`<button class="btn ghost sm" data-go="${i.link}" type="button">Open</button>`:''}${delBtn(i)}</li>`).join('')}</ul>
+    ${sug.length?`<div class="sugg"><p class="eyebrow">Suggestions · tap to add</p><div class="chips">${sug.map(x=>`<button class="chip" data-sug="${esc(x[0])}" type="button">+ ${esc(x[0])}</button>`).join('')}</div></div>`:''}
+    ${hist.length?`<div class="hist"><p class="eyebrow">Past months</p><ul>${hist.map(([m,h])=>`<li><span>${new Date(m+'-01T00:00').toLocaleDateString('en-IN',{month:'short',year:'numeric'})}</span><span class="rbar"><span style="width:${h.total?h.done/h.total*100:0}%"></span></span><span class="note">${h.done}/${h.total}</span></li>`).join('')}</ul></div>`:''}`;
+    tools=`<button class="btn ghost sm" id="uncheck" type="button">Start fresh this month</button><span class="note">Unchecks automatically on the 1st. Swipe left to remove an item.</span>`;
   }
   const mem=memId&&d.items.find(i=>i.id===memId);
   app.innerHTML=`<div class="sheet">
-   <div class="top"><button class="back" id="back">← All notes</button><span class="pill">${idx}/${notes.length}</span></div>
-   <div><h2>${idx}. ${esc(n.title)}</h2><p class="line">${n.line}</p>${n.id==='admin'?'<p class="note" style="margin-top:8px">For account numbers, store only the last 4 digits here.</p>':''}</div>
+   <div class="top"><button class="back" id="back">← All notes</button><span class="pill" style="background:${colorOf(n)}">${idx}/${notes.length}</span></div>
+   <div><h2><span style="color:${colorOf(n)}">${idx}.</span> ${esc(n.title)}</h2><p class="line">${n.line}</p>${n.id==='admin'?'<p class="note" style="margin-top:8px">For account numbers, store only the last 4 digits here.</p>':''}</div>
    ${n.kind==='free'?`<textarea class="free" id="freeT" aria-label="Empty note" placeholder="…">${esc(d.text)}</textarea>`:
    `${mem?`<div class="memory">${esc(mem.t)}<div class="meta"><span class="tag">${esc(mem.tag||'')}</span>${mem.date?`<span>${fmt(mem.date)}</span>`:''}</div></div>`:''}
    <form class="add" id="addF">${form}</form>
@@ -457,7 +499,9 @@ function sheet(){
     }
     mark(n.id);render();
     if(n.kind==='people'){$('f1').value=a;$('f2').focus()}else $('f1').focus()};
-  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const i=d.items.findIndex(x=>x.id===b.dataset.del);lastDeleted={id:n.id,item:d.items[i],at:i};d.items.splice(i,1);mark(n.id);render();toast('Deleted',true)});
+  app.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delItem(n.id,b.dataset.del));
+  app.querySelectorAll('[data-sug]').forEach(b=>b.onclick=()=>{const x=RESET_SUGG.find(s=>s[0]===b.dataset.sug);d.items.push({id:uid(),t:x[0],done:false,link:x[1]||null});mark(n.id);render();toast('Added to Monthly Reset')});
+  app.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const t=b.dataset.go;if(t==='review'){const r=S.notes.dump.items.filter(i=>!i.ex).map(i=>i.id);if(!r.length){toast('Brain Dump is already empty');return}review={ids:r,at:0,moved:0,deleted:0}}go(t)});
   if($('fT'))$('fT').onchange=()=>{const v=$('fT').value;
     if(v==='__new'){newTagOpen=true;render(true);$('f4').focus()}
     else{newTagOpen=false;selTag[n.id]=v;$('f4').hidden=true}};
@@ -513,12 +557,21 @@ undoBtn.onclick=()=>{if(!lastDeleted||!S.notes[lastDeleted.id])return;S.notes[la
 
 const startMsg=monthlyReset();saveLocal();
 history.replaceState({v:'home'},'',location.pathname);
+$('gear').onclick=()=>go('settings');
+$('fab').onclick=()=>{const el=$('f1')||$('capIn');if(!el)return;el.scrollIntoView({block:'center',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});el.focus({preventScroll:true})};
+let sw=null;
+document.addEventListener('pointerdown',e=>{const li=e.target.closest&&e.target.closest('[data-swipe]');if(!li||e.target.closest('button,input,select,a')||(e.pointerType==='mouse'&&e.button!==0))return;sw={li,x:e.clientX,y:e.clientY,dx:0,on:false}});
+document.addEventListener('pointermove',e=>{if(!sw)return;const dx=e.clientX-sw.x,dy=e.clientY-sw.y;
+  if(!sw.on){if(Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)){sw=null;return}if(dx<-12&&Math.abs(dx)>Math.abs(dy)){sw.on=true;sw.li.classList.add('dragging')}else return}
+  sw.dx=Math.min(0,dx);sw.li.style.transform=`translateX(${sw.dx}px)`;sw.li.classList.toggle('kill',sw.dx<-90)});
+function swEnd(){if(!sw)return;const {li,dx,on}=sw;sw=null;li.classList.remove('dragging');if(on&&dx<-90)delItem(view,li.dataset.swipe);else{li.style.transform='';li.classList.remove('kill')}}
+document.addEventListener('pointerup',swEnd);document.addEventListener('pointercancel',swEnd);
 render();
 if(startMsg)toast(startMsg);
 /* ---------- Supabase account sync + passcode lock (website build) ---------- */
 const SB_URL='https://xqbsdvwlspstejymrzhs.supabase.co';
 const SB_KEY='sb_publishable_JHOtsho3yrPdZlBe94voBQ_CcH-wAIa';
-const PINKEY='sb-pin', OWNKEY='sb-owner', LOCK_AFTER=2*60*1000;
+const PINKEY='sb-pin', OWNKEY='sb-owner', LOCK_AFTER=0;
 var sb=null, me=null, pinRec=null, lockMode='loading', lockMsg='', pinTry=0, hiddenAt=0, chan=null, signupMode=false, pinFirst='';
 try{pinRec=JSON.parse(localStorage.getItem(PINKEY))}catch(e){}
 const lockEl=document.createElement('div');lockEl.id='lock';lockEl.className='lock';document.body.appendChild(lockEl);
@@ -538,7 +591,7 @@ function applyRow(name,data){
     if(cur!==nxt){S.custom=data.custom||[];S.resetMonth=data.resetMonth||S.resetMonth;S.tags=data.tags||{};S.photo=data.photo||null;return true}
     return false;
   }
-  if(JSON.stringify(S.notes[k])!==JSON.stringify(data)){S.notes[k]={items:data.items||[],text:data.text||''};return true}
+  if(JSON.stringify(S.notes[k])!==JSON.stringify(data)){S.notes[k]=Object.assign({items:[],text:''},data);return true}
   return false;
 }
 function afterApply(changed){if(changed){ensure();const m=monthlyReset();saveLocal();render(true);if(m)toast(m)}}
@@ -660,12 +713,86 @@ document.addEventListener('click',async e=>{
     if(chan)sb.removeChannel(chan);chan=null;col=null;
     await sb.auth.signOut();me=null;pinRec=null;
     ['sb-pin',KEY,OLDKEY].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-    S=fresh();S.tags={};render();signupMode=false;lock('login');setSync('local');
+    S=fresh();S.tags={};view='home';render();signupMode=false;lock('login');setSync('local');
   }
 });
+/* ---------- settings, photo crop, app update ---------- */
+const APP_VERSION='1.7';
+function lockMin(){try{const v=localStorage.getItem('sb-lockmin');return v===null?2:+v}catch(e){return 2}}
+function settingsView(){
+  const lm=lockMin();
+  app.innerHTML=`<div class="sheet">
+   <div class="top"><button class="back" id="back">← All notes</button><span class="pill">Settings</span></div>
+   <h2>Settings</h2>
+   <section class="set"><p class="eyebrow">Profile</p>
+     <div class="set-row"><div class="avatar big">${S.photo?`<img src="${S.photo}" alt="Your photo">`:'<span>A</span>'}</div>
+       <div class="row"><button class="btn sm" id="sPick" type="button">${S.photo?'Change photo':'Add photo'}</button>${S.photo?'<button class="btn ghost sm" id="sAdjust" type="button">Adjust</button><button class="btn ghost sm" id="sRemove" type="button">Remove</button>':''}</div></div>
+   </section>
+   <section class="set"><p class="eyebrow">Security</p>
+     <label class="set-line" for="sLock"><span>Auto-lock after</span><select id="sLock">${[[0,'Immediately'],[1,'1 minute'],[2,'2 minutes'],[5,'5 minutes'],[15,'15 minutes']].map(([v,t])=>`<option value="${v}" ${v===lm?'selected':''}>${t}</option>`).join('')}</select></label>
+     <div class="row"><button class="btn ghost sm" id="lockNow" type="button">Lock now</button><button class="btn ghost sm" id="chPin" type="button">Change passcode</button></div>
+   </section>
+   <section class="set"><p class="eyebrow">Sync</p>
+     <p class="set-line"><span>Account</span><b>${me&&me.email?esc(me.email):'Not signed in'}</b></p>
+     <p class="set-line"><span>Status</span><span id="syncEl" class="sync ${sync}">${esc(syncLabel())}</span></p>
+     <div class="row"><button class="btn ghost sm" id="sSync" type="button">Sync now</button></div>
+   </section>
+   <section class="set"><p class="eyebrow">App</p>
+     <p class="set-line"><span>Version</span><b>${APP_VERSION}</b></p>
+     <div class="row"><button class="btn sm" id="sUpdate" type="button">Check for updates</button></div>
+     <p class="note">Loads the newest version of the app. Your notes stay safe.</p>
+   </section>
+   <section class="set"><div class="row"><button class="btn warn sm" id="signOut" type="button">Sign out</button></div>
+     <p class="note">Signing out removes notes from this device only. They stay in your account.</p></section>
+   <p class="credit">Crafted by Alok</p>
+  </div>`;
+  $('back').onclick=()=>goBack('home');
+  $('sPick').onclick=()=>$('avIn').click();
+  if($('sAdjust'))$('sAdjust').onclick=()=>openCrop(S.photo);
+  if($('sRemove'))$('sRemove').onclick=()=>{S.photo=null;mark('meta');render();toast('Photo removed')};
+  $('sLock').onchange=()=>{try{localStorage.setItem('sb-lockmin',$('sLock').value)}catch(e){}toast('Auto-lock updated')};
+  $('sSync').onclick=async()=>{if(!me||!col){toast('Sign in to sync.');return}await flush();await pullAll(false);toast(sync==='synced'?'Everything is synced':'Sync will finish when you are online')};
+  $('sUpdate').onclick=updateApp;
+}
+async function updateApp(){
+  const b=$('sUpdate');if(b){b.disabled=true;b.textContent='Updating…'}
+  try{if(dirty.size)await flush()}catch(e){}
+  try{
+    if('serviceWorker' in navigator){const r=await navigator.serviceWorker.getRegistration();if(r)await r.update()}
+    if(window.caches)for(const k of await caches.keys())await caches.delete(k);
+  }catch(e){}
+  location.reload();
+}
+
+/* photo crop */
+const cropEl=document.createElement('div');cropEl.className='crop';cropEl.hidden=true;
+cropEl.innerHTML=`<div class="crop-card" role="dialog" aria-label="Adjust photo"><p class="lk-brand">Adjust photo</p>
+  <canvas id="cropC" width="560" height="560"></canvas>
+  <label class="zoom" for="cropZ"><span>Zoom</span><input type="range" id="cropZ" min="1" max="4" step="0.01" value="1"></label>
+  <p class="note">Drag the photo to position it inside the circle.</p>
+  <div class="row"><button class="btn ghost" id="cropX" type="button">Cancel</button><button class="btn" id="cropOk" type="button">Save photo</button></div></div>`;
+document.body.appendChild(cropEl);
+const cc=$('cropC'),cx=cc.getContext('2d');let ci=null,cz=1,ox=0,oy=0,cd=null;
+function cBase(){return Math.max(cc.width/ci.width,cc.height/ci.height)}
+function cClamp(){const s=cBase()*cz,mx=Math.max(0,(ci.width*s-cc.width)/2),my=Math.max(0,(ci.height*s-cc.height)/2);ox=Math.max(-mx,Math.min(mx,ox));oy=Math.max(-my,Math.min(my,oy))}
+function cDraw(){const W=cc.width,s=cBase()*cz;cx.clearRect(0,0,W,W);
+  cx.drawImage(ci,W/2-ci.width*s/2+ox,W/2-ci.height*s/2+oy,ci.width*s,ci.height*s);
+  cx.save();cx.fillStyle='rgba(0,0,0,.45)';cx.beginPath();cx.rect(0,0,W,W);cx.arc(W/2,W/2,W/2-10,0,Math.PI*2,true);cx.fill('evenodd');
+  cx.strokeStyle='rgba(255,255,255,.9)';cx.lineWidth=3;cx.beginPath();cx.arc(W/2,W/2,W/2-10,0,Math.PI*2);cx.stroke();cx.restore()}
+function openCrop(src){const img=new Image();img.onload=()=>{ci=img;cz=1;ox=oy=0;$('cropZ').value=1;cDraw();cropEl.hidden=false};img.onerror=()=>toast('That file is not a picture. Choose a JPG or PNG.');img.src=src}
+$('cropZ').oninput=()=>{cz=+$('cropZ').value;cClamp();cDraw()};
+cc.addEventListener('pointerdown',e=>{cd={x:e.clientX,y:e.clientY,ox,oy};cc.setPointerCapture(e.pointerId)});
+cc.addEventListener('pointermove',e=>{if(!cd)return;const k=cc.width/cc.getBoundingClientRect().width;ox=cd.ox+(e.clientX-cd.x)*k;oy=cd.oy+(e.clientY-cd.y)*k;cClamp();cDraw()});
+cc.addEventListener('pointerup',()=>cd=null);cc.addEventListener('pointercancel',()=>cd=null);
+cc.addEventListener('wheel',e=>{e.preventDefault();cz=Math.max(1,Math.min(4,cz-e.deltaY*0.002));$('cropZ').value=cz;cClamp();cDraw()},{passive:false});
+$('cropX').onclick=()=>{cropEl.hidden=true;ci=null};
+$('cropOk').onclick=()=>{const O=256,o=document.createElement('canvas');o.width=o.height=O;const k=O/cc.width,s=cBase()*cz*k;
+  o.getContext('2d').drawImage(ci,O/2-ci.width*s/2+ox*k,O/2-ci.height*s/2+oy*k,ci.width*s,ci.height*s);
+  S.photo=o.toDataURL('image/jpeg',.85);cropEl.hidden=true;ci=null;mark('meta');render();toast('Photo saved')};
+
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){hiddenAt=Date.now();return}
-  if(me&&pinRec&&lockMode==='open'&&hiddenAt&&Date.now()-hiddenAt>LOCK_AFTER)lock('pin');
+  if(me&&pinRec&&lockMode==='open'&&hiddenAt&&Date.now()-hiddenAt>=lockMin()*60000)lock('pin');
   if(me&&col)pullAll(false);
 });
 addEventListener('online',()=>{if(me&&col){flush();pullAll(false)}});
