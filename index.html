@@ -131,6 +131,16 @@ li.kill .body{text-decoration:line-through}
 .zoom{display:flex;align-items:center;gap:10px;width:100%;font-family:var(--sans);font-size:13px;color:var(--muted)}
 .zoom input{flex:1;accent-color:var(--ink)}
 .crop .row{display:flex;gap:8px;justify-content:center}
+.x.ed{display:inline-grid;place-items:center;padding:3px 4px}
+.cal{font-family:var(--sans);font-size:12px;color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+.renew{margin-top:6px}
+li.editing{display:block!important}
+.edit{display:flex;flex-direction:column;gap:8px;background:var(--sheet);border:1px solid var(--line);border-radius:12px;padding:10px}
+.edit input,.edit select{background:transparent;border:0;border-bottom:1px solid var(--line);padding:6px 2px;font-size:17px;min-width:0;color:var(--ink)}
+.edit input:focus,.edit select:focus{outline:none;border-color:var(--accent)}
+.edit-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.edit select,.add select#fR{font-family:var(--sans);font-size:13px}
+.add select#fR{background:transparent;border:0;border-bottom:1px solid var(--line);padding:6px 2px}
 .acct{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:14px}
 .acct .row{display:flex;gap:8px;flex-wrap:wrap}
 html,body{overscroll-behavior-y:none}
@@ -352,7 +362,7 @@ function render(preserve){
 }
 let navDepth=0;
 function go(v,fromPop){if(!fromPop&&v!==view){history.pushState({v},'',v==='home'?location.pathname:'#'+v);navDepth++}
-  view=v;memId=null;confirmDel=false;filterTag=null;newTagOpen=false;render();window.scrollTo(0,0)}
+  view=v;memId=null;confirmDel=false;filterTag=null;newTagOpen=false;editId=null;render();window.scrollTo(0,0)}
 function goBack(fallback){if(navDepth>0)history.back();else go(fallback)}
 addEventListener('popstate',e=>{navDepth=Math.max(0,navDepth-1);let v=(e.state&&e.state.v)||'home';if(v==='review'&&!review)v='dump';go(v,true)});
 
@@ -411,7 +421,7 @@ function home(){
 }
 
 function starBtn(i){return `<button class="star ${i.pin?'on':''}" data-pin="${i.id}" aria-label="${i.pin?'Unpin':'Pin to top'}" aria-pressed="${!!i.pin}">${i.pin?'★':'☆'}</button>`}
-function delBtn(i){return `<button class="x" data-del="${i.id}" aria-label="Delete">×</button>`}
+function delBtn(i){return `<button class="x ed" data-edit="${i.id}" aria-label="Edit"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 20h4L19 9l-4-4L4 16v4ZM14 6l4 4"/></svg></button><button class="x" data-del="${i.id}" aria-label="Delete">×</button>`}
 function exm(i){return i.ex?'<span class="exmark">e.g.</span>':''}
 
 function sheet(){
@@ -428,21 +438,21 @@ function sheet(){
   }
   if(n.kind==='list'){
     form=`<input class="grow" id="f1" placeholder="${esc(n.ph)}" autocomplete="off" aria-label="Entry">${tagSel(n)}<button class="btn">Add</button>`;
-    list=d.items.length?`<ul class="items">${pinSort(d.items).filter(fil).map(i=>`<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta"><span class="tag">${esc(i.tag||'')}</span>${i.date?`<span>${fmt(i.date)}</span>`:''}</div></div>${n.id==='dump'&&!i.ex?`<select class="mv" data-mv="${i.id}" aria-label="Move to note"><option value="">Move…</option>${lists.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`).join('')}</select>`:''}${delBtn(i)}</li>`).join('')}</ul>`:'';
+    list=d.items.length?`<ul class="items">${pinSort(d.items).filter(fil).map(i=>i.id===editId?editForm(n,i):`<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta"><span class="tag">${esc(i.tag||'')}</span>${i.date?`<span>${fmt(i.date)}</span>`:''}</div></div>${n.id==='dump'&&!i.ex?`<select class="mv" data-mv="${i.id}" aria-label="Move to note"><option value="">Move…</option>${lists.map(x=>`<option value="${x.id}">${esc(x.title)}</option>`).join('')}</select>`:''}${delBtn(i)}</li>`).join('')}</ul>`:'';
     const real=d.items.filter(i=>!i.ex).length;
     if(n.id==='dump'&&real)tools=`<button class="btn sm" id="revB" type="button">Review & sort ${real} ${real===1?'item':'items'}</button>`;
     if(n.id==='smile'&&d.items.length)tools=`<button class="btn sm" id="memB" type="button">Show a random memory</button>`;
   }
   if(n.kind==='admin'){
-    form=`<input class="grow" id="f1" placeholder="${esc(n.ph)}" autocomplete="off" aria-label="What">${tagSel(n)}<label class="d">Date <input type="date" id="f2"></label><button class="btn">Add</button>`;
+    form=`<input class="grow" id="f1" placeholder="${esc(n.ph)}" autocomplete="off" aria-label="What">${tagSel(n)}<label class="d">Date <input type="date" id="f2"></label><select id="fR" aria-label="Repeats"><option value="">One time</option><option value="m">Every month</option><option value="y">Every year</option></select><button class="btn">Add</button>`;
     const it=[...d.items].filter(fil).sort((a,b)=>(b.pin?1:0)-(a.pin?1:0)||((a.due||'9')<(b.due||'9')?-1:1));
-    list=it.length?`<ul class="items">${it.map(i=>{const dl=i.due?daysLeft(i.due):null;return `<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta">${i.tag?`<span class="tag">${esc(i.tag)}</span>`:''}${i.due?`<span>${fmt(i.due)}</span><span class="due ${dl<=30?'soon':'ok'}">${dueTxt(i.due)}</span>`:'<span>no date</span>'}</div></div>${delBtn(i)}</li>`}).join('')}</ul>`:'';
+    list=it.length?`<ul class="items">${it.map(i=>{if(i.id===editId)return editForm(n,i);const dl=i.due?daysLeft(i.due):null;return `<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<div class="body">${exm(i)}${esc(i.t)}<div class="meta">${i.tag?`<span class="tag">${esc(i.tag)}</span>`:''}${i.due?`<span>${fmt(i.due)}</span><span class="due ${dl<=30?'soon':'ok'}">${dueTxt(i.due)}</span>${i.rep?`<span class="tag">${REP[i.rep]}</span>`:''}${calLink(i.t,i.due,i.rep)}`:'<span>no date</span>'}</div>${i.rep&&i.due&&dl<=30&&!i.ex?`<button class="btn ghost sm renew" data-renew="${i.id}" type="button">Renewed · set next date</button>`:''}</div>${delBtn(i)}</li>`}).join('')}</ul>`:'';
   }
   if(n.kind==='people'){
     form=`<input id="f1" placeholder="Name" autocomplete="off" aria-label="Name" list="names" style="flex:1 1 110px"><datalist id="names">${[...new Set(d.items.map(i=>i.who))].map(w=>`<option value="${esc(w)}">`).join('')}</datalist><input class="grow" id="f2" placeholder="Coffee, book, goal…" autocomplete="off" aria-label="Detail"><label class="d">Birthday <input type="date" id="f3"></label><button class="btn">Add</button>`;
     const g={};pinSort(d.items).forEach(i=>(g[i.who]=g[i.who]||[]).push(i));
     const names=Object.keys(g).sort((a,b)=>(g[b].some(i=>i.pin)?1:0)-(g[a].some(i=>i.pin)?1:0)||a.localeCompare(b));
-    list=names.map(w=>{const b=g[w].find(i=>i.bday);return `<div class="person"><h3>${esc(w)}${b?`<span class="meta"><span class="tag">Birthday · ${fmtMD(b.bday)} · in ${bdayIn(b.bday)} days</span></span>`:''}</h3><ul>${g[w].map(i=>`<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<span class="body">${exm(i)}${esc(i.t)}</span>${delBtn(i)}</li>`).join('')}</ul></div>`}).join('');
+    list=names.map(w=>{const b=g[w].find(i=>i.bday);return `<div class="person"><h3>${esc(w)}${b?`<span class="meta"><span class="tag">Birthday · ${fmtMD(b.bday)} · in ${bdayIn(b.bday)} days</span>${calLink(w+'’s birthday',nextBday(b.bday),'y')}</span>`:''}</h3><ul>${g[w].map(i=>i.id===editId?editForm(n,i):`<li class="${i.ex?'ex':''}" data-swipe="${i.id}">${starBtn(i)}<span class="body">${exm(i)}${esc(i.t)}</span>${delBtn(i)}</li>`).join('')}</ul></div>`}).join('');
   }
   if(n.kind==='check'){
     form=`<input class="grow" id="f1" placeholder="${esc(n.ph)}" autocomplete="off" aria-label="Item"><button class="btn">Add</button>`;
@@ -450,7 +460,7 @@ function sheet(){
     const have=new Set(d.items.map(i=>i.t.toLowerCase())),sug=RESET_SUGG.filter(x=>!have.has(x[0].toLowerCase()));
     const hist=Object.entries(d.history||{}).sort((a,b)=>a[0]<b[0]?1:-1).slice(0,6);
     list=`<div class="rprog"><div class="rbar"><span style="width:${pct}%;background:${colorOf(n)}"></span></div><span class="note">${dn} of ${tt} done${tt&&dn===tt?' · all clear this month':''}</span></div>
-    <ul class="items">${d.items.map(i=>`<li class="${i.done?'done':''}" data-swipe="${i.id}"><input type="checkbox" class="chk" id="c${i.id}" data-chk="${i.id}" ${i.done?'checked':''}><label class="body" for="c${i.id}">${esc(i.t)}</label>${i.link?`<button class="btn ghost sm" data-go="${i.link}" type="button">Open</button>`:''}${delBtn(i)}</li>`).join('')}</ul>
+    <ul class="items">${d.items.map(i=>i.id===editId?editForm(n,i):`<li class="${i.done?'done':''}" data-swipe="${i.id}"><input type="checkbox" class="chk" id="c${i.id}" data-chk="${i.id}" ${i.done?'checked':''}><label class="body" for="c${i.id}">${esc(i.t)}</label>${i.link?`<button class="btn ghost sm" data-go="${i.link}" type="button">Open</button>`:''}${delBtn(i)}</li>`).join('')}</ul>
     ${sug.length?`<div class="sugg"><p class="eyebrow">Suggestions · tap to add</p><div class="chips">${sug.map(x=>`<button class="chip" data-sug="${esc(x[0])}" type="button">+ ${esc(x[0])}</button>`).join('')}</div></div>`:''}
     ${hist.length?`<div class="hist"><p class="eyebrow">Past months</p><ul>${hist.map(([m,h])=>`<li><span>${new Date(m+'-01T00:00').toLocaleDateString('en-IN',{month:'short',year:'numeric'})}</span><span class="rbar"><span style="width:${h.total?h.done/h.total*100:0}%"></span></span><span class="note">${h.done}/${h.total}</span></li>`).join('')}</ul></div>`:''}`;
     tools=`<button class="btn ghost sm" id="uncheck" type="button">Start fresh this month</button><span class="note">Unchecks automatically on the 1st. Swipe left to remove an item.</span>`;
@@ -496,7 +506,7 @@ function sheet(){
       d.items.push({id:uid(),who:a,t:b||'Birthday',bday:bd});
     } else {
       if(!a)return;
-      if(n.kind==='admin')d.items.push({id:uid(),t:a,due:b||null,tag});
+      if(n.kind==='admin')d.items.push({id:uid(),t:a,due:b||null,tag,rep:b?($('fR').value||null):null});
       else if(n.kind==='check')d.items.push({id:uid(),t:a,done:false});
       else d.items.unshift({id:uid(),t:a,tag,date:n.dated?today():null});
     }
@@ -511,6 +521,7 @@ function sheet(){
   app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filterTag=b.dataset.f||null;render()});
   app.querySelectorAll('[data-rmtag]').forEach(b=>b.onclick=()=>{const t=b.dataset.rmtag;
     S.tags[n.id]=(S.tags[n.id]||[]).filter(x=>x!==t);if(selTag[n.id]===t)delete selTag[n.id];mark('meta');render();toast('Type “'+t+'” removed. Existing entries keep it.')});
+  bindEdit(n,d);
   app.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>{const it=d.items.find(x=>x.id===b.dataset.pin);it.pin=!it.pin;mark(n.id);render()});
   app.querySelectorAll('[data-chk]').forEach(c=>c.onchange=()=>{d.items.find(x=>x.id===c.dataset.chk).done=c.checked;mark(n.id);render()});
   app.querySelectorAll('[data-mv]').forEach(s=>s.onchange=()=>{if(!s.value)return;moveItem(s.dataset.mv,s.value);render()});
@@ -628,7 +639,7 @@ async function savePin(pin){
   try{localStorage.setItem(PINKEY,JSON.stringify(pinRec))}catch(e){}
   try{await col.doc('settings').set(pinRec)}catch(e){toast('Passcode saved on this device. It will sync when online.')}
 }
-function unlock(){touchActive();lockMode='open';lockEl.hidden=true;document.documentElement.classList.remove('locked');render()}
+function unlock(){touchActive();lockMode='open';lockEl.hidden=true;document.documentElement.classList.remove('locked');render();setTimeout(maybeNotify,800)}
 function lock(mode,msg){if(mode==='pin'||mode==='forgot'||mode==='login')try{localStorage.setItem('sb-active','0')}catch(e){}
   const auto=mode==='pin'&&lockMode!=='pin';lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock();if(auto&&bioOn())setTimeout(()=>bioUnlock(true),250)}
 
@@ -723,7 +734,7 @@ document.addEventListener('click',async e=>{
   }
 });
 /* ---------- settings, photo crop, app update ---------- */
-const APP_VERSION='1.8';
+const APP_VERSION='1.9';
 function lockMin(){try{const v=localStorage.getItem('sb-lockmin');return v===null?2:+v}catch(e){return 2}}
 function settingsView(){
   const lm=lockMin();
@@ -749,6 +760,18 @@ function settingsView(){
      <div class="row"><button class="btn sm" id="sUpdate" type="button">Check for updates</button></div>
      <p class="note">Loads the newest version of the app. Your notes stay safe.</p>
    </section>
+   <section class="set"><p class="eyebrow">Reminders</p>
+     <p class="set-line"><span>Daily notification for dates and birthdays</span><button class="btn sm ${notifyOn()?'ghost':''}" id="sNotify" type="button">${notifyOn()?'Turn off':'Turn on'}</button></p>
+     <p class="note">Shows once a day when you open the app: renewals due within 7 days, birthdays today or tomorrow.</p>
+     <div class="row"><button class="btn ghost sm" id="sIcs" type="button">Add all dates to my calendar</button></div>
+     <p class="note">Downloads a calendar file with every Life Admin date and birthday, with alerts 7 days and 1 day before. Open it and choose Google Calendar. These alerts work even when the app is closed.</p>
+   </section>
+   <section class="set"><p class="eyebrow">Backup</p>
+     <p class="set-line"><span>Last backup</span><b>${(()=>{try{const v=localStorage.getItem('sb-lastbackup');return v?fmt(v):'Never'}catch(e){return 'Never'}})()}</b></p>
+     <div class="row"><button class="btn sm" id="sXlsx" type="button">Download Excel</button><button class="btn ghost sm" id="sJson" type="button">Download backup file</button><button class="btn ghost sm" id="sRest" type="button">Restore</button></div>
+     ${restoreData?`<div class="row"><span class="note">This replaces all current notes with the backup.</span><button class="btn warn sm" id="sRestYes" type="button">Restore backup</button><button class="btn ghost sm" id="sRestNo" type="button">Cancel</button></div>`:''}
+     <p class="note">Excel is for reading. The backup file can be restored here.</p>
+   </section>
    <section class="set"><div class="row"><button class="btn warn sm" id="signOut" type="button">Sign out</button></div>
      <p class="note">Signing out removes notes from this device only. They stay in your account.</p></section>
    <p class="credit">Crafted by Alok</p>
@@ -761,6 +784,9 @@ function settingsView(){
   $('sLock').onchange=()=>{try{localStorage.setItem('sb-lockmin',$('sLock').value)}catch(e){}toast('Auto-lock updated')};
   $('sSync').onclick=async()=>{if(!me||!col){toast('Sign in to sync.');return}await flush();await pullAll(false);toast(sync==='synced'?'Everything is synced':'Sync will finish when you are online')};
   $('sUpdate').onclick=updateApp;
+  $('sNotify').onclick=toggleNotify;$('sIcs').onclick=icsAll;
+  $('sXlsx').onclick=backupXLSX;$('sJson').onclick=backupJSON;$('sRest').onclick=restorePick;
+  if($('sRestYes'))$('sRestYes').onclick=restoreNow;if($('sRestNo'))$('sRestNo').onclick=()=>{restoreData=null;render()};
 }
 async function updateApp(){
   const b=$('sUpdate');if(b){b.disabled=true;b.textContent='Updating…'}
@@ -801,6 +827,103 @@ async function bioUnlock(silent){
   }catch(e){if(!silent){const er=$('lkErr');if(er)er.textContent='Fingerprint did not work. Use your passcode.'}}
   finally{bioBusy=false}
 }
+
+/* ---------- edit, repeat dates, reminders, backup ---------- */
+var editId=null;
+const REP={m:'Every month',y:'Every year'};
+const lfmt=t=>t.getFullYear()+'-'+String(t.getMonth()+1).padStart(2,'0')+'-'+String(t.getDate()).padStart(2,'0');
+function addMonths(d,n){const [y,m,dd]=d.split('-').map(Number);const t=new Date(y,m-1+n,1,12);const last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();t.setDate(Math.min(dd,last));return lfmt(t)}
+function nextDue(i){let d=addMonths(i.due,i.rep==='y'?12:1);while(daysLeft(d)<0)d=addMonths(d,i.rep==='y'?12:1);return d}
+function nextBday(md){const y=+today().slice(0,4);let d=y+'-'+md;if(daysLeft(d)<0)d=(y+1)+'-'+md;return d}
+const ymd=d=>d.replace(/-/g,'');
+function plusDay(d){const t=new Date(d+'T12:00');t.setDate(t.getDate()+1);return lfmt(t)}
+function gcal(title,date,rep){const p=new URLSearchParams({action:'TEMPLATE',text:title,dates:ymd(date)+'/'+ymd(plusDay(date)),details:'Reminder from Alok’s Second Brain'});if(rep)p.set('recur','RRULE:FREQ='+(rep==='y'?'YEARLY':'MONTHLY'));return 'https://calendar.google.com/calendar/render?'+p}
+function calLink(title,date,rep){return `<a class="cal" href="${esc(gcal(title,date,rep))}" target="_blank" rel="noopener">+ Calendar</a>`}
+
+function editForm(n,i){
+  const tags=n.tags?tagsFor(n):null;if(tags&&i.tag&&!tags.includes(i.tag))tags.push(i.tag);
+  return `<li class="editing"><form class="edit" data-editf="${i.id}">
+   ${n.kind==='people'?`<input id="e_w" value="${esc(i.who)}" aria-label="Name" placeholder="Name" required>`:''}
+   <input id="e_t" value="${esc(i.t)}" aria-label="Text" placeholder="Text" ${n.kind==='people'?'':'required'}>
+   <div class="edit-row">
+   ${tags?`<select id="e_g" aria-label="Type">${tags.map(t=>`<option ${t===i.tag?'selected':''}>${esc(t)}</option>`).join('')}</select>`:''}
+   ${n.kind==='admin'?`<label class="d">Date <input type="date" id="e_d" value="${i.due||''}"></label><select id="e_r" aria-label="Repeats"><option value="">One time</option><option value="m" ${i.rep==='m'?'selected':''}>Every month</option><option value="y" ${i.rep==='y'?'selected':''}>Every year</option></select>`:''}
+   ${n.kind==='list'&&n.dated?`<label class="d">Date <input type="date" id="e_d" value="${i.date||''}"></label>`:''}
+   ${n.kind==='people'?`<label class="d">Birthday <input type="date" id="e_b" value="${i.bday?'2000-'+i.bday:''}"></label>`:''}
+   </div>
+   <div class="edit-row"><button class="btn sm">Save</button><button class="btn ghost sm" type="button" data-ecancel>Cancel</button></div>
+  </form></li>`;
+}
+function bindEdit(n,d){
+  app.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{editId=b.dataset.edit;render();const t=$('e_t');if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}});
+  app.querySelectorAll('[data-ecancel]').forEach(b=>b.onclick=()=>{editId=null;render()});
+  app.querySelectorAll('[data-editf]').forEach(f=>f.onsubmit=e=>{e.preventDefault();const i=d.items.find(x=>x.id===f.dataset.editf);if(!i)return;
+    const t=$('e_t').value.trim();
+    if(n.kind==='people'){const w=$('e_w').value.trim();if(!w)return $('e_w').focus();i.who=w;i.t=t||i.t;const b=$('e_b').value;
+      if(b){d.items.forEach(x=>{if(x.who===w&&x!==i)x.bday=null});i.bday=b.slice(5)}else i.bday=null}
+    else{if(!t)return $('e_t').focus();i.t=t}
+    if($('e_g'))i.tag=$('e_g').value;
+    if(n.kind==='admin'){i.due=$('e_d').value||null;i.rep=i.due?($('e_r').value||null):null}
+    if(n.kind==='list'&&n.dated&&$('e_d'))i.date=$('e_d').value||i.date;
+    delete i.ex;editId=null;mark(n.id);render();toast('Saved')});
+  app.querySelectorAll('[data-renew]').forEach(b=>b.onclick=()=>{const i=d.items.find(x=>x.id===b.dataset.renew);if(!i||!i.due||!i.rep)return;i.due=nextDue(i);mark(n.id);render();toast('Next date: '+fmt(i.due))});
+}
+
+/* reminders */
+function notifyOn(){try{return localStorage.getItem('sb-notify')==='1'&&'Notification' in window&&Notification.permission==='granted'}catch(e){return false}}
+async function maybeNotify(){
+  if(!notifyOn())return;
+  try{if(localStorage.getItem('sb-notified')===today())return}catch(e){}
+  const lines=[];
+  S.notes.admin.items.forEach(i=>{if(i.due&&!i.ex){const n=daysLeft(i.due);if(n<=7)lines.push(`${i.t}: ${dueTxt(i.due)}`)}});
+  S.notes.people.items.forEach(i=>{if(i.bday&&!i.ex){const n=bdayIn(i.bday);if(n<=1)lines.push(`${i.who}’s birthday ${n===0?'today':'tomorrow'}`)}});
+  const r=S.notes.reset.items,left=r.filter(i=>!i.done).length;if(left&&+today().slice(8)<=3)lines.push(`Monthly Reset: ${left} items left`);
+  if(!lines.length)return;
+  try{localStorage.setItem('sb-notified',today())}catch(e){}
+  const opt={body:lines.slice(0,6).join('\n'),icon:'icon-192.png',badge:'icon-192.png',tag:'daily-'+today()};
+  try{const reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.showNotification('Coming up · Alok’s Second Brain',opt);else new Notification('Coming up · Alok’s Second Brain',opt)}catch(e){}
+}
+async function toggleNotify(){
+  if(notifyOn()){try{localStorage.setItem('sb-notify','0')}catch(e){}render();toast('Reminder notifications turned off');return}
+  if(!('Notification' in window)){toast('This browser does not support notifications. Use the calendar option.');return}
+  const p=await Notification.requestPermission();
+  if(p!=='granted'){toast('Notifications are blocked. Allow them in the browser’s site settings.');return}
+  try{localStorage.setItem('sb-notify','1');localStorage.removeItem('sb-notified')}catch(e){}
+  render();toast('Reminder notifications are on');maybeNotify();
+}
+function icsAll(){
+  const ev=[],stamp=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',escI=s=>String(s).replace(/[\\,;]/g,m=>'\\'+m).replace(/\n/g,'\\n');
+  const add=(uidv,title,date,rule)=>ev.push(['BEGIN:VEVENT','UID:'+uidv+'@second-brain','DTSTAMP:'+stamp,'DTSTART;VALUE=DATE:'+ymd(date),'DTEND;VALUE=DATE:'+ymd(plusDay(date)),'SUMMARY:'+escI(title),...(rule?['RRULE:FREQ='+rule]:[]),
+    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+escI(title),'TRIGGER:-P7D','END:VALARM','BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+escI(title),'TRIGGER:-PT15H','END:VALARM','END:VEVENT'].join('\r\n'));
+  S.notes.admin.items.forEach(i=>{if(i.due&&!i.ex)add(i.id,i.t,i.due,i.rep==='y'?'YEARLY':i.rep==='m'?'MONTHLY':null)});
+  S.notes.people.items.forEach(i=>{if(i.bday&&!i.ex)add(i.id,i.who+'’s birthday',nextBday(i.bday),'YEARLY')});
+  if(!ev.length){toast('No dates yet. Add Life Admin dates or birthdays first.');return}
+  saveFile(['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Alok//Second Brain//EN','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n'),'second-brain-dates.ics','text/calendar');
+  toast(ev.length+' dates exported. Open the file to add them to your calendar.');
+}
+
+/* backup */
+function saveFile(data,name,type){const u=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
+function backupJSON(){saveFile(JSON.stringify({app:'second-brain',version:APP_VERSION,exported:new Date().toISOString(),data:S},null,1),'second-brain-backup-'+today()+'.json','application/json');try{localStorage.setItem('sb-lastbackup',today())}catch(e){}toast('Backup downloaded')}
+function loadXLSX(){return window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>no(new Error('load'));document.head.appendChild(s)})}
+async function backupXLSX(){
+  try{await loadXLSX()}catch(e){toast('Could not load the Excel tool. Check the internet and try again.');return}
+  const wb=XLSX.utils.book_new(),used=new Set();
+  allNotes().forEach(n=>{const d=S.notes[n.id];let rows;
+    if(n.kind==='free')rows=[{Text:d.text||''}];
+    else if(n.kind==='check')rows=d.items.map(i=>({Item:i.t,Done:i.done?'Yes':'No'}));
+    else if(n.kind==='admin')rows=d.items.map(i=>({What:i.t,Type:i.tag||'',Date:i.due||'','Days left':i.due?daysLeft(i.due):'',Repeats:REP[i.rep]||'One time',Pinned:i.pin?'Yes':''}));
+    else if(n.kind==='people')rows=d.items.map(i=>({Name:i.who,Detail:i.t,Birthday:i.bday?fmtMD(i.bday):''}));
+    else rows=d.items.map(i=>({Entry:i.t,Type:i.tag||'',Date:i.date||'',Pinned:i.pin?'Yes':''}));
+    let nm=n.title.replace(/[:\\/?*\[\]]/g,'').slice(0,31)||'Note',k=2;while(used.has(nm))nm=nm.slice(0,28)+' '+k++;used.add(nm);
+    const ws=XLSX.utils.json_to_sheet(rows.length?rows:[{Note:'(empty)'}]);
+    ws['!cols']=Object.keys(rows[0]||{Note:1}).map(h=>({wch:Math.min(60,Math.max(h.length+2,...rows.map(r=>String(r[h]??'').length+2)))}));
+    XLSX.utils.book_append_sheet(wb,ws,nm)});
+  XLSX.writeFile(wb,'second-brain-backup-'+today()+'.xlsx');try{localStorage.setItem('sb-lastbackup',today())}catch(e){}toast('Excel backup downloaded');
+}
+var restoreData=null;
+function restorePick(){const f=document.createElement('input');f.type='file';f.accept='.json,application/json';f.onchange=async()=>{try{const j=JSON.parse(await f.files[0].text());const d=j.data||j;if(!d.notes)throw 0;restoreData=d;render();toast('Backup loaded. Confirm to restore.')}catch(e){toast('That file is not a Second Brain backup.')}};f.click()}
+function restoreNow(){if(!restoreData)return;S=restoreData;S.custom=S.custom||[];S.tags=S.tags||{};restoreData=null;ensure();saveLocal();mark('meta',...Object.keys(S.notes));render();toast('Backup restored')}
 
 /* photo crop */
 const cropEl=document.createElement('div');cropEl.className='crop';cropEl.hidden=true;
