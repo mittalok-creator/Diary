@@ -283,13 +283,16 @@ button.pill{cursor:pointer}
 .chip-t{display:flex;flex-direction:column;line-height:1.15}
 .chip-t b{font-size:14px;font-weight:600}.chip-t small{font-size:11px;color:var(--muted)}
 .wxi{display:inline-grid;place-items:center}
-.streak{cursor:pointer;border-radius:0 14px 14px 0;color:var(--ink)}
-.streak .flame{color:#d9762b;display:inline-grid}
-.streak .sdot{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);white-space:nowrap}
-.streak.done .sdot{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
-.streak:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
-.tb-c>.streak:only-child{border-radius:14px}
-.tb-c>.wxSlot[hidden]+.streak{border-left:0}
+.nextev{border-radius:0 14px 14px 0;color:var(--ink);max-width:420px;min-width:0}
+button.nextev{cursor:pointer}
+button.nextev:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
+.nextev .chip-t{min-width:0}
+.nextev .chip-t b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nextev .ic{width:26px;height:26px;flex:0 0 auto}.nextev .ic svg{width:22px;height:22px}
+.nextev .sdot{font-size:11px;font-weight:600;border-radius:999px;padding:2px 8px;background:color-mix(in srgb,var(--ink) 7%,transparent);color:var(--muted);white-space:nowrap;flex:0 0 auto}
+.nextev .sdot.now{background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent)}
+.tb-c>.nextev:only-child{border-radius:14px}
+.tb-c>.wxSlot[hidden]+.nextev{border-left:0}
 .moodBtn:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
 .mnone{color:var(--muted);display:inline-grid}
 .icons{display:flex;gap:4px}
@@ -385,7 +388,8 @@ html.hand .dtxt{font-family:'Kalam','Segoe Print','Bradley Hand',cursive;font-si
 .dfoot{align-items:center}
 .dfoot .fr{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-left:auto}
 .dfoot #dcount{font-variant-numeric:tabular-nums}
-.dfoot .btn{padding:9px 18px}
+.saved{display:inline-flex;align-items:center;gap:6px;font-family:var(--sans);font-size:12px;color:var(--muted);white-space:nowrap}
+.sv{width:7px;height:7px;border-radius:50%;background:var(--ok)}.sv-busy{background:#c9a24a}.sv-off{background:var(--accent)}
 .shead{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .yearnav{display:flex;align-items:center;gap:6px;font-family:var(--sans);font-size:15px}
 .chart{width:100%;height:auto;display:block}
@@ -482,7 +486,7 @@ function dLong(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'long',da
 function dShort(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.1';
+const APP_VERSION='4.2';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
@@ -545,7 +549,7 @@ async function flush(){
   }
   writing=false;setSync('synced');
 }
-function setSync(s,msg){sync=s;syncErr=msg||'';if(s==='synced'){lastSyncAt=Date.now();const ls=$('lastSync');if(ls)ls.textContent='Last '+new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}document.querySelectorAll('.syncEl').forEach(el=>{el.className='sync syncEl '+s;el.textContent=syncLabel()})}
+function setSync(s,msg){sync=s;syncErr=msg||'';setTimeout(()=>{const sa=$('savedAt');if(sa)sa.innerHTML=savedLabel()},0);if(s==='synced'){lastSyncAt=Date.now();const ls=$('lastSync');if(ls)ls.textContent='Last '+new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}document.querySelectorAll('.syncEl').forEach(el=>{el.className='sync syncEl '+s;el.textContent=syncLabel()})}
 function syncLabel(){return sync==='synced'?'Synced':sync==='saving'?'Saving…':sync==='offline'?'Offline · will sync':sync==='error'?'Sync paused':sync==='connecting'?'Connecting…':'This device only'}
 
 /* ================= Supabase account, passcode, fingerprint ================= */
@@ -796,7 +800,7 @@ async function gSync(interactive){
     if(hol.length)G.cals.push({id:'holidays',name:'Holidays in India'});
     G.events=evs.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:(a.tm?1:0)-(b.tm?1:0)||a.tm.localeCompare(b.tm));
     G.connected=true;G.v2=1;G.fetchedAt=Date.now();mark('gcal');saveNow();
-    if(interactive)toast(`Calendar updated: ${evs.length} events`);
+    refreshNext();if(interactive)toast(`Calendar updated: ${evs.length} events`);
   }catch(e){
     if(e.message==='expired'&&interactive){gBusy=false;return gSync(true)}
     gErr=e.message==='expired'?'':e.message;
@@ -937,9 +941,11 @@ function setField(d,f,v){const p=dOwn(d);if(v===null||v===undefined||v===''||(Ar
 
 /* ---------- weather (Open-Meteo, Hathras) ---------- */
 var WX=null;try{WX=JSON.parse(localStorage.getItem('alok-wx'))}catch(e){}
-const WXDEF={lat:27.5964,lon:78.0505,name:'Hathras, UP',def:1};
-var WXLOC=null;try{WXLOC=JSON.parse(localStorage.getItem('alok-wxloc'))}catch(e){}
-function getPos(){return new Promise(ok=>{if(!navigator.geolocation)return ok(null);try{navigator.geolocation.getCurrentPosition(p=>ok({lat:+p.coords.latitude.toFixed(3),lon:+p.coords.longitude.toFixed(3)}),()=>ok(null),{timeout:12000,maximumAge:30*60e3,enableHighAccuracy:false})}catch(e){ok(null)}})}
+var WXHOME=(()=>{try{return JSON.parse(localStorage.getItem('alok-wxhome'))}catch(e){return null}})()||{lat:27.5964,lon:78.0505,name:'Hathras, UP'};
+var WXDEF=Object.assign({def:1},WXHOME);
+const WX_PRECISE=5000;
+var WXLOC=null,wxSrc='';try{WXLOC=JSON.parse(localStorage.getItem('alok-wxloc'))}catch(e){}
+function getPos(){return new Promise(ok=>{if(!navigator.geolocation)return ok(null);try{navigator.geolocation.getCurrentPosition(p=>ok({lat:+p.coords.latitude.toFixed(3),lon:+p.coords.longitude.toFixed(3),acc:p.coords.accuracy}),()=>ok(null),{timeout:12000,maximumAge:30*60e3,enableHighAccuracy:false})}catch(e){ok(null)}})}
 async function placeName(lat,lon){
   try{const r=await withTimeout(fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`),8000);if(!r.ok)throw 0;const j=await r.json();
     const city=j.city||j.locality||'',st=(j.principalSubdivisionCode||'').split('-')[1]||j.principalSubdivision||'';return [city,st].filter(Boolean).join(', ')||'Your location'}catch(e){return 'Your location'}
@@ -948,11 +954,18 @@ async function wxLocation(){
   if(WXLOC&&!WXLOC.def&&Date.now()-WXLOC.at<30*60e3)return WXLOC;
   if(lockMode!=='open')return WXLOC||WXDEF;
   const pos=await getPos();
-  if(!pos)return WXLOC&&!WXLOC.def?WXLOC:WXDEF;
+  if(!pos||!(pos.acc<=WX_PRECISE))return WXDEF;
   const moved=!WXLOC||Math.abs(WXLOC.lat-pos.lat)>.02||Math.abs(WXLOC.lon-pos.lon)>.02;
   WXLOC={lat:pos.lat,lon:pos.lon,name:moved||!WXLOC.name?await placeName(pos.lat,pos.lon):WXLOC.name,at:Date.now()};
   try{localStorage.setItem('alok-wxloc',JSON.stringify(WXLOC))}catch(e){}return WXLOC;
 }
+const STATE={'Uttar Pradesh':'UP','Madhya Pradesh':'MP','Maharashtra':'MH','Delhi':'DL','National Capital Territory of Delhi':'DL','Rajasthan':'RJ','Haryana':'HR','Punjab':'PB','Gujarat':'GJ','Bihar':'BR','Uttarakhand':'UK','Karnataka':'KA','Tamil Nadu':'TN','West Bengal':'WB','Telangana':'TS','Kerala':'KL','Andhra Pradesh':'AP','Himachal Pradesh':'HP','Jammu and Kashmir':'JK','Odisha':'OD','Assam':'AS','Chhattisgarh':'CG','Jharkhand':'JH','Goa':'GA'};
+async function citySearch(q){
+  const r=await withTimeout(fetch('https://geocoding-api.open-meteo.com/v1/search?count=6&language=en&format=json&name='+encodeURIComponent(q)),8000);
+  if(!r.ok)throw new Error('The city search is not available right now.');const j=await r.json();
+  return (j.results||[]).map(c=>({lat:+c.latitude.toFixed(3),lon:+c.longitude.toFixed(3),name:[c.name,STATE[c.admin1]||c.admin1].filter(Boolean).join(', '),country:c.country||''}));
+}
+function setHome(c){WXHOME={lat:c.lat,lon:c.lon,name:c.name};WXDEF=Object.assign({def:1},WXHOME);try{localStorage.setItem('alok-wxhome',JSON.stringify(WXHOME))}catch(e){}WX=null;loadWeather(true)}
 function wxInfo(code,day){
   if(code===0)return [day?'Clear sky':'Clear night',day?'sun':'moonc'];
   if(code<=2)return ['Partly cloudy',day?'psun':'cloud'];if(code===3)return ['Overcast','cloud'];
@@ -973,7 +986,7 @@ async function loadWeather(force){
   try{
     const r=await withTimeout(fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,is_day&timezone=auto`),10000);
     if(!r.ok)throw 0;const j=await r.json();const c=j.current;if(!c||typeof c.temperature_2m!=='number')throw 0;
-    WX={t:Math.round(c.temperature_2m),code:c.weather_code,day:c.is_day!==0,at:Date.now(),name:loc.name,def:!!loc.def};try{localStorage.setItem('alok-wx',JSON.stringify(WX))}catch(e){}
+    WX={t:Math.round(c.temperature_2m),code:c.weather_code,day:c.is_day!==0,at:Date.now(),name:loc.name,def:!!loc.def};wxSrc=loc.def?'home':'gps';try{localStorage.setItem('alok-wx',JSON.stringify(WX))}catch(e){}
     document.querySelectorAll('.wxSlot').forEach(el=>el.outerHTML=wxHTML());
   }catch(e){}
 }
@@ -981,7 +994,7 @@ setInterval(()=>{if(!document.hidden)loadWeather()},10*60e3);
 function wxHTML(){
   if(!WX||Date.now()-WX.at>3*3600e3)return '<span class="wxSlot" hidden></span>';
   const [label,ic]=wxInfo(WX.code,WX.day);
-  return `<span class="chip wx wxSlot" title="${esc(label)} · ${WX.def?'default location (allow location access to use where you are)':'your current location'} · updated ${new Date(WX.at).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}"><span class="wxi">${svg(WXI[ic],26).replace('stroke="currentColor"','stroke="currentColor" stroke-width="1.4"')}</span><span class="chip-t"><b>${WX.t}°C</b><small>${esc(WX.name||'Hathras, UP')}</small></span></span>`;
+  return `<span class="chip wx wxSlot" title="${esc(label)} · ${WX.def?'home city (set in Settings)':'your current location'} · updated ${new Date(WX.at).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}"><span class="wxi">${svg(WXI[ic],26).replace('stroke="currentColor"','stroke="currentColor" stroke-width="1.4"')}</span><span class="chip-t"><b>${WX.t}°C</b><small>${esc(WX.name||'Hathras, UP')}</small></span></span>`;
 }
 
 /* ---------- daily quote ---------- */
@@ -1023,12 +1036,26 @@ function quoteHTML(){const [q,a]=quoteFor(today());return `<p class="quote"><spa
 
 /* ---------- top bar, drawer and bottom navigation ---------- */
 var lastSyncAt=0,mSearch=false;
-function streakChip(){
-  const n=curStreak(),done=dHas(today());
-  return `<button class="chip streak${done?' done':''}" id="streakBtn" type="button" aria-label="Writing streak ${n} ${n===1?'day':'days'}. Open statistics"><span class="flame" aria-hidden="true">${svg('<path d="M12 21c-4 0-6.5-2.7-6.5-6.3 0-3.2 2.2-5.2 3.6-7.4.4 1.6 1.2 2.7 2.4 3.4-.2-2.8.9-5.5 3.4-7.7.2 3.2 1.5 4.9 2.8 6.6 1.1 1.5 1.8 3 1.8 5 0 3.7-2.9 6.4-7.5 6.4Z" fill="currentColor" fill-opacity=".18"/><path d="M12 21c-1.7 0-3-1.2-3-2.9 0-1.6 1.2-2.6 1.9-3.6.3 1 .9 1.6 1.6 1.9.1-1.2.6-2.3 1.4-3.1.2 1.3.8 2 1.3 2.8.4.6.8 1.2.8 2 0 1.7-1.6 2.9-4 2.9Z"/>',24)}</span><span class="chip-t"><small><span class="wonly">Writing streak</span><span class="monly">Streak</span></small><b>${n} ${n===1?'day':'days'}</b></span><span class="sdot" title="${done?'Written today':'Not written yet today'}">${done?'Written today':'Write today'}</span></button>`;
+function tmMin(tm){const m=/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(tm||'');if(!m)return 0;let h=+m[1]%12;if(/pm/i.test(m[3]))h+=12;return h*60+ +m[2]}
+function nextEvent(){
+  if(!G.connected)return null;const t=today(),now=new Date(),mins=now.getHours()*60+now.getMinutes();
+  for(let k=0;k<60;k++){const d=dAdd(t,k);const ev=evOn(d).filter(e=>e.k!=='moon'&&(k>0||e.d===d||!e.tm)&&!(k===0&&e.tm&&tmMin(e.tm)<mins-30));
+    if(ev.length)return {d,e:ev[0],more:ev.length-1}}
+  return null;
 }
+function nextChip(){
+  const n=nextEvent();
+  if(!G.connected)return `<button class="chip nextev" id="nextBtn" type="button" data-act="connect"><span class="ic">${svg(UI.cal,22)}</span><span class="chip-t"><small>Next event</small><b>Connect calendar</b></span></button>`;
+  if(!n)return `<span class="chip nextev"><span class="ic">${svg(UI.cal,22)}</span><span class="chip-t"><small>Next event</small><b>Nothing in 60 days</b></span></span>`;
+  const t=today(),k=dDiff(n.d,t),when=k===0?(n.e.tm?'Today · '+n.e.tm:'Today'):k===1?(n.e.tm?'Tomorrow · '+n.e.tm:'Tomorrow'):k<7?dParse(n.d).toLocaleDateString('en-IN',{weekday:'long'}):dShort(n.d);
+  const title=evTitle(n.e)+(evAge(n.e,n.d)?' · '+evAge(n.e,n.d):'');
+  return `<button class="chip nextev k-${n.e.k}" id="nextBtn" type="button" data-go="${n.d}" aria-label="Next event: ${esc(title)}, ${esc(when)}. Open that page">${icon(n.e.k)}<span class="chip-t"><small>${esc(when)}${n.more?` · +${n.more} more`:''}</small><b>${esc(title)}</b></span>${k>1?`<span class="sdot">in ${k} days</span>`:''}</button>`;
+}
+function bindNext(){const b=$('nextBtn');if(!b)return;b.onclick=()=>{if(b.dataset.act==='connect'){goView('settings');return}const d=b.dataset.go;if(!d)return;closeDrawer();if(view!=='diary')goDiary();sideM=null;dq='';mSearch=false;if(d===diaryDate)render();else dGo(d)}}
 function busyTypingSide(){const a=document.activeElement;return !!(a&&$('side').contains(a))}
-function refreshStreak(){clearTimeout(refreshStreak.t);refreshStreak.t=setTimeout(()=>{if(!busyTypingSide())renderSide()},300);const b=$('streakBtn');if(!b)return;const h=streakChip();if(b.outerHTML===h)return;b.outerHTML=h;const n=$('streakBtn');if(n)n.onclick=()=>goView(view==='stats'?'diary':'stats')}
+function refreshStreak(){clearTimeout(refreshStreak.t);refreshStreak.t=setTimeout(()=>{if(!busyTypingSide())renderSide()},300)}
+function refreshNext(){const b=$('nextBtn')||document.querySelector('.nextev');if(!b)return;const h=nextChip();if(b.outerHTML===h)return;b.outerHTML=h;bindNext()}
+setInterval(()=>{if(!document.hidden)refreshNext()},60000);
 function topBar(){
   const p=S.diary[diaryDate],m=p&&p.mood?moodOf(p.mood):null,isToday=diaryDate===today();
   return `<header class="topbar">
@@ -1037,7 +1064,7 @@ function topBar(){
      <span class="navpair only-wide"><button class="sq-btn" id="tbPrev" type="button" aria-label="Previous day">${svg(UI.left,18)}</button><button class="sq-btn" id="tbNext" type="button" aria-label="Next day">${svg(UI.right,18)}</button></span>
      <span class="now"><span class="ndate">${esc(new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))}</span><span class="clock" id="clock" role="timer" aria-label="Current time"></span></span>
    </div>
-   <div class="tb-c">${wxHTML()}${streakChip()}</div>
+   <div class="tb-c">${wxHTML()}${nextChip()}</div>
    <div class="tb-r">
      <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
      <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last '+new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):''}</small></span>
@@ -1050,7 +1077,7 @@ function bindTop(){
   if($('tbBm'))$('tbBm').onclick=()=>goView(view==='bookmarks'?'diary':'bookmarks');
   if($('tbStats'))$('tbStats').onclick=()=>goView(view==='stats'?'diary':'stats');
   if($('tbSet'))$('tbSet').onclick=()=>goView(view==='settings'?'diary':'settings');
-  if($('streakBtn'))$('streakBtn').onclick=()=>goView(view==='stats'?'diary':'stats');
+  bindNext();
 }
 function focusSearch(){
   if(view!=='diary')goView('diary');
@@ -1285,7 +1312,7 @@ function diaryView(){
      ${attHTML(p)}
      <div class="dlines" id="dlines">${dRowsHTML(d)}</div>
      <div class="dfill" id="dfill" aria-hidden="true"></div>
-     <div class="dfoot"><span class="hint">Tap a line number to strike it off · Swipe sideways to turn the page</span><span class="fr"><span id="dcount"></span><button type="button" class="ic-btn sm${bm?' on':''}" id="dBm" aria-pressed="${bm}" aria-label="${bm?'Remove bookmark':'Bookmark this page'}">${svg(UI.bm,18).replace('fill="none"',bm?'fill="currentColor"':'fill="none"')}</button><button class="btn" id="dSave" type="button">Save entry</button></span></div>
+     <div class="dfoot"><span class="hint">Tap a line number to strike it off · Swipe sideways to turn the page</span><span class="fr"><span id="dcount"></span><button type="button" class="ic-btn sm${bm?' on':''}" id="dBm" aria-pressed="${bm}" aria-label="${bm?'Remove bookmark':'Bookmark this page'}">${svg(UI.bm,18).replace('fill="none"',bm?'fill="currentColor"':'fill="none"')}</button><span class="saved" id="savedAt" aria-live="polite">${savedLabel()}</span></span></div>
    </article>`}
    <p class="credit">Crafted by Alok</p>
   </div>`);
@@ -1331,7 +1358,6 @@ function diaryView(){
   pp.querySelectorAll('[data-hl]').forEach(b=>b.onclick=()=>lineAction(l=>{const v=b.dataset.hl;l.hl=v&&l.hl!==v?v:undefined}));
   $('tFocus').onclick=toggleFocus;
   $('dBm').onclick=toggleBookmark;
-  $('dSave').onclick=saveEntry;
   const box=$('dlines');
   if(!box.__fi){box.__fi=1;box.addEventListener('focusin',e=>{if(e.target.classList.contains('dtxt')){dActive=e.target.parentNode.dataset.id;updateTools()}});box.addEventListener('focusout',dFlushSoon)}
   box.oninput=e=>{
@@ -1368,12 +1394,18 @@ function diaryView(){
     else{const t=$('dl-'+last.id);t.focus();t.setSelectionRange(t.value.length,t.value.length)}};
 }
 function toggleBookmark(){const p=S.diary[diaryDate];const on=!(p&&p.bm);setField(diaryDate,'bm',on?true:null);render();toast(on?'Page bookmarked':'Bookmark removed')}
+function savedLabel(){
+  const t=lastSyncAt?new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):'';
+  if(sync==='saving')return '<i class="sv sv-busy"></i>Saving…';
+  if(sync==='offline')return '<i class="sv sv-off"></i>Saved on this device · will upload';
+  if(sync==='error')return '<i class="sv sv-off"></i>Saved on this device · retrying';
+  if(!col)return '<i class="sv"></i>Saved on this device';
+  return '<i class="sv"></i>Saved'+(t?' · '+t:'');
+}
 async function saveEntry(){
-  dFlushSoon();const b=$('dSave');
+  dFlushSoon();
   if(!col){saveNow();toast('Saved on this device');return}
-  if(b){b.disabled=true;b.textContent='Saving…'}
   await flush();const ok=!dirty.size;
-  if(b){b.disabled=false;b.textContent=ok?'Saved':'Save entry';if(ok)setTimeout(()=>{const x=$('dSave');if(x)x.textContent='Save entry'},1800)}
   toast(ok?'Saved to your account':sync==='offline'?'You are offline. The entry is kept on this device and will upload automatically.':'The entry could not be uploaded yet. It is kept on this device and will retry.');
 }
 function toggleFocus(){
@@ -1522,6 +1554,12 @@ function settingsView(){
      <p class="note">Photos and documents added with Quick Add are saved in your Google Drive, in a folder named “Alok’s Diary”. The diary can see only the files it created there. A small preview of each photo is kept on the page so it shows on every device; tapping it opens the original in Drive.</p>
      <p class="set-line"><span>Google Drive</span><b>${driveReady()?'Connected for this session':'Asked when you first upload'}</b></p>
    </section>
+   <section class="set"><p class="eyebrow">Weather</p>
+     <p class="set-line"><span>Home city</span><b>${esc(WXHOME.name)}</b></p>
+     <div class="row"><label class="dfield">Change to <input id="cityQ" type="search" placeholder="Type a city" autocomplete="off"></label><button class="btn ghost sm" id="citySearch" type="button">Search</button></div>
+     <div id="cityRes"></div>
+     <p class="note">On a phone, the weather follows your GPS location. Computers usually know only the rough location of your internet connection (for example Delhi), so when the location is not precise the diary shows the weather for your home city instead.${wxSrc?` Showing now: <b>${esc(WX&&WX.name||'')}</b> (${wxSrc==='gps'?'your precise location':'home city'}).`:''}</p>
+   </section>
    <section class="set"><p class="eyebrow">Security</p>
      <p class="set-line"><label for="sLock">Lock the diary after</label><select id="sLock">${[[0,'Immediately'],[1,'1 minute'],[2,'2 minutes'],[5,'5 minutes'],[15,'15 minutes']].map(([v,t])=>`<option value="${v}" ${v===lm?'selected':''}>${t}</option>`).join('')}</select></p>
      <p class="set-line"><span>Fingerprint, face or Windows Hello</span><button class="btn sm ${bioOn()?'ghost':''}" id="sBio" type="button">${bioOn()?'Turn off':'Turn on'}</button></p>
@@ -1556,6 +1594,11 @@ function settingsView(){
   if($('gRefresh'))$('gRefresh').onclick=()=>gSync(true);
   if($('gOff'))$('gOff').onclick=gDisconnect;
   app.querySelectorAll('[data-cal]').forEach(c=>c.onchange=()=>{const id=c.dataset.cal;G.off=c.checked?G.off.filter(x=>x!==id):[...G.off,id];mark('gcal');renderSide()});
+  const doCity=async()=>{const q=$('cityQ').value.trim();const out=$('cityRes');if(!q){$('cityQ').focus();return}out.innerHTML='<p class="note">Searching…</p>';
+    try{const list=await citySearch(q);out.innerHTML=list.length?'<ul class="snaps">'+list.map((c,i)=>`<li><span>${esc(c.name)}${c.country?' · '+esc(c.country):''}</span><button class="btn ghost sm" type="button" data-city="${i}">Use this city</button></li>`).join('')+'</ul>':'<p class="note">No city found with that name.</p>';
+      out.querySelectorAll('[data-city]').forEach(b=>b.onclick=()=>{setHome(list[+b.dataset.city]);toast('Home city set to '+list[+b.dataset.city].name);render()})}
+    catch(e){out.innerHTML='<p class="err">'+esc(e.message||'The city search is not available right now.')+'</p>'}};
+  $('citySearch').onclick=doCity;$('cityQ').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();doCity()}};
   $('sLock').onchange=()=>{try{localStorage.setItem('sb-lockmin',$('sLock').value)}catch(e){}toast('Auto-lock updated')};
   $('sBio').onclick=async()=>{if(bioOn()){try{localStorage.removeItem('sb-bio')}catch(e){}render();toast('Fingerprint unlock is off');return}await bioEnable();render()};
   $('lockNow').onclick=()=>lock('pin');
