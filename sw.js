@@ -1,6 +1,6 @@
 // Alok's Diary service worker.
 // Caches only the app shell and static libraries/fonts. Data (Supabase, Google APIs) always goes to the network.
-const CACHE='alok-diary-v46';
+const CACHE='alok-diary-v47';
 const SHELL=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png','apple-touch-icon.png','favicon-32.png','logo-96.png'];
 const STATIC_HOSTS=['cdn.jsdelivr.net','cdnjs.cloudflare.com','fonts.googleapis.com','fonts.gstatic.com'];
 
