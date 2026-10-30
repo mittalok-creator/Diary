@@ -1,12 +1,12 @@
 {
-  "name": "Second Brain Notes",
-  "short_name": "Second Brain",
-  "description": "Brain Dump, Life Admin, People, Monthly Reset and more.",
+  "name": "Alok's Diary",
+  "short_name": "Diary",
+  "description": "One ruled page for every day, with Google Calendar events.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#e5dbc9",
-  "theme_color": "#e5dbc9",
+  "background_color": "#e8dfcc",
+  "theme_color": "#e8dfcc",
   "icons": [
     {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
     {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
