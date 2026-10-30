@@ -670,6 +670,8 @@ html.viewing{overflow:hidden}
 .rlist small{font-family:var(--sans);font-size:12px;color:var(--muted)}
 .rlist .row{display:flex;gap:6px}
 .tb.hin{gap:5px}
+.dnum.nx{color:var(--muted);opacity:.5}
+.tb:disabled{opacity:.35;cursor:default}
 </style>
 </head>
 <body>
@@ -697,7 +699,7 @@ function fmtTime(ts,sec){const d=new Date(ts);let h=d.getHours();const ap=h<12?'
 function fmtDT(ts){const d=new Date(ts),t=today(),s=dFmt(d);return (s===t?'today':s===dAdd(t,-1)?'yesterday':d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:d.getFullYear()===new Date().getFullYear()?undefined:'numeric'}))+', '+fmtTime(ts)}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.7';
+const APP_VERSION='4.7.1';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
@@ -744,7 +746,7 @@ function mergeNote(L,R){
   return out;
 }
 function pageSig(p){return JSON.stringify([p.items||[],p.mood||'',p.bm||0,p.tags||[],(p.att||[]).map(a=>a.id),p.carryOff||0,p.people||[]])}
-function mark(...ids){if(col&&sync!=='offline'&&sync!=='saving')setSync('saving');const now=Date.now();ids.forEach(i=>{dirty.add(i);if(i==='gcal')G._ts=now;else if(i==='prefs')S.prefs._ts=now;else if(i==='lists')S.lists._ts=now;else if(i.startsWith('mem:')){const m=S.mem[i.slice(4)];if(m)m._ts=now}else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500);if(typeof refreshStreak==='function')refreshStreak()}
+function mark(...ids){if(col&&sync!=='offline'&&sync!=='saving')setSync('saving');const now=Date.now();ids.forEach(i=>{if(i.startsWith('diary:')&&typeof uRecord==='function')uRecord(i.slice(6));dirty.add(i);if(i==='gcal')G._ts=now;else if(i==='prefs')S.prefs._ts=now;else if(i==='lists')S.lists._ts=now;else if(i.startsWith('mem:')){const m=S.mem[i.slice(4)];if(m)m._ts=now}else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500);if(typeof refreshStreak==='function')refreshStreak()}
 const docName=id=>id==='gcal'?'g_events':id==='prefs'||id==='lists'?id:id.startsWith('mem:')?'mem_'+id.slice(4):'d_'+id.slice(6);
 const body=id=>id==='gcal'?{folder:G.folder||null,v2:G.v2||0,connected:G.connected,events:G.events,cals:G.cals,off:G.off,fetchedAt:G.fetchedAt,bkM:G.bkM||'',bkAt:G.bkAt||0,bkName:G.bkName||'',bkLink:G.bkLink||'',_ts:G._ts||0}:id==='prefs'?S.prefs:id==='lists'?S.lists:id.startsWith('mem:')?S.mem[id.slice(4)]:getRef(id);
 var col=null,sync='local',syncErr='';
@@ -1091,6 +1093,7 @@ function dRelayout(focusId,pos){
   const box=$('dlines');if(!box)return;box.innerHTML=dRowsHTML(diaryDate);
   box.querySelectorAll('.dtxt').forEach(dAutosize);dCount();app.__html='';
   if(focusId){const t=$('dl-'+focusId);if(t){t.focus();const p=Math.min(pos,t.value.length);t.setSelectionRange(p,p)}}
+  if(UH.d===diaryDate)UH.caret=uCaret();
 }
 
 /* ================= rendering ================= */
@@ -1134,6 +1137,8 @@ const UI={
   up:'<path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/>',
   x:'<path d="M6 6l12 12M18 6 6 18"/>',
   chev:'<path d="m6 9 6 6 6-6"/>',
+  undo:'<path d="M9 14 4.5 9.5 9 5"/><path d="M4.5 9.5h10a5 5 0 0 1 0 10H11"/>',
+  redo:'<path d="m15 14 4.5-4.5L15 5"/><path d="M19.5 9.5h-10a5 5 0 0 0 0 10H13"/>',
   ppl:'<circle cx="9" cy="8.5" r="3.2"/><path d="M3.5 19.5c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.8" cy="9.5" r="2.5"/><path d="M15.6 14.6c2.6-.3 4.4 1.3 4.9 4.4"/>',
   tpl:'<rect x="4.5" y="3.5" width="15" height="17" rx="2"/><path d="M8 8h8M8 12h5M8 16h7"/>',
   pin:'<path d="M9 3.5h6l-1 5.2 3 2.8v1.7H7v-1.7l3-2.8Z"/><path d="M12 13.2v7.3"/>',
@@ -1560,13 +1565,38 @@ function dRowsHTML(d){
 function dCount(){const el=$('dcount');if(!el)return;const p=dPage(diaryDate),tx=p.items.filter(l=>userLine(l)&&!l.fw),dn=tx.filter(l=>l.done).length,w=words(p);
   el.textContent=`Words: ${w} · Lines: ${tx.length}${dn?` · ${dn} done`:''}`;
   const tm=$('dtimes');if(tm){const pt=pageTimes(S.diary[diaryDate]);const h=pt?`Created ${fmtDT(pt.c)}${pt.e-pt.c>60000?` · Last edited ${fmtDT(pt.e)}`:''}`:'';if(tm.textContent!==h)tm.textContent=h}}
+/* ---------- undo and redo for the page ----------
+   Each line is its own text box, so the browser's own undo cannot reach across lines. The page keeps its own
+   history instead: every saved change (a burst of typing, a new line, a strike-off, formatting) is one step. */
+var UH={d:null,cur:null,caret:null,stack:[],redo:[]};
+const uStrip=items=>JSON.stringify(items.map(i=>{const c=Object.assign({},i);delete c.u;return c}));
+function uCaret(){const a=document.activeElement;if(a&&a.classList&&a.classList.contains('dtxt'))return {id:a.parentNode.dataset.id,pos:a.selectionStart};return UH.caret}
+function uReset(d){const p=dPage(d);UH={d,cur:JSON.stringify(p.items),caret:uCaret(),stack:[],redo:[]};uButtons()}
+function uRecord(d){
+  if(UH.d!==d||UH.busy)return;const p=S.diary[d];if(!p)return;const now=JSON.stringify(p.items);
+  if(uStrip(JSON.parse(now))===uStrip(JSON.parse(UH.cur)))return;
+  UH.stack.push({items:UH.cur,caret:UH.caret});if(UH.stack.length>200)UH.stack.shift();UH.redo=[];UH.cur=now;UH.caret=uCaret();uButtons();
+}
+function uApply(from,to,label){
+  dFlushSoon();if(UH.d!==diaryDate)uReset(diaryDate);uRecord(diaryDate);
+  if(!from.length){toast(label==='undo'?'Nothing to undo on this page':'Nothing to redo');return}
+  const st=from.pop();to.push({items:UH.cur,caret:uCaret()});
+  const p=dOwn(diaryDate);p.items=JSON.parse(st.items);UH.busy=true;clearTimeout(dSoonT);dSoonT=null;mark(dKey(diaryDate));UH.busy=false;
+  UH.cur=JSON.stringify(p.items);UH.caret=st.caret;
+  const c=st.caret&&p.items.some(l=>l.id===st.caret.id)?st.caret:{id:p.items[p.items.length-1].id,pos:Infinity};
+  dRelayout(c.id,c.pos);uButtons();
+}
+function dUndo(){uApply(UH.stack,UH.redo,'undo')}
+function dRedo(){uApply(UH.redo,UH.stack,'redo')}
+function uButtons(){const u=$('tUndo'),r=$('tRedo');if(u)u.disabled=!UH.stack.length;if(r)r.disabled=!UH.redo.length}
 function dRenumber(){
-  const p=dPage(diaryDate);let n=0;
+  const p=dPage(diaryDate);let n=0;const ae=document.activeElement,act=ae&&ae.classList&&ae.classList.contains('dtxt')?ae.parentNode.dataset.id:null;
   document.querySelectorAll('#dlines .drow').forEach(r=>{const l=p.items.find(x=>x.id===r.dataset.id),b=r.firstChild;if(!l)return;
-    const has=!!l.t.trim();if(l.fw){b.textContent='→';return}
+    const has=!!l.t.trim();b.classList.remove('nx');if(l.fw){b.textContent='→';return}
     if(l.hd){b.textContent='';b.disabled=true;b.removeAttribute('aria-label');return}
     if(l.task){if(!b.querySelector('.tbox'))b.innerHTML='<span class="tbox"></span>';b.disabled=false;b.setAttribute('aria-label',l.done?'Mark task as not done':'Mark task as done');return}
     if(has){n++;if(b.textContent!==String(n))b.textContent=n;b.disabled=false;b.setAttribute('aria-label',(l.done?'Restore line ':'Strike off line ')+n)}
+    else if(l.id===act&&!l.hd){b.textContent=n+1;b.classList.add('nx');b.disabled=true;b.removeAttribute('aria-label')}
     else{b.textContent='';b.disabled=true;b.removeAttribute('aria-label')}});
   dCount();
 }
@@ -1660,6 +1690,7 @@ function dSearchHTML(){
 }
 function diaryView(){
   if(diaryDate===today())applyRules(diaryDate);
+  if(UH.d!==diaryDate)uReset(diaryDate);
   const d=diaryDate,t=today(),diff=dDiff(d,t),dt=dParse(d),y=dt.getFullYear(),doy=dDiff(d,y+'-01-01')+1,len=(y%4===0&&y%100!==0)||y%400===0?366:365;
   const p=S.diary[d],bm=!!(p&&p.bm);
   const rel=diff===0?'<span class="pill">Today</span>':diff<0?`<span>${diff===-1?'Yesterday':(-diff)+' days ago'}</span><button class="pill" id="dToday" type="button">Go to today</button>`
@@ -1696,6 +1727,7 @@ function diaryView(){
        <span class="tg sw" role="group" aria-label="Highlight line">${HL.map(([k,n])=>`<button type="button" class="swatch hl-${k}" data-hl="${k}" aria-pressed="false" aria-label="${n} highlight"></button>`).join('')}<button type="button" class="swatch none" data-hl="" aria-label="Remove highlight">${svg(UI.x,12)}</button></span>
        <button type="button" class="tb wide hin" id="tHin" aria-pressed="${!!P.hin}" aria-label="Hindi typing" title="Hindi typing: type in Roman letters, words turn into Hindi"><span class="dev">अ</span><span>Hindi</span></button>
        <span class="grow"></span>
+       <span class="tg"><button type="button" class="tb" id="tUndo" aria-label="Undo (Ctrl+Z)" title="Undo (Ctrl+Z)" ${UH.stack.length?'':'disabled'}>${svg(UI.undo,17)}</button><button type="button" class="tb" id="tRedo" aria-label="Redo (Ctrl+Y)" title="Redo (Ctrl+Y)" ${UH.redo.length?'':'disabled'}>${svg(UI.redo,17)}</button></span>
        <button type="button" class="tb wide" id="tFocus" aria-label="Focus mode">${svg(UI.focus,17)}<span>Focus</span></button>
      </div>
      ${eventsHTML(d)}
@@ -1757,17 +1789,18 @@ function diaryView(){
   $('tTask').onclick=()=>lineAction(l=>{l.task=!l.task||undefined;if(!l.task)l.done=false});
   pp.querySelectorAll('[data-hl]').forEach(b=>b.onclick=()=>lineAction(l=>{const v=b.dataset.hl;l.hl=v&&l.hl!==v?v:undefined}));
   $('tFocus').onclick=toggleFocus;
+  $('tUndo').onclick=dUndo;$('tRedo').onclick=dRedo;
   $('dBm').onclick=toggleBookmark;
   if($('dMem'))$('dMem').onclick=()=>{const m=memOfPage(diaryDate);if(m){memId='m:'+m.id;goView('memory');return}const x=memFind('d:'+diaryDate);const p=S.diary[diaryDate];const pt=pageTitle(p);openMemEdit(x||{auto:'diary',date:diaryDate,title:pt.title||'Photos from this day',cat:pageCat(p),fav:!!p.bm})};
   const box=$('dlines');
-  if(!box.__fi){box.__fi=1;box.addEventListener('focusin',e=>{if(e.target.classList.contains('dtxt')){dActive=e.target.parentNode.dataset.id;updateTools()}});box.addEventListener('focusout',dFlushSoon)}
+  if(!box.__fi){box.__fi=1;box.addEventListener('focusin',e=>{if(e.target.classList.contains('dtxt')){dActive=e.target.parentNode.dataset.id;updateTools();dRenumber()}});box.addEventListener('focusout',()=>{dFlushSoon();setTimeout(()=>{if($('dlines'))dRenumber()},0)})}
   box.oninput=e=>{
     const ta=e.target;if(!ta.classList.contains('dtxt'))return;
     const d=diaryDate,p=dOwn(d),i=p.items.findIndex(l=>l.id===ta.parentNode.dataset.id),line=p.items[i];if(!line)return;
     if(ta.value.includes('\n')){
       const pos=ta.selectionStart,parts=ta.value.split('\n');let acc=0,ci=parts.length-1,co=parts[ci].length;
       for(let k=0;k<parts.length;k++){if(pos<=acc+parts[k].length){ci=k;co=pos-acc;break}acc+=parts[k].length+1}
-      line.t=parts[0];const fresh=parts.slice(1).map(t=>({id:uid(),t,done:false,task:line.task?true:undefined}));p.items.splice(i+1,0,...fresh);
+      dFlushSoon();line.t=parts[0];const fresh=parts.slice(1).map(t=>({id:uid(),t,done:false,task:line.task?true:undefined}));p.items.splice(i+1,0,...fresh);
       clearTimeout(dSoonT);dSoonT=null;mark(dKey(d));dRelayout(p.items[i+ci].id,co);
     }else{line.t=ta.value;line.u=Date.now();p._ts=line.u;dirty.add(dKey(d));keepDirty();if(col&&sync==='synced')setSync('saving');dAutosize(ta);dRenumber();dSoon(d)}
   };
@@ -1779,6 +1812,7 @@ function diaryView(){
     const p=dPage(diaryDate),i=p.items.findIndex(l=>l.id===ta.parentNode.dataset.id),s=ta.selectionStart,en=ta.selectionEnd,len=ta.value.length;
     const fo=(id,pos)=>{const t=$('dl-'+id);if(t){t.focus();const q=Math.min(pos,t.value.length);t.setSelectionRange(q,q)}};
     if(e.key==='Escape'){ta.blur();return}
+    if((e.ctrlKey||e.metaKey)&&!e.altKey&&(e.key==='z'||e.key==='Z'||e.key==='y'||e.key==='Y')){e.preventDefault();if((e.key==='z'||e.key==='Z')&&!e.shiftKey)dUndo();else dRedo();return}
     if((e.ctrlKey||e.metaKey)&&(e.key==='b'||e.key==='B')){e.preventDefault();lineAction(l=>{l.b=!l.b||undefined});return}
     if(e.key==='Backspace'&&s===0&&en===0&&(i>0||(p.items[i]&&p.items[i].task&&!p.items[i].t))){if(i===0){lineAction(l=>{l.task=undefined});e.preventDefault()}else if(mergeUp(i))e.preventDefault()}
     else if(e.key==='Delete'&&s===len&&en===len&&i<p.items.length-1){if(mergeUp(i+1))e.preventDefault()}
@@ -2740,6 +2774,7 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){closeMenu();closeDCal();closeMood();closeDrawer();if(document.documentElement.classList.contains('focus')&&!(document.activeElement&&document.activeElement.classList.contains('dtxt')))toggleFocus();return}
   if(lockMode!=='open')return;
   if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S')){e.preventDefault();if(view==='diary')saveEntry();return}
+  if(view==='diary'&&(e.ctrlKey||e.metaKey)&&!e.altKey&&/^[zy]$/i.test(e.key)&&!(document.activeElement&&/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName))){e.preventDefault();if(/z/i.test(e.key)&&!e.shiftKey)dUndo();else dRedo();return}
   if(e.ctrlKey||e.metaKey||e.altKey)return;
   const a=document.activeElement,typing=a&&(a.tagName==='TEXTAREA'||a.tagName==='INPUT'||a.tagName==='SELECT');if(typing)return;
   if($('dcal')&&!$('dcal').hidden)return;
