@@ -433,7 +433,13 @@ html.hand .dtxt{font-family:'Kalam','Segoe Print','Bradley Hand',cursive;font-si
   .tb-c>.chip{flex:1}
   .quote{font-size:16px}
 }
-@media (min-width:1000px){.only-narrow{display:none!important}}
+@media (min-width:1000px){.only-narrow{display:none!important}
+  html.sidehide .shell{grid-template-columns:minmax(0,1fr);max-width:1720px}
+  html.sidehide .side{display:none!important}
+  html.sidehide .topbar .brand.only-narrow{display:flex!important}
+  html.sidehide .search.only-narrow:not(.hidden-m){display:flex!important}
+  #tbSide[aria-pressed="true"]{color:var(--accent)}
+}
 @media (max-width:520px){
   .topbar{gap:8px}.brand{font-size:18px}.now .ndate{display:none}
   .syncbox .lastsync{display:none}.wonly{display:none}.monly{display:inline!important}.syncbox .sync{font-size:0;gap:0}
@@ -487,7 +493,7 @@ function dLong(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'long',da
 function dShort(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.3';
+const APP_VERSION='4.4';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
@@ -1062,6 +1068,7 @@ function topBar(){
   return `<header class="topbar">
    <div class="tb-l">
      <span class="brand only-narrow">${UI.book}<span><b>Alok’s Diary</b></span></span>
+     <button class="sq-btn only-wide" id="tbSide" type="button" aria-pressed="${sideHidden()}" aria-label="${sideHidden()?'Show the side panel':'Hide the side panel'}" title="${sideHidden()?'Show':'Hide'} side panel ( [ )">${svg(sideHidden()?'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15M13 10l2.5 2-2.5 2"/>':'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15M15.5 10 13 12l2.5 2"/>',18)}</button>
      <span class="navpair only-wide"><button class="sq-btn" id="tbPrev" type="button" aria-label="Previous day">${svg(UI.left,18)}</button><button class="sq-btn" id="tbNext" type="button" aria-label="Next day">${svg(UI.right,18)}</button></span>
      <span class="now"><span class="ndate">${esc(new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))}</span><span class="clock" id="clock" role="timer" aria-label="Current time"></span></span>
    </div>
@@ -1071,7 +1078,14 @@ function topBar(){
      <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last '+new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):''}</small></span>
    </div></header>${view==='diary'&&!dq?quoteHTML():''}`;
 }
+function sideHidden(){return document.documentElement.classList.contains('sidehide')}
+function toggleSide(force){
+  const on=typeof force==='boolean'?force:!sideHidden();document.documentElement.classList.toggle('sidehide',on);
+  try{localStorage.setItem('alok-sidehide',on?'1':'0')}catch(e){}
+  app.__html='';render(true);requestAnimationFrame(()=>document.querySelectorAll('#dlines .dtxt').forEach(dAutosize));
+}
 function bindTop(){
+  if($('tbSide'))$('tbSide').onclick=()=>toggleSide();
   if($('tbPrev'))$('tbPrev').onclick=()=>{if(view!=='diary')goDiary();dGo(dAdd(diaryDate,-1),'prev')};
   if($('tbNext'))$('tbNext').onclick=()=>{if(view!=='diary')goDiary();dGo(dAdd(diaryDate,1),'next')};
   if($('tbSearch'))$('tbSearch').onclick=focusSearch;
@@ -1082,7 +1096,7 @@ function bindTop(){
 }
 function focusSearch(){
   if(view!=='diary')goView('diary');
-  if(innerWidth>=1000){const i=$('sq');if(i){i.focus();i.select()}}
+  if(innerWidth>=1000&&!sideHidden()){const i=$('sq');if(i){i.focus();i.select()}}
   else{mSearch=true;render();const i=$('dq');if(i){i.focus();i.select()}}
 }
 function renderNav(){
@@ -1147,7 +1161,7 @@ function renderSide(){
    <div class="panel"><div class="phead"><p class="eyebrow">Next 7 days</p>${G.connected?'<button class="linkbtn" id="sideUp" type="button">View all →</button>':''}</div>${G.connected?(up.length?`<ul class="up">${up.map(x=>`<li class="k-${x.e.k}"><button type="button" data-sd="${x.d}">${icon(x.e.k)}<span class="t">${esc(evTitle(x.e))}</span><span class="w">${x.d===t?'Today':x.d===dAdd(t,1)?'Tomorrow':dShort(x.d)}${x.e.tm?' · '+x.e.tm:''}${evAge(x.e,x.d)?' · '+evAge(x.e,x.d):''}</span></button></li>`).join('')}</ul>`:'<p class="note">Nothing on your calendar this week.</p>')
      :`<p class="note">Connect Google Calendar in Settings to see birthdays, holidays and events here and on each page.</p>`}</div>
    ${statsCard()}
-   <p class="keys only-wide"><kbd>←</kbd> <kbd>→</kbd> pages · <kbd>T</kbd> today · <kbd>/</kbd> search · <kbd>C</kbd> calendar · <kbd>B</kbd> bookmark · <kbd>F</kbd> focus · <kbd>Ctrl</kbd>+<kbd>S</kbd> save</p>`;
+   <p class="keys only-wide"><kbd>←</kbd> <kbd>→</kbd> pages · <kbd>T</kbd> today · <kbd>/</kbd> search · <kbd>C</kbd> calendar · <kbd>B</kbd> bookmark · <kbd>F</kbd> focus · <kbd>[</kbd> hide panel · <kbd>Ctrl</kbd>+<kbd>S</kbd> save</p>`;
   if(side.__html!==html){const f=document.activeElement&&document.activeElement.id==='sq';side.innerHTML=html;side.__html=html;if(f){const i=$('sq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
   $('sq').oninput=e=>{dq=e.target.value;if(view!=='diary'){view='diary';app.__html='';history.replaceState({v:'diary'},'',location.pathname)}render(true);const i=$('sq');if(document.activeElement!==i)i.focus()};
   $('sq').onkeydown=e=>{if(e.key==='Enter'&&innerWidth<1000)closeDrawer()};
@@ -1819,9 +1833,11 @@ document.addEventListener('keydown',e=>{
   else if(e.key==='c'||e.key==='C'){if($('dDate'))openDCal()}
   else if(e.key==='b'||e.key==='B'){toggleBookmark()}
   else if(e.key==='f'||e.key==='F'){toggleFocus()}
+  else if(e.key==='['&&innerWidth>=1000){toggleSide()}
 });
 
 /* ================= start ================= */
+try{if(localStorage.getItem('alok-sidehide')==='1')document.documentElement.classList.add('sidehide')}catch(e){}
 snapAll();applyPrefs();loadWeather();
 history.replaceState({v:'diary'},'',location.pathname);
 (async()=>{
