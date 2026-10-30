@@ -303,9 +303,21 @@ button.nextev:hover{background:color-mix(in srgb,var(--ink) 4%,transparent)}
 .ic-btn.on{color:var(--accent)}
 .syncbox{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2}
 .lastsync{font-family:var(--sans);font-size:11px;color:var(--muted);padding-left:13px}
-.quote{margin:2px 0 14px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;font-size:18px;font-style:italic;color:var(--ink);text-wrap:balance}
-.quote .qmark{font-size:30px;line-height:0;color:var(--accent);font-style:normal;transform:translateY(8px)}
-.quote .qa{font-family:var(--sans);font-style:normal;font-size:12px;color:var(--muted);letter-spacing:.02em}
+.quote{margin:0 0 14px;display:flex;align-items:flex-start;gap:8px;color:var(--muted)}
+.quote .qmark{flex:0 0 auto;color:var(--accent);opacity:.75;margin-top:4px}
+.quote .qbody{margin:0;flex:1;min-width:0;font-family:var(--serif);font-style:italic;font-size:17px;line-height:1.4;text-wrap:pretty}
+.quote .qt{color:color-mix(in srgb,var(--ink) 78%,var(--muted))}
+.quote .qa{font-family:var(--sans);font-style:normal;font-size:12px;color:var(--muted);letter-spacing:.02em;white-space:normal}
+.quote .qd{font-family:var(--sans);font-style:normal;font-size:11px;color:var(--accent);border:1px solid var(--marg);border-radius:999px;padding:0 7px;white-space:nowrap}
+.qctl{display:flex;align-items:center;gap:2px;flex:0 0 auto}
+.qb2{border:0;background:transparent;color:var(--muted);min-width:30px;height:30px;border-radius:8px;display:inline-grid;place-items:center;font-size:18px;line-height:1;font-family:var(--sans)}
+.qb2:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.qb2.on{color:var(--accent)}
+.qb2.txt{font-size:12px;padding:0 6px;text-decoration:underline;text-underline-offset:2px}
+@media (max-width:640px){.quote{flex-wrap:wrap}.quote .qbody{flex-basis:calc(100% - 30px);font-size:16px}.qctl{margin-left:22px}}
+.qlist{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.qrow{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;border-bottom:1px dashed var(--line);padding:10px 2px}
+.qrow .qt{margin:0;font-style:italic;font-size:17px}.qrow .qa{margin:2px 0 0;font-family:var(--sans);font-size:12px;color:var(--muted)}
 .popmenu{position:absolute;z-index:45;background:var(--ivory);border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 40px -16px rgba(0,0,0,.4);padding:10px;min-width:220px;display:flex;flex-direction:column;gap:2px}
 .mopt{display:flex;align-items:center;gap:10px;border:0;background:transparent;border-radius:9px;padding:7px 10px;font-family:var(--sans);font-size:14px;color:var(--ink);text-align:left}
 .mopt:hover,.mopt:focus-visible{background:color-mix(in srgb,var(--ink) 6%,transparent)}
@@ -480,6 +492,105 @@ html.focus body{padding-bottom:20px}
   .pr-foot{margin-top:20px;font-style:italic;color:#777;text-align:center}
   html.printing body{background:#fff;padding:0}
 }
+
+/* 4.6 · statistics, attachments, viewer, memories */
+.period{margin:0;font-family:var(--sans);font-size:11.5px;color:var(--muted)}
+.panel .period{margin-top:8px}
+.dtimes{display:block;margin-top:3px;opacity:.9}
+.dtimes:empty{display:none}
+.mc.fut{opacity:.45}
+.arrow:disabled{opacity:.3;pointer-events:none}
+.ytab{width:100%;border-collapse:collapse;font-family:var(--sans);font-size:13px;font-variant-numeric:tabular-nums}
+.ytab th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 4px;border-bottom:1px solid var(--line)}
+.ytab td{padding:7px 4px;border-bottom:1px dashed var(--line)}
+.ytab tr.on td{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.atth{margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+.atth b{color:var(--ink);font-weight:600}
+.thumbs{gap:10px}
+.thumb{width:118px;height:auto;border:0;background:transparent;overflow:visible;margin:0}
+.thumb .tview{all:unset;cursor:pointer;display:block;width:118px;height:118px;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:var(--sheet)}
+.thumb .tview:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.thumb .tview img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+.thumb .tview:hover img{transform:scale(1.04)}
+.thumb figcaption{font-family:var(--sans);font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:118px}
+.thumb .rm{top:4px;right:4px}
+@media (max-width:520px){.thumb,.thumb .tview{width:96px}.thumb .tview{height:96px}.thumb figcaption{max-width:96px}}
+.confirm{display:flex;flex-direction:column;gap:8px;border:1px solid var(--marg);background:color-mix(in srgb,var(--accent) 7%,var(--ivory));border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:13px;color:var(--ink)}
+.confirm .row{display:flex;gap:8px;flex-wrap:wrap}
+.plist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.plist li{display:flex;align-items:center;gap:10px;min-width:0}
+.plist img,.plist .pi{width:44px;height:44px;border-radius:8px;object-fit:cover;flex:0 0 auto;border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
+.plist .pn{display:flex;flex-direction:column;min-width:0;flex:1}
+.plist .pn>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.plist .pn small{color:var(--muted)}
+.plist li.bad .pn small{color:var(--accent)}
+html.viewing{overflow:hidden}
+.viewer{position:fixed;inset:0;z-index:80;background:rgba(14,12,10,.94);color:#f3ece0;display:flex;flex-direction:column;font-family:var(--sans)}
+.viewer[hidden]{display:none}
+.vw-top{display:flex;align-items:center;gap:12px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px}
+.vw-n{font-size:12.5px;opacity:.75;white-space:nowrap;font-variant-numeric:tabular-nums}
+.vw-name{flex:1;min-width:0;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vw-btn{border:0;background:rgba(255,255,255,.1);color:inherit;width:42px;height:42px;border-radius:50%;display:grid;place-items:center}
+.vw-stage{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:0 8px;touch-action:pan-y}
+.vw-stage img{max-width:100%;max-height:100%;object-fit:contain;user-select:none;-webkit-user-select:none;border-radius:4px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+.vw-nav{position:absolute;top:50%;transform:translateY(-50%);border:0;background:rgba(255,255,255,.12);color:#fff;width:48px;height:48px;border-radius:50%;display:grid;place-items:center;z-index:1}
+.vw-nav:hover{background:rgba(255,255,255,.22)}.vw-nav.l{left:12px}.vw-nav.r{right:12px}
+@media (max-width:640px){.vw-nav{width:40px;height:40px}.vw-nav.l{left:4px}.vw-nav.r{right:4px}}
+.vw-bar{display:flex;flex-direction:column;gap:8px;padding:10px 14px calc(12px + env(safe-area-inset-bottom,0px))}
+.vw-bar .row{display:flex;gap:8px;flex-wrap:wrap}
+.vw-q{font-size:12px;opacity:.75}
+.viewer .btn.ghost{color:#f3ece0;border-color:rgba(255,255,255,.3)}
+.viewer .confirm{background:#2b2520;color:#f3ece0;border-color:#a8564f}
+.memb.on{color:var(--accent)}
+/* memories */
+.otd{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--k-hol) 6%,var(--ivory))}
+.otd .tl{margin-top:4px}
+.mfilters{display:flex;gap:6px;flex-wrap:wrap}
+.fchip{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:transparent;border-radius:999px;padding:5px 11px;font-family:var(--sans);font-size:12.5px;color:var(--ink)}
+.fchip.on{background:var(--ink);color:var(--desk);border-color:var(--ink)}
+.fchip.on .mic{color:inherit!important}
+.mtools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mtools .msearch{flex:1 1 260px;margin:0}
+.mtools select{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:7px 8px;font-family:var(--sans);font-size:13.5px;color:var(--ink)}
+.mic{display:inline-grid;place-items:center}
+.timeline{display:flex;flex-direction:column}
+.tl-y{margin:14px 0 2px;font-family:var(--serif);font-size:26px;font-weight:600}
+.tl-m{margin:8px 0 6px;font-family:var(--sans);font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.tl{list-style:none;margin:0;padding:0 0 0 18px;border-left:1.5px solid var(--marg);display:flex;flex-direction:column;gap:10px}
+.tl-item{position:relative}
+.tl-dot{position:absolute;left:-32px;top:12px;width:26px;height:26px;border-radius:50%;background:var(--ivory);border:1.5px solid var(--mc,var(--marg));display:grid;place-items:center}
+.tl-card{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:4px;width:100%;border:1px solid var(--line);border-left:3px solid var(--mc,var(--line));border-radius:10px;padding:10px 12px;background:var(--ivory)}
+.tl-card:hover{background:color-mix(in srgb,var(--mc) 5%,var(--ivory))}
+.tl-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tl-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--sans);font-size:11.5px;color:var(--muted)}
+.tl-cat{color:var(--mc);font-weight:600}
+.tl-fav{color:var(--accent);display:inline-grid;margin-left:auto}
+.tl-title{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.tl-desc{font-size:15.5px;color:color-mix(in srgb,var(--ink) 80%,var(--muted));display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.tl-ph{display:flex;gap:6px;margin-top:2px}
+.tl-ph img,.tl-ph .more{width:56px;height:56px;border-radius:8px;object-fit:cover;border:1px solid var(--line)}
+.tl-ph .more{display:grid;place-items:center;font-family:var(--sans);font-size:12px;color:var(--muted)}
+.tl-src{font-family:var(--sans);font-size:11px;color:var(--muted);font-style:italic}
+.mdetail h2{font-size:30px;line-height:1.15;overflow-wrap:anywhere}
+.mcatl{margin:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--sans);font-size:12.5px;font-weight:600;color:var(--mc)}
+.mdate{margin:-10px 0 0;font-family:var(--sans);font-size:13px;color:var(--muted)}
+.mbody{font-size:18px;line-height:1.5;border-top:1px solid var(--rule);padding-top:10px}
+.mbody p{margin:0 0 6px;white-space:pre-wrap;overflow-wrap:anywhere}
+.mdetail .datt{margin:0}
+.mact{display:flex;gap:8px;flex-wrap:wrap}
+.mact .btn{display:inline-flex;align-items:center;gap:6px}
+.mact .btn.on{color:var(--accent);border-color:var(--marg)}
+.mform{display:flex;flex-direction:column;gap:12px;font-family:var(--sans);font-size:13px;color:var(--muted)}
+.mform label{display:flex;flex-direction:column;gap:5px}
+.mform input,.mform select,.mform textarea{font-family:var(--serif);font-size:17px;color:var(--ink);background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.mform textarea{resize:vertical;line-height:1.45}
+.mform .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:520px){.mform .row2{grid-template-columns:1fr}}
+.mform label.chk{flex-direction:row;align-items:center;gap:8px;font-size:14px;color:var(--ink)}
+.mform .chk input{width:18px;height:18px}
+.mform .row{display:flex;gap:8px}
+@media (max-width:999px){.bnav button span{font-size:10.5px}}
+@media print{.viewer,.quote{display:none!important}}
 </style>
 </head>
 <body>
@@ -502,16 +613,19 @@ function dAdd(s,n){const t=dParse(s);t.setDate(t.getDate()+n);return dFmt(t)}
 function dDiff(a,b){return Math.round((dParse(a)-dParse(b))/864e5)}
 function dLong(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}
 function dShort(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
+/* one time format everywhere: 12-hour clock with upper-case AM/PM in the device's own time zone */
+function fmtTime(ts,sec){const d=new Date(ts);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;return h+':'+pad(d.getMinutes())+(sec?':'+pad(d.getSeconds()):'')+' '+ap}
+function fmtDT(ts){const d=new Date(ts),t=today(),s=dFmt(d);return (s===t?'today':s===dAdd(t,-1)?'yesterday':d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:d.getFullYear()===new Date().getFullYear()?undefined:'numeric'}))+', '+fmtTime(ts)}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.5';
+const APP_VERSION='4.6';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
 var S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S){let old=null;try{old=JSON.parse(localStorage.getItem('second-brain-v2'))}catch(e){}S={diary:(old&&old.diary)||{}}}
-S.diary=S.diary||{};
+S.diary=S.diary||{};S.mem=S.mem||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};
 var G=null;try{G=JSON.parse(localStorage.getItem(GKEY))}catch(e){}
 G=G||{connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};G.off=G.off||[];G.cals=G.cals||[];G.events=G.events||[];
 let saveT;
@@ -520,7 +634,7 @@ function saveNow(){clearTimeout(saveT);try{localStorage.setItem(KEY,JSON.stringi
 addEventListener('pagehide',saveNow);
 
 /* ================= sync engine (entry-level merge) ================= */
-const dirty=new Set((()=>{try{return (JSON.parse(localStorage.getItem('sb-dirty'))||[]).filter(k=>k.startsWith('diary:')||k==='gcal')}catch(e){return []}})());
+const dirty=new Set((()=>{try{return (JSON.parse(localStorage.getItem('sb-dirty'))||[]).filter(k=>k.startsWith('diary:')||k.startsWith('mem:')||k==='gcal'||k==='prefs')}catch(e){return []}})());
 let writing=false,flushT;
 function keepDirty(){try{localStorage.setItem('sb-dirty',JSON.stringify([...dirty]))}catch(e){}}
 const SNAP=new WeakMap();
@@ -542,6 +656,7 @@ function mergeNote(L,R){
   const items=order.map(id=>{const a=lm.get(id),b=rm.get(id);const w=a&&b?((a.u||0)>(b.u||0)?a:b):(a||b);return del[id]&&del[id]>=(w.u||0)?null:w}).filter(Boolean);
   const cut=Date.now()-60*864e5;for(const k in del)if(del[k]<cut)delete del[k];
   const out=Object.assign({},other,newer,{items,del,_ts:Math.max(L._ts||0,R._ts||0)});
+  const ca=[L.cAt,R.cAt].filter(Boolean);if(ca.length)out.cAt=Math.min(...ca);
   for(const f of ['mood','bm','tags','carryOff']){const lu=L[f+'U']||0,ru=R[f+'U']||0;if(lu||ru){const w=lu>=ru?L:R;if(w[f]===undefined)delete out[f];else out[f]=w[f];out[f+'U']=Math.max(lu,ru)}}
   const ad=Object.assign({},R.attDel||{});for(const [k,v] of Object.entries(L.attDel||{}))ad[k]=Math.max(ad[k]||0,v);
   const am=new Map();[...(L.att||[]),...(R.att||[])].forEach(a=>{if(!ad[a.id]&&!am.has(a.id))am.set(a.id,a)});
@@ -550,9 +665,9 @@ function mergeNote(L,R){
   return out;
 }
 function pageSig(p){return JSON.stringify([p.items||[],p.mood||'',p.bm||0,p.tags||[],(p.att||[]).map(a=>a.id),p.carryOff||0])}
-function mark(...ids){if(col&&sync!=='offline'&&sync!=='saving')setSync('saving');const now=Date.now();ids.forEach(i=>{dirty.add(i);if(i==='gcal')G._ts=now;else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500);if(typeof refreshStreak==='function')refreshStreak()}
-const docName=id=>id==='gcal'?'g_events':'d_'+id.slice(6);
-const body=id=>id==='gcal'?{folder:G.folder||null,v2:G.v2||0,connected:G.connected,events:G.events,cals:G.cals,off:G.off,fetchedAt:G.fetchedAt,_ts:G._ts||0}:getRef(id);
+function mark(...ids){if(col&&sync!=='offline'&&sync!=='saving')setSync('saving');const now=Date.now();ids.forEach(i=>{dirty.add(i);if(i==='gcal')G._ts=now;else if(i==='prefs')S.prefs._ts=now;else if(i.startsWith('mem:')){const m=S.mem[i.slice(4)];if(m)m._ts=now}else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500);if(typeof refreshStreak==='function')refreshStreak()}
+const docName=id=>id==='gcal'?'g_events':id==='prefs'?'prefs':id.startsWith('mem:')?'mem_'+id.slice(4):'d_'+id.slice(6);
+const body=id=>id==='gcal'?{folder:G.folder||null,v2:G.v2||0,connected:G.connected,events:G.events,cals:G.cals,off:G.off,fetchedAt:G.fetchedAt,_ts:G._ts||0}:id==='prefs'?S.prefs:id.startsWith('mem:')?S.mem[id.slice(4)]:getRef(id);
 var col=null,sync='local',syncErr='';
 async function flush(){
   if(!col||writing||!dirty.size)return;
@@ -567,7 +682,7 @@ async function flush(){
   }
   writing=false;setSync('synced');
 }
-function setSync(s,msg){sync=s;syncErr=msg||'';setTimeout(()=>{const sa=$('savedAt');if(sa)sa.innerHTML=savedLabel()},0);if(s==='synced'){lastSyncAt=Date.now();const ls=$('lastSync');if(ls)ls.textContent='Last '+new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}document.querySelectorAll('.syncEl').forEach(el=>{el.className='sync syncEl '+s;el.textContent=syncLabel()})}
+function setSync(s,msg){sync=s;syncErr=msg||'';setTimeout(()=>{const sa=$('savedAt');if(sa)sa.innerHTML=savedLabel()},0);if(s==='synced'){lastSyncAt=Date.now();const ls=$('lastSync');if(ls)ls.textContent='Last synced '+fmtTime(lastSyncAt)}document.querySelectorAll('.syncEl').forEach(el=>{el.className='sync syncEl '+s;el.textContent=syncLabel()})}
 function syncLabel(){return sync==='synced'?'Synced':sync==='saving'?'Saving…':sync==='offline'?'Offline · will sync':sync==='error'?'Sync paused':sync==='connecting'?'Connecting…':'This device only'}
 
 /* ================= Supabase account, passcode, fingerprint ================= */
@@ -590,6 +705,19 @@ function applyRow(name,data){
     if(dirty.has('gcal')||(data._ts||0)<=(G._ts||0))return false;
     G={folder:data.folder||G.folder||null,v2:data.v2||0,connected:!!data.connected,events:data.events||[],cals:data.cals||[],off:data.off||[],fetchedAt:data.fetchedAt||0,_ts:data._ts||0};return true;
   }
+  if(name==='prefs'){
+    /* saved quotes merge one by one: the most recent change to each quote wins */
+    const qf=S.prefs.qfav,rq=data.qfav||{};let ch=false;
+    for(const k in rq){if(!qf[k]||(rq[k].at||0)>(qf[k].at||0)){qf[k]=rq[k];ch=true}}
+    if(Object.keys(qf).some(k=>!rq[k]||(qf[k].at||0)>(rq[k].at||0))&&!dirty.has('prefs')){dirty.add('prefs');keepDirty();clearTimeout(flushT);flushT=setTimeout(flush,800)}
+    S.prefs._ts=Math.max(S.prefs._ts||0,data._ts||0);return ch;
+  }
+  if(name.startsWith('mem_')){
+    const id=name.slice(4),k='mem:'+id,l=S.mem[id];
+    if(dirty.has(k)&&l)return false;
+    if(l&&(l._ts||0)>=(data._ts||0))return false;
+    S.mem[id]=Object.assign({},data,{id});return true;
+  }
   if(!name.startsWith('d_'))return false;
   const dd=name.slice(2),k='diary:'+dd,a=document.activeElement;
   if(!S.diary[dd]&&dTmp[dd]&&a&&a.classList&&a.classList.contains('dtxt')&&diaryDate===dd){S.diary[dd]=mergeNote(dTmp[dd],data);delete dTmp[dd];snapNote(k);return true}
@@ -608,7 +736,7 @@ function afterApply(changed){if(changed){saveLocal();softRender()}}
 let pulling=false;
 async function pullAll(){
   if(pulling||!sb)return;pulling=true;
-  let res;try{res=await withTimeout(sb.from('notes').select('note_id,data').or('note_id.like.d_*,note_id.eq.settings,note_id.eq.g_events'),15000)}catch(e){res={error:e}}finally{pulling=false}
+  let res;try{res=await withTimeout(sb.from('notes').select('note_id,data').or('note_id.like.d_*,note_id.like.mem_*,note_id.eq.settings,note_id.eq.g_events,note_id.eq.prefs'),15000)}catch(e){res={error:e}}finally{pulling=false}
   const {data,error}=res;
   if(error){setSync(isNet(error)?'offline':'error',error.message);return}
   let changed=false;(data||[]).forEach(r=>{if(applyRow(r.note_id,r.data))changed=true});
@@ -641,7 +769,7 @@ setInterval(()=>{if(lockMode==='open'&&!document.hidden)touchActive()},30000);
 addEventListener('pagehide',()=>{if(lockMode==='open')touchActive()});
 function unlock(){touchActive();const was=lockMode;lockMode='open';document.documentElement.classList.remove('locked');render();
   if(!lockEl.hidden&&was!=='open'){lockEl.classList.add('fade');setTimeout(()=>{if(lockMode==='open')lockEl.hidden=true;lockEl.classList.remove('fade')},200)}else lockEl.hidden=true;
-  setTimeout(gAutoRefresh,1200);loadWeather();setTimeout(autoSnapshot,4000)}
+  setTimeout(gAutoRefresh,1200);loadWeather();setTimeout(autoSnapshot,4000);if(!loadPending.done){loadPending.done=1;setTimeout(loadPending,1500)}}
 function lock(mode,msg){if(mode===lockMode&&mode==='pin'&&!lockEl.hidden&&!msg)return;lockEl.classList.remove('fade');
   if(mode==='pin'||mode==='forgot'||mode==='login')try{localStorage.setItem('sb-active','0')}catch(e){}
   const auto=mode==='pin'&&lockMode!=='pin';lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock();if(auto&&bioOn())setTimeout(()=>bioUnlock(true),250)}
@@ -707,7 +835,7 @@ async function onSignedIn(user,viaPassword){
   if(me&&me.id===user.id&&col){if(viaPassword&&pinRec)unlock();return}
   const keepOpen=lockMode==='open'&&me&&me.id===user.id;
   const owner=localStorage.getItem(OWNKEY);
-  if(owner&&owner!==user.id){dirty.clear();keepDirty();S={diary:{}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
+  if(owner&&owner!==user.id){dirty.clear();keepDirty();S={diary:{},mem:{},prefs:{qfav:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
   try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
   me=user;startSync();
   if(!pinRec){try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}}
@@ -786,7 +914,7 @@ function gKind(e,c){
 function gNorm(e,c){
   const allDay=!!(e.start&&e.start.date);let d,last,tm='';
   if(allDay){d=e.start.date;last=e.end&&e.end.date?dAdd(e.end.date,-1):d;if(last<d)last=d}
-  else{const s=new Date(e.start.dateTime);d=dFmt(s);last=d;tm=s.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true}).toUpperCase()}
+  else{const s=new Date(e.start.dateTime);d=dFmt(s);last=d;tm=fmtTime(s)}
   const kind=gKind(e,c);
   const ev={id:e.id,d,last,tm,t:(e.summary||'(No title)').trim(),k:kind,l:e.htmlLink||'',c:c.id,pub:kind==='hol'&&/public holiday/i.test(e.description||'')?1:0};
   if(kind==='bday'||kind==='anniv'){
@@ -837,7 +965,7 @@ function gStatusHTML(){
   if(gBusy)return '<p class="note">Reading your calendar…</p>';
   if(gErr)return `<p class="err">${esc(gErr)}</p>`;
   if(!G.connected)return '<p class="note">Not connected.</p>';
-  return `<p class="note">Connected · ${G.events.length} events · updated ${new Date(G.fetchedAt).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}</p>`;
+  return `<p class="note">Connected · ${G.events.length} events · updated ${fmtDT(G.fetchedAt)}</p>`;
 }
 
 /* icons */
@@ -870,7 +998,9 @@ const confettiShown=new Set();
 function dKey(d){return 'diary:'+d}
 function dPage(d){return S.diary[d]||(dTmp[d]=dTmp[d]||{items:[{id:uid(),t:'',done:false}],_ts:0})}
 function dHas(d){const p=S.diary[d];return !!(p&&p.items&&p.items.some(l=>l.t&&l.t.trim()))}
-function dOwn(d){if(!S.diary[d]){S.diary[d]=dPage(d);delete dTmp[d]}return S.diary[d]}
+function dOwn(d){if(!S.diary[d]){S.diary[d]=dPage(d);S.diary[d].cAt=Date.now();delete dTmp[d]}return S.diary[d]}
+function pageTimes(p){if(!p||!p.items||!dHasP(p))return null;const us=p.items.filter(l=>l.u).map(l=>l.u);const e=p._ts||(us.length?Math.max(...us):0),c=Math.min(p.cAt||Infinity,us.length?Math.min(...us):Infinity,e||Infinity);return isFinite(c)?{c,e:Math.max(e,c)}:null}
+function dHasP(p){return !!(p&&p.items&&p.items.some(l=>l.t&&l.t.trim()))}
 function dFlushSoon(){if(dSoonT){clearTimeout(dSoonT);dSoonT=null;if(dSoonKey)mark(dSoonKey)}}
 function dSoon(d){dSoonKey=dKey(d);clearTimeout(dSoonT);dSoonT=setTimeout(()=>{dSoonT=null;mark(dSoonKey)},500)}
 function dUnfinished(p){return p&&p.items?p.items.filter(l=>l.t.trim()&&!l.done&&!l.fw):[]}
@@ -889,7 +1019,7 @@ function setApp(html){if(app.__html===html)return false;app.innerHTML=html;app._
 function render(preserve){
   const keep={},ae=document.activeElement;let aid=null,sel=null;
   if(preserve){app.querySelectorAll('input[id]').forEach(e=>{if(e.type!=='checkbox'&&e.type!=='file')keep[e.id]=e.value});if(ae&&ae.id){aid=ae.id;try{sel=[ae.selectionStart,ae.selectionEnd]}catch(e){}}}
-  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else diaryView();
+  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else diaryView();
   renderSide();renderNav();
   if(preserve){for(const k in keep){const e=$(k);if(e)e.value=keep[k]}if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
   tickClock();
@@ -903,7 +1033,7 @@ function goView(v){
 }
 function goSettings(){goView('settings')}
 function goDiary(){goView('diary')}
-addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming'].includes(v)?v:'diary';app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
+addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming','memories','memory','memedit','quotes'].includes(v)?v:'diary';if(view==='memedit'&&!memEdit)view='memories';if(view==='diary')closeViewer();app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
 
 /* ---------- icons used by the chrome ---------- */
 const UI={
@@ -1012,45 +1142,116 @@ setInterval(()=>{if(!document.hidden)loadWeather()},10*60e3);
 function wxHTML(){
   if(!WX||Date.now()-WX.at>3*3600e3)return '<span class="wxSlot" hidden></span>';
   const [label,ic]=wxInfo(WX.code,WX.day);
-  return `<span class="chip wx wxSlot" title="${esc(label)} · ${WX.def?'home city (set in Settings)':'your current location'} · updated ${new Date(WX.at).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}"><span class="wxi">${svg(WXI[ic],26).replace('stroke="currentColor"','stroke="currentColor" stroke-width="1.4"')}</span><span class="chip-t"><b>${WX.t}°C</b><small>${esc(WX.name||'Hathras, UP')}</small></span></span>`;
+  return `<span class="chip wx wxSlot" title="${esc(label)} · ${WX.def?'home city (set in Settings)':'your current location'} · updated ${fmtTime(WX.at)}"><span class="wxi">${svg(WXI[ic],26).replace('stroke="currentColor"','stroke="currentColor" stroke-width="1.4"')}</span><span class="chip-t"><b>${WX.t}°C</b><small>${esc(WX.name||'Hathras, UP')}</small></span></span>`;
 }
 
-/* ---------- daily quote ---------- */
+/* ---------- daily quote ----------
+   Only quotations with a known written source are listed, with the source where it helps.
+   Sayings whose author is not known are labelled “Proverb” or “Unattributed”. */
 const QUOTES=[
-['Well begun is half done.','Aristotle'],['We are what we repeatedly do.','Will Durant'],['The journey of a thousand miles begins with one step.','Lao Tzu'],
-['It always seems impossible until it is done.','Nelson Mandela'],['Arise, awake, and stop not till the goal is reached.','Swami Vivekananda'],
-['You have to dream before your dreams can come true.','A. P. J. Abdul Kalam'],['Be the change that you wish to see in the world.','Mahatma Gandhi'],
-['Simplicity is the ultimate sophistication.','Leonardo da Vinci'],['Fill your paper with the breathings of your heart.','William Wordsworth'],
-['Write it on your heart that every day is the best day in the year.','Ralph Waldo Emerson'],['Do what you can, with what you have, where you are.','Theodore Roosevelt'],
-['Discipline is the bridge between goals and accomplishment.','Jim Rohn'],['Small deeds done are better than great deeds planned.','Peter Marshall'],
-['The best time to plant a tree was twenty years ago. The second best time is now.','Chinese proverb'],['Knowing yourself is the beginning of all wisdom.','Aristotle'],
-['In the middle of difficulty lies opportunity.','Albert Einstein'],['What we think, we become.','The Buddha'],['The unexamined life is not worth living.','Socrates'],
-['Happiness depends upon ourselves.','Aristotle'],['Act as if what you do makes a difference. It does.','William James'],
-['Start where you are. Use what you have. Do what you can.','Arthur Ashe'],['Little by little, one travels far.','Spanish proverb'],
-['It does not matter how slowly you go as long as you do not stop.','Confucius'],['The future depends on what you do today.','Mahatma Gandhi'],
-['Every moment is a fresh beginning.','T. S. Eliot'],['Fall seven times, stand up eight.','Japanese proverb'],['Patience is bitter, but its fruit is sweet.','Jean-Jacques Rousseau'],
-['Take care of your body. It is the only place you have to live.','Jim Rohn'],['Whatever you are, be a good one.','Abraham Lincoln'],
-['Believe you can and you are halfway there.','Theodore Roosevelt'],['Change your thoughts and you change your world.','Norman Vincent Peale'],
-['Today is the first day of the rest of your life.','Charles Dederich'],['A goal without a plan is just a wish.','Antoine de Saint-Exupéry'],
-['Keep your face always toward the sunshine, and shadows will fall behind you.','Walt Whitman'],['Dream big and dare to fail.','Norman Vaughan'],
-['Learning never exhausts the mind.','Leonardo da Vinci'],['An investment in knowledge pays the best interest.','Benjamin Franklin'],
-['Well done is better than well said.','Benjamin Franklin'],['Lost time is never found again.','Benjamin Franklin'],
-['Do not wait to strike till the iron is hot; make it hot by striking.','W. B. Yeats'],['Kindness is a language which the deaf can hear and the blind can see.','Mark Twain'],
-['Courage is grace under pressure.','Ernest Hemingway'],['The best way out is always through.','Robert Frost'],['Writing is the painting of the voice.','Voltaire'],
-['Either write something worth reading or do something worth writing.','Benjamin Franklin'],['I write to discover what I know.','Flannery O’Connor'],
-['Memory is the diary that we all carry about with us.','Oscar Wilde'],['Take up one idea. Make that one idea your life.','Swami Vivekananda'],
-['Excellence is a continuous process and not an accident.','A. P. J. Abdul Kalam'],['Where there is love there is life.','Mahatma Gandhi'],
-['The purpose of our lives is to be happy.','Dalai Lama'],['Turn your wounds into wisdom.','Oprah Winfrey'],['Do one thing every day that scares you.','Eleanor Roosevelt'],
-['A person who never made a mistake never tried anything new.','Albert Einstein'],['Energy and persistence conquer all things.','Benjamin Franklin'],
-['Our greatest glory is not in never falling, but in rising every time we fall.','Confucius'],['Make each day your masterpiece.','John Wooden'],
-['Gratitude turns what we have into enough.','Anonymous'],['The secret of your future is hidden in your daily routine.','Mike Murdock'],
-['Nothing will work unless you do.','Maya Angelou'],['What you do today can improve all your tomorrows.','Ralph Marston'],
-['The best preparation for tomorrow is doing your best today.','H. Jackson Brown Jr.'],['Strive for progress, not perfection.','Anonymous'],
-['Be so good they cannot ignore you.','Steve Martin'],['Life is what happens while you are busy making other plans.','Allen Saunders'],
-['Your time is limited, so do not waste it living someone else’s life.','Steve Jobs'],['The only way to do great work is to love what you do.','Steve Jobs']
+['Paper has more patience than people.','Anne Frank','The Diary of a Young Girl'],
+['Keep a diary, and someday it’ll keep you.','Mae West','Every Day’s a Holiday, 1937'],
+['I never travel without my diary. One should always have something sensational to read in the train.','Oscar Wilde','The Importance of Being Earnest'],
+['Memory is the diary that we all carry about with us.','Oscar Wilde','The Importance of Being Earnest'],
+['We write to taste life twice, in the moment and in retrospection.','Anaïs Nin','The Diary of Anaïs Nin'],
+['We do not remember days, we remember moments.','Cesare Pavese','This Business of Living'],
+['Life can only be understood backwards; but it must be lived forwards.','Søren Kierkegaard','Journals, 1843'],
+['All we have to decide is what to do with the time that is given us.','J. R. R. Tolkien','The Fellowship of the Ring'],
+['Not all those who wander are lost.','J. R. R. Tolkien','The Fellowship of the Ring'],
+['It’s no use going back to yesterday, because I was a different person then.','Lewis Carroll','Alice’s Adventures in Wonderland'],
+['Isn’t it nice to think that tomorrow is a new day with no mistakes in it yet?','L. M. Montgomery','Anne of Green Gables'],
+['I’m not afraid of storms, for I’m learning how to sail my ship.','Louisa May Alcott','Little Women'],
+['I am no bird; and no net ensnares me.','Charlotte Brontë','Jane Eyre'],
+['We know what we are, but know not what we may be.','William Shakespeare','Hamlet'],
+['The web of our life is of a mingled yarn, good and ill together.','William Shakespeare','All’s Well That Ends Well'],
+['Let life be beautiful like summer flowers and death like autumn leaves.','Rabindranath Tagore','Stray Birds'],
+['Clouds come floating into my life, no longer to carry rain or usher storm, but to add color to my sunset sky.','Rabindranath Tagore','Stray Birds'],
+['Faith is the bird that feels the light and sings when the dawn is still dark.','Rabindranath Tagore','Fireflies'],
+['The butterfly counts not months but moments, and has time enough.','Rabindranath Tagore','Fireflies'],
+['Arise, awake, and stop not till the goal is reached.','Swami Vivekananda',''],
+['Take up one idea. Make that one idea your life — think of it, dream of it, live on that idea.','Swami Vivekananda','Raja Yoga'],
+['Strength does not come from physical capacity. It comes from an indomitable will.','Mahatma Gandhi','Young India, 1920'],
+['You have a right to your actions, but never to the fruits of your actions.','Bhagavad Gita','Chapter 2, verse 47'],
+['The journey of a thousand miles begins with a single step.','Lao Tzu','Tao Te Ching, chapter 64'],
+['All that we are is the result of what we have thought.','The Dhammapada','Verse 1'],
+['The unexamined life is not worth living.','Socrates','Plato, Apology'],
+['Well begun is half done.','Aristotle','Politics'],
+['We are what we repeatedly do. Excellence, then, is not an act, but a habit.','Will Durant','The Story of Philosophy'],
+['While we are postponing, life speeds by.','Seneca','Letters to Lucilius, 1'],
+['Very little is needed to make a happy life.','Marcus Aurelius','Meditations'],
+['Know the true value of time; snatch, seize, and enjoy every moment of it.','Lord Chesterfield','Letters to His Son, 1749'],
+['Well done is better than well said.','Benjamin Franklin','Poor Richard’s Almanack, 1737'],
+['Lost time is never found again.','Benjamin Franklin','Poor Richard’s Almanack, 1748'],
+['Either write things worth reading, or do things worth the writing.','Benjamin Franklin','Poor Richard’s Almanack, 1738'],
+['Write it on your heart that every day is the best day in the year.','Ralph Waldo Emerson','Society and Solitude'],
+['It is not enough to be busy. The question is: what are we busy about?','Henry David Thoreau','Letter to H. G. O. Blake, 1857'],
+['Reflect upon your present blessings, of which every man has many; not on your past misfortunes, of which all men have some.','Charles Dickens','Sketches by Boz'],
+['I declare after all there is no enjoyment like reading!','Jane Austen','Pride and Prejudice'],
+['All, everything that I understand, I understand only because I love.','Leo Tolstoy','War and Peace'],
+['Work is love made visible.','Kahlil Gibran','The Prophet'],
+['The best way out is always through.','Robert Frost','A Servant to Servants'],
+['In three words I can sum up everything I’ve learned about life: it goes on.','Robert Frost',''],
+['Writing is the painting of the voice.','Voltaire','Philosophical Dictionary'],
+['I write because I don’t know what I think until I read what I say.','Flannery O’Connor',''],
+['There is no greater agony than bearing an untold story inside you.','Maya Angelou','I Know Why the Caged Bird Sings'],
+['Not everything that is faced can be changed, but nothing can be changed until it is faced.','James Baldwin','“As Much Truth As One Can Bear”, 1962'],
+['Life is either a daring adventure or nothing.','Helen Keller','Let Us Have Faith'],
+['You must do the thing you think you cannot do.','Eleanor Roosevelt','You Learn by Living'],
+['Life is like riding a bicycle. To keep your balance you must keep moving.','Albert Einstein','Letter to his son Eduard, 1930'],
+['I believe that the very purpose of our life is to seek happiness.','The Dalai Lama','The Art of Happiness'],
+['One child, one teacher, one book, one pen can change the world.','Malala Yousafzai','United Nations address, 2013'],
+['Amateurs sit and wait for inspiration, the rest of us just get up and go to work.','Stephen King','On Writing'],
+['Your time is limited, so don’t waste it living someone else’s life.','Steve Jobs','Stanford commencement address, 2005'],
+['The only way to do great work is to love what you do.','Steve Jobs','Stanford commencement address, 2005'],
+['Life is what happens to us while we are making other plans.','Allen Saunders','Reader’s Digest, 1957'],
+['Be so good they can’t ignore you.','Steve Martin',''],
+['Do what you can, with what you have, where you are.','Squire Bill Widener','quoted by Theodore Roosevelt in his autobiography'],
+['Gratitude is the memory of the heart.','Jean-Baptiste Massieu',''],
+['Little by little, one travels far.','Proverb',''],
+['Fall seven times, stand up eight.','Japanese proverb',''],
+['The best time to plant a tree was twenty years ago. The second best time is now.','Proverb',''],
+['Gratitude turns what we have into enough.','Unattributed',''],
+['Strive for progress, not perfection.','Unattributed','']
 ];
-function quoteFor(d){const t=dParse(d),start=new Date(t.getFullYear(),0,1);const n=Math.round((t-start)/864e5)+t.getFullYear()*7;return QUOTES[n%QUOTES.length]}
-function quoteHTML(){const [q,a]=quoteFor(today());return `<p class="quote"><span class="qmark" aria-hidden="true">“</span><span class="qt">${esc(q)}</span><span class="qa">— ${esc(a)}</span></p>`}
+/* each year gets its own fixed shuffle, so no quote repeats until the whole list has been shown */
+function qOrder(y){let a=QUOTES.map((_,i)=>i),x=(y*2654435761)>>>0;const rnd=()=>{x^=x<<13;x>>>=0;x^=x>>>17;x^=x<<5;x>>>=0;return x/4294967296};for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const qCache={};
+function quoteFor(d){const y=+d.slice(0,4),n=dDiff(d,y+'-01-01');const o=qCache[y]||(qCache[y]=qOrder(y));return QUOTES[o[n%o.length]]}
+function qKey(q){return q[0].toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,48)}
+function qFav(q){const f=S.prefs.qfav[qKey(q)];return !!(f&&f.on)}
+function qToggle(q,d){const k=qKey(q),on=!qFav(q);S.prefs.qfav[k]={q:q[0],a:q[1],s:q[2]||'',d,at:Date.now(),on};mark('prefs');return on}
+function qFavList(){return Object.values(S.prefs.qfav).filter(f=>f.on).sort((a,b)=>b.at-a.at)}
+var qOff=0;
+function quoteHTML(){
+  const d=dAdd(today(),qOff),q=quoteFor(d),fav=qFav(q),who=q[1]+(q[2]?', '+q[2]:'');
+  return `<div class="quote" id="quote"><span class="qmark" aria-hidden="true">${svg('<path d="M9.5 7C6.5 8 5 10.4 5 13.5V17h4.5v-4.5H7.2c.1-1.8 1-3 2.8-3.7ZM18.5 7c-3 1-4.5 3.4-4.5 6.5V17h4.5v-4.5h-2.3c.1-1.8 1-3 2.8-3.7Z"/>',15)}</span>
+   <p class="qbody"><span class="qt">${esc(q[0])}</span> <span class="qa">— ${esc(who)}</span>${qOff?` <span class="qd">Quote for ${esc(dShort(d))}</span>`:''}</p>
+   <span class="qctl"><button class="qb2" id="qPrev" type="button" aria-label="Previous day’s quote" title="Previous day’s quote">‹</button>${qOff?`<button class="qb2" id="qNext" type="button" aria-label="Next day’s quote" title="Next day’s quote">›</button><button class="qb2 txt" id="qToday" type="button">Today</button>`:''}
+   <button class="qb2${fav?' on':''}" id="qFav" type="button" aria-pressed="${fav}" aria-label="${fav?'Remove from saved quotes':'Save this quote'}" title="${fav?'Saved':'Save quote'}">${svg(HEART,15).replace('fill="none"',fav?'fill="currentColor"':'fill="none"')}</button>
+   <button class="qb2 txt" id="qAll" type="button" title="Saved quotes">Saved${qFavList().length?' ('+qFavList().length+')':''}</button></span></div>`;
+}
+const HEART='<path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20Z"/>';
+function bindQuote(){
+  const qp=$('quote');if(!qp)return;
+  const re=()=>{qp.outerHTML=quoteHTML();app.__html='';bindQuote()};
+  $('qPrev').onclick=()=>{if(qOff>-3650){qOff--;re()}};
+  if($('qNext'))$('qNext').onclick=()=>{if(qOff<0){qOff++;re()}};
+  if($('qToday'))$('qToday').onclick=()=>{qOff=0;re()};
+  $('qFav').onclick=()=>{const d=dAdd(today(),qOff),on=qToggle(quoteFor(d),d);re();toast(on?'Quote saved to Saved quotes':'Quote removed from Saved quotes')};
+  $('qAll').onclick=()=>goView('quotes');
+}
+function quotesView(){
+  const list=qFavList(),t=today(),recent=[];for(let k=0;k<30;k++){const d=dAdd(t,-k);recent.push([d,quoteFor(d)])}
+  const row=(q,a,src,d,key)=>`<li class="qrow"><div><p class="qt">“${esc(q)}”</p><p class="qa">— ${esc(a)}${src?', '+esc(src):''}${d?` · <span>${esc(dShort(d))}</span>`:''}</p></div><button class="qb2${S.prefs.qfav[key]&&S.prefs.qfav[key].on?' on':''}" type="button" data-qk="${key}" data-qd="${d||''}" aria-label="${S.prefs.qfav[key]&&S.prefs.qfav[key].on?'Remove from saved quotes':'Save this quote'}">${svg(HEART,16).replace('fill="none"',S.prefs.qfav[key]&&S.prefs.qfav[key].on?'fill="currentColor"':'fill="none"')}</button></li>`;
+  setApp(`<div class="dy">${topBar()}<div class="sheet">
+   <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button></div><h2>Quotes</h2>
+   <section class="set"><p class="eyebrow">Saved quotes · ${list.length}</p>${list.length?`<ul class="qlist">${list.map(f=>row(f.q,f.a,f.s,f.d,qKey([f.q]))).join('')}</ul>`:'<p class="empty">No saved quotes yet. Use the heart next to the daily quote to save one.</p>'}</section>
+   <section class="set"><p class="eyebrow">Previous 30 days</p><ul class="qlist">${recent.map(([d,q])=>row(q[0],q[1],q[2],d,qKey(q))).join('')}</ul></section>
+   <p class="note">Quotations are drawn from a list of ${QUOTES.length} with known written sources. Sayings whose author is not known are labelled “Proverb” or “Unattributed”. Each day of the year has one fixed quote, and no quote repeats until the whole list has been shown.</p>
+  </div><p class="credit">Crafted by Alok</p></div>`);
+  bindTop();$('vBack').onclick=goDiary;
+  app.querySelectorAll('[data-qk]').forEach(b=>b.onclick=()=>{const k=b.dataset.qk;let q=QUOTES.find(x=>qKey(x)===k);const f=S.prefs.qfav[k];if(!q&&f)q=[f.q,f.a,f.s];if(!q)return;const on=qToggle(q,b.dataset.qd||(f&&f.d)||today());app.__html='';render(true);toast(on?'Quote saved':'Quote removed from Saved quotes')});
+}
 
 /* ---------- top bar, drawer and bottom navigation ---------- */
 var lastSyncAt=0,mSearch=false;
@@ -1081,12 +1282,12 @@ function topBar(){
      <span class="brand only-narrow">${UI.book}<span><b>Alok’s Diary</b></span></span>
      <button class="sq-btn only-wide" id="tbSide" type="button" aria-pressed="${sideHidden()}" aria-label="${sideHidden()?'Show the side panel':'Hide the side panel'}" title="${sideHidden()?'Show':'Hide'} side panel ( [ )">${svg(sideHidden()?'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15M13 10l2.5 2-2.5 2"/>':'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15M15.5 10 13 12l2.5 2"/>',18)}</button>
      <span class="navpair only-wide"><button class="sq-btn" id="tbPrev" type="button" aria-label="Previous day">${svg(UI.left,18)}</button><button class="sq-btn" id="tbNext" type="button" aria-label="Next day">${svg(UI.right,18)}</button></span>
-     <span class="now"><span class="ndate">${esc(new Date().toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))}</span><span class="clock" id="clock" role="timer" aria-label="Current time"></span></span>
+     <span class="now"><span class="ndate">${esc(nowDate(new Date()))}</span><span class="clock" id="clock" role="timer" aria-label="Current time"></span></span>
    </div>
    <div class="tb-c">${wxHTML()}${nextChip()}</div>
    <div class="tb-r">
-     <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
-     <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last '+new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):''}</small></span>
+     <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${['memories','memory','memedit'].includes(view)?' on':''}" id="tbMem" type="button" aria-label="Memories" title="Memories">${svg(UI.mem)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
+     <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last synced '+fmtTime(lastSyncAt):''}</small></span>
    </div></header>${view==='diary'&&!dq?quoteHTML():''}`;
 }
 function sideHidden(){return document.documentElement.classList.contains('sidehide')}
@@ -1101,6 +1302,8 @@ function bindTop(){
   if($('tbNext'))$('tbNext').onclick=()=>{if(view!=='diary')goDiary();dGo(dAdd(diaryDate,1),'next')};
   if($('tbSearch'))$('tbSearch').onclick=focusSearch;
   if($('tbBm'))$('tbBm').onclick=()=>goView(view==='bookmarks'?'diary':'bookmarks');
+  if($('tbMem'))$('tbMem').onclick=()=>goView(view==='memories'?'diary':'memories');
+  bindQuote();
   if($('tbStats'))$('tbStats').onclick=()=>goView(view==='stats'?'diary':'stats');
   if($('tbSet'))$('tbSet').onclick=()=>goView(view==='settings'?'diary':'settings');
   bindNext();
@@ -1112,8 +1315,8 @@ function focusSearch(){
 }
 function renderNav(){
   let nav=$('bnav');if(!nav){nav=document.createElement('nav');nav.id='bnav';nav.className='bnav';nav.setAttribute('aria-label','Main');document.body.appendChild(nav)}
-  const it=[['today','Today',UI.today],['cal','Calendar',UI.cal],['search','Search',UI.search],['stats','Stats',UI.stats],['settings','Settings',null]];
-  const cur=view==='diary'?(mSearch||dq?'search':diaryDate===today()?'today':''):view;
+  const it=[['today','Today',UI.today],['cal','Calendar',UI.cal],['memories','Memories',UI.mem],['search','Search',UI.search],['stats','Stats',UI.stats],['settings','Settings',null]];
+  const cur=view==='diary'?(mSearch||dq?'search':diaryDate===today()?'today':''):['memory','memedit'].includes(view)?'memories':view;
   const html=it.map(([k,l,ic])=>`<button type="button" data-nav="${k}" class="${cur===k?'on':''}" aria-label="${l}">${ic?svg(ic,22):GEAR}<span>${l}</span></button>`).join('');
   if(nav.__html!==html){nav.innerHTML=html;nav.__html=html;nav.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{const k=b.dataset.nav;
     if(k==='today'){mSearch=false;dq='';if(view!=='diary')goView('diary');if(diaryDate!==today())dGo(today());else render();window.scrollTo({top:0,behavior:'smooth'})}
@@ -1143,20 +1346,31 @@ function pickerHTML(st,attrM){
 const LEGEND=`<div class="legend"><span><i style="background:var(--accent)"></i>Writing</span><span><i style="background:var(--k-bday)"></i>Birthday</span><span><i style="background:var(--k-meet)"></i>Event</span><span><i class="nl"></i>No entry</span></div>`;
 
 /* ---------- statistics ---------- */
-function words(p){return (p&&p.items?p.items:[]).reduce((a,l)=>a+(l.t&&l.t.trim()?l.t.trim().split(/\s+/).length:0),0)}
+/* Rules: an entry is a calendar date (up to today) whose saved page has at least one written line.
+   Lines moved forward to a later page are counted once, on the page they were moved to. */
+function words(p){return (p&&p.items?p.items:[]).reduce((a,l)=>a+(!l.fw&&l.t&&l.t.trim()?l.t.trim().split(/\s+/).length:0),0)}
+function entryDays(){const t=today();return Object.keys(S.diary).filter(d=>d<=t&&dHas(d)).sort()}
+function monthLen(y,m){return new Date(y,m+1,0).getDate()}
 function monthStats(y,m){
-  const days=new Date(y,m+1,0).getDate(),t=today(),pre=y+'-'+pad(m+1)+'-';
-  let entries=0,w=0,elapsed=0;
-  for(let d=1;d<=days;d++){const s=pre+pad(d);if(s<=t)elapsed++;if(dHas(s)){entries++;w+=words(S.diary[s])}}
-  const from=firstUseDate();let base=0;for(let d=1;d<=days;d++){const s=pre+pad(d);if(s<=t&&s>=from)base++}
-  return {entries,words:w,elapsed,consistency:base?Math.round(entries/base*100):0};
+  const days=monthLen(y,m),t=today(),pre=y+'-'+pad(m+1)+'-';
+  let entries=0,w=0,elapsed=0,run=0,best=0,tasks=0;
+  for(let d=1;d<=days;d++){const s=pre+pad(d);if(s>t)break;elapsed++;
+    if(dHas(s)){entries++;w+=words(S.diary[s]);run++;best=Math.max(best,run);(S.diary[s].items||[]).forEach(l=>{if(l.task&&l.done&&!l.fw)tasks++})}else run=0}
+  const last=elapsed?pre+pad(elapsed):null;
+  return {y,m,days,entries,words:w,elapsed,best,tasks,last,consistency:pctOf(entries,elapsed),
+    period:elapsed?`1${elapsed>1?'–'+elapsed:''} ${new Date(y,m,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'})}`:new Date(y,m,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'})};
 }
-function curStreak(){let d=today();if(!dHas(d))d=dAdd(d,-1);let n=0;while(dHas(d)&&n<4000){n++;d=dAdd(d,-1)}return n}
-function longestStreak(){const k=Object.keys(S.diary).filter(dHas).sort();let best=0,run=0,prev=null;k.forEach(d=>{run=prev&&dDiff(d,prev)===1?run+1:1;best=Math.max(best,run);prev=d});return best}
+function yearStats(y){const ms=Array.from({length:12},(_,m)=>monthStats(y,m));const e=ms.reduce((a,s)=>a+s.entries,0),el=ms.reduce((a,s)=>a+s.elapsed,0);
+  return {ms,entries:e,words:ms.reduce((a,s)=>a+s.words,0),elapsed:el,consistency:pctOf(e,el),tasks:ms.reduce((a,s)=>a+s.tasks,0)}}
+function curStreak(){let d=today();if(!dHas(d))d=dAdd(d,-1);let n=0;while(dHas(d)&&n<40000){n++;d=dAdd(d,-1)}return n}
+function longestStreak(){let best=0,run=0,prev=null;entryDays().forEach(d=>{run=prev&&dDiff(d,prev)===1?run+1:1;best=Math.max(best,run);prev=d});return best}
+function pctOf(a,b){if(!b)return null;const v=a/b*100;return v>0&&v<10?Math.round(v*10)/10:Math.round(v)}
+function pct(v){return v===null?'—':v+'%'}
 function statsCard(){
   const t=dParse(today()),s=monthStats(t.getFullYear(),t.getMonth());
   return `<div class="panel"><div class="phead"><p class="eyebrow">Writing · ${t.toLocaleDateString('en-IN',{month:'long'})}</p><button class="linkbtn" id="sideStats" type="button">View all →</button></div>
-   <div class="tiles"><div><b>${s.entries}</b><span>Entries</span></div><div><b>${s.words.toLocaleString('en-IN')}</b><span>Words</span></div><div><b>${curStreak()}</b><span>Day streak</span></div><div><b>${s.consistency}%</b><span>Consistency</span></div></div></div>`;
+   <div class="tiles"><div><b>${s.entries}</b><span>Entries</span></div><div><b>${s.words.toLocaleString('en-IN')}</b><span>Words</span></div><div><b>${curStreak()}</b><span>Day streak</span></div><div><b>${pct(s.consistency)}</b><span>Consistency</span></div></div>
+   <p class="period">${esc(s.period)} · ${s.entries} of ${s.elapsed} ${s.elapsed===1?'day':'days'} written</p></div>`;
 }
 
 /* ---------- side rail (desktop) / drawer (phone, tablet) ---------- */
@@ -1260,7 +1474,8 @@ function dRowsHTML(d){
     return `<div class="${rowCls(l)}" data-id="${l.id}"><button class="dnum" type="button" tabindex="-1" ${(has||l.task)&&!l.fw?'':'disabled'} ${lab?`aria-label="${lab}"`:''}>${num}</button><textarea class="dtxt" id="dl-${l.id}" rows="1" aria-label="Diary line" ${l.fw?'readonly':''} ${i===0&&ph?`placeholder="${ph}"`:l.task&&!has?'placeholder="New task"':''}>${esc(l.t)}</textarea></div>`}).join('');
 }
 function dCount(){const el=$('dcount');if(!el)return;const p=dPage(diaryDate),tx=p.items.filter(l=>l.t.trim()&&!l.fw),dn=tx.filter(l=>l.done).length,w=words(p);
-  el.textContent=`Words: ${w} · Lines: ${tx.length}${dn?` · ${dn} done`:''}`}
+  el.textContent=`Words: ${w} · Lines: ${tx.length}${dn?` · ${dn} done`:''}`;
+  const tm=$('dtimes');if(tm){const pt=pageTimes(S.diary[diaryDate]);const h=pt?`Created ${fmtDT(pt.c)}${pt.e-pt.c>60000?` · Last edited ${fmtDT(pt.e)}`:''}`:'';if(tm.textContent!==h)tm.textContent=h}}
 function dRenumber(){
   const p=dPage(diaryDate);let n=0;
   document.querySelectorAll('#dlines .drow').forEach(r=>{const l=p.items.find(x=>x.id===r.dataset.id),b=r.firstChild;if(!l)return;
@@ -1299,16 +1514,46 @@ function tagsHTML(p){
 function addTag(v){v=(v||'').trim().replace(/^#+/,'').toLowerCase().replace(/[^\p{L}\p{N}_-]+/gu,'-').replace(/^-|-$/g,'').slice(0,24);if(!v)return;
   const p=dOwn(diaryDate),tags=(p.tags||[]).slice();if(!tags.includes(v))tags.push(v);setField(diaryDate,'tags',tags)}
 
-/* ---------- attachments ---------- */
-function attHTML(p){
-  const att=(p&&p.att)||[];if(!att.length&&!pendingFiles.length&&!uploading.length)return '';
-  const imgs=att.filter(a=>a.thumb),docs=att.filter(a=>!a.thumb);
+/* ---------- attachments (photos and files kept in Google Drive) ----------
+   A target is either a diary page {date} or a memory {mem}. Pending files are kept in IndexedDB until they
+   are uploaded, so nothing is lost on refresh. Blob URLs are used only to display a file on screen; the page
+   stores a small JPEG preview (data URL) and the Google Drive file id. */
+var attAsk=null,pendAsk=null;const pendURL=new Map();
+function tgtSame(x,t){return t.mem?x.mem===t.mem:!x.mem&&x.date===t.date}
+function pendFor(t){return pendingFiles.filter(x=>tgtSame(x,t))}
+function pendThumb(x){if(!/^image\//.test(x.type||''))return '';let u=pendURL.get(x.id);if(!u){try{u=URL.createObjectURL(x.file)}catch(e){return ''}pendURL.set(x.id,u)}return u}
+function attList(t){return t.mem?((S.mem[t.mem]||{}).photos||[]):((S.diary[t.date]||{}).att||[])}
+function attHTML(t){
+  const att=attList(t),pend=pendFor(t),up=uploading.filter(u=>tgtSame(u,t));
+  if(!att.length&&!pend.length&&!up.length)return '';
+  const imgs=att.filter(a=>a.thumb),docs=att.filter(a=>!a.thumb),ask=attAsk&&att.find(a=>a.id===attAsk),pa=pendAsk&&pend.find(x=>x.id===pendAsk);
+  const cnt=[imgs.length?imgs.length+(imgs.length===1?' photo':' photos'):'',docs.length?docs.length+(docs.length===1?' file':' files'):''].filter(Boolean).join(' · ');
   return `<section class="datt" aria-label="Photos and files">
-   ${imgs.length?`<div class="thumbs">${imgs.map(a=>`<div class="thumb"><a href="${esc(a.link)}" target="_blank" rel="noopener" title="${esc(a.name)} · opens in Google Drive"><img src="${a.thumb}" alt="${esc(a.name)}"></a><button type="button" class="rm" data-attx="${a.id}" aria-label="Remove ${esc(a.name)} from this page">×</button></div>`).join('')}</div>`:''}
-   ${docs.map(a=>`<div class="doc">${svg(UI.file,18)}<a href="${esc(a.link)}" target="_blank" rel="noopener">${esc(a.name)}</a><small>${fmtSize(a.size)}</small><button type="button" class="rm" data-attx="${a.id}" aria-label="Remove ${esc(a.name)} from this page">×</button></div>`).join('')}
-   ${uploading.map(u=>`<div class="doc up">${svg(UI.up,18)}<span>${esc(u.name)}</span><small>Uploading…</small></div>`).join('')}
-   ${pendingFiles.length?`<div class="pend"><span>${pendingFiles.length} ${pendingFiles.length===1?'file is':'files are'} ready to save in your Google Drive.</span><span class="row"><button class="btn sm" id="upGo" type="button">Upload to Google Drive</button><button class="btn ghost sm" id="upNo" type="button">Cancel</button></span></div>`:''}
+   ${cnt?`<p class="atth">${svg(UI.photo,15)}<b>${cnt}</b><small>Saved in your Google Drive${imgs.length?' · select a photo to view it full size':''}</small></p>`:''}
+   ${imgs.length?`<div class="thumbs">${imgs.map((a,i)=>`<figure class="thumb"><button type="button" class="tview" data-view="${i}" aria-label="View ${esc(a.name)} (${i+1} of ${imgs.length})"><img src="${a.thumb}" alt="${esc(a.name)}" loading="lazy"></button><figcaption title="${esc(a.name)}">${esc(a.name)}</figcaption><button type="button" class="rm" data-attx="${a.id}" aria-label="Remove ${esc(a.name)}">×</button></figure>`).join('')}</div>`:''}
+   ${docs.map(a=>`<div class="doc">${svg(UI.file,18)}<a href="${esc(a.link)}" target="_blank" rel="noopener">${esc(a.name)}</a><small>${fmtSize(a.size)}</small><button type="button" class="rm" data-attx="${a.id}" aria-label="Remove ${esc(a.name)}">×</button></div>`).join('')}
+   ${ask?`<div class="confirm" role="alertdialog" aria-label="Confirm removal"><span>Remove “${esc(ask.name)}” from this ${t.mem?'memory':'page'}? The original file stays in your Google Drive.</span><span class="row"><button class="btn warn sm" type="button" data-attyes="${ask.id}">Remove</button><button class="btn ghost sm" type="button" data-attno="1">Keep it</button></span></div>`:''}
+   ${up.map(u=>`<div class="doc up">${svg(UI.up,18)}<span>${esc(u.name)}</span><small>Uploading…</small></div>`).join('')}
+   ${pend.length?`<div class="pend"><p class="atth"><b>${pend.length} ${pend.length===1?'file is':'files are'} waiting to upload</b><small>${pend.some(x=>x.vol)?'Upload before closing the app.':'Kept safely on this device until uploaded.'}</small></p>
+     <ul class="plist">${pend.map(x=>`<li class="${x.err?'bad':''}">${pendThumb(x)?`<img src="${pendThumb(x)}" alt="">`:`<span class="pi">${svg(UI.file,18)}</span>`}<span class="pn"><span>${esc(x.name)}</span><small>${fmtSize(x.size)}${x.err?' · Not uploaded: '+esc(x.err):''}</small></span><button type="button" class="linkbtn" data-pdrop="${x.id}">Discard</button></li>`).join('')}</ul>
+     ${pa?`<div class="confirm" role="alertdialog"><span>Discard “${esc(pa.name)}”? It has not been uploaded, so it will not be kept anywhere.</span><span class="row"><button class="btn warn sm" type="button" data-pdyes="${pa.id}">Discard</button><button class="btn ghost sm" type="button" data-pdno="1">Keep it</button></span></div>`:''}
+     <span class="row"><button class="btn sm" id="upGo" type="button">${pend.some(x=>x.err)?'Retry upload':'Upload to Google Drive'}</button></span></div>`:''}
   </section>`;
+}
+function removeAtt(t,id){
+  if(t.mem){const m=S.mem[t.mem];if(!m)return;m.photos=(m.photos||[]).filter(a=>a.id!==id);mark('mem:'+t.mem)}
+  else{const p=dOwn(t.date);p.att=(p.att||[]).filter(a=>a.id!==id);p.attDel=Object.assign({},p.attDel,{[id]:Date.now()});mark(dKey(t.date))}
+}
+function bindAtt(t,root){
+  root=root||app;
+  root.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>openViewer(t,+b.dataset.view));
+  root.querySelectorAll('[data-attx]').forEach(b=>b.onclick=()=>{attAsk=b.dataset.attx;pendAsk=null;render(true)});
+  root.querySelectorAll('[data-attno]').forEach(b=>b.onclick=()=>{attAsk=null;render(true)});
+  root.querySelectorAll('[data-attyes]').forEach(b=>b.onclick=()=>{removeAtt(t,b.dataset.attyes);attAsk=null;render(true);toast('Removed. The original file remains in your Google Drive.')});
+  root.querySelectorAll('[data-pdrop]').forEach(b=>b.onclick=()=>{pendAsk=b.dataset.pdrop;attAsk=null;render(true)});
+  root.querySelectorAll('[data-pdno]').forEach(b=>b.onclick=()=>{pendAsk=null;render(true)});
+  root.querySelectorAll('[data-pdyes]').forEach(b=>b.onclick=()=>{dropPending(b.dataset.pdyes);pendAsk=null;render(true);toast('File discarded')});
+  const g=root.querySelector('#upGo');if(g)g.onclick=()=>uploadPending(t);
 }
 function fmtSize(b){b=+b||0;return b>1048576?(b/1048576).toFixed(1)+' MB':b>1024?Math.round(b/1024)+' KB':b?b+' B':''}
 
@@ -1320,10 +1565,11 @@ function dSearchHTML(){
     Object.keys(S.diary).sort().reverse().forEach(d=>{const p=S.diary[d];(p.items||[]).forEach(l=>{if(l.t&&l.t.toLowerCase().includes(ql))hits.push({d,t:l.t,done:l.done})});
       (p.tags||[]).forEach(t=>{if(t.includes(ql))hits.push({d,t:'#'+t,tag:1})});(p.att||[]).forEach(a=>{if(a.name.toLowerCase().includes(ql))hits.push({d,t:a.name,file:1})})});
     G.events.forEach(e=>{if(evTitle(e).toLowerCase().includes(ql)&&!G.off.includes(e.c))hits.push({d:e.d,t:evTitle(e),ev:e.k})});
+    Object.values(S.mem).forEach(m=>{if(m&&!m.deleted&&m.date&&((m.title||'')+' '+(m.desc||'')).toLowerCase().includes(ql))hits.push({d:m.date,t:m.title||'(untitled)',mem:m.id})});
     const dm=raw.match(/^(\d{1,2})[\/\-. ](\d{1,2})(?:[\/\-. ](\d{2,4}))?$/);if(dm){let y=dm[3]?+dm[3]:dParse(today()).getFullYear();if(y<100)y+=2000;const s=y+'-'+pad(+dm[2])+'-'+pad(+dm[1]);if(!isNaN(dParse(s)))hits.unshift({d:s,t:'Open the page for '+dLong(s),go:1})}
   }
   hits.sort((a,b)=>(b.go||0)-(a.go||0)||(a.d<b.d?1:-1));
-  return hits.length?`<p class="note">${hits.length} ${hits.length===1?'result':'results'} for “${esc(raw)}”</p><ul class="results">${hits.slice(0,120).map(h=>`<li><button data-dgo="${h.d}" type="button"><div class="where">${esc(dLong(h.d))}${h.ev?' · '+KLABEL[h.ev]:h.tag?' · Tag':h.file?' · File':''}</div><div class="${h.done?'dstruck':''}">${hl(h.t,raw.replace(/^#/,''))}</div></button></li>`).join('')}</ul>`
+  return hits.length?`<p class="note">${hits.length} ${hits.length===1?'result':'results'} for “${esc(raw)}”</p><ul class="results">${hits.slice(0,120).map(h=>`<li><button ${h.mem?`data-mgo="${h.mem}"`:`data-dgo="${h.d}"`} type="button"><div class="where">${esc(dLong(h.d))}${h.mem?' · Memory':h.ev?' · '+KLABEL[h.ev]:h.tag?' · Tag':h.file?' · File':''}</div><div class="${h.done?'dstruck':''}">${hl(h.t,raw.replace(/^#/,''))}</div></button></li>`).join('')}</ul>`
     :`<p class="empty">No diary page, tag or calendar event matches “${esc(raw)}”.</p>`;
 }
 function diaryView(){
@@ -1362,10 +1608,10 @@ function diaryView(){
      </div>
      ${eventsHTML(d)}
      ${carry}
-     ${attHTML(p)}
+     ${attHTML({date:d})}
      <div class="dlines" id="dlines">${dRowsHTML(d)}</div>
      <div class="dfill" id="dfill" aria-hidden="true"></div>
-     <div class="dfoot"><span class="hint">Tap a line number to strike it off · Swipe sideways to turn the page</span><span class="fr"><span id="dcount"></span><button type="button" class="ic-btn sm${bm?' on':''}" id="dBm" aria-pressed="${bm}" aria-label="${bm?'Remove bookmark':'Bookmark this page'}">${svg(UI.bm,18).replace('fill="none"',bm?'fill="currentColor"':'fill="none"')}</button><span class="saved" id="savedAt" aria-live="polite">${savedLabel()}</span></span></div>
+     <div class="dfoot"><span class="hint">Tap a line number to strike it off · Swipe sideways to turn the page<span class="dtimes" id="dtimes"></span></span><span class="fr"><span id="dcount"></span><button type="button" class="ic-btn sm${bm?' on':''}" id="dBm" aria-pressed="${bm}" aria-label="${bm?'Remove bookmark':'Bookmark this page'}">${svg(UI.bm,18).replace('fill="none"',bm?'fill="currentColor"':'fill="none"')}</button>${memBtn(d)}<span class="saved" id="savedAt" aria-live="polite">${savedLabel()}</span></span></div>
    </article>`}
    <p class="credit">Crafted by Alok</p>
   </div>`);
@@ -1373,6 +1619,7 @@ function diaryView(){
   const qi=$('dq');if(qi){qi.oninput=()=>{dq=qi.value;render(true)};qi.onkeydown=e=>{if(e.key==='Escape'){dq='';mSearch=false;render()}}}
   if($('dqX'))$('dqX').onclick=()=>{dq='';mSearch=false;render()};
   app.querySelectorAll('[data-dgo]').forEach(b=>b.onclick=()=>{dq='';mSearch=false;dAnim='next';diaryDate=b.dataset.dgo;sideM=null;render();window.scrollTo({top:0})});
+  app.querySelectorAll('[data-mgo]').forEach(b=>b.onclick=()=>{dq='';mSearch=false;openMem('m:'+b.dataset.mgo)});
   const pp=$('dpaper');if(!pp)return;
   if(dAnim){pp.classList.add('turn-'+dAnim);dAnim=''}
   if(changed){pp.querySelectorAll('.dtxt').forEach(dAutosize);confetti()}
@@ -1392,15 +1639,13 @@ function diaryView(){
   /* quick add and tools */
   $('qTask').onclick=addTaskLine;
   $('qTag').onclick=()=>{tagEdit=true;render();const i=$('tagIn');if(i)i.focus()};
-  $('qPhoto').onclick=()=>pickFiles('image/*');
-  $('qFile').onclick=()=>pickFiles('');
+  $('qPhoto').onclick=()=>pickFiles('photo',{date:diaryDate});
+  $('qFile').onclick=()=>pickFiles('file',{date:diaryDate});
   const ti=$('tagIn');if(ti){ti.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();addTag(ti.value);ti.value='';tagEdit=true;render();const n=$('tagIn');if(n)n.focus()}else if(e.key==='Escape'){tagEdit=false;render()}};
     ti.onblur=()=>setTimeout(()=>{if(document.activeElement&&document.activeElement.id==='tagIn')return;if(ti.value.trim())addTag(ti.value);tagEdit=false;render()},150)}
   app.querySelectorAll('[data-tagq]').forEach(b=>b.onclick=()=>{dq='#'+b.dataset.tagq;mSearch=true;render()});
   app.querySelectorAll('[data-tagx]').forEach(b=>b.onclick=()=>{const p=dOwn(diaryDate);setField(diaryDate,'tags',(p.tags||[]).filter(x=>x!==b.dataset.tagx));render()});
-  app.querySelectorAll('[data-attx]').forEach(b=>b.onclick=()=>{const p=dOwn(diaryDate),id=b.dataset.attx;p.att=(p.att||[]).filter(a=>a.id!==id);p.attDel=Object.assign({},p.attDel,{[id]:Date.now()});mark(dKey(diaryDate));render();toast('Removed from this page. The file remains in your Google Drive.')});
-  if($('upGo'))$('upGo').onclick=uploadPending;
-  if($('upNo'))$('upNo').onclick=()=>{pendingFiles=[];render()};
+  bindAtt({date:diaryDate});
   $('tFont').onclick=e=>{const m=$('fontMenu');if(m&&!m.hidden){m.hidden=true;return}openFonts(e.currentTarget)};
   $('tSpace').onchange=e=>{P.space=e.target.value;savePrefs();applyPrefs()};
   $('tSm').onclick=()=>{P.size=P.size==='l'?'m':'s';savePrefs();applyPrefs()};
@@ -1411,6 +1656,7 @@ function diaryView(){
   pp.querySelectorAll('[data-hl]').forEach(b=>b.onclick=()=>lineAction(l=>{const v=b.dataset.hl;l.hl=v&&l.hl!==v?v:undefined}));
   $('tFocus').onclick=toggleFocus;
   $('dBm').onclick=toggleBookmark;
+  if($('dMem'))$('dMem').onclick=()=>{const m=memOfPage(diaryDate);if(m){memId='m:'+m.id;goView('memory');return}const x=memFind('d:'+diaryDate);const p=S.diary[diaryDate];const pt=pageTitle(p);openMemEdit(x||{auto:'diary',date:diaryDate,title:pt.title||'Photos from this day',cat:pageCat(p),fav:!!p.bm})};
   const box=$('dlines');
   if(!box.__fi){box.__fi=1;box.addEventListener('focusin',e=>{if(e.target.classList.contains('dtxt')){dActive=e.target.parentNode.dataset.id;updateTools()}});box.addEventListener('focusout',dFlushSoon)}
   box.oninput=e=>{
@@ -1446,9 +1692,11 @@ function diaryView(){
     if(last.t.trim()||last.fw){const nl={id:uid(),t:'',done:false};dOwn(diaryDate).items.push(nl);dRelayout(nl.id,0)}
     else{const t=$('dl-'+last.id);t.focus();t.setSelectionRange(t.value.length,t.value.length)}};
 }
+function memOfPage(d){return Object.values(S.mem).find(m=>m&&!m.deleted&&m.src&&m.src.date===d)||null}
+function memBtn(d){const p=S.diary[d];if(!p||!(dHas(d)||(p.att||[]).some(a=>a.thumb)))return '';const m=memOfPage(d);return `<button type="button" class="ic-btn sm memb${m?' on':''}" id="dMem" aria-label="${m?'Open the saved memory':'Save this page as a memory'}" title="${m?'Saved as a memory':'Save as memory'}">${svg(UI.mem,18)}</button>`}
 function toggleBookmark(){const p=S.diary[diaryDate];const on=!(p&&p.bm);setField(diaryDate,'bm',on?true:null);render();toast(on?'Page bookmarked':'Bookmark removed')}
 function savedLabel(){
-  const t=lastSyncAt?new Date(lastSyncAt).toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}):'';
+  const t=lastSyncAt?fmtTime(lastSyncAt):'';
   if(sync==='saving')return '<i class="sv sv-busy"></i>Saving…';
   if(sync==='offline')return '<i class="sv sv-off"></i>Saved on this device · will upload';
   if(sync==='error')return '<i class="sv sv-off"></i>Saved on this device · retrying';
@@ -1591,7 +1839,7 @@ function dFlipSound(){
 }
 
 /* ================= settings ================= */
-var restoreData=null,restoreFrom='';
+var restoreData=null,restoreFrom='',restoreMem=null,restorePrefs=null;
 function settingsView(){
   const lm=lockMin(),t=today(),mStart=t.slice(0,8)+'01';
   setApp(`<div class="dy">${topBar()}<div class="sheet">
@@ -1606,6 +1854,8 @@ function settingsView(){
    <section class="set"><p class="eyebrow">Photos and files</p>
      <p class="note">Photos and documents added with Quick Add are saved in your Google Drive, in a folder named “Alok’s Diary”. The diary can see only the files it created there. A small preview of each photo is kept on the page so it shows on every device; tapping it opens the original in Drive.</p>
      <p class="set-line"><span>Google Drive</span><b>${driveReady()?'Connected for this session':'Asked when you first upload'}</b></p>
+     <p class="note">Photos can be JPG, JPEG, PNG or WEBP, up to 100 MB each. The original file is uploaded unchanged. Until a file is uploaded it is kept on this device, even if the app is closed.</p>
+     ${pendingFiles.length?`<div class="pend"><p class="atth"><b>${pendingFiles.length} ${pendingFiles.length===1?'file is':'files are'} waiting to upload</b></p><ul class="plist">${pendingFiles.map(x=>`<li class="${x.err?'bad':''}"><span class="pn"><span>${esc(x.name)}</span><small>${x.mem?'Memory: '+esc((S.mem[x.mem]&&S.mem[x.mem].title)||'untitled'):esc(dLong(x.date))}${x.err?' · Not uploaded: '+esc(x.err):''}</small></span></li>`).join('')}</ul><span class="row"><button class="btn sm" id="upAll" type="button">Upload all now</button></span></div>`:''}
    </section>
    <section class="set"><p class="eyebrow">Weather</p>
      <p class="set-line"><span>Home city</span><b>${esc(WXHOME.name)}</b></p>
@@ -1660,29 +1910,52 @@ function settingsView(){
   const rng=()=>{let a=$('exFrom').value,b=$('exTo').value;if(!a||!b){toast('Please choose both dates.');return null}if(a>b)[a,b]=[b,a];return [a,b]};
   $('exPdf').onclick=()=>{const r=rng();if(r)exportPDF(r[0],r[1])};
   $('exXlsx').onclick=()=>{const r=rng();if(r)backupXLSX(r[0],r[1])};
+  if($('upAll'))$('upAll').onclick=()=>uploadPending();
   $('sJson').onclick=backupJSON;$('sRest').onclick=restorePick;
-  if($('sRestYes'))$('sRestYes').onclick=restoreNow;if($('sRestNo'))$('sRestNo').onclick=()=>{restoreData=null;render()};
+  if($('sRestYes'))$('sRestYes').onclick=restoreNow;if($('sRestNo'))$('sRestNo').onclick=()=>{restoreData=restoreMem=restorePrefs=null;render()};
   $('sUpdate').onclick=updateApp;
   $('signOut').onclick=signOut;
   listSnaps().then(list=>{const el=$('snapList');if(!el)return;
     el.innerHTML=list.length?`<ul class="snaps">${list.map(s=>`<li><span>${esc(dLong(s.day))} · ${s.pages} ${s.pages===1?'page':'pages'}</span><button class="btn ghost sm" type="button" data-snap="${s.day}">Restore this copy</button></li>`).join('')}</ul>`:'<p class="note">No automatic copies yet. The first one is made today.</p>';
-    el.querySelectorAll('[data-snap]').forEach(b=>b.onclick=async()=>{const s=await loadSnap(b.dataset.snap);if(!s){toast('That copy could not be read.');return}restoreData=s.diary;restoreFrom='the copy of '+dLong(s.day);render();window.scrollTo({top:document.body.scrollHeight})})});
+    el.querySelectorAll('[data-snap]').forEach(b=>b.onclick=async()=>{const s=await loadSnap(b.dataset.snap);if(!s){toast('That copy could not be read.');return}restoreData=s.diary;restoreMem=s.mem||null;restorePrefs=null;restoreFrom='the copy of '+dLong(s.day);render();window.scrollTo({top:document.body.scrollHeight})})});
 }
 
 /* ---------- Google Drive attachments (drive.file: the app sees only files it created) ---------- */
 const DSCOPE='https://www.googleapis.com/auth/drive.file';
 function driveReady(){return gTok&&Date.now()<gExp&&/drive\.file/.test(gScopes||'')}
-function pickFiles(accept){
-  const f=document.createElement('input');f.type='file';f.multiple=true;if(accept)f.accept=accept;
-  f.onchange=()=>{const list=[...f.files].filter(x=>{if(x.size>100*1048576){toast(`${x.name} is larger than 100 MB and was skipped.`);return false}return true});if(!list.length)return;
-    pendingFiles=pendingFiles.concat(list.map(file=>({file,date:diaryDate})));if(driveReady())uploadPending();else render()};
+const PHOTO_TYPES=['image/jpeg','image/png','image/webp'];
+function isPhoto(f){return PHOTO_TYPES.includes((f.type||'').toLowerCase())||/\.(jpe?g|png|webp)$/i.test(f.name||'')}
+function photoType(f){if(PHOTO_TYPES.includes((f.type||'').toLowerCase()))return f.type.toLowerCase();const e=(/\.(\w+)$/.exec(f.name||'')||[])[1]||'';return /png/i.test(e)?'image/png':/webp/i.test(e)?'image/webp':'image/jpeg'}
+function pickFiles(kind,t){
+  t=t||{date:diaryDate};
+  const f=document.createElement('input');f.type='file';f.multiple=true;if(kind==='photo')f.accept='image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
+  f.onchange=async()=>{
+    const bad=[],big=[],list=[];
+    [...f.files].forEach(x=>{if(x.size>100*1048576)big.push(x.name);else if(kind==='photo'&&!isPhoto(x))bad.push(x.name);else list.push(x)});
+    if(bad.length)toast(`${bad.join(', ')}: only JPG, JPEG, PNG and WEBP photos can be added.`);
+    else if(big.length)toast(`${big.join(', ')}: larger than 100 MB, so not added.`);
+    if(!list.length)return;
+    const add=list.map(file=>({id:uid(),file,name:file.name,type:kind==='photo'||isPhoto(file)?photoType(file):(file.type||''),size:file.size,date:t.mem?undefined:t.date,mem:t.mem,at:Date.now()}));
+    pendingFiles=pendingFiles.concat(add);
+    await Promise.all(add.map(savePending));
+    if(driveReady())uploadPending(t);else{render(true);toast(`${add.length} ${add.length===1?'file is':'files are'} ready. Select “Upload to Google Drive” to save ${add.length===1?'it':'them'}.`)}
+  };
   f.click();
 }
+async function savePending(x){try{const db=await idb();await new Promise((ok,no)=>{const tx=db.transaction('pending','readwrite');tx.objectStore('pending').put({id:x.id,blob:x.file,name:x.name,type:x.type,size:x.size,date:x.date||null,mem:x.mem||null,err:x.err||'',at:x.at});tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});x.vol=false}catch(e){x.vol=true}}
+async function delPending(id){try{const db=await idb();await new Promise(ok=>{const tx=db.transaction('pending','readwrite');tx.objectStore('pending').delete(id);tx.oncomplete=ok;tx.onerror=ok})}catch(e){}}
+function dropPending(id){pendingFiles=pendingFiles.filter(x=>x.id!==id);const u=pendURL.get(id);if(u){URL.revokeObjectURL(u);pendURL.delete(id)}delPending(id)}
+async function loadPending(){
+  try{const db=await idb();const rows=await new Promise((ok,no)=>{const r=db.transaction('pending').objectStore('pending').getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>no(r.error)});
+    const have=new Set(pendingFiles.map(x=>x.id));
+    rows.forEach(r=>{if(!have.has(r.id)&&r.blob)pendingFiles.push({id:r.id,file:r.blob,name:r.name,type:r.type,size:r.size,date:r.date||undefined,mem:r.mem||undefined,err:r.err||'',at:r.at})});
+    if(rows.length){render(true);toast(`${rows.length} ${rows.length===1?'file is':'files are'} still waiting to upload to Google Drive.`)}
+  }catch(e){}
+}
 async function makeThumb(file){
-  if(!/^image\//.test(file.type))return null;
   try{const u=URL.createObjectURL(file);const img=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});
-    const m=220,s=Math.min(1,m/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*s));c.height=Math.max(1,Math.round(img.height*s));
-    c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);return c.toDataURL('image/jpeg',.72)}catch(e){return null}
+    const m=480,s=Math.min(1,m/Math.max(img.naturalWidth,img.naturalHeight)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.naturalWidth*s));c.height=Math.max(1,Math.round(img.naturalHeight*s));
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);return c.toDataURL('image/jpeg',.8)}catch(e){return null}
 }
 async function driveFolder(){
   if(G.folder)return G.folder;
@@ -1694,8 +1967,8 @@ async function driveFolder(){
   mark('gcal');return G.folder;
 }
 async function driveErr(r){const j=await r.json().catch(()=>({}));const m=j.error&&j.error.message||('Google Drive returned an error ('+r.status+').');return new Error(/has not been used|is disabled/i.test(m)?'The Google Drive API is not enabled for this app. Please enable it in Google Cloud.':m)}
-async function driveUpload(file,d,folder){
-  const type=file.type||'application/octet-stream',meta={name:`${d} · ${file.name}`,parents:[folder],mimeType:file.type||undefined,description:'Saved from Alok’s Diary for '+d};
+async function driveUpload(file,d,folder,x){
+  const type=(x&&x.type)||file.type||'application/octet-stream',meta={name:`${d} · ${(x&&x.name)||file.name}`,parents:[folder],mimeType:type==='application/octet-stream'?undefined:type,description:(x&&x.mem?'Memory photo saved from Alok’s Diary for ':'Saved from Alok’s Diary for ')+d};
   const init=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+gTok,'Content-Type':'application/json; charset=UTF-8','X-Upload-Content-Type':type,'X-Upload-Content-Length':String(file.size)},body:JSON.stringify(meta)});
   if(!init.ok)throw await driveErr(init);
   const loc=init.headers.get('Location');let res;
@@ -1704,23 +1977,66 @@ async function driveUpload(file,d,folder){
     res=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,webViewLink',{method:'POST',headers:{Authorization:'Bearer '+gTok,'Content-Type':'multipart/related; boundary='+bd},body})}
   if(!res.ok)throw await driveErr(res);return res.json();
 }
-async function uploadPending(){
-  if(!pendingFiles.length)return;
+async function uploadPending(t){
+  const batch=t?pendFor(t):pendingFiles.slice();if(!batch.length)return;
   try{if(!driveReady())await gAuth(/drive\.file/.test(localStorage.getItem('alok-gscopes')||'')?'':'consent',GSCOPE+' '+DSCOPE)}
-  catch(e){toast(e.message||'Google Drive access was not granted.');return}
-  if(!/drive\.file/.test(gScopes||'')){toast('Google Drive access was not granted. Please tick the Drive permission.');return}
-  const batch=pendingFiles;pendingFiles=[];uploading=uploading.concat(batch.map(x=>({name:x.file.name})));render();
-  let ok=0;
-  try{const folder=await driveFolder();
-    for(const x of batch){
-      try{const [j,thumb]=await Promise.all([driveUpload(x.file,x.date,folder),makeThumb(x.file)]);
-        const p=dOwn(x.date);p.att=(p.att||[]).concat([{id:uid(),fid:j.id,name:x.file.name,mime:x.file.type||j.mimeType||'',size:x.file.size,link:j.webViewLink||('https://drive.google.com/file/d/'+j.id+'/view'),thumb:thumb||undefined,at:Date.now()}]);
-        mark(dKey(x.date));ok++}
-      catch(e){toast(`${x.file.name}: ${e.message==='expired'?'Google sign-in expired. Please try again.':e.message}`)}
-      uploading=uploading.filter(u=>u.name!==x.file.name);render();
-    }
-  }catch(e){uploading=[];render();toast(e.message==='expired'?'Google sign-in expired. Please try again.':e.message);return}
-  if(ok)toast(`${ok} ${ok===1?'file':'files'} saved to Google Drive · Alok’s Diary folder`);
+  catch(e){toast((e.message||'Google Drive access was not granted.')+' The files are kept and can be uploaded later.');return}
+  if(!/drive\.file/.test(gScopes||'')){toast('Google Drive access was not granted. Please tick the Drive permission. The files are kept.');return}
+  const ids=new Set(batch.map(x=>x.id));uploading=uploading.concat(batch.map(x=>({id:x.id,name:x.name,date:x.date,mem:x.mem})));render(true);
+  let ok=0,fail=0;
+  let folder=null;try{folder=await driveFolder()}catch(e){
+    const m=e.message==='expired'?'Google sign-in expired':e.message;batch.forEach(x=>{x.err=m;savePending(x)});uploading=uploading.filter(u=>!ids.has(u.id));render(true);toast(m+'. The files are kept and can be retried.');return}
+  for(const x of batch){
+    try{const isImg=/^image\//.test(x.type||'');const [j,thumb]=await Promise.all([driveUpload(x.file,x.mem?(S.mem[x.mem]&&S.mem[x.mem].date||today()):x.date,folder,x),isImg?makeThumb(x.file):null]);
+      const a={id:uid(),fid:j.id,name:x.name,mime:x.type||j.mimeType||'',size:x.size,link:j.webViewLink||('https://drive.google.com/file/d/'+j.id+'/view'),thumb:thumb||undefined,at:Date.now()};
+      if(isImg&&!thumb)a.thumb=undefined;
+      if(x.mem){const m=S.mem[x.mem];if(m){m.photos=(m.photos||[]).concat([a]);mark('mem:'+x.mem)}else{const p=dOwn(today());p.att=(p.att||[]).concat([a]);mark(dKey(today()))}}
+      else{const p=dOwn(x.date);p.att=(p.att||[]).concat([a]);mark(dKey(x.date))}
+      dropPending(x.id);ok++}
+    catch(e){fail++;x.err=e.message==='expired'?'Google sign-in expired':(e.message||'Upload failed');savePending(x)}
+    uploading=uploading.filter(u=>u.id!==x.id);render(true);
+  }
+  if(ok&&!fail)toast(`${ok} ${ok===1?'file':'files'} saved to Google Drive · Alok’s Diary folder`);
+  else if(fail)toast(`${ok} uploaded, ${fail} not uploaded. The remaining ${fail===1?'file is':'files are'} kept and can be retried.`);
+}
+
+/* ---------- full-size photo viewer ---------- */
+var VW=null;
+function vwList(){return VW?attList(VW.t).filter(a=>a.thumb):[]}
+function openViewer(t,i){VW={t,i,full:new Map(),err:{},loading:null,ask:false,ret:document.activeElement};drawViewer()}
+function closeViewer(){if(!VW)return;VW.full.forEach(u=>URL.revokeObjectURL(u));const r=VW.ret;VW=null;const v=$('viewer');if(v){v.hidden=true;v.innerHTML=''}document.documentElement.classList.remove('viewing');if(r&&r.focus)try{r.focus({preventScroll:true})}catch(e){}}
+function vwStep(k){const n=vwList().length;if(!VW||n<2)return;VW.i=(VW.i+k+n)%n;VW.ask=false;drawViewer()}
+function drawViewer(){
+  const list=vwList();if(!VW||!list.length){closeViewer();return}
+  if(VW.i>=list.length)VW.i=list.length-1;
+  let v=$('viewer');if(!v){v=document.createElement('div');v.id='viewer';v.className='viewer';v.setAttribute('role','dialog');v.setAttribute('aria-modal','true');v.setAttribute('aria-label','Photo viewer');document.body.appendChild(v)}
+  const a=list[VW.i],n=list.length,full=VW.full.get(a.fid),st=full?'Full quality from Google Drive':VW.loading===a.fid?'Loading full quality…':VW.err[a.fid]?VW.err[a.fid]:'Preview';
+  v.hidden=false;document.documentElement.classList.add('viewing');
+  v.innerHTML=`<div class="vw-top"><span class="vw-n">${VW.i+1} of ${n}</span><span class="vw-name" title="${esc(a.name)}">${esc(a.name)}</span><button class="vw-btn" id="vwX" type="button" aria-label="Close viewer">${svg(UI.x,22)}</button></div>
+   <div class="vw-stage" id="vwStage">${n>1?`<button class="vw-nav l" id="vwPrev" type="button" aria-label="Previous photo">${svg(UI.left,26)}</button>`:''}<img id="vwImg" src="${full||a.thumb}" alt="${esc(a.name)}" draggable="false">${n>1?`<button class="vw-nav r" id="vwNext" type="button" aria-label="Next photo">${svg(UI.right,26)}</button>`:''}</div>
+   <div class="vw-bar"><span class="vw-q">${esc(st)}${a.size?' · '+fmtSize(a.size):''}</span>
+     <span class="row">${!full&&a.fid&&VW.loading!==a.fid?`<button class="btn sm ghost" id="vwFull" type="button">Load full quality</button>`:''}<a class="btn sm ghost" href="${esc(a.link)}" target="_blank" rel="noopener">Open in Google Drive</a><button class="btn sm warn" id="vwRm" type="button">Remove…</button></span>
+     ${VW.ask?`<div class="confirm" role="alertdialog"><span>Remove “${esc(a.name)}” from this ${VW.t.mem?'memory':'page'}? The original file stays in your Google Drive.</span><span class="row"><button class="btn warn sm" id="vwRmYes" type="button">Remove</button><button class="btn ghost sm" id="vwRmNo" type="button">Keep it</button></span></div>`:''}</div>`;
+  $('vwX').onclick=closeViewer;
+  if($('vwPrev'))$('vwPrev').onclick=()=>vwStep(-1);if($('vwNext'))$('vwNext').onclick=()=>vwStep(1);
+  if($('vwFull'))$('vwFull').onclick=async()=>{try{if(!driveReady())await gAuth(/drive\.file/.test(localStorage.getItem('alok-gscopes')||'')?'':'consent',GSCOPE+' '+DSCOPE);loadFull(a)}catch(e){VW&&(VW.err[a.fid]=e.message||'Google Drive access was not granted.');drawViewer()}};
+  $('vwRm').onclick=()=>{VW.ask=true;drawViewer()};
+  if($('vwRmNo'))$('vwRmNo').onclick=()=>{VW.ask=false;drawViewer()};
+  if($('vwRmYes'))$('vwRmYes').onclick=()=>{removeAtt(VW.t,a.id);VW.ask=false;render(true);toast('Removed. The original file remains in your Google Drive.');if(vwList().length)drawViewer();else closeViewer()};
+  const stg=$('vwStage');let sx=null;
+  stg.onpointerdown=e=>{if(e.target.closest('button'))return;sx=e.clientX};
+  stg.onpointerup=e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>50)vwStep(dx<0?1:-1)};
+  stg.onclick=e=>{if(e.target===stg)closeViewer()};
+  if(!full&&a.fid&&driveReady()&&VW.loading!==a.fid&&!VW.err[a.fid])loadFull(a);
+  if(!v.contains(document.activeElement))$('vwX').focus({preventScroll:true});
+}
+async function loadFull(a){
+  if(!VW||VW.full.has(a.fid))return;VW.loading=a.fid;drawViewer();
+  try{const r=await fetch(`https://www.googleapis.com/drive/v3/files/${encodeURIComponent(a.fid)}?alt=media`,{headers:{Authorization:'Bearer '+gTok}});
+    if(r.status===401)throw new Error('Google sign-in expired. Select “Load full quality” again.');if(r.status===404)throw new Error('This file is no longer in Google Drive.');if(!r.ok)throw await driveErr(r);
+    const b=await r.blob();if(!VW)return;VW.full.set(a.fid,URL.createObjectURL(b));delete VW.err[a.fid]}
+  catch(e){if(VW)VW.err[a.fid]=e.message||'The full-size photo could not be loaded. The preview is shown.'}
+  if(VW){VW.loading=null;drawViewer()}
 }
 
 /* ---------- statistics page ---------- */
@@ -1734,32 +2050,225 @@ function barChart(vals,labels,fmt,color){
   </svg>`;
 }
 function statsView(){
-  const now=dParse(today());if(statY===null){statY=now.getFullYear();statM=now.getMonth()}
-  const months=Array.from({length:12},(_,m)=>monthStats(statY,m)),ml=Array.from({length:12},(_,m)=>new Date(2000,m,1).toLocaleDateString('en-IN',{month:'short'}));
-  const yEntries=months.reduce((a,s)=>a+s.entries,0),yWords=months.reduce((a,s)=>a+s.words,0);
-  const ms=months[statM],pre=statY+'-'+pad(statM+1)+'-',mc={};
-  Object.keys(S.diary).forEach(d=>{if(d.startsWith(pre)&&S.diary[d].mood)mc[S.diary[d].mood]=(mc[S.diary[d].mood]||0)+1});
-  let tasksDone=0;Object.keys(S.diary).forEach(d=>{if(d.startsWith(pre))(S.diary[d].items||[]).forEach(l=>{if(l.task&&l.done)tasksDone++})});
-  const days=new Date(statY,statM+1,0).getDate(),first=new Date(statY,statM,1).getDay();
+  const now=dParse(today()),cy=now.getFullYear(),cm=now.getMonth();if(statY===null){statY=cy;statM=cm}
+  const Y=yearStats(statY),months=Y.ms,ml=Array.from({length:12},(_,m)=>new Date(2000,m,1).toLocaleDateString('en-IN',{month:'short'}));
+  const ms=months[statM],pre=statY+'-'+pad(statM+1)+'-',mName=new Date(statY,statM,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'});
+  const ed=entryDays(),y0=ed.length?+ed[0].slice(0,4):cy,years=[];for(let y=Math.min(y0,cy);y<=cy;y++)years.push(y);
+  const yrs=years.map(y=>yearStats(y));
+  const first=new Date(statY,statM,1).getDay(),t=today();
   let strip='';for(let i=0;i<first;i++)strip+='<span class="mc out"></span>';
-  for(let d=1;d<=days;d++){const s=pre+pad(d),p=S.diary[s],m=p&&p.mood&&moodOf(p.mood);strip+=`<button type="button" class="mc${dHas(s)?' w':''}${s===today()?' tday':''}" data-sgo="${s}" title="${esc(dLong(s))}">${d}</button>`}
+  for(let d=1;d<=ms.days;d++){const s=pre+pad(d);strip+=`<button type="button" class="mc${s<=t&&dHas(s)?' w':''}${s===t?' tday':''}${s>t?' fut':''}" data-sgo="${s}" title="${esc(dLong(s))}">${d}</button>`}
+  const yPeriod=Y.elapsed?`1 January – ${statY===cy?dParse(t).toLocaleDateString('en-IN',{day:'numeric',month:'long'}):'31 December'} ${statY} · ${Y.elapsed} days elapsed`:`${statY} has not started yet`;
+  const mNote=!ms.elapsed?`<p class="empty">${esc(mName)} has not started yet. Future dates are not counted.</p>`:!ms.entries?`<p class="empty">No entries were saved in ${esc(mName)}.</p>`:'';
   setApp(`<div class="dy">${topBar()}<div class="sheet">
    <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button></div>
-   <div class="shead"><h2>Statistics</h2><span class="yearnav"><button class="arrow" id="syPrev" type="button" aria-label="Previous year">‹</button><b>${statY}</b><button class="arrow" id="syNext" type="button" aria-label="Next year">›</button></span></div>
-   <div class="tiles big"><div><b>${yEntries}</b><span>Entries in ${statY}</span></div><div><b>${yWords.toLocaleString('en-IN')}</b><span>Words in ${statY}</span></div><div><b>${curStreak()}</b><span>Current streak</span></div><div><b>${longestStreak()}</b><span>Longest streak</span></div></div>
-   <section class="set"><p class="eyebrow">Pages written each month</p>${barChart(months.map(s=>s.entries),ml,v=>v,'var(--accent)')}</section>
-   <section class="set"><p class="eyebrow">Words written each month</p>${barChart(months.map(s=>s.words),ml,v=>v>=1000?(v/1000).toFixed(1)+'k':v,'var(--k-meet)')}</section>
-   <section class="set"><div class="shead"><p class="eyebrow">Month in detail</p><span class="yearnav"><button class="arrow" id="smoPrev" type="button" aria-label="Previous month">‹</button><b>${new Date(statY,statM,1).toLocaleDateString('en-IN',{month:'long'})}</b><button class="arrow" id="smoNext" type="button" aria-label="Next month">›</button></span></div>
-     <div class="tiles"><div><b>${ms.entries}</b><span>Entries</span></div><div><b>${ms.words.toLocaleString('en-IN')}</b><span>Words</span></div><div><b>${ms.consistency}%</b><span>Consistency</span></div><div><b>${tasksDone}</b><span>Tasks done</span></div></div>
+   <div class="shead"><h2>Statistics</h2><span class="yearnav"><button class="arrow" id="syPrev" type="button" aria-label="Previous year">‹</button><b>${statY}</b><button class="arrow" id="syNext" type="button" aria-label="Next year" ${statY>=cy?'disabled':''}>›</button></span></div>
+   <p class="period">${esc(yPeriod)}</p>
+   ${!Y.entries?`<p class="empty">${Y.elapsed?'No entries were saved in '+statY+'.':'No figures yet for '+statY+'.'}</p>`:''}
+   <div class="tiles big"><div><b>${Y.entries}</b><span>Entries in ${statY}</span></div><div><b>${Y.words.toLocaleString('en-IN')}</b><span>Words in ${statY}</span></div><div><b>${pct(Y.consistency)}</b><span>Consistency in ${statY}</span></div><div><b>${curStreak()}</b><span>Current streak</span></div></div>
+   <div class="tiles"><div><b>${longestStreak()}</b><span>Longest streak ever</span></div><div><b>${ed.length}</b><span>Entries in total</span></div><div><b>${Y.entries?Math.round(Y.words/Y.entries):0}</b><span>Words per entry, ${statY}</span></div><div><b>${Y.tasks}</b><span>Tasks done, ${statY}</span></div></div>
+   <section class="set"><div class="shead"><p class="eyebrow">Month in detail</p><span class="yearnav"><button class="arrow" id="smoPrev" type="button" aria-label="Previous month">‹</button><b>${esc(new Date(statY,statM,1).toLocaleDateString('en-IN',{month:'long'}))}</b><button class="arrow" id="smoNext" type="button" aria-label="Next month" ${statY>=cy&&statM>=cm?'disabled':''}>›</button></span></div>
+     <p class="period">${ms.elapsed?`Period: ${esc(ms.period)} · ${ms.elapsed} of ${ms.days} days elapsed`:'Period: '+esc(mName)+' · no days elapsed'}</p>
+     ${mNote}
+     <div class="tiles"><div><b>${ms.entries}</b><span>Entries</span></div><div><b>${ms.words.toLocaleString('en-IN')}</b><span>Words</span></div><div><b>${pct(ms.consistency)}</b><span>Consistency</span></div><div><b>${ms.best}</b><span>Best streak</span></div></div>
+     ${ms.elapsed?`<p class="note">Consistency = ${ms.entries} ${ms.entries===1?'day':'days'} with an entry ÷ ${ms.elapsed} elapsed ${ms.elapsed===1?'day':'days'} × 100.</p>`:''}
      <div class="mcal" aria-label="Days of the month">${['S','M','T','W','T','F','S'].map(w=>`<span class="mc h">${w}</span>`).join('')}${strip}</div>
-     <p class="note">Underlined days have writing. Select a day to open its page.</p>
+     <p class="note">Highlighted days have a saved entry. Select a day to open its page.</p>
    </section>
-   <p class="note">All figures are calculated from the pages saved in your diary. Consistency is the share of days with writing since your first entry.</p>
+   <section class="set"><p class="eyebrow">Monthly trend · ${statY}</p><p class="note">Entries each month</p>${barChart(months.map(s=>s.entries),ml,v=>v,'var(--accent)')}
+     <p class="note">Consistency each month (%)</p>${barChart(months.map(s=>s.consistency||0),ml,v=>v+'%','var(--ok)')}
+     <p class="note">Words each month</p>${barChart(months.map(s=>s.words),ml,v=>v>=1000?(v/1000).toFixed(1)+'k':v,'var(--k-meet)')}</section>
+   <section class="set"><p class="eyebrow">Yearly trend</p>
+     <table class="ytab"><thead><tr><th>Year</th><th>Entries</th><th>Words</th><th>Consistency</th></tr></thead><tbody>${yrs.map((s,k)=>`<tr${years[k]===statY?' class="on"':''}><td><button class="linkbtn" type="button" data-sy="${years[k]}">${years[k]}</button></td><td>${s.entries}</td><td>${s.words.toLocaleString('en-IN')}</td><td>${pct(s.consistency)}</td></tr>`).join('')}</tbody></table>
+     ${years.length>1?barChart(yrs.map(s=>s.entries),years.map(String),v=>v,'var(--accent)'):''}</section>
+   <p class="note">How the figures are calculated: an entry is a date with at least one written line saved in the diary. Blank pages, unsaved drafts and future dates are not counted. Lines moved forward to another day are counted once, on the day they were moved to. A streak is a run of consecutive days with an entry; the current streak continues if today has no entry yet but yesterday does.</p>
   </div><p class="credit">Crafted by Alok</p></div>`);
   bindTop();$('vBack').onclick=goDiary;
-  $('syPrev').onclick=()=>{statY--;render()};$('syNext').onclick=()=>{statY++;render()};
-  $('smoPrev').onclick=()=>{statM--;if(statM<0){statM=11;statY--}render()};$('smoNext').onclick=()=>{statM++;if(statM>11){statM=0;statY++}render()};
+  $('syPrev').onclick=()=>{statY--;render()};$('syNext').onclick=()=>{if(statY<cy){statY++;if(statY===cy&&statM>cm)statM=cm}render()};
+  $('smoPrev').onclick=()=>{statM--;if(statM<0){statM=11;statY--}render()};$('smoNext').onclick=()=>{if(statY>=cy&&statM>=cm)return;statM++;if(statM>11){statM=0;statY++}render()};
+  app.querySelectorAll('[data-sy]').forEach(b=>b.onclick=()=>{statY=+b.dataset.sy;if(statY===cy&&statM>cm)statM=cm;render()});
   app.querySelectorAll('[data-sgo]').forEach(b=>b.onclick=()=>{diaryDate=b.dataset.sgo;sideM=null;goDiary();render()});
+}
+
+/* ================= memory timeline =================
+   Saved memories are rows "mem_<id>" in the same notes table. Items collected automatically are worked out
+   from existing diary pages and calendar events each time; they are never invented or stored separately. */
+const MCATS=[
+  {k:'daily',l:'Daily memory',f:'Daily',c:'var(--k-ev)',i:'<path d="M5 4.5h11a3 3 0 0 1 3 3V20H8a3 3 0 0 1-3-3Z"/><path d="M5 17a3 3 0 0 1 3-3h11M9 8.5h6"/>'},
+  {k:'family',l:'Family event',f:'Family',c:'var(--k-pay)',i:'<path d="M3.5 11 12 4l8.5 7M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/>'},
+  {k:'bday',l:'Birthday',f:'Birthdays',c:'var(--k-bday)',i:IC.bday},
+  {k:'anniv',l:'Anniversary',f:'Anniversaries',c:'var(--k-anniv)',i:IC.anniv},
+  {k:'travel',l:'Travel memory',f:'Travel',c:'var(--k-travel)',i:IC.travel},
+  {k:'achieve',l:'Personal achievement',f:'Achievements',c:'var(--k-hol)',i:'<path d="M8 4h8v5a4 4 0 0 1-8 0Z"/><path d="M8 6H5v1.5A3 3 0 0 0 8 10.5M16 6h3v1.5a3 3 0 0 1-3 3M12 13v4M8.5 20.5h7M10 17h4l.5 3.5h-5Z"/>'},
+  {k:'life',l:'Important life event',f:'Important events',c:'var(--k-task)',i:'<path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9Z"/>'},
+  {k:'custom',l:'Custom event',f:'Custom',c:'var(--k-meet)',i:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18"/>'}
+];
+const MFILTERS=[['all','All'],['family','Family'],['bday','Birthdays'],['anniv','Anniversaries'],['travel','Travel'],['achieve','Achievements'],['life','Important events'],['fav','Favourites']];
+const TAGCAT={family:'family',parivar:'family',travel:'travel',trip:'travel',journey:'travel',vacation:'travel',holiday:'travel',birthday:'bday',bday:'bday',anniversary:'anniv',achievement:'achieve',achieve:'achieve',success:'achieve',award:'achieve',milestone:'life',important:'life',life:'life',memory:'daily'};
+function mcat(k){return MCATS.find(c=>c.k===k)||MCATS[0]}
+function micon(k,w){const c=mcat(k);return `<span class="mic" style="color:${c.c}" aria-hidden="true">${svg(c.i,w||18)}</span>`}
+UI.mem='<circle cx="6" cy="6" r="2"/><circle cx="6" cy="18" r="2"/><path d="M6 8v8M10 6h10M10 10h6M10 18h10M10 14h6"/>';
+var memF='all',memCat='',memQ='',memY='',memSort='new',memId=null,memEdit=null,memAsk=false;
+function pageTitle(p){const ls=(p.items||[]).filter(l=>l.t&&l.t.trim()).map(l=>l.t.trim());return {title:ls[0]?ls[0].slice(0,100)+(ls[0].length>100?'…':''):'',desc:ls.slice(1).join(' · ').slice(0,600)}}
+function pageCat(p){for(const t of (p.tags||[])){const k=TAGCAT[t]||TAGCAT[t.replace(/s$/,'')];if(k)return k}return 'daily'}
+function pageWhy(p){const w=[];if(p.bm)w.push('bookmarked');if((p.att||[]).some(a=>a.thumb))w.push('has photos');const tg=(p.tags||[]).filter(t=>TAGCAT[t]||TAGCAT[t.replace(/s$/,'')]);if(tg.length)w.push('tagged #'+tg.join(' #'));return w}
+function evKey(e){return 'e:'+e.id+'|'+e.d}
+function allMemories(){
+  const t=today(),out=[],takenD=new Set(),takenE=new Set();
+  Object.values(S.mem).forEach(m=>{if(!m||m.deleted||!m.date)return;if(m.src&&m.src.date)takenD.add(m.src.date);if(m.src&&m.src.ev)takenE.add(m.src.ev);
+    out.push({key:'m:'+m.id,id:m.id,date:m.date,title:m.title||'(untitled)',desc:m.desc||'',cat:m.cat||'custom',fav:!!m.fav,photos:(m.photos||[]).filter(a=>a.thumb),t:{mem:m.id},src:m.src||null})});
+  Object.keys(S.diary).forEach(d=>{if(d>t||takenD.has(d))return;const p=S.diary[d];if(!p||!pageWhy(p).length)return;
+    const has=dHas(d),ph=(p.att||[]).filter(a=>a.thumb);if(!has&&!ph.length)return;const pt=pageTitle(p);
+    out.push({key:'d:'+d,auto:'diary',date:d,title:pt.title||'Photos from this day',desc:pt.desc,cat:pageCat(p),fav:!!p.bm,photos:ph,t:{date:d},why:pageWhy(p)})});
+  if(G.connected)G.events.forEach(e=>{if(!['bday','anniv','travel'].includes(e.k)||e.d>t||G.off.includes(e.c))return;const k=evKey(e);if(takenE.has(k))return;
+    out.push({key:k,auto:'cal',date:e.d,title:evTitle(e)+(evAge(e,e.d)?' · '+evAge(e,e.d):''),desc:'',cat:e.k,fav:false,photos:[],ev:e})});
+  return out;
+}
+function memFind(key){return allMemories().find(x=>x.key===key)||null}
+function memMatch(x,q){
+  if(!q)return true;q=q.toLowerCase().trim();
+  const dm=q.match(/^(\d{1,2})[\/\-. ](\d{1,2})(?:[\/\-. ](\d{2,4}))?$/);
+  if(dm){let y=dm[3]?+dm[3]:0;if(y&&y<100)y+=2000;return x.date.slice(5)===pad(+dm[2])+'-'+pad(+dm[1])&&(!y||+x.date.slice(0,4)===y)}
+  if(/^\d{4}$/.test(q))return x.date.startsWith(q);
+  if(/^\d{4}-\d{2}(-\d{2})?$/.test(q))return x.date.startsWith(q);
+  const long=dParse(x.date).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).toLowerCase();
+  return (x.title+' '+x.desc+' '+mcat(x.cat).l).toLowerCase().includes(q)||long.includes(q);
+}
+function memCard(x,compact){
+  const t=today(),ago=+t.slice(0,4)-+x.date.slice(0,4);
+  const ph=x.photos.slice(0,4);
+  return `<li class="tl-item" style="--mc:${mcat(x.cat).c}"><span class="tl-dot">${micon(x.cat,16)}</span>
+    <button class="tl-card" type="button" data-mopen="${esc(x.key)}">
+      <span class="tl-meta"><span>${esc(compact?(ago===1?'1 year ago':ago+' years ago')+' · '+x.date.slice(0,4):dParse(x.date).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'}))}</span><span class="tl-cat">${esc(mcat(x.cat).l)}</span>${x.fav?`<span class="tl-fav" aria-label="Favourite">${svg(HEART,14).replace('fill="none"','fill="currentColor"')}</span>`:''}</span>
+      <b class="tl-title">${esc(x.title)}</b>
+      ${x.desc?`<span class="tl-desc">${esc(x.desc)}</span>`:''}
+      ${ph.length?`<span class="tl-ph">${ph.map(a=>`<img src="${a.thumb}" alt="${esc(a.name)}" loading="lazy">`).join('')}${x.photos.length>4?`<span class="more">+${x.photos.length-4}</span>`:''}</span>`:''}
+      ${x.auto?`<span class="tl-src">${x.auto==='diary'?'From your diary page':'From your Google Calendar'}</span>`:''}
+    </button></li>`;
+}
+function onThisDay(all){
+  const t=today(),md=t.slice(5),y=+t.slice(0,4),seen=new Set(),out=[];
+  all.filter(x=>x.date.slice(5)===md&&+x.date.slice(0,4)<y).forEach(x=>{out.push(x);if(x.auto==='diary')seen.add(x.date);if(x.src&&x.src.date)seen.add(x.src.date)});
+  Object.keys(S.diary).forEach(d=>{if(d.slice(5)!==md||+d.slice(0,4)>=y||seen.has(d)||!dHas(d))return;const p=S.diary[d],pt=pageTitle(p);
+    out.push({key:'p:'+d,auto:'diary',date:d,title:pt.title,desc:pt.desc,cat:'daily',fav:!!p.bm,photos:(p.att||[]).filter(a=>a.thumb)})});
+  return out.sort((a,b)=>a.date<b.date?1:-1);
+}
+function memoriesView(){
+  const all=allMemories(),otd=onThisDay(all),years=[...new Set(all.map(x=>x.date.slice(0,4)))].sort().reverse();
+  if(memY&&!years.includes(memY))memY='';
+  let list=all.filter(x=>(memF==='all'||(memF==='fav'?x.fav:x.cat===memF))&&(!memCat||x.cat===memCat)&&(!memY||x.date.startsWith(memY))&&memMatch(x,memQ));
+  list.sort((a,b)=>memSort==='old'?(a.date<b.date?-1:a.date>b.date?1:0):(a.date<b.date?1:a.date>b.date?-1:0));
+  let h='',cy='',cm='';
+  list.forEach(x=>{const y=x.date.slice(0,4),m=x.date.slice(0,7);
+    if(y!==cy){if(cm)h+='</ul>';h+=`<h3 class="tl-y">${y}</h3>`;cy=y;cm=''}
+    if(m!==cm){if(cm)h+='</ul>';h+=`<h4 class="tl-m">${esc(dParse(x.date).toLocaleDateString('en-IN',{month:'long'}))}</h4><ul class="tl">`;cm=m}
+    h+=memCard(x)});
+  if(cm)h+='</ul>';
+  const md=dParse(today()).toLocaleDateString('en-IN',{day:'numeric',month:'long'});
+  const filtered=memF!=='all'||memCat||memY||memQ.trim();
+  setApp(`<div class="dy">${topBar()}<div class="sheet">
+   <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button><button class="btn sm" id="mNew" type="button">+ Add a memory</button></div>
+   <h2>Memories</h2>
+   <section class="otd" aria-label="On this day"><p class="eyebrow">On this day · ${esc(md)}</p>
+     ${otd.length?`<ul class="tl otdl">${otd.map(x=>memCard(x,true)).join('')}</ul>`:`<p class="note">There are no diary pages or memories from ${esc(md)} in earlier years yet.</p>`}</section>
+   <div class="mfilters" role="group" aria-label="Filter memories">${MFILTERS.map(([k,l])=>`<button type="button" class="fchip${memF===k?' on':''}" data-mf="${k}" aria-pressed="${memF===k}">${k==='all'||k==='fav'?'':micon(k,14)}${esc(l)}</button>`).join('')}</div>
+   <div class="mtools">
+     <span class="search msearch"><span class="sic">${svg(UI.search,18)}</span><input id="mq" type="search" placeholder="Search memories: words, 2025, October 2025, 29/10" value="${esc(memQ)}" autocomplete="off" aria-label="Search memories"></span>
+     <label class="tsel"><span class="sr">Category</span><select id="mCat" aria-label="Category"><option value="">All categories</option>${MCATS.map(c=>`<option value="${c.k}" ${memCat===c.k?'selected':''}>${esc(c.l)}</option>`).join('')}</select></label>
+     <label class="tsel"><span class="sr">Year</span><select id="mYear" aria-label="Year"><option value="">All years</option>${years.map(y=>`<option ${memY===y?'selected':''}>${y}</option>`).join('')}</select></label>
+     <label class="tsel"><span class="sr">Sort</span><select id="mSort" aria-label="Sort order"><option value="new" ${memSort==='new'?'selected':''}>Newest first</option><option value="old" ${memSort==='old'?'selected':''}>Oldest first</option></select></label>
+   </div>
+   <p class="note">${list.length} ${list.length===1?'memory':'memories'}${filtered?` match${list.length===1?'es':''} the filters`:''}${filtered?' · <button class="linkbtn" id="mClear" type="button">Clear filters</button>':''}</p>
+   ${list.length?`<div class="timeline">${h}</div>`:`<p class="empty">${all.length?'No memories match these filters.':'No memories yet. Add one with “+ Add a memory”, or use “Save as memory” at the bottom of a diary page. Bookmarked pages, pages with photos, and birthdays, anniversaries and trips from your calendar also appear here automatically.'}</p>`}
+   <p class="note">Collected automatically: diary pages that are bookmarked, have photos, or carry a tag such as #family, #travel, #birthday, #anniversary, #achievement or #important; and past birthdays, anniversaries and travel from your Google Calendar. Nothing is added unless it exists in your diary or calendar.</p>
+  </div><p class="credit">Crafted by Alok</p></div>`);
+  bindTop();$('vBack').onclick=goDiary;
+  $('mNew').onclick=()=>openMemEdit(null);
+  app.querySelectorAll('[data-mf]').forEach(b=>b.onclick=()=>{memF=b.dataset.mf;render()});
+  const mq=$('mq');mq.oninput=()=>{memQ=mq.value;render(true)};
+  $('mCat').onchange=e=>{memCat=e.target.value;render()};$('mYear').onchange=e=>{memY=e.target.value;render()};$('mSort').onchange=e=>{memSort=e.target.value;render()};
+  if($('mClear'))$('mClear').onclick=()=>{memF='all';memCat='';memY='';memQ='';render()};
+  app.querySelectorAll('[data-mopen]').forEach(b=>b.onclick=()=>openMem(b.dataset.mopen));
+}
+function openMem(key){if(key.startsWith('p:')){diaryDate=key.slice(2);sideM=null;goDiary();return}memId=key;memAsk=false;attAsk=null;goView('memory')}
+function memoryView(){
+  const x=memId&&memFind(memId);
+  if(!x){setApp(`<div class="dy">${topBar()}<div class="sheet"><div class="shead"><button class="back" id="vBack" type="button">← All memories</button></div><p class="empty">This memory is no longer available.</p></div></div>`);bindTop();$('vBack').onclick=()=>goView('memories');return}
+  const c=mcat(x.cat),p=x.auto==='diary'?S.diary[x.date]:null;
+  setApp(`<div class="dy">${topBar()}<div class="sheet mdetail" style="--mc:${c.c}">
+   <div class="shead"><button class="back" id="vBack" type="button">← All memories</button></div>
+   <p class="mcatl">${micon(x.cat,18)}<span>${esc(c.l)}</span>${x.auto?`<span class="tl-src">${x.auto==='diary'?'From your diary page · '+esc(x.why.join(', ')):'From your Google Calendar'}</span>`:''}</p>
+   <h2>${esc(x.title)}</h2>
+   <p class="mdate">${esc(dLong(x.date))}</p>
+   ${x.auto==='diary'&&p?`<div class="mbody">${(p.items||[]).filter(l=>l.t&&l.t.trim()).map(l=>`<p class="${l.done?'dstruck':''}">${esc(l.t)}</p>`).join('')}</div>`:x.desc?`<div class="mbody">${esc(x.desc).split('\n').map(l=>`<p>${l||'&nbsp;'}</p>`).join('')}</div>`:''}
+   ${x.auto==='cal'&&x.ev&&x.ev.l?`<p class="note"><a href="${esc(x.ev.l)}" target="_blank" rel="noopener">Open in Google Calendar</a></p>`:''}
+   ${x.t?attHTML(x.t):''}
+   <div class="row mact">
+     <button class="btn sm" id="mEdit" type="button">${x.auto?'Save as a memory and edit':'Edit'}</button>
+     <button class="btn ghost sm${x.fav?' on':''}" id="mFav" type="button" aria-pressed="${x.fav}">${svg(HEART,15).replace('fill="none"',x.fav?'fill="currentColor"':'fill="none"')} ${x.fav?'Favourite':'Add to favourites'}</button>
+     ${x.id?`<button class="btn ghost sm" id="mPh" type="button">${svg(UI.photo,15)} Add photos</button>`:''}
+     <button class="btn ghost sm" id="mPage" type="button">Open the diary page</button>
+     ${x.id?`<button class="btn ghost sm" id="mDel" type="button">Delete…</button>`:''}
+   </div>
+   ${memAsk?`<div class="confirm" role="alertdialog"><span>Delete the memory “${esc(x.title)}”? The diary page and the photos in Google Drive are not affected.</span><span class="row"><button class="btn warn sm" id="mDelYes" type="button">Delete memory</button><button class="btn ghost sm" id="mDelNo" type="button">Keep it</button></span></div>`:''}
+   ${x.id&&S.mem[x.id].cAt?`<p class="note">Saved ${esc(fmtDT(S.mem[x.id].cAt))}${S.mem[x.id]._ts-S.mem[x.id].cAt>60000?' · last changed '+esc(fmtDT(S.mem[x.id]._ts)):''}</p>`:''}
+  </div><p class="credit">Crafted by Alok</p></div>`);
+  bindTop();$('vBack').onclick=()=>goView('memories');
+  if(x.t)bindAtt(x.t);
+  $('mEdit').onclick=()=>openMemEdit(x);
+  $('mFav').onclick=()=>{
+    if(x.id){S.mem[x.id].fav=!x.fav;mark('mem:'+x.id)}
+    else if(x.auto==='diary'){setField(x.date,'bm',x.fav?null:true)}
+    else{const id=saveMem(null,{date:x.date,title:x.title,desc:'',cat:x.cat,fav:true,src:{ev:x.key}});memId='m:'+id}
+    render();toast(x.fav?'Removed from favourites':'Added to favourites')};
+  if($('mPh'))$('mPh').onclick=()=>pickFiles('photo',{mem:x.id});
+  $('mPage').onclick=()=>{diaryDate=x.date;sideM=null;goDiary()};
+  if($('mDel'))$('mDel').onclick=()=>{memAsk=true;render()};
+  if($('mDelNo'))$('mDelNo').onclick=()=>{memAsk=false;render()};
+  if($('mDelYes'))$('mDelYes').onclick=()=>{const m=S.mem[x.id];m.deleted=true;mark('mem:'+x.id);memAsk=false;memId=null;goView('memories');toast('Memory deleted')};
+}
+/* create or update a saved memory; returns its id */
+function saveMem(id,f){
+  const now=Date.now();let m=id&&S.mem[id];
+  if(!m){id=uid();m=S.mem[id]={id,cAt:now,photos:[]};if(f.photos)m.photos=f.photos}
+  Object.assign(m,{date:f.date,title:f.title,desc:f.desc||'',cat:f.cat||'custom',fav:!!f.fav});if(f.src)m.src=f.src;delete m.deleted;
+  mark('mem:'+id);return id;
+}
+function openMemEdit(x){
+  if(!x)memEdit={id:null,date:today(),title:'',desc:'',cat:'daily',fav:false};
+  else if(x.id){const m=S.mem[x.id];memEdit={id:m.id,date:m.date,title:m.title||'',desc:m.desc||'',cat:m.cat||'custom',fav:!!m.fav}}
+  else if(x.auto==='diary'){const p=S.diary[x.date]||{},ls=(p.items||[]).filter(l=>l.t&&l.t.trim()&&!l.fw).map(l=>l.t.trim());
+    memEdit={id:null,date:x.date,title:x.title,desc:ls.slice(1).join('\n'),cat:x.cat,fav:x.fav,src:{date:x.date},photos:(p.att||[]).filter(a=>a.thumb).map(a=>Object.assign({},a,{id:uid()}))}}
+  else memEdit={id:null,date:x.date,title:x.title,desc:'',cat:x.cat,fav:x.fav,src:{ev:x.key}};
+  goView('memedit');
+}
+function memEditView(){
+  const e=memEdit;if(!e){goView('memories');return}
+  setApp(`<div class="dy">${topBar()}<div class="sheet">
+   <div class="shead"><button class="back" id="vBack" type="button">← ${e.id?'Back to the memory':'All memories'}</button></div>
+   <h2>${e.id?'Edit memory':e.src?'Save as a memory':'Add a memory'}</h2>
+   ${e.src&&e.src.date?`<p class="note">From the diary page of ${esc(dLong(e.src.date))}${e.photos&&e.photos.length?` · ${e.photos.length} ${e.photos.length===1?'photo':'photos'} included`:''}. The diary page itself is not changed.</p>`:''}
+   <form id="mForm" class="mform">
+     <label>Title<input id="mfT" required maxlength="140" value="${esc(e.title)}" placeholder="What happened?"></label>
+     <div class="row2"><label>Date<input id="mfD" type="date" required value="${esc(e.date)}"></label>
+     <label>Category<select id="mfC">${MCATS.map(c=>`<option value="${c.k}" ${e.cat===c.k?'selected':''}>${esc(c.l)}</option>`).join('')}</select></label></div>
+     <label>Description<textarea id="mfS" rows="6" maxlength="4000" placeholder="A few lines about this memory">${esc(e.desc)}</textarea></label>
+     <label class="chk"><input id="mfF" type="checkbox" ${e.fav?'checked':''}> Favourite</label>
+     <p class="err" id="mfErr" role="alert"></p>
+     <div class="row"><button class="btn" type="submit">Save memory</button><button class="btn ghost" id="mfX" type="button">Cancel</button></div>
+     ${e.id?'':'<p class="note">Photos can be added after saving.</p>'}
+   </form></div><p class="credit">Crafted by Alok</p></div>`);
+  bindTop();
+  const back=()=>{if(e.id){memId='m:'+e.id;goView('memory')}else goView('memories')};
+  $('vBack').onclick=back;$('mfX').onclick=back;
+  const keep=()=>{e.title=$('mfT').value;e.date=$('mfD').value;e.cat=$('mfC').value;e.desc=$('mfS').value;e.fav=$('mfF').checked};
+  $('mForm').oninput=keep;$('mForm').onchange=keep;
+  $('mForm').onsubmit=ev=>{ev.preventDefault();keep();
+    const err=$('mfErr');if(!e.title.trim()){err.textContent='Please enter a title.';$('mfT').focus();return}
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(e.date)){err.textContent='Please choose a date.';$('mfD').focus();return}
+    const id=saveMem(e.id,{date:e.date,title:e.title.trim(),desc:e.desc.trim(),cat:e.cat,fav:e.fav,src:e.src,photos:e.photos});
+    const isNew=!e.id;memEdit=null;memId='m:'+id;goView('memory');toast(isNew?'Memory saved':'Memory updated')};
+  if(!e.title)$('mfT').focus();
 }
 
 /* ---------- bookmarks and upcoming ---------- */
@@ -1799,10 +2308,10 @@ function exportPDF(from,to){
 }
 
 /* ---------- automatic local backups (IndexedDB, one per day, last 14 kept) ---------- */
-function idb(){return new Promise((ok,no)=>{try{const r=indexedDB.open('alok-diary',1);r.onupgradeneeded=()=>r.result.createObjectStore('snaps',{keyPath:'day'});r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})}
+function idb(){return new Promise((ok,no)=>{try{const r=indexedDB.open('alok-diary',2);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('snaps'))db.createObjectStore('snaps',{keyPath:'day'});if(!db.objectStoreNames.contains('pending'))db.createObjectStore('pending',{keyPath:'id'})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})}
 async function autoSnapshot(){
   try{const n=Object.keys(S.diary).filter(dHas).length;if(!n)return;const db=await idb(),day=today();
-    await new Promise((ok,no)=>{const tx=db.transaction('snaps','readwrite'),st=tx.objectStore('snaps');st.put({day,at:Date.now(),pages:n,diary:JSON.parse(JSON.stringify(S.diary))});
+    await new Promise((ok,no)=>{const tx=db.transaction('snaps','readwrite'),st=tx.objectStore('snaps');st.put({day,at:Date.now(),pages:n,diary:JSON.parse(JSON.stringify(S.diary)),mem:JSON.parse(JSON.stringify(S.mem))});
       const kr=st.getAllKeys();kr.onsuccess=()=>{kr.result.sort().slice(0,-14).forEach(k=>st.delete(k))};tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});
   }catch(e){}
 }
@@ -1814,7 +2323,7 @@ async function signOut(){
   if(chan)sb.removeChannel(chan);chan=null;col=null;
   try{await sb.auth.signOut()}catch(e){}me=null;pinRec=null;dirty.clear();
   ['sb-pin','sb-dirty',KEY,GKEY,'second-brain-v2'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  S={diary:{}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
+  S={diary:{},mem:{},prefs:{qfav:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
   view='diary';diaryDate=today();dq='';mSearch=false;app.__html='';render();signupMode=false;lock('login');setSync('local');
 }
 async function updateApp(){
@@ -1824,7 +2333,7 @@ async function updateApp(){
   location.reload();
 }
 function saveFile(data,name,type){const u=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000)}
-function backupJSON(){saveFile(JSON.stringify({app:'alok-diary',version:APP_VERSION,exported:new Date().toISOString(),diary:S.diary},null,1),'alok-diary-backup-'+today()+'.json','application/json');toast('Backup downloaded')}
+function backupJSON(){saveFile(JSON.stringify({app:'alok-diary',version:APP_VERSION,exported:new Date().toISOString(),diary:S.diary,memories:S.mem,prefs:S.prefs},null,1),'alok-diary-backup-'+today()+'.json','application/json');toast('Backup downloaded')}
 function loadXLSX(){return window.XLSX?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=ok;s.onerror=()=>no(new Error('load'));document.head.appendChild(s)})}
 async function backupXLSX(from,to){
   try{await loadXLSX()}catch(e){toast('The Excel tool could not load. Please check the internet connection.');return}
@@ -1832,17 +2341,24 @@ async function backupXLSX(from,to){
   const rows=[];Object.keys(S.diary).filter(d=>d>=from&&d<=to).sort().forEach(d=>{const p=S.diary[d],m=p.mood&&moodOf(p.mood),tg=(p.tags||[]).map(t=>'#'+t).join(' ');
     (p.items||[]).forEach(l=>{if(l.t&&l.t.trim())rows.push({Date:d,Day:dParse(d).toLocaleDateString('en-IN',{weekday:'long'}),Entry:l.t,Type:l.task?'Task':'Note',Status:l.fw?'Moved forward':l.done?'Done':'',Mood:m?m.l:'',Tags:tg,Bookmarked:p.bm?'Yes':''})});
     (p.att||[]).forEach(a=>rows.push({Date:d,Day:dParse(d).toLocaleDateString('en-IN',{weekday:'long'}),Entry:a.name+' — '+a.link,Type:'Attachment',Status:'',Mood:m?m.l:'',Tags:tg,Bookmarked:p.bm?'Yes':''}))});
-  if(!rows.length){toast('There are no entries in that date range.');return}
-  const wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(rows);
-  ws['!cols']=[{wch:12},{wch:11},{wch:70},{wch:11},{wch:14},{wch:11},{wch:22},{wch:11}];XLSX.utils.book_append_sheet(wb,ws,'Diary');
+  const mrows=Object.values(S.mem).filter(m=>m&&!m.deleted&&m.date>=from&&m.date<=to).sort((a,b)=>a.date<b.date?-1:1).map(m=>({Date:m.date,Title:m.title||'',Category:mcat(m.cat).l,Description:m.desc||'',Favourite:m.fav?'Yes':'',Photos:(m.photos||[]).map(a=>a.name+' — '+a.link).join('\n')}));
+  if(!rows.length&&!mrows.length){toast('There are no entries in that date range.');return}
+  const wb=XLSX.utils.book_new();
+  if(rows.length){const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:12},{wch:11},{wch:70},{wch:11},{wch:14},{wch:11},{wch:22},{wch:11}];XLSX.utils.book_append_sheet(wb,ws,'Diary')}
+  if(mrows.length){const ws=XLSX.utils.json_to_sheet(mrows);ws['!cols']=[{wch:12},{wch:40},{wch:22},{wch:70},{wch:10},{wch:50}];XLSX.utils.book_append_sheet(wb,ws,'Memories')}
   XLSX.writeFile(wb,'alok-diary-'+(from==='0000'?'all':from+'-to-'+to)+'.xlsx');toast('Excel file downloaded');
 }
-function restorePick(){const f=document.createElement('input');f.type='file';f.accept='.json,application/json';f.onchange=async()=>{try{const j=JSON.parse(await f.files[0].text());const d=j.diary||(j.data&&j.data.diary);if(!d||typeof d!=='object')throw 0;restoreData=d;restoreFrom='the selected file';render();toast('Backup loaded. Please confirm the restore.')}catch(e){toast('That file is not a diary backup.')}};f.click()}
-function restoreNow(){if(!restoreData)return;restoreFrom='';const now=Date.now();S.diary=restoreData;Object.values(S.diary).forEach(p=>{p._ts=now;(p.items||[]).forEach(i=>i.u=now)});restoreData=null;snapAll();saveNow();Object.keys(S.diary).forEach(d=>dirty.add('diary:'+d));keepDirty();flush();render();toast('Backup restored')}
+function restorePick(){const f=document.createElement('input');f.type='file';f.accept='.json,application/json';f.onchange=async()=>{try{const j=JSON.parse(await f.files[0].text());const d=j.diary||(j.data&&j.data.diary);if(!d||typeof d!=='object')throw 0;restoreData=d;restoreMem=j.memories&&typeof j.memories==='object'?j.memories:null;restorePrefs=j.prefs&&j.prefs.qfav?j.prefs:null;restoreFrom='the selected file';render();toast('Backup loaded. Please confirm the restore.')}catch(e){toast('That file is not a diary backup.')}};f.click()}
+function restoreNow(){if(!restoreData)return;restoreFrom='';const now=Date.now();S.diary=restoreData;Object.values(S.diary).forEach(p=>{p._ts=now;(p.items||[]).forEach(i=>i.u=now)});restoreData=null;
+  /* memories in the backup are added back; memories made after the backup are kept */
+  if(restoreMem){Object.values(restoreMem).forEach(m=>{if(m&&m.id){S.mem[m.id]=Object.assign({},m,{_ts:now});dirty.add('mem:'+m.id)}})}
+  if(restorePrefs){for(const k in restorePrefs.qfav){const f=restorePrefs.qfav[k];if(!S.prefs.qfav[k]&&f){S.prefs.qfav[k]=Object.assign({},f,{at:now})}}S.prefs._ts=now;dirty.add('prefs')}
+  restoreMem=restorePrefs=null;snapAll();saveNow();Object.keys(S.diary).forEach(d=>dirty.add('diary:'+d));keepDirty();flush();render();toast('Backup restored')}
 
 /* ================= misc ================= */
 const toastEl=$('toast'),undoBtn=$('undo');let toastT;
 function toast(msg){$('toastMsg').textContent=msg;undoBtn.hidden=true;toastEl.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>toastEl.hidden=true,3500)}
+function nowDate(d){return d.toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short',year:'numeric'})}
 function tickClock(){
   const el=$('clock');if(!el)return;
   const d=new Date();let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;
@@ -1850,13 +2366,15 @@ function tickClock(){
   if(!el.firstChild){el.innerHTML=[0,1,'s',2,3,'s',4,5].map(x=>x==='s'?'<span class="csep" aria-hidden="true">:</span>':'<span class="fd" aria-hidden="true"><b></b></span>').join('')+'<span class="ampm"></span>'}
   el.querySelectorAll('.fd').forEach((f,i)=>{const v=str[i];if(f.dataset.v!==v){f.dataset.v=v;f.firstChild.textContent=v;if(f.dataset.init){f.classList.remove('flip');void f.offsetWidth;f.classList.add('flip')}f.dataset.init='1'}});
   el.querySelector('.ampm').textContent=ap;
-  el.setAttribute('aria-label','Current time '+str.slice(0,2)+':'+str.slice(2,4)+' '+ap);
+  el.setAttribute('aria-label','Current time '+fmtTime(d,true));
+  const nd=document.querySelector('.ndate'),ds=nowDate(d);if(nd&&nd.textContent!==ds)nd.textContent=ds;
 }
 (function loop(){tickClock();setTimeout(loop,1000-Date.now()%1000+5)})();
 setInterval(()=>{const t=today();if(t!==dLastToday){const was=dLastToday;dLastToday=t;if(view==='diary'&&diaryDate===was&&!busyTyping()){diaryDate=t;dAnim='next';sideM=null;render()}else renderSide()}},20000);
 let rw=innerWidth;addEventListener('resize',()=>{if(innerWidth!==rw){const cross=(rw>=1000)!==(innerWidth>=1000);rw=innerWidth;if(cross){applyPrefs();closeDrawer()}else document.querySelectorAll('#dlines .dtxt').forEach(dAutosize)}});
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>document.querySelectorAll('#dlines .dtxt').forEach(dAutosize));
 document.addEventListener('keydown',e=>{
+  if(VW){if(e.key==='Escape'){e.preventDefault();if(VW.ask){VW.ask=false;drawViewer()}else closeViewer()}else if(e.key==='ArrowLeft'){e.preventDefault();vwStep(-1)}else if(e.key==='ArrowRight'){e.preventDefault();vwStep(1)}return}
   if(e.key==='Escape'){closeDCal();closeMood();closeDrawer();if(document.documentElement.classList.contains('focus')&&!(document.activeElement&&document.activeElement.classList.contains('dtxt')))toggleFocus();return}
   if(lockMode!=='open')return;
   if((e.ctrlKey||e.metaKey)&&(e.key==='s'||e.key==='S')){e.preventDefault();if(view==='diary')saveEntry();return}
@@ -1877,6 +2395,7 @@ document.addEventListener('keydown',e=>{
 /* ================= start ================= */
 try{if(localStorage.getItem('alok-sidehide')==='1')document.documentElement.classList.add('sidehide')}catch(e){}
 snapAll();applyPrefs();loadWeather();
+setTimeout(()=>{if(!loadPending.done){loadPending.done=1;loadPending()}},1500);
 history.replaceState({v:'diary'},'',location.pathname);
 (async()=>{
   const hasSess=(()=>{try{return Object.keys(localStorage).some(k=>/^sb-.+-auth-token$/.test(k))}catch(e){return false}})();
