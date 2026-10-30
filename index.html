@@ -24,6 +24,7 @@
   --k-bday:#b8426b; --k-anniv:#b5473a; --k-hol:#b07a12; --k-moon:#5a6aa8; --k-meet:#2f7a7a; --k-travel:#4a6fa5; --k-pay:#5e7a3c; --k-task:#7d4a8f; --k-ev:#6d5c45;
   --serif:'EB Garamond',Georgia,'Times New Roman',serif;
   --sans:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --L:32px; --fs:19px;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -49,15 +50,17 @@ button{cursor:pointer}
 html.locked body{overflow:hidden}
 
 /* shell */
-.shell{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:start}
+.shell{max-width:1600px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:start}
 .side{display:none}
 main#app{min-width:0;width:100%;max-width:780px;margin:0 auto}
 @media (min-width:1000px){
-  .shell{grid-template-columns:300px minmax(0,1fr)}
+  .shell{grid-template-columns:320px minmax(0,1fr);gap:32px}
+  :root{--L:36px;--fs:21px}
+  .dpaper{padding:26px 28px 26px 8px}
+  .ddt{font-size:40px}
   .side{display:flex;flex-direction:column;gap:18px;position:sticky;top:calc(14px + env(safe-area-inset-top,0px));max-height:calc(100vh - 28px);overflow-y:auto;padding:4px 2px 12px}
-  main#app{margin:0;max-width:880px}
+  main#app{margin:0;max-width:none}
   .only-narrow{display:none!important}
-  .dtxt{font-size:20px}
 }
 
 /* buttons, bars */
@@ -142,7 +145,7 @@ main#app{min-width:0;width:100%;max-width:780px;margin:0 auto}
 
 /* the page */
 .dy{position:relative;display:flex;flex-direction:column;gap:14px}
-.dpaper{position:relative;background:var(--ivory);border-radius:4px;box-shadow:0 1px 0 rgba(60,45,20,.06),0 12px 30px -14px var(--shadow);padding:20px 14px 24px 8px;overflow:hidden;touch-action:pan-y}
+.dpaper{position:relative;display:flex;flex-direction:column;min-height:calc(100vh - 150px);min-height:calc(100dvh - 150px);background:var(--ivory);border-radius:4px;box-shadow:0 1px 0 rgba(60,45,20,.06),0 12px 30px -14px var(--shadow);padding:20px 14px 24px 8px;overflow:hidden;touch-action:pan-y}
 .dpaper::before{content:"";position:absolute;top:0;bottom:0;left:calc(8px + 44px + 8px);width:1.5px;background:var(--marg);opacity:.9}
 .dhead{display:grid;grid-template-columns:44px 1fr auto;align-items:center;column-gap:16px}
 .ddate{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0;border-radius:6px}
@@ -167,7 +170,8 @@ button.pill{cursor:pointer}
 .ic svg{width:18px;height:18px}
 .k-bday .ic{color:var(--k-bday)} .k-anniv .ic{color:var(--k-anniv)} .k-hol .ic{color:var(--k-hol)} .k-moon .ic{color:var(--k-moon)}
 .k-meet .ic{color:var(--k-meet)} .k-travel .ic{color:var(--k-travel)} .k-pay .ic{color:var(--k-pay)} .k-task .ic{color:var(--k-task)}
-.wish{position:relative;margin:6px 0 2px;border:1px solid color-mix(in srgb,var(--k-bday) 45%,transparent);background:color-mix(in srgb,var(--k-bday) 7%,transparent);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.wishes{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:10px;margin:6px 0 4px}
+.wish{position:relative;margin:0;border:1px solid color-mix(in srgb,var(--k-bday) 45%,transparent);background:color-mix(in srgb,var(--k-bday) 7%,transparent);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
 .wish.k-hol{border-color:color-mix(in srgb,var(--k-hol) 45%,transparent);background:color-mix(in srgb,var(--k-hol) 8%,transparent)}
 .wish.k-anniv{border-color:color-mix(in srgb,var(--k-anniv) 45%,transparent);background:color-mix(in srgb,var(--k-anniv) 7%,transparent)}
 .wish-h{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-weight:600;font-size:14px}
@@ -188,17 +192,17 @@ button.pill{cursor:pointer}
 .dcarry{margin:14px 0 0 60px;display:flex;flex-direction:column;gap:8px;border:1px dashed var(--marg);border-radius:8px;padding:10px 12px;font-family:var(--sans);font-size:13px}
 .dcarry .row{display:flex;gap:8px;flex-wrap:wrap}
 .dlines{margin-top:14px;border-top:1px solid var(--rule)}
-.drow{display:grid;grid-template-columns:44px 1fr;column-gap:16px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--rule) 31px,var(--rule) 32px)}
-.dnum{all:unset;cursor:pointer;height:32px;line-height:32px;text-align:right;font-family:var(--sans);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent}
+.drow{display:grid;grid-template-columns:44px 1fr;column-gap:16px;background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--L) - 1px),var(--rule) calc(var(--L) - 1px),var(--rule) var(--L))}
+.dnum{all:unset;cursor:pointer;height:var(--L);line-height:var(--L);text-align:right;font-family:var(--sans);font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent}
 .dnum:disabled{cursor:default}
 .dnum:not(:disabled):hover{color:var(--accent)}
-.dtxt{display:block;width:100%;min-width:0;border:0;margin:0;padding:0;resize:none;overflow:hidden;background:transparent;font-family:var(--serif);font-size:19px;line-height:32px;height:32px;color:var(--ink);caret-color:var(--accent);outline:none}
+.dtxt{display:block;width:100%;min-width:0;border:0;margin:0;padding:0;resize:none;overflow:hidden;background:transparent;font-family:var(--serif);font-size:var(--fs);line-height:var(--L);height:var(--L);color:var(--ink);caret-color:var(--accent);outline:none}
 .dtxt::placeholder{color:var(--muted);opacity:.75;font-style:italic}
 .drow.done .dtxt,.dstruck{text-decoration:line-through;text-decoration-color:var(--accent);text-decoration-thickness:1.5px;color:var(--muted)}
 .drow.done .dnum{color:var(--accent);text-decoration:line-through}
 .drow.fw .dtxt{color:var(--muted);font-style:italic}
 .drow.fw .dnum{color:var(--accent)}
-.dfill{min-height:calc(32px * 9);cursor:text;background:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,var(--rule) 31px,var(--rule) 32px)}
+.dfill{flex:1 0 auto;min-height:calc(var(--L) * 6);cursor:text;background:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--L) - 1px),var(--rule) calc(var(--L) - 1px),var(--rule) var(--L))}
 .dfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 0 0 68px;font-family:var(--sans);font-size:11.5px;color:var(--muted)}
 .results{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .results li{border-bottom:1px dashed var(--line)}
@@ -281,7 +285,7 @@ function dLong(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'long',da
 function dShort(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'})}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='3.0';
+const APP_VERSION='3.1';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
@@ -322,7 +326,7 @@ function mergeNote(L,R){
 }
 function mark(...ids){if(col&&sync!=='offline'&&sync!=='saving')setSync('saving');const now=Date.now();ids.forEach(i=>{dirty.add(i);if(i==='gcal')G._ts=now;else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500)}
 const docName=id=>id==='gcal'?'g_events':'d_'+id.slice(6);
-const body=id=>id==='gcal'?{connected:G.connected,events:G.events,cals:G.cals,off:G.off,fetchedAt:G.fetchedAt,_ts:G._ts||0}:getRef(id);
+const body=id=>id==='gcal'?{v2:G.v2||0,connected:G.connected,events:G.events,cals:G.cals,off:G.off,fetchedAt:G.fetchedAt,_ts:G._ts||0}:getRef(id);
 var col=null,sync='local',syncErr='';
 async function flush(){
   if(!col||writing||!dirty.size)return;
@@ -358,7 +362,7 @@ function applyRow(name,data){
   if(name==='settings'){if(data.pinHash){pinRec=data;try{localStorage.setItem(PINKEY,JSON.stringify(data))}catch(e){}}return false}
   if(name==='g_events'){
     if(dirty.has('gcal')||(data._ts||0)<=(G._ts||0))return false;
-    G={connected:!!data.connected,events:data.events||[],cals:data.cals||[],off:data.off||[],fetchedAt:data.fetchedAt||0,_ts:data._ts||0};return true;
+    G={v2:data.v2||0,connected:!!data.connected,events:data.events||[],cals:data.cals||[],off:data.off||[],fetchedAt:data.fetchedAt||0,_ts:data._ts||0};return true;
   }
   if(!name.startsWith('d_'))return false;
   const dd=name.slice(2),k='diary:'+dd,a=document.activeElement;
@@ -537,8 +541,10 @@ async function gFetch(url){
   return r.json();
 }
 const FESTIVALS=/diwali|deepavali|holi\b|bhai ?duj|bhai ?dooj|raksha ?bandhan|rakhi|dussehra|vijaya ?dashami|navratri|janmashtami|ganesh ?chaturthi|makar ?sankranti|lohri|pongal|karwa|karva|chhat|chhath|govardhan|dhanteras|eid|christmas|new year|guru nanak|mahavir|buddha purnima|ram navami|maha ?shivaratri|baisakhi|vaisakhi|onam|independence day|republic day|gandhi jayanti/i;
+function gImported(e){return !!(e.start&&e.start.date&&e.recurringEventId&&/^1900-/.test(e.created||''))}
 function gKind(e,c){
   const t=(e.summary||'');
+  if(gImported(e))return /anniversary|marriage|wedding/i.test(t)?'anniv':'bday';
   if(e.eventType==='birthday'||/birthday|b'?day|janamdin/i.test(t))return 'bday';
   if(/anniversary|marriage day|wedding day/i.test(t))return 'anniv';
   if(/#holiday@/.test(c.id))return 'hol';
@@ -554,7 +560,13 @@ function gNorm(e,c){
   if(allDay){d=e.start.date;last=e.end&&e.end.date?dAdd(e.end.date,-1):d;if(last<d)last=d}
   else{const s=new Date(e.start.dateTime);d=dFmt(s);last=d;tm=s.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true}).toUpperCase()}
   const kind=gKind(e,c);
-  return {id:e.id,d,last,tm,t:(e.summary||'(No title)').trim(),k:kind,l:e.htmlLink||'',c:c.id,pub:kind==='hol'&&/public holiday/i.test(e.description||'')?1:0};
+  const ev={id:e.id,d,last,tm,t:(e.summary||'(No title)').trim(),k:kind,l:e.htmlLink||'',c:c.id,pub:kind==='hol'&&/public holiday/i.test(e.description||'')?1:0};
+  if(kind==='bday'||kind==='anniv'){
+    const m=ev.t.match(/^(\d{4})\s+(.+)$/);if(m){ev.yr=+m[1];ev.nm=m[2].trim()}
+    if(kind==='bday'&&!ev.nm){const n=bdayName(ev.t);if(n)ev.nm=n}
+    if(kind==='anniv'&&!ev.nm){const n=ev.t.replace(/(['’]s)?\s*(wedding\s*|marriage\s*)?anniversary/i,'').trim()||String(e.description||'').split('\n')[0].trim().slice(0,40);if(n)ev.nm=n}
+  }
+  return ev;
 }
 async function gSync(interactive){
   if(gBusy)return;gBusy=true;gErr='';renderGStatus();
@@ -566,7 +578,7 @@ async function gSync(interactive){
     const evs=[],seen=new Set();
     for(const c of cals){
       let pt='';
-      do{const u=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(c.id)}/events?singleEvents=true&orderBy=startTime&maxResults=2500&timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}&fields=nextPageToken,items(id,summary,description,start,end,htmlLink,eventType,hangoutLink,status)${pt?'&pageToken='+encodeURIComponent(pt):''}`;
+      do{const u=`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(c.id)}/events?singleEvents=true&orderBy=startTime&maxResults=2500&timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}&fields=nextPageToken,items(id,summary,description,start,end,htmlLink,eventType,hangoutLink,status,created,recurringEventId)${pt?'&pageToken='+encodeURIComponent(pt):''}`;
         const j=await gFetch(u);
         (j.items||[]).forEach(e=>{if(e.status==='cancelled'||!e.start||e.eventType==='workingLocation')return;const n=gNorm(e,c);
           const key=(n.k==='hol'||n.k==='bday'?n.k:n.c)+'|'+n.d+'|'+n.t.toLowerCase()+'|'+n.tm;if(seen.has(key))return;seen.add(key);
@@ -577,7 +589,7 @@ async function gSync(interactive){
     G.cals=cals.filter(c=>!/#holiday@/.test(c.id)).map(c=>({id:c.id,name:c.primary?'My calendar':(c.summaryOverride||c.summary||c.id)}));
     if(hol.length)G.cals.push({id:'holidays',name:'Holidays in India'});
     G.events=evs.sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:(a.tm?1:0)-(b.tm?1:0)||a.tm.localeCompare(b.tm));
-    G.connected=true;G.fetchedAt=Date.now();mark('gcal');saveNow();
+    G.connected=true;G.v2=1;G.fetchedAt=Date.now();mark('gcal');saveNow();
     if(interactive)toast(`Calendar updated: ${evs.length} events`);
   }catch(e){
     if(e.message==='expired'&&interactive){gBusy=false;return gSync(true)}
@@ -614,10 +626,12 @@ const IC={
 };
 function icon(k){return `<span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${IC[k]||IC.ev}</svg></span>`}
 const KLABEL={bday:'Birthday',anniv:'Anniversary',hol:'Holiday',moon:'Moon phase',meet:'Meeting',travel:'Travel',pay:'Payment',task:'Task',ev:'Event'};
+function evTitle(e){if(e.k==='bday')return (e.nm||bdayName(e.t)||'Someone')+'’s birthday';if(e.k==='anniv')return e.nm?e.nm+'’s anniversary':e.t;return e.t}
+function evAge(e,d){if(!e.yr)return '';const n=+d.slice(0,4)-e.yr;if(n<=0||n>120)return '';return e.k==='bday'?'turns '+n:n+(n===1?' year':' years')}
 function bdayName(t){return t.replace(/(['’]s)?\s*birthday/i,'').replace(/^birthday[:\-–\s]*/i,'').replace(/^happy\s*/i,'').trim()}
 function wishFor(e){
-  if(e.k==='bday'){const n=bdayName(e.t);return {k:'bday',title:n?`${n}’s birthday`:'A birthday today',text:`Happy Birthday${n?', '+n:''}! Wishing you a wonderful year ahead, filled with good health, happiness and success.`}}
-  if(e.k==='anniv'){const n=e.t.replace(/(['’]s)?\s*(wedding\s*)?anniversary/i,'').trim();return {k:'anniv',title:e.t,text:`Happy Anniversary${n?', '+n:''}! Wishing you both a lifetime of love, togetherness and happiness.`}}
+  if(e.k==='bday'){const n=e.nm||bdayName(e.t);return {k:'bday',title:(n?`${n}’s birthday`:'A birthday')+(evAge(e,e.d)?' · '+evAge(e,e.d):''),text:`Happy Birthday${n?', '+n:''}! Wishing you a wonderful year ahead, filled with good health, happiness and success.`}}
+  if(e.k==='anniv'){const n=e.nm||'';return {k:'anniv',title:evTitle(e)+(evAge(e,e.d)?' · '+evAge(e,e.d):''),text:`Happy Anniversary${n?', '+n:''}! Wishing you both a lifetime of love, togetherness and happiness.`}}
   if(e.k==='hol'&&FESTIVALS.test(e.t)){const f=e.t.split('/')[0].replace(/\(.*\)/,'').trim();return {k:'hol',title:f,text:`Wishing you and your family a very happy ${f}. May this festival bring joy, peace and prosperity to your home.`}}
   return null;
 }
@@ -640,7 +654,8 @@ function dRowsHTML(d){
     const lab=l.fw?'Moved to a later page':has?(l.done?'Restore line ':'Strike off line ')+n:'';
     return `<div class="drow${l.done?' done':''}${l.fw?' fw':''}" data-id="${l.id}"><button class="dnum" type="button" tabindex="-1" ${has&&!l.fw?'':'disabled'} ${lab?`aria-label="${lab}"`:''}>${l.fw?'→':has?n:''}</button><textarea class="dtxt" id="dl-${l.id}" rows="1" aria-label="Diary line" ${l.fw?'readonly':''} ${i===0&&ph?`placeholder="${ph}"`:''}>${esc(l.t)}</textarea></div>`}).join('');
 }
-function dAutosize(t){t.style.height='auto';t.style.height=Math.max(32,t.scrollHeight)+'px'}
+function lineH(){return parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--L'))||32}
+function dAutosize(t){t.style.height='auto';t.style.height=Math.max(lineH(),t.scrollHeight)+'px'}
 function dCount(){const el=$('dcount');if(!el)return;const p=dPage(diaryDate),tx=p.items.filter(l=>l.t.trim()&&!l.fw),dn=tx.filter(l=>l.done).length;el.textContent=tx.length?`${tx.length} ${tx.length===1?'line':'lines'}${dn?` · ${dn} struck off`:''}`:''}
 function dRenumber(){
   const p=dPage(diaryDate);let n=0;
@@ -697,7 +712,7 @@ function renderSide(){
    <div class="panel mini"><div class="mhead"><button class="arrow" id="smPrev" type="button" aria-label="Previous month">‹</button><b>${new Date(sideM.y,sideM.m,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</b><button class="arrow" id="smNext" type="button" aria-label="Next month">›</button></div>
      <div class="grid">${monthGrid(sideM.y,sideM.m,'data-sd')}</div>${LEGEND}
      <div class="calfoot"><span></span><button class="btn sm" id="sToday" type="button">Today</button></div></div>
-   <div class="panel"><p class="eyebrow">Next 7 days</p>${G.connected?(up.length?`<ul class="up">${up.map(x=>`<li class="k-${x.e.k}"><button type="button" data-sd="${x.d}">${icon(x.e.k)}<span class="t">${esc(x.e.k==='bday'?(bdayName(x.e.t)||'Someone')+'’s birthday':x.e.t)}</span><span class="w">${x.d===t?'Today':x.d===dAdd(t,1)?'Tomorrow':dShort(x.d)}${x.e.tm?' · '+x.e.tm:''}</span></button></li>`).join('')}</ul>`:'<p class="note">Nothing on your calendar this week.</p>')
+   <div class="panel"><p class="eyebrow">Next 7 days</p>${G.connected?(up.length?`<ul class="up">${up.map(x=>`<li class="k-${x.e.k}"><button type="button" data-sd="${x.d}">${icon(x.e.k)}<span class="t">${esc(evTitle(x.e))}</span><span class="w">${x.d===t?'Today':x.d===dAdd(t,1)?'Tomorrow':dShort(x.d)}${x.e.tm?' · '+x.e.tm:''}${evAge(x.e,x.d)?' · '+evAge(x.e,x.d):''}</span></button></li>`).join('')}</ul>`:'<p class="note">Nothing on your calendar this week.</p>')
      :`<p class="note">Connect Google Calendar in Settings to see birthdays, holidays and events here and on each page.</p>`}</div>
    <p class="keys"><kbd>←</kbd> <kbd>→</kbd> turn pages · <kbd>T</kbd> today · <kbd>/</kbd> search · <kbd>C</kbd> calendar</p>`;
   if(side.__html!==html){const f=document.activeElement&&document.activeElement.id==='sq';side.innerHTML=html;side.__html=html;if(f){const i=$('sq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
@@ -712,13 +727,13 @@ function renderSide(){
 function eventsHTML(d){
   if(!G.connected)return '';
   const ev=evOn(d);if(!ev.length)return '';
-  const stale=Date.now()-G.fetchedAt>24*3600e3;
+  const stale=Date.now()-G.fetchedAt>24*3600e3||!G.v2;
   const wl=dDiff(d,today())>=-1?ev.map(e=>[e,wishFor(e)]).filter(x=>x[1]):[],wishes=wl.map(x=>x[1]),shown=new Set(wl.map(x=>x[0]));
   return `<section class="devs" aria-label="From your Google Calendar">
     <p class="devs-h"><span>From your calendar</span>${stale?'<button class="linkbtn" id="gRef" type="button">Refresh</button>':''}</p>
-    ${wishes.map((w,i)=>`<div class="wish k-${w.k}" data-wish="${i}">${'<div class="confetti"></div>'}<div class="wish-h">${icon(w.k)}<span>${esc(w.title)}</span></div><p>“${esc(w.text)}”</p>
-      <div class="row"><a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(w.text)}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost sm" type="button" data-copy="${esc(w.text)}">Copy wish</button></div></div>`).join('')}
-    ${ev.filter(e=>!shown.has(e)).map(e=>`<div class="dev k-${e.k}">${icon(e.k)}<span class="tm">${e.tm||(e.d!==e.last?'All days':'All day')}</span><a href="${esc(e.l)}" target="_blank" rel="noopener">${esc(e.k==='bday'?(bdayName(e.t)||'Someone')+'’s birthday':e.t)}${e.pub?'<span class="tag">Public holiday</span>':''}</a></div>`).join('')}
+    ${wishes.length?'<div class="wishes">':''}${wishes.map((w,i)=>`<div class="wish k-${w.k}" data-wish="${i}">${'<div class="confetti"></div>'}<div class="wish-h">${icon(w.k)}<span>${esc(w.title)}</span></div><p>“${esc(w.text)}”</p>
+      <div class="row"><a class="btn sm" href="https://wa.me/?text=${encodeURIComponent(w.text)}" target="_blank" rel="noopener">Send on WhatsApp</a><button class="btn ghost sm" type="button" data-copy="${esc(w.text)}">Copy wish</button></div></div>`).join('')}${wishes.length?'</div>':''}
+    ${ev.filter(e=>!shown.has(e)).map(e=>`<div class="dev k-${e.k}">${icon(e.k)}<span class="tm">${e.tm||(e.d!==e.last?'All days':'All day')}</span><a href="${esc(e.l)}" target="_blank" rel="noopener">${esc(evTitle(e))}${evAge(e,d)?`<span class="tag" style="color:var(--k-${e.k})">${evAge(e,d)}</span>`:''}${e.pub?'<span class="tag">Public holiday</span>':''}</a></div>`).join('')}
   </section>`;
 }
 function confetti(){
