@@ -153,6 +153,24 @@ li.editing{display:block!important}
 .edit-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .edit select,.add select#fR{font-family:var(--sans);font-size:13px}
 .add select#fR{background:transparent;border:0;border-bottom:1px solid var(--line);padding:6px 2px}
+.dy{position:relative}
+.dpaper.dghost{position:absolute;left:0;right:0;margin:0;z-index:5;pointer-events:none}
+.dghost.dunder{z-index:1}
+#dpaper.dfold-prev{z-index:6}
+@media (prefers-reduced-motion:no-preference){
+  .dfold-next,.dfold-prev{transform-origin:left center;backface-visibility:hidden;will-change:transform}
+  .dfold-next{animation:dfoldNext .68s cubic-bezier(.45,.05,.3,1) forwards}
+  .dfold-prev{animation:dfoldPrev .68s cubic-bezier(.45,.05,.3,1) both}
+  .dfold-next::after,.dfold-prev::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+    background:linear-gradient(to left,rgba(0,0,0,.28),rgba(0,0,0,.06) 40%,rgba(255,255,255,.08) 70%,rgba(0,0,0,0));animation:dshade .68s ease-in-out both}
+  @keyframes dfoldNext{0%{transform:perspective(1800px) rotateY(0) skewY(0);box-shadow:0 12px 30px -14px var(--ivshadow)}
+    45%{transform:perspective(1800px) rotateY(-55deg) skewY(-1.5deg);box-shadow:-30px 20px 40px -10px rgba(0,0,0,.35)}
+    100%{transform:perspective(1800px) rotateY(-180deg) skewY(0);box-shadow:none}}
+  @keyframes dfoldPrev{0%{transform:perspective(1800px) rotateY(-180deg)}
+    55%{transform:perspective(1800px) rotateY(-55deg) skewY(-1.5deg);box-shadow:-30px 20px 40px -10px rgba(0,0,0,.35)}
+    100%{transform:perspective(1800px) rotateY(0);box-shadow:0 12px 30px -14px var(--ivshadow)}}
+  @keyframes dshade{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
+}
 .dcard{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:6px;background:var(--ivory);border-radius:6px;padding:14px 16px 12px 22px;position:relative;box-shadow:0 8px 22px -14px var(--ivshadow)}
 .dcard::before{content:"";position:absolute;top:0;bottom:0;left:12px;width:1.5px;background:var(--marg)}
 .dcard:focus-visible{outline:2px solid var(--accent)}
@@ -462,6 +480,7 @@ function render(preserve){
   if(view!=='home'&&!S.notes[view]&&view!=='review'&&view!=='settings'&&view!=='journal')view='home';
   view==='home'?home():view==='review'?reviewView():view==='settings'?settingsView():view==='journal'?diaryView():sheet();
   const gear=$('gear');if(gear)gear.hidden=view!=='home';
+  if(typeof tickClock==='function')tickClock();
   const fab=$('fab');if(fab)fab.hidden=!(view==='home'?!q.trim():!!$('f1'));
   if(preserve){for(const k in keep){const e=$(k);if(e&&(k!=='freeT'||k===aid))e.value=keep[k]}
     if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
@@ -867,7 +886,7 @@ document.addEventListener('click',async e=>{
   }
 });
 /* ---------- settings, photo crop, app update ---------- */
-const APP_VERSION='2.0';
+const APP_VERSION='2.1';
 function lockMin(){try{const v=localStorage.getItem('sb-lockmin');return v===null?2:+v}catch(e){return 2}}
 function settingsView(){
   const lm=lockMin();
@@ -889,6 +908,7 @@ function settingsView(){
      <div class="row"><button class="btn ghost sm" id="sSync" type="button">Sync now</button></div>
    </section>
    <section class="set"><p class="eyebrow">App</p>
+     <p class="set-line"><span>Page-turn sound in the Diary</span><button class="btn sm ghost" id="sSound" type="button">${dSoundOn()?'Turn off':'Turn on'}</button></p>
      <p class="set-line"><span>Version</span><b>${APP_VERSION}</b></p>
      <div class="row"><button class="btn sm" id="sUpdate" type="button">Check for updates</button></div>
      <p class="note">Loads the newest version of the app. Your notes stay safe.</p>
@@ -917,6 +937,7 @@ function settingsView(){
   $('sLock').onchange=()=>{try{localStorage.setItem('sb-lockmin',$('sLock').value)}catch(e){}toast('Auto-lock updated')};
   $('sSync').onclick=async()=>{if(!me||!col){toast('Sign in to sync.');return}await flush();await pullAll(false);toast(sync==='synced'?'Everything is synced':'Sync will finish when you are online')};
   $('sUpdate').onclick=updateApp;
+  $('sSound').onclick=()=>{const on=!dSoundOn();try{localStorage.setItem('sb-sound',on?'1':'0')}catch(e){}if(on)dFlipSound();render();toast(on?'Page-turn sound is on':'Page-turn sound is off')};
   $('sNotify').onclick=toggleNotify;$('sIcs').onclick=icsAll;
   $('sXlsx').onclick=backupXLSX;$('sJson').onclick=backupJSON;$('sRest').onclick=restorePick;
   if($('sRestYes'))$('sRestYes').onclick=restoreNow;if($('sRestNo'))$('sRestNo').onclick=()=>{restoreData=null;render()};
@@ -1099,9 +1120,42 @@ function dRelayout(focusId,pos){
   box.querySelectorAll('.dtxt').forEach(dAutosize);dCount();app.__html='';
   if(focusId){const t=$('dl-'+focusId);if(t){t.focus();const p=Math.min(pos,t.value.length);t.setSelectionRange(p,p)}}
 }
+function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
 function dGo(d,dir){
   if(d===diaryDate)return;dFlushSoon();
-  dAnim=dir||(d>diaryDate?'next':'prev');diaryDate=d;dq='';closeDCal();render();window.scrollTo({top:0});
+  dir=dir||(d>diaryDate?'next':'prev');
+  document.querySelectorAll('.dghost').forEach(g=>g.remove());
+  const old=$('dpaper');let ghost=null,top=0,h=0;
+  if(old&&!dReduce()){ghost=old.cloneNode(true);ghost.removeAttribute('id');ghost.querySelectorAll('[id]').forEach(e=>e.removeAttribute('id'));top=old.offsetTop;h=old.offsetHeight}
+  diaryDate=d;dq='';closeDCal();dAnim=ghost?'':dir;render();
+  const pp=$('dpaper');
+  if(ghost&&pp){
+    dFlipSound();
+    ghost.classList.add('dghost');ghost.setAttribute('aria-hidden','true');ghost.style.top=top+'px';ghost.style.height=h+'px';
+    pp.parentNode.insertBefore(ghost,pp.nextSibling);
+    const turning=dir==='next'?ghost:pp;turning.classList.add(dir==='next'?'dfold-next':'dfold-prev');
+    if(dir==='prev')ghost.classList.add('dunder');
+    const done=()=>{ghost.remove();pp.classList.remove('dfold-prev')};
+    turning.addEventListener('animationend',done,{once:true});setTimeout(done,1200);
+  }
+  const r=pp&&pp.getBoundingClientRect();if(r&&r.top<0)setTimeout(()=>window.scrollTo({top:Math.max(0,scrollY+r.top-12),behavior:dReduce()?'auto':'smooth'}),ghost?700:0);
+}
+/* synthesised paper page-turn sound: a soft lift, a swish, and the page settling */
+var dActx=null;
+function dSoundOn(){try{return localStorage.getItem('sb-sound')!=='0'}catch(e){return true}}
+function dFlipSound(){
+  if(!dSoundOn())return;
+  try{
+    dActx=dActx||new (window.AudioContext||window.webkitAudioContext)();if(dActx.state==='suspended')dActx.resume();
+    const a=dActx,t=a.currentTime+.01,dur=.55,sr=a.sampleRate,buf=a.createBuffer(1,Math.floor(sr*dur),sr),ch=buf.getChannelData(0);
+    for(let i=0;i<ch.length;i++){const crackle=Math.random()<.035?(Math.random()*2-1):0;ch[i]=(Math.random()*2-1)*.45+crackle*.9}
+    const src=a.createBufferSource();src.buffer=buf;
+    const bp=a.createBiquadFilter();bp.type='bandpass';bp.Q.value=.7;bp.frequency.setValueAtTime(2600,t);bp.frequency.exponentialRampToValueAtTime(900,t+.32);bp.frequency.exponentialRampToValueAtTime(1500,t+dur);
+    const hp=a.createBiquadFilter();hp.type='highpass';hp.frequency.value=350;
+    const g=a.createGain();g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.32,t+.05);g.gain.exponentialRampToValueAtTime(.08,t+.22);
+    g.gain.exponentialRampToValueAtTime(.42,t+.36);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    src.connect(bp);bp.connect(hp);hp.connect(g);g.connect(a.destination);src.start(t);src.stop(t+dur);
+  }catch(e){}
 }
 function dSearchHTML(){
   const ql=dq.trim().toLowerCase(),hits=[];
