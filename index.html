@@ -713,10 +713,75 @@ html.viewing{overflow:hidden}
 .sbh{margin-top:6px}
 .slist.bought{opacity:.92}
 @media (max-width:520px){.sadd .sin{flex:1 1 100%}.sadd .sq{width:auto;flex:1 1 0}.sadd .btn{flex:0 0 auto;padding:10px 22px}.sname .st{font-size:18px}.sedit{padding-left:8px}}
-@media (min-width:1000px) and (max-width:1499px){.lastsync{display:none}.syncbox .sync{font-size:0;gap:0}.tb-r{gap:4px}.tb-r .icons{gap:0}.tb-r .ic-btn{width:36px}.tb-c{gap:0}.now{gap:6px}}
+@media (min-width:1000px) and (max-width:1759px){.lastsync{display:none}.syncbox .sync{font-size:0;gap:0}.tb-r{gap:4px}.tb-r .icons{gap:0}.tb-r .ic-btn{width:36px}.tb-c{gap:0}.now{gap:6px}html:not(.sidehide) #tbSearch{display:none}}
 @media (max-width:999px){.topbar{flex-wrap:wrap}.tb-l{flex:1 1 0;min-width:0}.tb-r{flex:0 0 auto;gap:8px}}
-@media (max-width:520px){.cartbtn{width:36px;height:36px}.tb-l{gap:8px}.brand{gap:6px;min-width:0}.brand .logo{width:34px;height:34px}.brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fd{font-size:12.5px}.ampm{margin-left:2px}}
+@media (max-width:520px){.cartbtn{width:36px;height:36px}.tb-l{gap:8px}.brand{gap:6px;min-width:0}.brand .logo{width:34px;height:34px}.brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
+@media (max-width:430px){.topbar .brand.only-narrow>span{display:none}.fd{font-size:12.5px}.ampm{margin-left:2px}}
 @media (prefers-reduced-motion:reduce){.srow.fresh,.srow.striking .st::after{animation:none}}
+
+/* 4.9 · lists and money */
+.ltabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.ltab{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 13px;font-family:var(--sans);font-size:13px;color:var(--ink);white-space:nowrap}
+.ltab span{min-width:18px;height:18px;border-radius:999px;background:color-mix(in srgb,var(--ink) 12%,transparent);font-size:11px;font-weight:700;display:inline-grid;place-items:center;padding:0 5px;box-sizing:border-box}
+.ltab span.red{background:var(--accent);color:#fff}
+.ltab.on{background:var(--ink);color:var(--desk);border-color:var(--ink)}
+.ltab.on span{background:color-mix(in srgb,var(--desk) 25%,transparent)}
+.ltab.add{border-style:dashed;color:var(--muted)}
+.lnew{display:flex;gap:6px;flex:0 0 auto}
+.lnew input{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-family:var(--sans);font-size:13px;background:var(--sheet);color:var(--ink);width:170px}
+.sbh .row{display:flex;gap:14px;flex-wrap:wrap}
+.cbadge.soft{background:var(--k-hol)}
+.money h2{display:flex;align-items:center;gap:10px}.money h2 svg{color:var(--accent)}
+.xform,.bform{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:12px;padding:14px;background:color-mix(in srgb,var(--sheet) 60%,var(--ivory))}
+.xform .eyebrow,.bform .eyebrow{margin:0}
+.xgrid,.bgrid{display:grid;grid-template-columns:150px 1fr 160px;gap:10px}
+.bgrid{grid-template-columns:2fr 1fr 1.3fr 1.2fr 1.2fr}
+.xgrid label,.bgrid label{display:flex;flex-direction:column;gap:4px;font-family:var(--sans);font-size:12px;color:var(--muted);min-width:0}
+.xgrid input,.bgrid input,.bgrid select{min-width:0;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-family:var(--sans);font-size:15px;background:var(--ivory);color:var(--ink)}
+.xa input{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+@media (max-width:760px){.xgrid{grid-template-columns:1fr 1fr}.xgrid .xa{grid-column:1/-1}.bgrid{grid-template-columns:1fr 1fr}.bgrid label:first-child{grid-column:1/-1}}
+.xcats{display:flex;flex-wrap:wrap;gap:6px}
+.xc input{position:absolute;opacity:0;pointer-events:none}
+.xc span{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-family:var(--sans);font-size:12.5px;cursor:pointer;color:var(--ink)}
+.xc span::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--xc)}
+.xc input:checked+span{border-color:var(--xc);background:color-mix(in srgb,var(--xc) 14%,transparent);font-weight:600}
+.xc input:focus-visible+span{outline:2px solid var(--accent)}
+.money .tiles b{font-size:16px}
+.xbars{display:flex;flex-direction:column;gap:7px}
+.xbar{display:grid;grid-template-columns:150px 1fr 90px 40px;gap:10px;align-items:center;font-family:var(--sans);font-size:13px}
+.xbar b{text-align:right;font-variant-numeric:tabular-nums}.xbar small{color:var(--muted);text-align:right}
+.xtrack{height:10px;border-radius:999px;background:color-mix(in srgb,var(--ink) 7%,transparent);overflow:hidden}.xtrack i{display:block;height:100%;border-radius:999px}
+@media (max-width:520px){.xbar{grid-template-columns:96px 1fr 72px;font-size:12px}.xbar small{display:none}}
+.xlist{list-style:none;margin:0;padding:0}
+.xday{display:flex;justify-content:space-between;padding:12px 2px 4px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--muted);border-bottom:1px solid var(--line)}
+.xrow{display:grid;grid-template-columns:12px 1fr auto 36px;gap:10px;align-items:center;padding:6px 2px;border-bottom:1px dashed var(--line)}
+.xrow i{width:10px;height:10px;border-radius:50%}
+.xname{all:unset;cursor:pointer;display:flex;flex-direction:column;min-width:0}
+.xname span{font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.xname small{font-family:var(--sans);font-size:11.5px;color:var(--muted)}
+.xrow b{font-family:var(--sans);font-size:15px;font-variant-numeric:tabular-nums}
+.blist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.brow{border:1px solid var(--line);border-left:4px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--ivory)}
+.brow.over{border-left-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,var(--ivory))}
+.brow.today,.brow.soon{border-left-color:var(--k-hol)}
+.bmain{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.bname{all:unset;cursor:pointer;display:flex;flex-direction:column;flex:1;min-width:160px}
+.bname b{font-size:19px;font-weight:600}.bname small{font-family:var(--sans);font-size:12px;color:var(--muted)}
+.bamt{font-family:var(--sans);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.bdue{font-family:var(--sans);font-size:12px;border-radius:999px;padding:2px 10px;border:1px solid var(--line);color:var(--muted)}
+.bdue.over{border-color:var(--accent);color:#fff;background:var(--accent)}
+.bdue.today,.bdue.soon{border-color:var(--k-hol);color:var(--k-hol);font-weight:600}
+.brow .row{display:flex;gap:8px}
+.bhist ul{margin:0;padding-left:18px;font-family:var(--sans);font-size:12.5px;color:var(--muted)}
+.blist.old .brow{opacity:.7}
+.dmoney{margin:12px 0 0 60px;display:flex;flex-direction:column;gap:8px}
+.dbills{display:flex;flex-direction:column;gap:6px}
+.dbill{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--sans);font-size:13px;border:1px dashed var(--k-hol);border-radius:10px;padding:7px 10px;background:color-mix(in srgb,var(--k-hol) 7%,transparent)}
+.dbill.over{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.dbill .btn{margin-left:auto}
+.dexp{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--sans);font-size:13px;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:var(--ivory)}
+.dexp svg{color:var(--accent)}.dexp span{font-weight:600}.dexp small{color:var(--muted)}
+.dexp:focus-visible{outline:2px solid var(--accent)}
+@media (max-width:520px){.dmoney{margin-left:56px}}
 </style>
 </head>
 <body>
@@ -744,14 +809,14 @@ function fmtTime(ts,sec){const d=new Date(ts);let h=d.getHours();const ap=h<12?'
 function fmtDT(ts){const d=new Date(ts),t=today(),s=dFmt(d);return (s===t?'today':s===dAdd(t,-1)?'yesterday':d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:d.getFullYear()===new Date().getFullYear()?undefined:'numeric'}))+', '+fmtTime(ts)}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.8';
+const APP_VERSION='4.9';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
 var S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S){let old=null;try{old=JSON.parse(localStorage.getItem('second-brain-v2'))}catch(e){}S={diary:(old&&old.diary)||{}}}
-S.diary=S.diary||{};S.mem=S.mem||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl','shop'].forEach(k=>S.lists[k]=S.lists[k]||{});
+S.diary=S.diary||{};S.mem=S.mem||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl','shop','ulist','exp','bills'].forEach(k=>S.lists[k]=S.lists[k]||{});
 var G=null;try{G=JSON.parse(localStorage.getItem(GKEY))}catch(e){}
 G=G||{connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};G.off=G.off||[];G.cals=G.cals||[];G.events=G.events||[];
 let saveT;
@@ -896,7 +961,7 @@ setInterval(()=>{if(lockMode==='open'&&!document.hidden)touchActive()},30000);
 addEventListener('pagehide',()=>{if(lockMode==='open')touchActive()});
 function unlock(){touchActive();const was=lockMode;lockMode='open';document.documentElement.classList.remove('locked');render();
   if(!lockEl.hidden&&was!=='open'){lockEl.classList.add('fade');setTimeout(()=>{if(lockMode==='open')lockEl.hidden=true;lockEl.classList.remove('fade')},200)}else lockEl.hidden=true;
-  setTimeout(gAutoRefresh,1200);loadWeather();setTimeout(autoSnapshot,4000);if(!loadPending.done){loadPending.done=1;setTimeout(loadPending,1500)}setTimeout(bkCheck,8000)}
+  setTimeout(gAutoRefresh,1200);loadWeather();setTimeout(autoSnapshot,4000);if(!loadPending.done){loadPending.done=1;setTimeout(loadPending,1500)}setTimeout(billNag,3000);setTimeout(bkCheck,15000)}
 function lock(mode,msg){if(mode===lockMode&&mode==='pin'&&!lockEl.hidden&&!msg)return;lockEl.classList.remove('fade');
   if(mode==='pin'||mode==='forgot'||mode==='login')try{localStorage.setItem('sb-active','0')}catch(e){}
   const auto=mode==='pin'&&lockMode!=='pin';lockMode=mode;lockMsg=msg||'';lockEl.hidden=false;document.documentElement.classList.add('locked');drawLock();if(auto&&bioOn())setTimeout(()=>bioUnlock(true),250)}
@@ -962,7 +1027,7 @@ async function onSignedIn(user,viaPassword){
   if(me&&me.id===user.id&&col){if(viaPassword&&pinRec)unlock();return}
   const keepOpen=lockMode==='open'&&me&&me.id===user.id;
   const owner=localStorage.getItem(OWNKEY);
-  if(owner&&owner!==user.id){dirty.clear();keepDirty();S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
+  if(owner&&owner!==user.id){dirty.clear();keepDirty();S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
   try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
   me=user;startSync();
   if(!pinRec){try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}}
@@ -1147,7 +1212,7 @@ function setApp(html){if(app.__html===html)return false;app.innerHTML=html;app._
 function render(preserve){
   const keep={},ae=document.activeElement;let aid=null,sel=null;
   if(preserve){app.querySelectorAll('input[id]').forEach(e=>{if(e.type!=='checkbox'&&e.type!=='file')keep[e.id]=e.value});if(ae&&ae.id){aid=ae.id;try{sel=[ae.selectionStart,ae.selectionEnd]}catch(e){}}}
-  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else if(view==='shop')shopView();else diaryView();
+  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else if(view==='shop')shopView();else if(view==='money')moneyView();else diaryView();
   renderSide();renderNav();
   if(preserve){for(const k in keep){const e=$(k);if(e)e.value=keep[k]}if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
   tickClock();
@@ -1161,7 +1226,7 @@ function goView(v){
 }
 function goSettings(){goView('settings')}
 function goDiary(){goView('diary')}
-addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming','memories','memory','memedit','quotes','shop'].includes(v)?v:'diary';if(view==='memedit'&&!memEdit)view='memories';if(view==='diary')closeViewer();app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
+addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming','memories','memory','memedit','quotes','shop','money'].includes(v)?v:'diary';if(view==='memedit'&&!memEdit)view='memories';if(view==='diary')closeViewer();app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
 
 /* ---------- icons used by the chrome ---------- */
 const UI={
@@ -1421,7 +1486,8 @@ function topBar(){
    <div class="tb-c">${wxHTML()}${nextChip()}</div>
    <div class="tb-r">
      <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${['memories','memory','memedit'].includes(view)?' on':''}" id="tbMem" type="button" aria-label="Memories" title="Memories">${svg(UI.mem)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
-     <button class="ic-btn cartbtn${view==='shop'?' on':''}" id="tbCart" type="button" aria-label="Shopping list${shopToBuy().length?', '+shopToBuy().length+' to buy':''}" title="Shopping list">${svg(UI.cart)}${cartBadge()}</button>
+     <button class="ic-btn cartbtn${view==='money'?' on':''}" id="tbMoney" type="button" aria-label="Expenses and bills${billsDue(3).length?', '+billsDue(3).length+' due soon':''}" title="Expenses and bills">${svg(UI.rupee)}${moneyBadge()}</button>
+     <button class="ic-btn cartbtn${view==='shop'?' on':''}" id="tbCart" type="button" aria-label="Lists${shopToBuy('shop').length?', '+shopToBuy('shop').length+' to buy':''}" title="Shopping and other lists">${svg(UI.cart)}${cartBadge()}</button>
      <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last synced '+fmtTime(lastSyncAt):''}</small></span>
    </div></header>${view==='diary'&&!dq?quoteHTML():''}`;
 }
@@ -1438,7 +1504,8 @@ function bindTop(){
   if($('tbSearch'))$('tbSearch').onclick=focusSearch;
   if($('tbBm'))$('tbBm').onclick=()=>goView(view==='bookmarks'?'diary':'bookmarks');
   if($('tbMem'))$('tbMem').onclick=()=>goView(view==='memories'?'diary':'memories');
-  if($('tbCart'))$('tbCart').onclick=()=>{shopEdit=null;goView(view==='shop'?'diary':'shop')};
+  if($('tbCart'))$('tbCart').onclick=()=>{shopEdit=null;listNew=false;goView(view==='shop'?'diary':'shop')};
+  if($('tbMoney'))$('tbMoney').onclick=()=>{expEdit=null;billEdit=null;goView(view==='money'?'diary':'money')};
   bindQuote();
   if($('tbStats'))$('tbStats').onclick=()=>goView(view==='stats'?'diary':'stats');
   if($('tbSet'))$('tbSet').onclick=()=>goView(view==='settings'?'diary':'settings');
@@ -1779,6 +1846,7 @@ function diaryView(){
      </div>
      ${eventsHTML(d)}
      ${otdCardHTML(d)}
+     ${dayMoneyHTML(d)}
      ${carry}
      ${attHTML({date:d})}
      <div class="dlines" id="dlines">${dRowsHTML(d)}</div>
@@ -1815,7 +1883,7 @@ function diaryView(){
   $('qPin').onclick=()=>{pinEdit=true;render(true);const i=$('pinIn');if(i)i.focus()};
   $('tRep').onclick=e=>openRepeat(e.currentTarget);
   $('tHin').onclick=toggleHindi;
-  bindPins();bindOtd();
+  bindPins();bindOtd();bindDayMoney();
   app.querySelectorAll('[data-px]').forEach(b=>b.onclick=()=>{setField(diaryDate,'people',pagePeople(S.diary[diaryDate]).filter(x=>x!==b.dataset.px));render(true)});
   app.querySelectorAll('[data-pgo]').forEach(b=>b.onclick=()=>{memPerson=b.dataset.pgo;memF='all';goView('memories')});
   $('qTag').onclick=()=>{tagEdit=true;render();const i=$('tagIn');if(i)i.focus()};
@@ -2298,7 +2366,7 @@ function statsView(){
 /* ================= synced lists: pinned notes, repeating tasks, people, page templates =================
    Stored together in one row named "lists". Each entry merges on its own by its "at" time, so edits made
    on two devices do not overwrite each other. Removed entries keep a "deleted" mark. */
-const LCOLS=['pins','rules','people','tpl','shop'];
+const LCOLS=['pins','rules','people','tpl','shop','ulist','exp','bills'];
 function lall(c){return Object.values(S.lists[c]||{}).filter(x=>x&&!x.deleted).sort((a,b)=>(a.cAt||0)-(b.cAt||0))}
 function lput(c,o){const now=Date.now();o.at=now;o.cAt=o.cAt||now;S.lists[c][o.id]=o;mark('lists');return o}
 function ldel(c,id){const x=S.lists[c][id];if(!x)return;x.deleted=true;x.at=Date.now();mark('lists')}
@@ -2525,69 +2593,226 @@ function bkCheck(){
 }
 setInterval(()=>{if(!document.hidden)bkCheck()},3600e3);
 
-/* ---------- shopping list (synced item by item in the "lists" row) ---------- */
+/* ---------- lists: Shopping, Books, Movies, Gifts, Packing and your own lists ----------
+   Items stay in the "shop" collection of the synced "lists" row; each item names its list in "l"
+   (items without it belong to Shopping, so the existing shopping list is kept as it is). */
 UI.cart='<path d="M3 4h2.2l2.1 10.6a1.6 1.6 0 0 0 1.6 1.3h8.4a1.6 1.6 0 0 0 1.6-1.2L20.5 8H6.1"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>';
-var shopEdit=null,shopFresh=new Set();
-function shopToBuy(){return lall('shop').filter(x=>!x.done)}
-function shopBought(){return lall('shop').filter(x=>x.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0))}
-function cartBadge(){const n=shopToBuy().length;return n?`<span class="cbadge" aria-hidden="true">${n>99?'99+':n}</span>`:''}
-function shopAdd(text,qty){
-  const names=String(text||'').split(/[,\n]+/).map(x=>x.trim().replace(/\s+/g,' ')).filter(Boolean).slice(0,50);let added=0,again=0;
-  names.forEach(n=>{n=n.slice(0,80);const ex=lall('shop').find(x=>x.t.toLowerCase()===n.toLowerCase());
+UI.rupee='<path d="M7 4.5h10M7 9h10M9.5 4.5c4.2 0 5.4 2 5.4 4.5s-1.8 4.6-5.4 4.6H7.5l7 6.4"/>';
+const LDEF=[
+  {id:'shop',n:'Shopping',q:'Qty',dn:'Bought',v:'bought',ph:'Add an item, e.g. Milk (or several: Milk, Bread, Eggs)',share:'Shopping list'},
+  {id:'books',n:'Books to read',q:'Author',dn:'Read',v:'read',ph:'Add a book'},
+  {id:'movies',n:'Films and shows',q:'Where',dn:'Watched',v:'watched',ph:'Add a film or show'},
+  {id:'gifts',n:'Gift ideas',q:'For whom',dn:'Given',v:'given',ph:'Add a gift idea'},
+  {id:'pack',n:'Packing',q:'Qty',dn:'Packed',v:'packed',ph:'Add something to pack',reset:1}
+];
+var shopEdit=null,shopFresh=new Set(),curList='shop',listNew=false,listAsk=null;
+function allLists(){return LDEF.concat(lall('ulist').map(x=>({id:x.id,n:x.n,q:'Note',dn:'Done',v:'done',ph:'Add an item',own:1})))}
+function listOf(id){return allLists().find(l=>l.id===id)||LDEF[0]}
+function listItems(id){return lall('shop').filter(x=>(x.l||'shop')===id)}
+function shopToBuy(id){return listItems(id||'shop').filter(x=>!x.done)}
+function shopBought(id){return listItems(id||'shop').filter(x=>x.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0))}
+function cartBadge(){const n=shopToBuy('shop').length;return n?`<span class="cbadge" aria-hidden="true">${n>99?'99+':n}</span>`:''}
+function shopAdd(text,qty,lid){
+  lid=lid||curList;const names=String(text||'').split(/[,\n]+/).map(x=>x.trim().replace(/\s+/g,' ')).filter(Boolean).slice(0,50);let added=0;
+  names.forEach(n=>{n=n.slice(0,80);const ex=listItems(lid).find(x=>x.t.toLowerCase()===n.toLowerCase());
     if(ex&&!ex.done){if(qty&&names.length===1){ex.q=qty;lput('shop',ex)}return}
-    if(ex&&ex.done){ex.done=false;delete ex.doneAt;if(qty&&names.length===1)ex.q=qty;ex.cAt=Date.now();lput('shop',ex);shopFresh.add(ex.id);again++;return}
-    const it=lput('shop',{id:uid(),t:n,q:names.length===1?(qty||'').slice(0,30):'',done:false});shopFresh.add(it.id);added++});
-  return added+again;
+    if(ex&&ex.done){ex.done=false;delete ex.doneAt;if(qty&&names.length===1)ex.q=qty;ex.cAt=Date.now();lput('shop',ex);shopFresh.add(ex.id);added++;return}
+    const it=lput('shop',{id:uid(),t:n,q:names.length===1?(qty||'').slice(0,30):'',done:false,l:lid==='shop'?undefined:lid});shopFresh.add(it.id);added++});
+  return added;
 }
-function shopText(){const l=shopToBuy();return 'Shopping list ('+dParse(today()).toLocaleDateString('en-IN',{day:'numeric',month:'short'})+')\n'+l.map(x=>'• '+x.t+(x.q?' — '+x.q:'')).join('\n')}
-function shopRow(x){
-  if(shopEdit===x.id)return `<li class="srow edit"><form class="sedit" data-sedit="${x.id}"><input class="sin" id="seT" value="${esc(x.t)}" maxlength="80" aria-label="Item"><input class="sq" id="seQ" value="${esc(x.q||'')}" maxlength="30" placeholder="Qty" aria-label="Quantity"><button class="btn sm" type="submit">Save</button><button class="btn ghost sm" type="button" id="seX">Cancel</button></form></li>`;
+function shopText(lid){const L=listOf(lid),l=shopToBuy(lid);return (L.share||L.n)+' ('+dParse(today()).toLocaleDateString('en-IN',{day:'numeric',month:'short'})+')\n'+l.map(x=>'• '+x.t+(x.q?' — '+x.q:'')).join('\n')}
+function shopRow(x,L){
+  if(shopEdit===x.id)return `<li class="srow edit"><form class="sedit" data-sedit="${x.id}"><input class="sin" id="seT" value="${esc(x.t)}" maxlength="80" aria-label="Item"><input class="sq" id="seQ" value="${esc(x.q||'')}" maxlength="30" placeholder="${esc(L.q)}" aria-label="${esc(L.q)}"><button class="btn sm" type="submit">Save</button><button class="btn ghost sm" type="button" id="seX">Cancel</button></form></li>`;
   return `<li class="srow${x.done?' done':''}${shopFresh.has(x.id)?' fresh':''}" data-sid="${x.id}">
-    <button type="button" class="stick" data-stick="${x.id}" role="checkbox" aria-checked="${!!x.done}" aria-label="${x.done?'Mark '+esc(x.t)+' as not bought':'Mark '+esc(x.t)+' as bought'}">${svg('<path d="m6.5 12.5 3.6 3.6 7.4-8"/>',16)}</button>
-    <button type="button" class="sname" data-sedit-open="${x.id}" title="Edit"><span class="st">${esc(x.t)}</span>${x.q?`<span class="sqty">${esc(x.q)}</span>`:''}${x.done&&x.doneAt?`<small>Bought ${esc(fmtDT(x.doneAt))}</small>`:''}</button>
+    <button type="button" class="stick" data-stick="${x.id}" role="checkbox" aria-checked="${!!x.done}" aria-label="${x.done?'Mark '+esc(x.t)+' as not '+L.v:'Mark '+esc(x.t)+' as '+L.v}">${svg('<path d="m6.5 12.5 3.6 3.6 7.4-8"/>',16)}</button>
+    <button type="button" class="sname" data-sedit-open="${x.id}" title="Edit"><span class="st">${esc(x.t)}</span>${x.q?`<span class="sqty">${esc(x.q)}</span>`:''}${x.done&&x.doneAt?`<small>${esc(L.dn)} ${esc(fmtDT(x.doneAt))}</small>`:''}</button>
     <button type="button" class="sdel" data-sdel="${x.id}" aria-label="Delete ${esc(x.t)}">×</button></li>`;
 }
 function shopView(){
-  const tb=shopToBuy(),bo=shopBought(),past=[...new Set(lall('shop').map(x=>x.t))].sort((a,b)=>a.localeCompare(b));
+  if(!allLists().some(l=>l.id===curList))curList='shop';
+  const L=listOf(curList),tb=shopToBuy(curList),bo=shopBought(curList),past=[...new Set(listItems(curList).map(x=>x.t))].sort((a,b)=>a.localeCompare(b));
   setApp(`<div class="dy">${topBar()}<div class="sheet shop">
-     <svg class="pclip spclip" viewBox="0 0 22 60" aria-hidden="true"><path d="M15 18v26a6 6 0 0 1-12 0V10a5 5 0 0 1 10 0v32a2.4 2.4 0 0 1-4.8 0V18" fill="none" stroke="#8d939b" stroke-width="2.4" stroke-linecap="round"/><path d="M15 18v26a6 6 0 0 1-12 0V10a5 5 0 0 1 10 0v32a2.4 2.4 0 0 1-4.8 0V18" fill="none" stroke="#eef0f2" stroke-width=".9" stroke-linecap="round" opacity=".9"/></svg>
+   <svg class="pclip spclip" viewBox="0 0 22 60" aria-hidden="true"><path d="M15 18v26a6 6 0 0 1-12 0V10a5 5 0 0 1 10 0v32a2.4 2.4 0 0 1-4.8 0V18" fill="none" stroke="#8d939b" stroke-width="2.4" stroke-linecap="round"/><path d="M15 18v26a6 6 0 0 1-12 0V10a5 5 0 0 1 10 0v32a2.4 2.4 0 0 1-4.8 0V18" fill="none" stroke="#eef0f2" stroke-width=".9" stroke-linecap="round" opacity=".9"/></svg>
    <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button>${tb.length?`<button class="btn ghost sm" id="sShare" type="button">Share list</button>`:''}</div>
+   <div class="ltabs" role="tablist" aria-label="Lists">${allLists().map(l=>{const n=shopToBuy(l.id).length;return `<button type="button" role="tab" class="ltab${l.id===curList?' on':''}" aria-selected="${l.id===curList}" data-lst="${l.id}">${esc(l.n)}${n?`<span>${n}</span>`:''}</button>`}).join('')}
+     ${listNew?`<form class="lnew" id="lNewF"><input id="lNewIn" maxlength="30" placeholder="Name of the new list" aria-label="Name of the new list"><button class="btn sm" type="submit">Create</button><button class="btn ghost sm" type="button" id="lNewX">Cancel</button></form>`:`<button type="button" class="ltab add" id="lNew">+ New list</button>`}</div>
    <div class="spad">
-     <h2>${svg(UI.cart,26)} Shopping list</h2>
-     <p class="note">${tb.length} to buy${bo.length?` · ${bo.length} bought`:''}</p>
+     <h2>${curList==='shop'?svg(UI.cart,26)+' ':''}${esc(L.n)}</h2>
+     <p class="note">${tb.length} to do${bo.length?` · ${bo.length} ${esc(L.dn.toLowerCase())}`:''}</p>
      <form class="sadd" id="sAddF" autocomplete="off">
-       <input class="sin" id="sIn" list="sPast" maxlength="400" placeholder="Add an item, e.g. Milk (or several: Milk, Bread, Eggs)" aria-label="Item to buy">
-       <input class="sq" id="sQ" maxlength="30" placeholder="Qty" aria-label="Quantity, optional">
+       <input class="sin" id="sIn" list="sPast" maxlength="400" placeholder="${esc(L.ph)}" aria-label="New item">
+       <input class="sq" id="sQ" maxlength="30" placeholder="${esc(L.q)}" aria-label="${esc(L.q)}, optional">
        <button class="btn" type="submit">Add</button>
        <datalist id="sPast">${past.map(t=>`<option value="${esc(t)}">`).join('')}</datalist>
      </form>
-     ${tb.length?`<ul class="slist" aria-label="To buy">${tb.map(shopRow).join('')}</ul>`:`<p class="empty">${bo.length?'Everything on the list is bought.':'The list is empty. Add what you need to buy.'}</p>`}
-     ${bo.length?`<div class="shead sbh"><p class="eyebrow">Bought · ${bo.length}</p><button class="linkbtn" id="sClear" type="button">Clear bought items</button></div>
-       <ul class="slist bought" aria-label="Bought">${bo.map(shopRow).join('')}</ul>`:''}
-     <p class="note">Tick an item when you buy it; it is struck off and moves to “Bought”. Untick it to buy it again. Select an item to change its name or quantity. The list is shared with your other devices.</p>
+     ${tb.length?`<ul class="slist" aria-label="To do">${tb.map(x=>shopRow(x,L)).join('')}</ul>`:`<p class="empty">${bo.length?'Everything on this list is done.':'This list is empty.'}</p>`}
+     ${bo.length?`<div class="shead sbh"><p class="eyebrow">${esc(L.dn)} · ${bo.length}</p><span class="row">${L.reset?`<button class="linkbtn" id="sReset" type="button">Untick all for the next trip</button>`:''}<button class="linkbtn" id="sClear" type="button">Clear ${esc(L.dn.toLowerCase())} items</button></span></div>
+       <ul class="slist bought" aria-label="${esc(L.dn)}">${bo.map(x=>shopRow(x,L)).join('')}</ul>`:''}
+     ${L.own?(listAsk===L.id?`<div class="confirm" role="alertdialog"><span>Delete the list “${esc(L.n)}” and its ${listItems(L.id).length} ${listItems(L.id).length===1?'item':'items'}?</span><span class="row"><button class="btn warn sm" id="lDelYes" type="button">Delete list</button><button class="btn ghost sm" id="lDelNo" type="button">Keep it</button></span></div>`:`<p class="note"><button class="linkbtn" id="lDel" type="button">Delete this list…</button></p>`):''}
+     <p class="note">Tick an item when it is done; it is struck off and moves down. Untick it, or add it again, to bring it back. Select an item to change it. Lists are shared with your other devices.${curList==='shop'?' After ticking a shopping item you can add what it cost to Expenses.':''}</p>
    </div></div><p class="credit">Crafted by Alok</p></div>`);
   shopFresh.clear();
   bindTop();$('vBack').onclick=goDiary;
   const si=$('sIn');
-  $('sAddF').onsubmit=e=>{e.preventDefault();const n=shopAdd(si.value,$('sQ').value.trim());if(!si.value.trim()){si.focus();return}
-    si.value='';$('sQ').value='';render(true);const i=$('sIn');if(i)i.focus();if(n>1)toast(n+' items added')};
-  if(!shopEdit&&innerWidth>=1000)si.focus();
+  $('sAddF').onsubmit=e=>{e.preventDefault();if(!si.value.trim()){si.focus();return}const n=shopAdd(si.value,$('sQ').value.trim(),curList);
+    si.value='';$('sQ').value='';render(true);refreshCart();const i=$('sIn');if(i)i.focus();if(n>1)toast(n+' items added')};
+  if(!shopEdit&&!listNew&&innerWidth>=1000)si.focus();
+  app.querySelectorAll('[data-lst]').forEach(b=>b.onclick=()=>{curList=b.dataset.lst;shopEdit=null;listAsk=null;render()});
+  if($('lNew'))$('lNew').onclick=()=>{listNew=true;render();$('lNewIn').focus()};
+  if($('lNewX'))$('lNewX').onclick=()=>{listNew=false;render()};
+  if($('lNewF'))$('lNewF').onsubmit=e=>{e.preventDefault();const n=$('lNewIn').value.trim().slice(0,30);if(!n){$('lNewIn').focus();return}const x=lput('ulist',{id:uid(),n});curList=x.id;listNew=false;render();toast('List created: '+n)};
+  if($('lDel'))$('lDel').onclick=()=>{listAsk=curList;render()};
+  if($('lDelNo'))$('lDelNo').onclick=()=>{listAsk=null;render()};
+  if($('lDelYes'))$('lDelYes').onclick=()=>{const id=curList,items=listItems(id);items.forEach(x=>{x.deleted=true;x.at=Date.now()});ldel('ulist',id);listAsk=null;curList='shop';render();toast('List deleted')};
   app.querySelectorAll('[data-stick]').forEach(b=>b.onclick=()=>{const x=S.lists.shop[b.dataset.stick];if(!x)return;
     const li=b.closest('.srow');x.done=!x.done;if(x.done)x.doneAt=Date.now();else{delete x.doneAt;shopFresh.add(x.id)}lput('shop',x);
-    if(x.done&&li&&!dReduce()){li.classList.add('done','striking');b.setAttribute('aria-checked','true');setTimeout(()=>render(true),650)}else render(true);refreshCart()});
+    if(x.done&&li&&!dReduce()){li.classList.add('done','striking');b.setAttribute('aria-checked','true');setTimeout(()=>render(true),650)}else render(true);refreshCart();
+    if(x.done&&(x.l||'shop')==='shop')toastAct(`“${x.t}” bought`,'Add cost',()=>{moneyTab='exp';expPrefill={n:x.t,c:'groc'};goView('money')},6000)});
   app.querySelectorAll('[data-sdel]').forEach(b=>b.onclick=()=>{const x=S.lists.shop[b.dataset.sdel];if(!x)return;ldel('shop',x.id);render(true);refreshCart();
     toastAct(`“${x.t}” deleted`,'Undo',()=>{delete x.deleted;lput('shop',x);render(true);refreshCart()})});
   app.querySelectorAll('[data-sedit-open]').forEach(b=>b.onclick=()=>{shopEdit=b.dataset.seditOpen;render(true);const i=$('seT');if(i){i.focus();i.select()}});
   const ef=app.querySelector('[data-sedit]');if(ef){
     ef.onsubmit=e=>{e.preventDefault();const x=S.lists.shop[ef.dataset.sedit],t=$('seT').value.trim();if(!t){$('seT').focus();return}x.t=t.slice(0,80);x.q=$('seQ').value.trim().slice(0,30);lput('shop',x);shopEdit=null;render(true)};
     $('seX').onclick=()=>{shopEdit=null;render(true)};ef.onkeydown=e=>{if(e.key==='Escape'){shopEdit=null;render(true)}}}
-  if($('sClear'))$('sClear').onclick=()=>{const bo=shopBought();bo.forEach(x=>{x.deleted=true;x.at=Date.now()});mark('lists');render(true);
-    toastAct(`${bo.length} bought ${bo.length===1?'item':'items'} cleared`,'Undo',()=>{bo.forEach(x=>{delete x.deleted;x.at=Date.now()});mark('lists');render(true)})};
-  if($('sShare'))$('sShare').onclick=async()=>{const t=shopText();
+  if($('sClear'))$('sClear').onclick=()=>{const bo=shopBought(curList);bo.forEach(x=>{x.deleted=true;x.at=Date.now()});mark('lists');render(true);
+    toastAct(`${bo.length} ${bo.length===1?'item':'items'} cleared`,'Undo',()=>{bo.forEach(x=>{delete x.deleted;x.at=Date.now()});mark('lists');render(true)})};
+  if($('sReset'))$('sReset').onclick=()=>{const bo=shopBought(curList);bo.forEach(x=>{x.done=false;delete x.doneAt;x.at=Date.now()});mark('lists');render(true);
+    toastAct(`${bo.length} ${bo.length===1?'item':'items'} unticked`,'Undo',()=>{const t=Date.now();bo.forEach(x=>{x.done=true;x.doneAt=t;x.at=t});mark('lists');render(true)})};
+  if($('sShare'))$('sShare').onclick=async()=>{const t=shopText(curList);
     if(navigator.share){try{await navigator.share({text:t});return}catch(e){if(e&&e.name==='AbortError')return}}
     window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener')};
 }
-function refreshCart(){const b=$('tbCart');if(!b)return;const o=b.querySelector('.cbadge'),h=cartBadge();if(o)o.remove();if(h)b.insertAdjacentHTML('beforeend',h);b.setAttribute('aria-label','Shopping list'+(shopToBuy().length?', '+shopToBuy().length+' to buy':''))}
+function refreshCart(){const b=$('tbCart');if(b){const o=b.querySelector('.cbadge'),h=cartBadge();if(o)o.remove();if(h)b.insertAdjacentHTML('beforeend',h);b.setAttribute('aria-label','Lists'+(shopToBuy('shop').length?', '+shopToBuy('shop').length+' to buy':''))}
+  const m=$('tbMoney');if(m){const o=m.querySelector('.cbadge'),h=moneyBadge();if(o)o.remove();if(h)m.insertAdjacentHTML('beforeend',h)}}
+/* ---------- money: expenses and bills (both synced item by item in the "lists" row) ---------- */
+const XCATS=[
+  {k:'groc',n:'Groceries',c:'var(--k-pay)'},{k:'food',n:'Eating out',c:'var(--k-anniv)'},{k:'fuel',n:'Fuel and travel',c:'var(--k-travel)'},
+  {k:'bills',n:'Bills and EMIs',c:'var(--k-task)'},{k:'school',n:'School and education',c:'var(--k-meet)'},{k:'health',n:'Health',c:'var(--k-bday)'},
+  {k:'shop',n:'Shopping',c:'var(--k-hol)'},{k:'home',n:'Home',c:'var(--k-ev)'},{k:'gift',n:'Gifts and occasions',c:'var(--k-moon)'},{k:'other',n:'Other',c:'var(--muted)'}];
+const BCATS=[['elec','Electricity'],['mobile','Mobile and internet'],['ins','Insurance'],['school','School fees'],['emi','EMI or loan'],['rent','Rent'],['card','Credit card'],['subs','Subscription'],['tax','Tax'],['other','Other']];
+const BFREQ=[['monthly','Every month',1],['quarterly','Every 3 months',3],['half','Every 6 months',6],['yearly','Every year',12],['once','Only once',0]];
+function xcat(k){return XCATS.find(c=>c.k===k)||XCATS[XCATS.length-1]}
+function inr(n){return '₹'+(+n||0).toLocaleString('en-IN',{maximumFractionDigits:2})}
+function amt(v){const n=parseFloat(String(v||'').replace(/[₹,\s]/g,''));return isFinite(n)&&n>0?Math.round(n*100)/100:null}
+var moneyTab='exp',expM=null,expEdit=null,expPrefill=null,billEdit=null,billOpen=null;
+function expOf(pred){return lall('exp').filter(pred)}
+function dayExp(d){return expOf(x=>x.d===d)}
+function sum(a){return a.reduce((s,x)=>s+(+x.a||0),0)}
+/* bills */
+function addMonthsKeep(d,n,dom){const t=dParse(d);let y=t.getFullYear(),m=t.getMonth()+n;y+=Math.floor(m/12);m=((m%12)+12)%12;return y+'-'+pad(m+1)+'-'+pad(Math.min(dom||t.getDate(),monthLen(y,m)))}
+function billsActive(){return lall('bills').filter(b=>!b.ended).sort((a,b)=>a.next<b.next?-1:a.next>b.next?1:0)}
+function billState(b){const k=dDiff(b.next,today());return k<0?{c:'over',t:(-k===1?'Overdue by 1 day':'Overdue by '+(-k)+' days')}:k===0?{c:'today',t:'Due today'}:k===1?{c:'soon',t:'Due tomorrow'}:k<=5?{c:'soon',t:'Due in '+k+' days'}:{c:'',t:'Due '+dShort(b.next)}}
+function billsDue(days){const t=today();return billsActive().filter(b=>dDiff(b.next,t)<=(days===undefined?3:days))}
+function moneyBadge(){const n=billsDue(3).length;return n?`<span class="cbadge${billsDue(0).length?'':' soft'}" aria-hidden="true">${n}</span>`:''}
+function payBill(b,addExp){
+  const before=JSON.parse(JSON.stringify(b)),dueWas=b.next,pd=today();let xid=null;
+  b.hist=(b.hist||[]).concat([{d:dueWas,pd,a:b.a||null}]).slice(-24);
+  const f=BFREQ.find(x=>x[0]===b.f)||BFREQ[0];if(f[2])b.next=addMonthsKeep(b.next,f[2],b.dom);else b.ended=true;
+  lput('bills',b);
+  if(addExp&&b.a){xid=uid();lput('exp',{id:xid,d:pd,a:b.a,c:b.c==='school'?'school':'bills',n:b.n,bill:b.id})}
+  render(true);refreshCart();
+  toastAct(`${b.n} marked paid${xid?' and added to expenses':''}`,'Undo',()=>{Object.keys(b).forEach(k=>delete b[k]);Object.assign(b,before);lput('bills',b);if(xid)ldel('exp',xid);render(true);refreshCart()},7000);
+}
+function billsHTML(){
+  const bs=billsActive(),done=lall('bills').filter(b=>b.ended),e=billEdit;
+  const form=e?`<form class="bform" id="bF"><p class="eyebrow">${e.id?'Edit bill':'Add a bill or EMI'}</p>
+     <div class="bgrid"><label>Name<input id="bN" maxlength="50" required value="${esc(e.n||'')}" placeholder="e.g. Electricity bill, Car EMI"></label>
+     <label>Amount (optional)<input id="bA" inputmode="decimal" maxlength="12" value="${e.a||''}" placeholder="₹"></label>
+     <label>Type<select id="bC">${BCATS.map(([k,n])=>`<option value="${k}" ${e.c===k?'selected':''}>${n}</option>`).join('')}</select></label>
+     <label>Repeats<select id="bR">${BFREQ.map(([k,n])=>`<option value="${k}" ${e.f===k?'selected':''}>${n}</option>`).join('')}</select></label>
+     <label>Next due date<input id="bD" type="date" required value="${esc(e.next||today())}"></label></div>
+     <p class="err" id="bErr" role="alert"></p>
+     <div class="row"><button class="btn sm" type="submit">${e.id?'Save changes':'Add bill'}</button><button class="btn ghost sm" type="button" id="bX">Cancel</button>${e.id?`<button class="btn ghost sm" type="button" id="bDel">Delete…</button>`:''}</div>
+     ${e.ask?`<div class="confirm" role="alertdialog"><span>Delete “${esc(e.n)}”? Its payment history is removed too. Expenses already recorded stay.</span><span class="row"><button class="btn warn sm" type="button" id="bDelYes">Delete</button><button class="btn ghost sm" type="button" id="bDelNo">Keep it</button></span></div>`:''}</form>`
+    :`<button class="btn sm" id="bAdd" type="button">+ Add a bill or EMI</button>`;
+  const total=sum(bs.filter(b=>b.next.slice(0,7)===today().slice(0,7)));
+  return `${form}
+   ${bs.length?`<p class="note">${bs.length} active · ${billsDue(3).length} due within 3 days${total?` · ${inr(total)} due this month`:''}</p>
+   <ul class="blist">${bs.map(b=>{const s=billState(b),open=billOpen===b.id;return `<li class="brow ${s.c}">
+     <div class="bmain"><button type="button" class="bname" data-bopen="${b.id}" aria-expanded="${open}"><b>${esc(b.n)}</b><small>${esc((BCATS.find(x=>x[0]===b.c)||BCATS[9])[1])} · ${esc((BFREQ.find(x=>x[0]===b.f)||BFREQ[0])[1])}</small></button>
+       <span class="bamt">${b.a?inr(b.a):''}</span><span class="bdue ${s.c}">${esc(s.t)}</span></div>
+     <div class="row"><button type="button" class="btn sm" data-bpay="${b.id}">Mark paid</button><button type="button" class="btn ghost sm" data-bedit="${b.id}">Edit</button></div>
+     ${open?`<div class="bhist">${(b.hist||[]).length?`<p class="eyebrow">Payments</p><ul>${b.hist.slice().reverse().map(h=>`<li>Due ${esc(dShort(h.d))} · paid ${esc(dShort(h.pd))}${h.a?' · '+inr(h.a):''}</li>`).join('')}</ul>`:'<p class="note">No payments recorded yet.</p>'}</div>`:''}</li>`}).join('')}</ul>`
+   :`<p class="empty">No bills yet. Add electricity, mobile, insurance, school fees, EMIs and other dues; a reminder appears before each due date.</p>`}
+   ${done.length?`<p class="eyebrow">Finished (one-time bills paid)</p><ul class="blist old">${done.map(b=>`<li class="brow"><div class="bmain"><b>${esc(b.n)}</b><span class="bamt">${b.a?inr(b.a):''}</span><span class="bdue">Paid ${esc(dShort((b.hist||[]).slice(-1)[0]?b.hist.slice(-1)[0].pd:b.next))}</span></div></li>`).join('')}</ul>`:''}
+   <p class="note">“Mark paid” records the payment, adds the amount to Expenses (you can undo), and moves the bill to its next due date. Bills due within 3 days show a number on the ₹ icon and a reminder on today’s diary page.</p>`;
+}
+function expHTML(){
+  const now=dParse(today());if(!expM)expM={y:now.getFullYear(),m:now.getMonth()};
+  const pre=expM.y+'-'+pad(expM.m+1),list=expOf(x=>x.d&&x.d.startsWith(pre)).sort((a,b)=>a.d<b.d?1:a.d>b.d?-1:(b.cAt||0)-(a.cAt||0));
+  const pm=expM.m?{y:expM.y,m:expM.m-1}:{y:expM.y-1,m:11},ppre=pm.y+'-'+pad(pm.m+1),prev=sum(expOf(x=>x.d&&x.d.startsWith(ppre)));
+  const tot=sum(list),isCur=expM.y===now.getFullYear()&&expM.m===now.getMonth(),el=isCur?now.getDate():monthLen(expM.y,expM.m),fut=expM.y*12+expM.m>now.getFullYear()*12+now.getMonth();
+  const byC=XCATS.map(c=>({c,v:sum(list.filter(x=>x.c===c.k))})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v),mx=byC.length?byC[0].v:1;
+  const e=expEdit?S.lists.exp[expEdit]:null,pf=expPrefill||{};
+  let h='',cd='';list.forEach(x=>{if(x.d!==cd){cd=x.d;h+=`<li class="xday"><span>${esc(dLong(x.d))}</span><b>${inr(sum(list.filter(y=>y.d===x.d)))}</b></li>`}
+    h+=`<li class="xrow"><i style="background:${xcat(x.c).c}"></i><button type="button" class="xname" data-xedit="${x.id}"><span>${esc(x.n||xcat(x.c).n)}</span><small>${esc(xcat(x.c).n)}</small></button><b>${inr(x.a)}</b><button type="button" class="sdel" data-xdel="${x.id}" aria-label="Delete">×</button></li>`});
+  return `<form class="xform" id="xF" autocomplete="off"><p class="eyebrow">${e?'Edit expense':'Add an expense'}</p>
+     <div class="xgrid"><label class="xa">Amount<input id="xA" inputmode="decimal" maxlength="12" placeholder="₹ 0" value="${e?e.a:''}"></label>
+     <label>For what<input id="xN" maxlength="60" placeholder="e.g. Vegetables, Petrol" value="${esc(e?e.n||'':pf.n||'')}"></label>
+     <label>Date<input id="xD" type="date" value="${esc(e?e.d:isCur||fut?today():pre+'-'+pad(monthLen(expM.y,expM.m)))}"></label></div>
+     <div class="xcats" role="radiogroup" aria-label="Category">${XCATS.map(c=>`<label class="xc"><input type="radio" name="xc" value="${c.k}" ${(e?e.c:pf.c||'groc')===c.k?'checked':''}><span style="--xc:${c.c}">${esc(c.n)}</span></label>`).join('')}</div>
+     <p class="err" id="xErr" role="alert"></p>
+     <div class="row"><button class="btn sm" type="submit">${e?'Save changes':'Add expense'}</button>${e?`<button class="btn ghost sm" type="button" id="xX">Cancel</button>`:''}</div></form>
+   <div class="shead"><span class="yearnav"><button class="arrow" id="xmPrev" type="button" aria-label="Previous month">‹</button><b>${esc(new Date(expM.y,expM.m,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'}))}</b><button class="arrow" id="xmNext" type="button" aria-label="Next month" ${isCur?'disabled':''}>›</button></span></div>
+   <div class="tiles"><div><b>${inr(tot)}</b><span>Spent this month</span></div><div><b>${isCur?inr(sum(dayExp(today()))):'—'}</b><span>Today</span></div><div><b>${el&&!fut?inr(Math.round(tot/el)):'—'}</b><span>Daily average</span></div><div><b>${prev?(tot>=prev?'↑ ':'↓ ')+Math.abs(Math.round((tot-prev)/prev*100))+'%':'—'}</b><span>vs ${esc(new Date(pm.y,pm.m,1).toLocaleDateString('en-IN',{month:'short'}))} (${inr(prev)})</span></div></div>
+   ${byC.length?`<div class="xbars">${byC.map(x=>`<div class="xbar"><span>${esc(x.c.n)}</span><span class="xtrack"><i style="width:${Math.max(3,Math.round(x.v/mx*100))}%;background:${x.c.c}"></i></span><b>${inr(x.v)}</b><small>${tot?Math.round(x.v/tot*100):0}%</small></div>`).join('')}</div>`:''}
+   ${list.length?`<ul class="xlist">${h}</ul>`:`<p class="empty">No expenses recorded for this month.</p>`}`;
+}
+function moneyView(){
+  setApp(`<div class="dy">${topBar()}<div class="sheet money">
+   <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button></div>
+   <h2>${svg(UI.rupee,26)} Money</h2>
+   <div class="ltabs" role="tablist"><button type="button" role="tab" class="ltab${moneyTab==='exp'?' on':''}" aria-selected="${moneyTab==='exp'}" data-mt="exp">Expenses</button><button type="button" role="tab" class="ltab${moneyTab==='bills'?' on':''}" aria-selected="${moneyTab==='bills'}" data-mt="bills">Bills and EMIs${billsDue(3).length?`<span class="${billsDue(0).length?'red':''}">${billsDue(3).length}</span>`:''}</button></div>
+   ${moneyTab==='exp'?expHTML():billsHTML()}
+  </div><p class="credit">Crafted by Alok</p></div>`);
+  bindTop();$('vBack').onclick=goDiary;
+  app.querySelectorAll('[data-mt]').forEach(b=>b.onclick=()=>{moneyTab=b.dataset.mt;expEdit=null;billEdit=null;render()});
+  if(moneyTab==='exp'){
+    const a=$('xA');if(expPrefill||expEdit||innerWidth>=1000)a.focus();expPrefill=null;
+    $('xF').onsubmit=e=>{e.preventDefault();const v=amt($('xA').value),d=$('xD').value,c=(app.querySelector('[name=xc]:checked')||{}).value||'other';
+      if(!v){$('xErr').textContent='Please enter the amount.';$('xA').focus();return}if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){$('xErr').textContent='Please choose a date.';return}
+      if(d>today()){$('xErr').textContent='The date cannot be in the future.';return}
+      const x=expEdit?S.lists.exp[expEdit]:{id:uid()};Object.assign(x,{a:v,d,c,n:$('xN').value.trim().slice(0,60)});lput('exp',x);const was=!!expEdit;expEdit=null;
+      const dt=dParse(d);expM={y:dt.getFullYear(),m:dt.getMonth()};render();toast(was?'Expense updated':inr(v)+' added to '+xcat(c).n)};
+    if($('xX'))$('xX').onclick=()=>{expEdit=null;render()};
+    $('xmPrev').onclick=()=>{expM.m--;if(expM.m<0){expM.m=11;expM.y--}render()};
+    $('xmNext').onclick=()=>{expM.m++;if(expM.m>11){expM.m=0;expM.y++}render()};
+    app.querySelectorAll('[data-xedit]').forEach(b=>b.onclick=()=>{expEdit=b.dataset.xedit;render();window.scrollTo({top:0,behavior:'smooth'})});
+    app.querySelectorAll('[data-xdel]').forEach(b=>b.onclick=()=>{const x=S.lists.exp[b.dataset.xdel];ldel('exp',x.id);render(true);toastAct(inr(x.a)+' expense deleted','Undo',()=>{delete x.deleted;lput('exp',x);render(true)})});
+  }else{
+    if($('bAdd'))$('bAdd').onclick=()=>{billEdit={f:'monthly',c:'elec',next:today()};render();$('bN').focus()};
+    app.querySelectorAll('[data-bedit]').forEach(b=>b.onclick=()=>{billEdit=JSON.parse(JSON.stringify(S.lists.bills[b.dataset.bedit]));render();window.scrollTo({top:0,behavior:'smooth'})});
+    app.querySelectorAll('[data-bopen]').forEach(b=>b.onclick=()=>{billOpen=billOpen===b.dataset.bopen?null:b.dataset.bopen;render(true)});
+    app.querySelectorAll('[data-bpay]').forEach(b=>b.onclick=()=>payBill(S.lists.bills[b.dataset.bpay],true));
+    const f=$('bF');if(f){
+      const keep=()=>{Object.assign(billEdit,{n:$('bN').value,a:amt($('bA').value),c:$('bC').value,f:$('bR').value,next:$('bD').value})};
+      f.onsubmit=e=>{e.preventDefault();keep();const b=billEdit;if(!b.n.trim()){$('bErr').textContent='Please enter a name.';$('bN').focus();return}if(!/^\d{4}-\d{2}-\d{2}$/.test(b.next)){$('bErr').textContent='Please choose the next due date.';return}
+        const x=b.id?S.lists.bills[b.id]:{id:uid(),hist:[]};Object.assign(x,{n:b.n.trim().slice(0,50),a:b.a||null,c:b.c,f:b.f,next:b.next,dom:+b.next.slice(8)});delete x.ended;delete x.ask;lput('bills',x);
+        const was=!!b.id;billEdit=null;render();refreshCart();toast(was?'Bill updated':'Bill added · '+billState(x).t)};
+      $('bX').onclick=()=>{billEdit=null;render()};
+      if($('bDel'))$('bDel').onclick=()=>{keep();billEdit.ask=true;render()};
+      if($('bDelNo'))$('bDelNo').onclick=()=>{billEdit.ask=false;render()};
+      if($('bDelYes'))$('bDelYes').onclick=()=>{const x=S.lists.bills[billEdit.id];ldel('bills',x.id);billEdit=null;render();refreshCart();toastAct(x.n+' deleted','Undo',()=>{delete x.deleted;lput('bills',x);render();refreshCart()})};
+    }
+  }
+}
+/* cards on the diary page: the day's spending, and bills due soon (today's page only) */
+function dayMoneyHTML(d){
+  const xs=dayExp(d),t=today(),due=d===t?billsDue(3):[];if(!xs.length&&!due.length)return '';
+  const byC={};xs.forEach(x=>{byC[x.c]=(byC[x.c]||0)+(+x.a||0)});
+  return `<section class="dmoney" aria-label="Money">${due.length?`<div class="dbills">${due.map(b=>{const s=billState(b);return `<span class="dbill ${s.c}"><b>${esc(b.n)}</b>${b.a?' '+inr(b.a):''} · ${esc(s.t)}<button type="button" class="btn sm" data-bpay="${b.id}">Mark paid</button></span>`}).join('')}</div>`:''}
+    ${xs.length?`<button type="button" class="dexp" id="dExp">${svg(UI.rupee,16)}<span>Spent ${inr(sum(xs))}</span><small>${Object.entries(byC).sort((a,b)=>b[1]-a[1]).map(([k,v])=>esc(xcat(k).n)+' '+inr(v)).join(' · ')}</small></button>`:''}</section>`;
+}
+function bindDayMoney(){
+  if($('dExp'))$('dExp').onclick=()=>{const t=dParse(diaryDate);expM={y:t.getFullYear(),m:t.getMonth()};moneyTab='exp';goView('money')};
+  app.querySelectorAll('.dmoney [data-bpay]').forEach(b=>b.onclick=()=>payBill(S.lists.bills[b.dataset.bpay],true));
+}
+/* once a day, after unlocking, mention bills due within 2 days */
+function billNag(){
+  if(lockMode!=='open')return;const due=billsDue(2);if(!due.length)return;
+  let last='';try{last=localStorage.getItem('alok-billnag')||''}catch(e){}if(last===today())return;try{localStorage.setItem('alok-billnag',today())}catch(e){}
+  const b=due[0];toastAct(due.length===1?`${b.n}${b.a?' ('+inr(b.a)+')':''}: ${billState(b).t.toLowerCase()}.`:`${due.length} bills are due within 2 days.`,'View',()=>{moneyTab='bills';goView('money')},9000);
+}
 
 /* ================= memory timeline =================
    Saved memories are rows "mem_<id>" in the same notes table. Items collected automatically are worked out
@@ -2828,7 +3053,7 @@ async function signOut(){
   if(chan)sb.removeChannel(chan);chan=null;col=null;
   try{await sb.auth.signOut()}catch(e){}me=null;pinRec=null;dirty.clear();
   ['sb-pin','sb-dirty',KEY,GKEY,'second-brain-v2'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
+  S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
   view='diary';diaryDate=today();dq='';mSearch=false;app.__html='';render();signupMode=false;lock('login');setSync('local');
 }
 async function updateApp(){
@@ -2847,9 +3072,11 @@ async function backupXLSX(from,to){
     (p.items||[]).forEach(l=>{if(l.t&&l.t.trim())rows.push({Date:d,Day:dParse(d).toLocaleDateString('en-IN',{weekday:'long'}),Entry:l.t,Type:l.task?'Task':'Note',Status:l.fw?'Moved forward':l.done?'Done':'',Mood:m?m.l:'',Tags:tg,Bookmarked:p.bm?'Yes':''})});
     (p.att||[]).forEach(a=>rows.push({Date:d,Day:dParse(d).toLocaleDateString('en-IN',{weekday:'long'}),Entry:a.name+' — '+a.link,Type:'Attachment',Status:'',Mood:m?m.l:'',Tags:tg,Bookmarked:p.bm?'Yes':''}))});
   const mrows=Object.values(S.mem).filter(m=>m&&!m.deleted&&m.date>=from&&m.date<=to).sort((a,b)=>a.date<b.date?-1:1).map(m=>({Date:m.date,Title:m.title||'',Category:mcat(m.cat).l,Description:m.desc||'',Favourite:m.fav?'Yes':'',Photos:(m.photos||[]).map(a=>a.name+' — '+a.link).join('\n')}));
-  if(!rows.length&&!mrows.length){toast('There are no entries in that date range.');return}
+  if(!rows.length&&!mrows.length&&!lall('exp').some(x=>x.d>=from&&x.d<=to)){toast('There are no entries in that date range.');return}
   const wb=XLSX.utils.book_new();
   if(rows.length){const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:12},{wch:11},{wch:70},{wch:11},{wch:14},{wch:11},{wch:22},{wch:11}];XLSX.utils.book_append_sheet(wb,ws,'Diary')}
+  const xrows=lall('exp').filter(x=>x.d>=from&&x.d<=to).sort((a,b)=>a.d<b.d?-1:1).map(x=>({Date:x.d,Category:xcat(x.c).n,'For what':x.n||'',Amount:+x.a}));
+  if(xrows.length){const ws=XLSX.utils.json_to_sheet(xrows);ws['!cols']=[{wch:12},{wch:22},{wch:40},{wch:12}];XLSX.utils.book_append_sheet(wb,ws,'Expenses')}
   if(mrows.length){const ws=XLSX.utils.json_to_sheet(mrows);ws['!cols']=[{wch:12},{wch:40},{wch:22},{wch:70},{wch:10},{wch:50}];XLSX.utils.book_append_sheet(wb,ws,'Memories')}
   XLSX.writeFile(wb,'alok-diary-'+(from==='0000'?'all':from+'-to-'+to)+'.xlsx');toast('Excel file downloaded');
 }
@@ -2858,7 +3085,7 @@ function restoreNow(){if(!restoreData)return;restoreFrom='';const now=Date.now()
   /* memories in the backup are added back; memories made after the backup are kept */
   if(restoreMem){Object.values(restoreMem).forEach(m=>{if(m&&m.id){S.mem[m.id]=Object.assign({},m,{_ts:now});dirty.add('mem:'+m.id)}})}
   if(restorePrefs){for(const k in restorePrefs.qfav){const f=restorePrefs.qfav[k];if(!S.prefs.qfav[k]&&f){S.prefs.qfav[k]=Object.assign({},f,{at:now})}}S.prefs._ts=now;dirty.add('prefs')}
-  if(restoreLists){['pins','rules','people','tpl','shop'].forEach(c=>{const r=restoreLists[c]||{};for(const id in r){if(!S.lists[c][id]&&r[id])S.lists[c][id]=Object.assign({},r[id],{at:now})}});dirty.add('lists')}
+  if(restoreLists){LCOLS.forEach(c=>{const r=restoreLists[c]||{};for(const id in r){if(!S.lists[c][id]&&r[id])S.lists[c][id]=Object.assign({},r[id],{at:now})}});dirty.add('lists')}
   restoreMem=restorePrefs=restoreLists=null;snapAll();saveNow();Object.keys(S.diary).forEach(d=>dirty.add('diary:'+d));keepDirty();flush();render();toast('Backup restored')}
 
 /* ================= misc ================= */
