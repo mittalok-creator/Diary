@@ -672,6 +672,51 @@ html.viewing{overflow:hidden}
 .tb.hin{gap:5px}
 .dnum.nx{color:var(--muted);opacity:.5}
 .tb:disabled{opacity:.35;cursor:default}
+
+/* 4.8 · shopping list */
+.cartbtn{position:relative}
+.cbadge{position:absolute;top:-3px;right:-4px;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--sans);font-size:10.5px;font-weight:700;line-height:18px;text-align:center;box-shadow:0 0 0 2px var(--desk)}
+.shop .spad{position:relative;display:flex;flex-direction:column;gap:12px;padding-left:2px}
+.shop h2{display:flex;align-items:center;gap:10px}
+.shop h2 svg{color:var(--accent)}
+.shop{position:relative}
+.spclip{position:absolute;top:-16px;left:-7px;width:22px;height:60px;transform:rotate(-8deg)}
+.sin::-webkit-calendar-picker-indicator{display:none!important}
+.sadd{display:flex;gap:8px;flex-wrap:wrap}
+.sadd .sin{flex:1 1 240px}
+.sin,.sq{min-width:0;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-family:var(--serif);font-size:18px;background:var(--sheet);color:var(--ink)}
+.sq{width:110px;flex:0 0 110px;font-family:var(--sans);font-size:14px}
+.slist{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule);background:repeating-linear-gradient(to bottom,transparent 0,transparent 51px,var(--rule) 51px,var(--rule) 52px);position:relative}
+.slist::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:1.5px;background:var(--marg);opacity:.8}
+.srow{display:grid;grid-template-columns:44px 1fr 40px;align-items:center;min-height:52px}
+.srow.fresh{animation:sin .35s ease-out}
+@keyframes sin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.stick{justify-self:center;width:26px;height:26px;border-radius:7px;border:1.8px solid var(--k-pay);background:transparent;color:transparent;display:grid;place-items:center;padding:0}
+.stick:hover{background:color-mix(in srgb,var(--k-pay) 12%,transparent)}
+.srow.done .stick{background:var(--k-pay);color:#fff}
+.sname{all:unset;cursor:pointer;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;padding:8px 6px 8px 14px;min-width:0}
+.sname:focus-visible{outline:2px solid var(--accent);border-radius:6px}
+.sname .st{font-size:20px;line-height:1.25;overflow-wrap:anywhere;position:relative}
+.sqty{font-family:var(--sans);font-size:12.5px;color:var(--ink);background:color-mix(in srgb,var(--k-hol) 16%,transparent);border-radius:999px;padding:1px 9px}
+.sname small{flex-basis:100%;font-family:var(--sans);font-size:11.5px;color:var(--muted)}
+.srow.done .st{color:var(--muted)}
+.srow.done .st::after{content:"";position:absolute;left:-2px;right:-2px;top:55%;height:2px;background:var(--accent);border-radius:2px;transform-origin:left;transform:scaleX(1)}
+.srow.striking .st::after{animation:strike .45s ease-out both}
+@keyframes strike{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.srow.done .sqty{opacity:.6}
+.sdel{justify-self:center;width:32px;height:32px;border:0;border-radius:50%;background:transparent;color:var(--muted);font-size:20px;line-height:1}
+.sdel:hover{background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--accent)}
+.srow.edit{grid-template-columns:1fr}
+.sedit{display:flex;gap:8px;flex-wrap:wrap;padding:8px 0 8px 56px}
+.sedit .sin{flex:1 1 180px;padding:7px 10px}
+.sedit .sq{padding:7px 10px}
+.sbh{margin-top:6px}
+.slist.bought{opacity:.92}
+@media (max-width:520px){.sadd .sin{flex:1 1 100%}.sadd .sq{width:auto;flex:1 1 0}.sadd .btn{flex:0 0 auto;padding:10px 22px}.sname .st{font-size:18px}.sedit{padding-left:8px}}
+@media (min-width:1000px) and (max-width:1499px){.lastsync{display:none}.syncbox .sync{font-size:0;gap:0}.tb-r{gap:4px}.tb-r .icons{gap:0}.tb-r .ic-btn{width:36px}.tb-c{gap:0}.now{gap:6px}}
+@media (max-width:999px){.topbar{flex-wrap:wrap}.tb-l{flex:1 1 0;min-width:0}.tb-r{flex:0 0 auto;gap:8px}}
+@media (max-width:520px){.cartbtn{width:36px;height:36px}.tb-l{gap:8px}.brand{gap:6px;min-width:0}.brand .logo{width:34px;height:34px}.brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.fd{font-size:12.5px}.ampm{margin-left:2px}}
+@media (prefers-reduced-motion:reduce){.srow.fresh,.srow.striking .st::after{animation:none}}
 </style>
 </head>
 <body>
@@ -699,14 +744,14 @@ function fmtTime(ts,sec){const d=new Date(ts);let h=d.getHours();const ap=h<12?'
 function fmtDT(ts){const d=new Date(ts),t=today(),s=dFmt(d);return (s===t?'today':s===dAdd(t,-1)?'yesterday':d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:d.getFullYear()===new Date().getFullYear()?undefined:'numeric'}))+', '+fmtTime(ts)}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.7.1';
+const APP_VERSION='4.8';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
 var S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S){let old=null;try{old=JSON.parse(localStorage.getItem('second-brain-v2'))}catch(e){}S={diary:(old&&old.diary)||{}}}
-S.diary=S.diary||{};S.mem=S.mem||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl'].forEach(k=>S.lists[k]=S.lists[k]||{});
+S.diary=S.diary||{};S.mem=S.mem||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl','shop'].forEach(k=>S.lists[k]=S.lists[k]||{});
 var G=null;try{G=JSON.parse(localStorage.getItem(GKEY))}catch(e){}
 G=G||{connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};G.off=G.off||[];G.cals=G.cals||[];G.events=G.events||[];
 let saveT;
@@ -793,7 +838,7 @@ function applyRow(name,data){
     if(Object.keys(qf).some(k=>!rq[k]||(qf[k].at||0)>(rq[k].at||0))&&!dirty.has('prefs')){dirty.add('prefs');keepDirty();clearTimeout(flushT);flushT=setTimeout(flush,800)}
     S.prefs._ts=Math.max(S.prefs._ts||0,data._ts||0);return ch;
   }
-  if(name==='lists')return mergeLists(data);
+  if(name==='lists'){const ch=mergeLists(data);if(ch)setTimeout(refreshCart,0);return ch}
   if(name.startsWith('mem_')){
     const id=name.slice(4),k='mem:'+id,l=S.mem[id];
     if(dirty.has(k)&&l)return false;
@@ -917,7 +962,7 @@ async function onSignedIn(user,viaPassword){
   if(me&&me.id===user.id&&col){if(viaPassword&&pinRec)unlock();return}
   const keepOpen=lockMode==='open'&&me&&me.id===user.id;
   const owner=localStorage.getItem(OWNKEY);
-  if(owner&&owner!==user.id){dirty.clear();keepDirty();S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
+  if(owner&&owner!==user.id){dirty.clear();keepDirty();S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
   try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
   me=user;startSync();
   if(!pinRec){try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}}
@@ -1102,7 +1147,7 @@ function setApp(html){if(app.__html===html)return false;app.innerHTML=html;app._
 function render(preserve){
   const keep={},ae=document.activeElement;let aid=null,sel=null;
   if(preserve){app.querySelectorAll('input[id]').forEach(e=>{if(e.type!=='checkbox'&&e.type!=='file')keep[e.id]=e.value});if(ae&&ae.id){aid=ae.id;try{sel=[ae.selectionStart,ae.selectionEnd]}catch(e){}}}
-  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else diaryView();
+  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else if(view==='shop')shopView();else diaryView();
   renderSide();renderNav();
   if(preserve){for(const k in keep){const e=$(k);if(e)e.value=keep[k]}if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
   tickClock();
@@ -1116,7 +1161,7 @@ function goView(v){
 }
 function goSettings(){goView('settings')}
 function goDiary(){goView('diary')}
-addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming','memories','memory','memedit','quotes'].includes(v)?v:'diary';if(view==='memedit'&&!memEdit)view='memories';if(view==='diary')closeViewer();app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
+addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming','memories','memory','memedit','quotes','shop'].includes(v)?v:'diary';if(view==='memedit'&&!memEdit)view='memories';if(view==='diary')closeViewer();app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
 
 /* ---------- icons used by the chrome ---------- */
 const UI={
@@ -1376,6 +1421,7 @@ function topBar(){
    <div class="tb-c">${wxHTML()}${nextChip()}</div>
    <div class="tb-r">
      <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${['memories','memory','memedit'].includes(view)?' on':''}" id="tbMem" type="button" aria-label="Memories" title="Memories">${svg(UI.mem)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
+     <button class="ic-btn cartbtn${view==='shop'?' on':''}" id="tbCart" type="button" aria-label="Shopping list${shopToBuy().length?', '+shopToBuy().length+' to buy':''}" title="Shopping list">${svg(UI.cart)}${cartBadge()}</button>
      <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last synced '+fmtTime(lastSyncAt):''}</small></span>
    </div></header>${view==='diary'&&!dq?quoteHTML():''}`;
 }
@@ -1392,6 +1438,7 @@ function bindTop(){
   if($('tbSearch'))$('tbSearch').onclick=focusSearch;
   if($('tbBm'))$('tbBm').onclick=()=>goView(view==='bookmarks'?'diary':'bookmarks');
   if($('tbMem'))$('tbMem').onclick=()=>goView(view==='memories'?'diary':'memories');
+  if($('tbCart'))$('tbCart').onclick=()=>{shopEdit=null;goView(view==='shop'?'diary':'shop')};
   bindQuote();
   if($('tbStats'))$('tbStats').onclick=()=>goView(view==='stats'?'diary':'stats');
   if($('tbSet'))$('tbSet').onclick=()=>goView(view==='settings'?'diary':'settings');
@@ -2251,7 +2298,7 @@ function statsView(){
 /* ================= synced lists: pinned notes, repeating tasks, people, page templates =================
    Stored together in one row named "lists". Each entry merges on its own by its "at" time, so edits made
    on two devices do not overwrite each other. Removed entries keep a "deleted" mark. */
-const LCOLS=['pins','rules','people','tpl'];
+const LCOLS=['pins','rules','people','tpl','shop'];
 function lall(c){return Object.values(S.lists[c]||{}).filter(x=>x&&!x.deleted).sort((a,b)=>(a.cAt||0)-(b.cAt||0))}
 function lput(c,o){const now=Date.now();o.at=now;o.cAt=o.cAt||now;S.lists[c][o.id]=o;mark('lists');return o}
 function ldel(c,id){const x=S.lists[c][id];if(!x)return;x.deleted=true;x.at=Date.now();mark('lists')}
@@ -2477,6 +2524,70 @@ function bkCheck(){
   toastAct('This month’s backup to Google Drive is due.','Back up now',()=>driveBackup(true),9000);
 }
 setInterval(()=>{if(!document.hidden)bkCheck()},3600e3);
+
+/* ---------- shopping list (synced item by item in the "lists" row) ---------- */
+UI.cart='<path d="M3 4h2.2l2.1 10.6a1.6 1.6 0 0 0 1.6 1.3h8.4a1.6 1.6 0 0 0 1.6-1.2L20.5 8H6.1"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/>';
+var shopEdit=null,shopFresh=new Set();
+function shopToBuy(){return lall('shop').filter(x=>!x.done)}
+function shopBought(){return lall('shop').filter(x=>x.done).sort((a,b)=>(b.doneAt||0)-(a.doneAt||0))}
+function cartBadge(){const n=shopToBuy().length;return n?`<span class="cbadge" aria-hidden="true">${n>99?'99+':n}</span>`:''}
+function shopAdd(text,qty){
+  const names=String(text||'').split(/[,\n]+/).map(x=>x.trim().replace(/\s+/g,' ')).filter(Boolean).slice(0,50);let added=0,again=0;
+  names.forEach(n=>{n=n.slice(0,80);const ex=lall('shop').find(x=>x.t.toLowerCase()===n.toLowerCase());
+    if(ex&&!ex.done){if(qty&&names.length===1){ex.q=qty;lput('shop',ex)}return}
+    if(ex&&ex.done){ex.done=false;delete ex.doneAt;if(qty&&names.length===1)ex.q=qty;ex.cAt=Date.now();lput('shop',ex);shopFresh.add(ex.id);again++;return}
+    const it=lput('shop',{id:uid(),t:n,q:names.length===1?(qty||'').slice(0,30):'',done:false});shopFresh.add(it.id);added++});
+  return added+again;
+}
+function shopText(){const l=shopToBuy();return 'Shopping list ('+dParse(today()).toLocaleDateString('en-IN',{day:'numeric',month:'short'})+')\n'+l.map(x=>'• '+x.t+(x.q?' — '+x.q:'')).join('\n')}
+function shopRow(x){
+  if(shopEdit===x.id)return `<li class="srow edit"><form class="sedit" data-sedit="${x.id}"><input class="sin" id="seT" value="${esc(x.t)}" maxlength="80" aria-label="Item"><input class="sq" id="seQ" value="${esc(x.q||'')}" maxlength="30" placeholder="Qty" aria-label="Quantity"><button class="btn sm" type="submit">Save</button><button class="btn ghost sm" type="button" id="seX">Cancel</button></form></li>`;
+  return `<li class="srow${x.done?' done':''}${shopFresh.has(x.id)?' fresh':''}" data-sid="${x.id}">
+    <button type="button" class="stick" data-stick="${x.id}" role="checkbox" aria-checked="${!!x.done}" aria-label="${x.done?'Mark '+esc(x.t)+' as not bought':'Mark '+esc(x.t)+' as bought'}">${svg('<path d="m6.5 12.5 3.6 3.6 7.4-8"/>',16)}</button>
+    <button type="button" class="sname" data-sedit-open="${x.id}" title="Edit"><span class="st">${esc(x.t)}</span>${x.q?`<span class="sqty">${esc(x.q)}</span>`:''}${x.done&&x.doneAt?`<small>Bought ${esc(fmtDT(x.doneAt))}</small>`:''}</button>
+    <button type="button" class="sdel" data-sdel="${x.id}" aria-label="Delete ${esc(x.t)}">×</button></li>`;
+}
+function shopView(){
+  const tb=shopToBuy(),bo=shopBought(),past=[...new Set(lall('shop').map(x=>x.t))].sort((a,b)=>a.localeCompare(b));
+  setApp(`<div class="dy">${topBar()}<div class="sheet shop">
+     <svg class="pclip spclip" viewBox="0 0 22 60" aria-hidden="true"><path d="M15 18v26a6 6 0 0 1-12 0V10a5 5 0 0 1 10 0v32a2.4 2.4 0 0 1-4.8 0V18" fill="none" stroke="#8d939b" stroke-width="2.4" stroke-linecap="round"/><path d="M15 18v26a6 6 0 0 1-12 0V10a5 5 0 0 1 10 0v32a2.4 2.4 0 0 1-4.8 0V18" fill="none" stroke="#eef0f2" stroke-width=".9" stroke-linecap="round" opacity=".9"/></svg>
+   <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button>${tb.length?`<button class="btn ghost sm" id="sShare" type="button">Share list</button>`:''}</div>
+   <div class="spad">
+     <h2>${svg(UI.cart,26)} Shopping list</h2>
+     <p class="note">${tb.length} to buy${bo.length?` · ${bo.length} bought`:''}</p>
+     <form class="sadd" id="sAddF" autocomplete="off">
+       <input class="sin" id="sIn" list="sPast" maxlength="400" placeholder="Add an item, e.g. Milk (or several: Milk, Bread, Eggs)" aria-label="Item to buy">
+       <input class="sq" id="sQ" maxlength="30" placeholder="Qty" aria-label="Quantity, optional">
+       <button class="btn" type="submit">Add</button>
+       <datalist id="sPast">${past.map(t=>`<option value="${esc(t)}">`).join('')}</datalist>
+     </form>
+     ${tb.length?`<ul class="slist" aria-label="To buy">${tb.map(shopRow).join('')}</ul>`:`<p class="empty">${bo.length?'Everything on the list is bought.':'The list is empty. Add what you need to buy.'}</p>`}
+     ${bo.length?`<div class="shead sbh"><p class="eyebrow">Bought · ${bo.length}</p><button class="linkbtn" id="sClear" type="button">Clear bought items</button></div>
+       <ul class="slist bought" aria-label="Bought">${bo.map(shopRow).join('')}</ul>`:''}
+     <p class="note">Tick an item when you buy it; it is struck off and moves to “Bought”. Untick it to buy it again. Select an item to change its name or quantity. The list is shared with your other devices.</p>
+   </div></div><p class="credit">Crafted by Alok</p></div>`);
+  shopFresh.clear();
+  bindTop();$('vBack').onclick=goDiary;
+  const si=$('sIn');
+  $('sAddF').onsubmit=e=>{e.preventDefault();const n=shopAdd(si.value,$('sQ').value.trim());if(!si.value.trim()){si.focus();return}
+    si.value='';$('sQ').value='';render(true);const i=$('sIn');if(i)i.focus();if(n>1)toast(n+' items added')};
+  if(!shopEdit&&innerWidth>=1000)si.focus();
+  app.querySelectorAll('[data-stick]').forEach(b=>b.onclick=()=>{const x=S.lists.shop[b.dataset.stick];if(!x)return;
+    const li=b.closest('.srow');x.done=!x.done;if(x.done)x.doneAt=Date.now();else{delete x.doneAt;shopFresh.add(x.id)}lput('shop',x);
+    if(x.done&&li&&!dReduce()){li.classList.add('done','striking');b.setAttribute('aria-checked','true');setTimeout(()=>render(true),650)}else render(true);refreshCart()});
+  app.querySelectorAll('[data-sdel]').forEach(b=>b.onclick=()=>{const x=S.lists.shop[b.dataset.sdel];if(!x)return;ldel('shop',x.id);render(true);refreshCart();
+    toastAct(`“${x.t}” deleted`,'Undo',()=>{delete x.deleted;lput('shop',x);render(true);refreshCart()})});
+  app.querySelectorAll('[data-sedit-open]').forEach(b=>b.onclick=()=>{shopEdit=b.dataset.seditOpen;render(true);const i=$('seT');if(i){i.focus();i.select()}});
+  const ef=app.querySelector('[data-sedit]');if(ef){
+    ef.onsubmit=e=>{e.preventDefault();const x=S.lists.shop[ef.dataset.sedit],t=$('seT').value.trim();if(!t){$('seT').focus();return}x.t=t.slice(0,80);x.q=$('seQ').value.trim().slice(0,30);lput('shop',x);shopEdit=null;render(true)};
+    $('seX').onclick=()=>{shopEdit=null;render(true)};ef.onkeydown=e=>{if(e.key==='Escape'){shopEdit=null;render(true)}}}
+  if($('sClear'))$('sClear').onclick=()=>{const bo=shopBought();bo.forEach(x=>{x.deleted=true;x.at=Date.now()});mark('lists');render(true);
+    toastAct(`${bo.length} bought ${bo.length===1?'item':'items'} cleared`,'Undo',()=>{bo.forEach(x=>{delete x.deleted;x.at=Date.now()});mark('lists');render(true)})};
+  if($('sShare'))$('sShare').onclick=async()=>{const t=shopText();
+    if(navigator.share){try{await navigator.share({text:t});return}catch(e){if(e&&e.name==='AbortError')return}}
+    window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener')};
+}
+function refreshCart(){const b=$('tbCart');if(!b)return;const o=b.querySelector('.cbadge'),h=cartBadge();if(o)o.remove();if(h)b.insertAdjacentHTML('beforeend',h);b.setAttribute('aria-label','Shopping list'+(shopToBuy().length?', '+shopToBuy().length+' to buy':''))}
 
 /* ================= memory timeline =================
    Saved memories are rows "mem_<id>" in the same notes table. Items collected automatically are worked out
@@ -2717,7 +2828,7 @@ async function signOut(){
   if(chan)sb.removeChannel(chan);chan=null;col=null;
   try{await sb.auth.signOut()}catch(e){}me=null;pinRec=null;dirty.clear();
   ['sb-pin','sb-dirty',KEY,GKEY,'second-brain-v2'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
+  S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
   view='diary';diaryDate=today();dq='';mSearch=false;app.__html='';render();signupMode=false;lock('login');setSync('local');
 }
 async function updateApp(){
@@ -2747,7 +2858,7 @@ function restoreNow(){if(!restoreData)return;restoreFrom='';const now=Date.now()
   /* memories in the backup are added back; memories made after the backup are kept */
   if(restoreMem){Object.values(restoreMem).forEach(m=>{if(m&&m.id){S.mem[m.id]=Object.assign({},m,{_ts:now});dirty.add('mem:'+m.id)}})}
   if(restorePrefs){for(const k in restorePrefs.qfav){const f=restorePrefs.qfav[k];if(!S.prefs.qfav[k]&&f){S.prefs.qfav[k]=Object.assign({},f,{at:now})}}S.prefs._ts=now;dirty.add('prefs')}
-  if(restoreLists){['pins','rules','people','tpl'].forEach(c=>{const r=restoreLists[c]||{};for(const id in r){if(!S.lists[c][id]&&r[id])S.lists[c][id]=Object.assign({},r[id],{at:now})}});dirty.add('lists')}
+  if(restoreLists){['pins','rules','people','tpl','shop'].forEach(c=>{const r=restoreLists[c]||{};for(const id in r){if(!S.lists[c][id]&&r[id])S.lists[c][id]=Object.assign({},r[id],{at:now})}});dirty.add('lists')}
   restoreMem=restorePrefs=restoreLists=null;snapAll();saveNow();Object.keys(S.diary).forEach(d=>dirty.add('diary:'+d));keepDirty();flush();render();toast('Backup restored')}
 
 /* ================= misc ================= */
