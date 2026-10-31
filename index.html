@@ -716,7 +716,7 @@ html.viewing{overflow:hidden}
 @media (min-width:1000px) and (max-width:1759px){.lastsync{display:none}.syncbox .sync{font-size:0;gap:0}.tb-r{gap:4px}.tb-r .icons{gap:0}.tb-r .ic-btn{width:36px}.tb-c{gap:0}.now{gap:6px}html:not(.sidehide) #tbSearch{display:none}}
 @media (max-width:999px){.topbar{flex-wrap:wrap}.tb-l{flex:1 1 0;min-width:0}.tb-r{flex:0 0 auto;gap:8px}}
 @media (max-width:520px){.cartbtn{width:36px;height:36px}.tb-l{gap:8px}.brand{gap:6px;min-width:0}.brand .logo{width:34px;height:34px}.brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
-@media (max-width:430px){.topbar .brand.only-narrow>span{display:none}.fd{font-size:12.5px}.ampm{margin-left:2px}}
+@media (max-width:430px){.fd{font-size:12.5px}.ampm{margin-left:2px}}
 @media (prefers-reduced-motion:reduce){.srow.fresh,.srow.striking .st::after{animation:none}}
 
 /* 4.9 · lists and money */
@@ -782,6 +782,46 @@ html.viewing{overflow:hidden}
 .dexp svg{color:var(--accent)}.dexp span{font-weight:600}.dexp small{color:var(--muted)}
 .dexp:focus-visible{outline:2px solid var(--accent)}
 @media (max-width:520px){.dmoney{margin-left:56px}}
+
+/* 4.9.1 · dd-mm-yyyy dates, no-spend days */
+.dmy{position:relative;display:flex;min-width:0}
+.dmy .dmyt{flex:1;min-width:0;width:100%;padding-right:40px!important;font-variant-numeric:tabular-nums;box-sizing:border-box}
+.dmy .dmyt.bad{border-color:var(--accent)!important;background:color-mix(in srgb,var(--accent) 6%,transparent)}
+.dmy input[type=date]{position:absolute;left:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+.dmyb{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:34px;height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);display:grid;place-items:center}
+.dmyb:hover{color:var(--ink);background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.dfield .dmy{display:inline-flex;width:170px;vertical-align:middle}
+.dfield .dmyt{border:1px solid var(--line);border-radius:10px;padding:7px 10px;font-family:var(--sans);font-size:14px;background:var(--sheet);color:var(--ink)}
+.xcal{display:flex;flex-direction:column;gap:6px}
+.xgrid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.xd{border:1px solid transparent;background:transparent;border-radius:9px;min-height:50px;padding:4px 2px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;font-family:var(--sans);color:var(--ink)}
+.xd.h{min-height:0;font-size:10.5px;font-weight:600;color:var(--muted);padding:0}
+.xd.out{visibility:hidden}
+.xd b{font-size:13px;font-weight:600}
+.xd small{font-size:10.5px;line-height:1.1;text-align:center}
+.xd.sp{background:color-mix(in srgb,var(--ink) 4%,transparent);border-color:var(--line)}
+.xd.sp small{color:var(--ink);font-weight:600}
+.xd.ns{background:color-mix(in srgb,var(--ok) 16%,transparent);border-color:color-mix(in srgb,var(--ok) 55%,transparent)}
+.xd.ns b,.xd.ns small{color:var(--ok)}
+.xd.ns small{font-weight:600}
+.xd.pre,.xd.fut{color:var(--muted);opacity:.55}
+.xd.fut{cursor:default}
+.xd.tday{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.xd:not(.fut):not(.h):hover{border-color:var(--accent)}
+.lg{display:inline-block;width:10px;height:10px;border-radius:3px;margin:0 4px -1px 0}
+.lg.ns{background:color-mix(in srgb,var(--ok) 35%,transparent);border:1px solid var(--ok)}
+.lg.sp{background:color-mix(in srgb,var(--ink) 8%,transparent);border:1px solid var(--line);margin-left:8px}
+.tiles .nsd b{color:var(--ok)}
+.dexp.dns{border-color:color-mix(in srgb,var(--ok) 55%,transparent);background:color-mix(in srgb,var(--ok) 10%,var(--ivory))}
+.dexp.dns svg,.dexp.dns span{color:var(--ok)}
+@media (max-width:520px){.xd{min-height:44px}.xd small{font-size:9.5px}.xd.ns small{font-size:0}.xd.ns small::after{content:"✓";font-size:13px}}
+
+/* 4.9.1 · phone bottom bar: Money and Lists */
+.bnav .nic{position:relative;display:inline-grid;place-items:center}
+.bnav .nic .cbadge{top:-6px;right:-10px}
+.drlinks{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:8px}
+.drlinks button{border:0;background:transparent;border-radius:10px;padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:var(--sans);font-size:12px;color:var(--ink)}
+.drlinks button:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
 </style>
 </head>
 <body>
@@ -807,9 +847,31 @@ function dShort(s){return dParse(s).toLocaleDateString('en-IN',{weekday:'short',
 /* one time format everywhere: 12-hour clock with upper-case AM/PM in the device's own time zone */
 function fmtTime(ts,sec){const d=new Date(ts);let h=d.getHours();const ap=h<12?'AM':'PM';h=h%12||12;return h+':'+pad(d.getMinutes())+(sec?':'+pad(d.getSeconds()):'')+' '+ap}
 function fmtDT(ts){const d=new Date(ts),t=today(),s=dFmt(d);return (s===t?'today':s===dAdd(t,-1)?'yesterday':d.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:d.getFullYear()===new Date().getFullYear()?undefined:'numeric'}))+', '+fmtTime(ts)}
+/* ---------- dates are typed and shown as dd-mm-yyyy; the browser's own date box stays hidden and holds yyyy-mm-dd ---------- */
+function fmtDMY(v){const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v||'');return m?m[3]+'-'+m[2]+'-'+m[1]:''}
+function parseDMY(t,short){t=(t||'').trim();if(!t)return '';
+  const m=/^(\d{1,2})[\s\/.\-](\d{1,2})[\s\/.\-](\d{4}|\d{2})$/.exec(t)||/^(\d{2})(\d{2})(\d{4})$/.exec(t);if(!m)return null;
+  let d=+m[1],mo=+m[2],y=+m[3];if(m[3].length===2){if(!short)return null;y+=2000}
+  if(mo<1||mo>12||d<1||d>new Date(y,mo,0).getDate())return null;return y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0')}
+function enhanceDates(root){
+  root.querySelectorAll('input[type=date]:not([data-enh])').forEach(n=>{n.dataset.enh='1';n.required=false;
+    const w=document.createElement('span');w.className='dmy';n.parentNode.insertBefore(w,n);w.appendChild(n);
+    const lb=n.closest('label'),name=lb?(lb.firstChild&&lb.firstChild.nodeType===3?lb.firstChild.textContent.trim():'Date'):'Date';
+    const t=document.createElement('input');t.type='text';t.id=n.id+'_t';t.className='dmyt';t.inputMode='numeric';t.placeholder='dd-mm-yyyy';t.maxLength=10;t.autocomplete='off';t.value=fmtDMY(n.value);t.setAttribute('aria-label',name+', day-month-year');
+    const b=document.createElement('button');b.type='button';b.className='dmyb';b.setAttribute('aria-label','Choose '+name.toLowerCase()+' from a calendar');b.innerHTML=svg(UI.cal,18);
+    w.insertBefore(t,n);w.insertBefore(b,n);n.tabIndex=-1;n.setAttribute('aria-hidden','true');
+    const push=v=>{if(n.value!==v){n.value=v;n.dispatchEvent(new Event('input',{bubbles:true}));n.dispatchEvent(new Event('change',{bubbles:true}))}};
+    t.addEventListener('input',e=>{e.stopPropagation();const p=parseDMY(t.value,false);t.classList.remove('bad');if(p)push(p);else if(!t.value.trim())push('')});
+    t.addEventListener('change',e=>e.stopPropagation());
+    t.addEventListener('blur',()=>{const p=parseDMY(t.value,true);if(p){push(p);t.value=fmtDMY(p);t.classList.remove('bad')}else if(t.value.trim()){t.classList.add('bad');push('')}});
+    t.addEventListener('keydown',e=>{if(e.key==='Enter'){const p=parseDMY(t.value,true);if(p){push(p);t.value=fmtDMY(p)}}});
+    b.onclick=()=>{try{n.showPicker()}catch(e){try{n.focus();n.click()}catch(x){}}};
+    n.addEventListener('change',()=>{if(n.value&&parseDMY(t.value,true)!==n.value){t.value=fmtDMY(n.value);t.classList.remove('bad')}});
+  });
+}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.9';
+const APP_VERSION='4.9.1';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
@@ -1213,7 +1275,7 @@ function render(preserve){
   const keep={},ae=document.activeElement;let aid=null,sel=null;
   if(preserve){app.querySelectorAll('input[id]').forEach(e=>{if(e.type!=='checkbox'&&e.type!=='file')keep[e.id]=e.value});if(ae&&ae.id){aid=ae.id;try{sel=[ae.selectionStart,ae.selectionEnd]}catch(e){}}}
   if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else if(view==='shop')shopView();else if(view==='money')moneyView();else diaryView();
-  renderSide();renderNav();
+  enhanceDates(app);renderSide();renderNav();
   if(preserve){for(const k in keep){const e=$(k);if(e)e.value=keep[k]}if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
   tickClock();
 }
@@ -1486,8 +1548,8 @@ function topBar(){
    <div class="tb-c">${wxHTML()}${nextChip()}</div>
    <div class="tb-r">
      <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${['memories','memory','memedit'].includes(view)?' on':''}" id="tbMem" type="button" aria-label="Memories" title="Memories">${svg(UI.mem)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
-     <button class="ic-btn cartbtn${view==='money'?' on':''}" id="tbMoney" type="button" aria-label="Expenses and bills${billsDue(3).length?', '+billsDue(3).length+' due soon':''}" title="Expenses and bills">${svg(UI.rupee)}${moneyBadge()}</button>
-     <button class="ic-btn cartbtn${view==='shop'?' on':''}" id="tbCart" type="button" aria-label="Lists${shopToBuy('shop').length?', '+shopToBuy('shop').length+' to buy':''}" title="Shopping and other lists">${svg(UI.cart)}${cartBadge()}</button>
+     <button class="ic-btn cartbtn only-wide${view==='money'?' on':''}" id="tbMoney" type="button" aria-label="Expenses and bills${billsDue(3).length?', '+billsDue(3).length+' due soon':''}" title="Expenses and bills">${svg(UI.rupee)}${moneyBadge()}</button>
+     <button class="ic-btn cartbtn only-wide${view==='shop'?' on':''}" id="tbCart" type="button" aria-label="Lists${shopToBuy('shop').length?', '+shopToBuy('shop').length+' to buy':''}" title="Shopping and other lists">${svg(UI.cart)}${cartBadge()}</button>
      <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last synced '+fmtTime(lastSyncAt):''}</small></span>
    </div></header>${view==='diary'&&!dq?quoteHTML():''}`;
 }
@@ -1518,12 +1580,13 @@ function focusSearch(){
 }
 function renderNav(){
   let nav=$('bnav');if(!nav){nav=document.createElement('nav');nav.id='bnav';nav.className='bnav';nav.setAttribute('aria-label','Main');document.body.appendChild(nav)}
-  const it=[['today','Today',UI.today],['cal','Calendar',UI.cal],['memories','Memories',UI.mem],['search','Search',UI.search],['stats','Stats',UI.stats],['settings','Settings',null]];
-  const cur=view==='diary'?(mSearch||dq?'search':diaryDate===today()?'today':''):['memory','memedit'].includes(view)?'memories':view;
-  const html=it.map(([k,l,ic])=>`<button type="button" data-nav="${k}" class="${cur===k?'on':''}" aria-label="${l}">${ic?svg(ic,22):GEAR}<span>${l}</span></button>`).join('');
+  const nb=shopToBuy('shop').length,nd=billsDue(3).length;
+  const it=[['today','Today',UI.today],['cal','Calendar',UI.cal],['money','Money',UI.rupee,nd?moneyBadge():''],['shop','Lists',UI.cart,nb?cartBadge():''],['search','Search',UI.search],['settings','Settings',null]];
+  const cur=view==='diary'?(mSearch||dq?'search':diaryDate===today()?'today':''):view;
+  const html=it.map(([k,l,ic,bd])=>`<button type="button" data-nav="${k}" class="${cur===k?'on':''}" aria-label="${l}${k==='shop'&&nb?', '+nb+' to buy':k==='money'&&nd?', '+nd+' bills due soon':''}"><span class="nic">${ic?svg(ic,22):GEAR}${bd||''}</span><span>${l}</span></button>`).join('');
   if(nav.__html!==html){nav.innerHTML=html;nav.__html=html;nav.querySelectorAll('[data-nav]').forEach(b=>b.onclick=()=>{const k=b.dataset.nav;
     if(k==='today'){mSearch=false;dq='';if(view!=='diary')goView('diary');if(diaryDate!==today())dGo(today());else render();window.scrollTo({top:0,behavior:'smooth'})}
-    else if(k==='cal')openDrawer();else if(k==='search')focusSearch();else goView(k)})}
+    else if(k==='cal')openDrawer();else if(k==='search')focusSearch();else{if(k==='shop'){shopEdit=null;listNew=false}if(k==='money'){expEdit=null;billEdit=null}goView(k)}})}
 }
 function openDrawer(){const s=$('side');if(!s)return;s.classList.add('open');let b=$('scrim');if(!b){b=document.createElement('div');b.id='scrim';b.className='scrim';b.onclick=closeDrawer;document.body.appendChild(b)}b.hidden=false;document.documentElement.classList.add('drawer')}
 function closeDrawer(){const s=$('side');if(s)s.classList.remove('open');const b=$('scrim');if(b)b.hidden=true;document.documentElement.classList.remove('drawer')}
@@ -1588,6 +1651,7 @@ function renderSide(){
      <div class="calfoot"><span></span><button class="btn sm" id="sToday" type="button">Today</button></div></div>
    <div class="panel"><div class="phead"><p class="eyebrow">Next 7 days</p>${G.connected?'<button class="linkbtn" id="sideUp" type="button">View all →</button>':''}</div>${G.connected?(up.length?`<ul class="up">${up.map(x=>`<li class="k-${x.e.k}"><button type="button" data-sd="${x.d}">${icon(x.e.k)}<span class="t">${esc(evTitle(x.e))}</span><span class="w">${x.d===t?'Today':x.d===dAdd(t,1)?'Tomorrow':dShort(x.d)}${x.e.tm?' · '+x.e.tm:''}${evAge(x.e,x.d)?' · '+evAge(x.e,x.d):''}</span></button></li>`).join('')}</ul>`:'<p class="note">Nothing on your calendar this week.</p>')
      :`<p class="note">Connect Google Calendar in Settings to see birthdays, holidays and events here and on each page.</p>`}</div>
+   <div class="panel drlinks only-narrow"><button type="button" id="drMem">${svg(UI.mem,20)}<span>Memories</span></button><button type="button" id="drStats">${svg(UI.stats,20)}<span>Statistics</span></button><button type="button" id="drBm">${svg(UI.bm,20)}<span>Bookmarks</span></button></div>
    ${statsCard()}
    <p class="keys only-wide"><kbd>←</kbd> <kbd>→</kbd> pages · <kbd>T</kbd> today · <kbd>/</kbd> search · <kbd>C</kbd> calendar · <kbd>B</kbd> bookmark · <kbd>F</kbd> focus · <kbd>[</kbd> hide panel · <kbd>Ctrl</kbd>+<kbd>S</kbd> save</p>`;
   if(side.__html!==html){const f=document.activeElement&&document.activeElement.id==='sq';side.innerHTML=html;side.__html=html;if(f){const i=$('sq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
@@ -1602,6 +1666,7 @@ function renderSide(){
   if($('drawerX'))$('drawerX').onclick=closeDrawer;
   if($('sideUp'))$('sideUp').onclick=()=>goView('upcoming');
   $('sideStats').onclick=()=>goView('stats');
+  if($('drMem'))$('drMem').onclick=()=>goView('memories');if($('drStats'))$('drStats').onclick=()=>goView('stats');if($('drBm'))$('drBm').onclick=()=>goView('bookmarks');
   side.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{const d=b.dataset.sd;closeDrawer();if(view!=='diary')goDiary();sideM=null;dq='';mSearch=false;if(d===diaryDate)render();else dGo(d)});
 }
 
@@ -2682,7 +2747,7 @@ function shopView(){
     if(navigator.share){try{await navigator.share({text:t});return}catch(e){if(e&&e.name==='AbortError')return}}
     window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener')};
 }
-function refreshCart(){const b=$('tbCart');if(b){const o=b.querySelector('.cbadge'),h=cartBadge();if(o)o.remove();if(h)b.insertAdjacentHTML('beforeend',h);b.setAttribute('aria-label','Lists'+(shopToBuy('shop').length?', '+shopToBuy('shop').length+' to buy':''))}
+function refreshCart(){if(typeof renderNav==='function')renderNav();const b=$('tbCart');if(b){const o=b.querySelector('.cbadge'),h=cartBadge();if(o)o.remove();if(h)b.insertAdjacentHTML('beforeend',h);b.setAttribute('aria-label','Lists'+(shopToBuy('shop').length?', '+shopToBuy('shop').length+' to buy':''))}
   const m=$('tbMoney');if(m){const o=m.querySelector('.cbadge'),h=moneyBadge();if(o)o.remove();if(h)m.insertAdjacentHTML('beforeend',h)}}
 /* ---------- money: expenses and bills (both synced item by item in the "lists" row) ---------- */
 const XCATS=[
@@ -2698,6 +2763,7 @@ var moneyTab='exp',expM=null,expEdit=null,expPrefill=null,billEdit=null,billOpen
 function expOf(pred){return lall('exp').filter(pred)}
 function dayExp(d){return expOf(x=>x.d===d)}
 function sum(a){return a.reduce((s,x)=>s+(+x.a||0),0)}
+function kInr(v){return v>=100000?'₹'+(Math.round(v/10000)/10)+'L':v>=1000?'₹'+(Math.round(v/100)/10)+'k':'₹'+Math.round(v)}
 /* bills */
 function addMonthsKeep(d,n,dom){const t=dParse(d);let y=t.getFullYear(),m=t.getMonth()+n;y+=Math.floor(m/12);m=((m%12)+12)%12;return y+'-'+pad(m+1)+'-'+pad(Math.min(dom||t.getDate(),monthLen(y,m)))}
 function billsActive(){return lall('bills').filter(b=>!b.ended).sort((a,b)=>a.next<b.next?-1:a.next>b.next?1:0)}
@@ -2754,7 +2820,14 @@ function expHTML(){
      <p class="err" id="xErr" role="alert"></p>
      <div class="row"><button class="btn sm" type="submit">${e?'Save changes':'Add expense'}</button>${e?`<button class="btn ghost sm" type="button" id="xX">Cancel</button>`:''}</div></form>
    <div class="shead"><span class="yearnav"><button class="arrow" id="xmPrev" type="button" aria-label="Previous month">‹</button><b>${esc(new Date(expM.y,expM.m,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'}))}</b><button class="arrow" id="xmNext" type="button" aria-label="Next month" ${isCur?'disabled':''}>›</button></span></div>
-   <div class="tiles"><div><b>${inr(tot)}</b><span>Spent this month</span></div><div><b>${isCur?inr(sum(dayExp(today()))):'—'}</b><span>Today</span></div><div><b>${el&&!fut?inr(Math.round(tot/el)):'—'}</b><span>Daily average</span></div><div><b>${prev?(tot>=prev?'↑ ':'↓ ')+Math.abs(Math.round((tot-prev)/prev*100))+'%':'—'}</b><span>vs ${esc(new Date(pm.y,pm.m,1).toLocaleDateString('en-IN',{month:'short'}))} (${inr(prev)})</span></div></div>
+   ${(()=>{const first=lall('exp').map(x=>x.d).filter(Boolean).sort()[0],t0=today(),fd=new Date(expM.y,expM.m,1).getDay();let g='',ns=0,tr=0;
+     for(let i=0;i<fd;i++)g+='<span class="xd out"></span>';
+     for(let k=1;k<=monthLen(expM.y,expM.m);k++){const dd=pre+'-'+pad(k),v=sum(dayExp(dd));let c,l='';
+       if(dd>t0)c='fut';else if(!first||dd<first)c='pre';else if(v>0){c='sp';l=kInr(v);tr++}else{c='ns';l='No spend';ns++;tr++}
+       g+=`<button type="button" class="xd ${c}${dd===t0?' tday':''}" data-xday="${dd}" title="${esc(dLong(dd))}${c==='sp'?': spent '+inr(v):c==='ns'?': no expenses':c==='pre'?': before you started recording':''}"><b>${k}</b><small>${l}</small></button>`}
+     return `<div class="tiles"><div><b>${inr(tot)}</b><span>Spent this month</span></div><div><b>${isCur?inr(sum(dayExp(t0))):'—'}</b><span>Today</span></div><div class="nsd"><b>${tr?ns:'—'}</b><span>No-spend ${ns===1?'day':'days'}</span></div><div><b>${prev?(tot>=prev?'↑ ':'↓ ')+Math.abs(Math.round((tot-prev)/prev*100))+'%':'—'}</b><span>vs ${esc(new Date(pm.y,pm.m,1).toLocaleDateString('en-IN',{month:'short'}))} (${inr(prev)})</span></div></div>
+       <section class="xcal" aria-label="Spending by day"><div class="xgrid7">${['S','M','T','W','T','F','S'].map(x=>`<span class="xd h">${x}</span>`).join('')}${g}</div>
+       <p class="note"><span class="lg ns"></span>No-spend day <span class="lg sp"></span>Amount spent · ${tr?`${ns} of ${tr} recorded ${tr===1?'day':'days'} had no expenses${el&&!fut?' · daily average '+inr(Math.round(tot/el)):''}`:'Days are counted from the date of your first expense.'} · Select a day to add an expense for it.</p></section>`})()}
    ${byC.length?`<div class="xbars">${byC.map(x=>`<div class="xbar"><span>${esc(x.c.n)}</span><span class="xtrack"><i style="width:${Math.max(3,Math.round(x.v/mx*100))}%;background:${x.c.c}"></i></span><b>${inr(x.v)}</b><small>${tot?Math.round(x.v/tot*100):0}%</small></div>`).join('')}</div>`:''}
    ${list.length?`<ul class="xlist">${h}</ul>`:`<p class="empty">No expenses recorded for this month.</p>`}`;
 }
@@ -2770,11 +2843,12 @@ function moneyView(){
   if(moneyTab==='exp'){
     const a=$('xA');if(expPrefill||expEdit||innerWidth>=1000)a.focus();expPrefill=null;
     $('xF').onsubmit=e=>{e.preventDefault();const v=amt($('xA').value),d=$('xD').value,c=(app.querySelector('[name=xc]:checked')||{}).value||'other';
-      if(!v){$('xErr').textContent='Please enter the amount.';$('xA').focus();return}if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){$('xErr').textContent='Please choose a date.';return}
+      if(!v){$('xErr').textContent='Please enter the amount.';$('xA').focus();return}if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){$('xErr').textContent='Please enter a valid date as dd-mm-yyyy, for example '+fmtDMY(today())+'.';return}
       if(d>today()){$('xErr').textContent='The date cannot be in the future.';return}
       const x=expEdit?S.lists.exp[expEdit]:{id:uid()};Object.assign(x,{a:v,d,c,n:$('xN').value.trim().slice(0,60)});lput('exp',x);const was=!!expEdit;expEdit=null;
       const dt=dParse(d);expM={y:dt.getFullYear(),m:dt.getMonth()};render();toast(was?'Expense updated':inr(v)+' added to '+xcat(c).n)};
     if($('xX'))$('xX').onclick=()=>{expEdit=null;render()};
+    app.querySelectorAll('[data-xday]').forEach(b=>b.onclick=()=>{const d=b.dataset.xday;if(d>today())return;const n=$('xD');n.value=d;n.dispatchEvent(new Event('change'));window.scrollTo({top:0,behavior:'smooth'});$('xA').focus({preventScroll:true});toast('Adding an expense for '+fmtDMY(d))});
     $('xmPrev').onclick=()=>{expM.m--;if(expM.m<0){expM.m=11;expM.y--}render()};
     $('xmNext').onclick=()=>{expM.m++;if(expM.m>11){expM.m=0;expM.y++}render()};
     app.querySelectorAll('[data-xedit]').forEach(b=>b.onclick=()=>{expEdit=b.dataset.xedit;render();window.scrollTo({top:0,behavior:'smooth'})});
@@ -2786,7 +2860,7 @@ function moneyView(){
     app.querySelectorAll('[data-bpay]').forEach(b=>b.onclick=()=>payBill(S.lists.bills[b.dataset.bpay],true));
     const f=$('bF');if(f){
       const keep=()=>{Object.assign(billEdit,{n:$('bN').value,a:amt($('bA').value),c:$('bC').value,f:$('bR').value,next:$('bD').value})};
-      f.onsubmit=e=>{e.preventDefault();keep();const b=billEdit;if(!b.n.trim()){$('bErr').textContent='Please enter a name.';$('bN').focus();return}if(!/^\d{4}-\d{2}-\d{2}$/.test(b.next)){$('bErr').textContent='Please choose the next due date.';return}
+      f.onsubmit=e=>{e.preventDefault();keep();const b=billEdit;if(!b.n.trim()){$('bErr').textContent='Please enter a name.';$('bN').focus();return}if(!/^\d{4}-\d{2}-\d{2}$/.test(b.next)){$('bErr').textContent='Please enter the next due date as dd-mm-yyyy.';return}
         const x=b.id?S.lists.bills[b.id]:{id:uid(),hist:[]};Object.assign(x,{n:b.n.trim().slice(0,50),a:b.a||null,c:b.c,f:b.f,next:b.next,dom:+b.next.slice(8)});delete x.ended;delete x.ask;lput('bills',x);
         const was=!!b.id;billEdit=null;render();refreshCart();toast(was?'Bill updated':'Bill added · '+billState(x).t)};
       $('bX').onclick=()=>{billEdit=null;render()};
@@ -2798,7 +2872,9 @@ function moneyView(){
 }
 /* cards on the diary page: the day's spending, and bills due soon (today's page only) */
 function dayMoneyHTML(d){
-  const xs=dayExp(d),t=today(),due=d===t?billsDue(3):[];if(!xs.length&&!due.length)return '';
+  const xs=dayExp(d),t=today(),due=d===t?billsDue(3):[],first=lall('exp').map(x=>x.d).filter(Boolean).sort()[0],nsd=!xs.length&&first&&d>=first&&d<t;
+  if(nsd&&!due.length)return `<section class="dmoney"><button type="button" class="dexp dns" id="dExp">${svg('<path d="m6.5 12.5 3.6 3.6 7.4-8"/>',16)}<span>No-spend day</span><small>No expenses were recorded on this day</small></button></section>`;
+  if(!xs.length&&!due.length)return '';
   const byC={};xs.forEach(x=>{byC[x.c]=(byC[x.c]||0)+(+x.a||0)});
   return `<section class="dmoney" aria-label="Money">${due.length?`<div class="dbills">${due.map(b=>{const s=billState(b);return `<span class="dbill ${s.c}"><b>${esc(b.n)}</b>${b.a?' '+inr(b.a):''} · ${esc(s.t)}<button type="button" class="btn sm" data-bpay="${b.id}">Mark paid</button></span>`}).join('')}</div>`:''}
     ${xs.length?`<button type="button" class="dexp" id="dExp">${svg(UI.rupee,16)}<span>Spent ${inr(sum(xs))}</span><small>${Object.entries(byC).sort((a,b)=>b[1]-a[1]).map(([k,v])=>esc(xcat(k).n)+' '+inr(v)).join(' · ')}</small></button>`:''}</section>`;
@@ -2995,7 +3071,7 @@ function memEditView(){
   $('mForm').oninput=keep;$('mForm').onchange=keep;
   $('mForm').onsubmit=ev=>{ev.preventDefault();keep();
     const err=$('mfErr');if(!e.title.trim()){err.textContent='Please enter a title.';$('mfT').focus();return}
-    if(!/^\d{4}-\d{2}-\d{2}$/.test(e.date)){err.textContent='Please choose a date.';$('mfD').focus();return}
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(e.date)){err.textContent='Please enter the date as dd-mm-yyyy.';$('mfD_t').focus();return}
     const id=saveMem(e.id,{date:e.date,title:e.title.trim(),desc:e.desc.trim(),cat:e.cat,fav:e.fav,src:e.src,photos:e.photos,people:e.people||[]});
     const isNew=!e.id;memEdit=null;memId='m:'+id;goView('memory');toast(isNew?'Memory saved':'Memory updated')};
   if(!e.title)$('mfT').focus();
