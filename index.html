@@ -714,6 +714,7 @@ html.viewing{overflow:hidden}
 .slist.bought{opacity:.92}
 @media (max-width:520px){.sadd .sin{flex:1 1 100%}.sadd .sq{width:auto;flex:1 1 0}.sadd .btn{flex:0 0 auto;padding:10px 22px}.sname .st{font-size:18px}.sedit{padding-left:8px}}
 @media (min-width:1000px) and (max-width:1759px){.lastsync{display:none}.syncbox .sync{font-size:0;gap:0}.tb-r{gap:4px}.tb-r .icons{gap:0}.tb-r .ic-btn{width:36px}.tb-c{gap:0}.now{gap:6px}html:not(.sidehide) #tbSearch{display:none}}
+@media (min-width:1000px) and (max-width:1499px){.tb-r .ic-btn{width:32px}.tb-l{gap:8px}.navpair .sq-btn{width:34px}}
 @media (max-width:999px){.topbar{flex-wrap:wrap}.tb-l{flex:1 1 0;min-width:0}.tb-r{flex:0 0 auto;gap:8px}}
 @media (max-width:520px){.cartbtn{width:36px;height:36px}.tb-l{gap:8px}.brand{gap:6px;min-width:0}.brand .logo{width:34px;height:34px}.brand b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}}
 @media (max-width:430px){.fd{font-size:12.5px}.ampm{margin-left:2px}}
@@ -829,6 +830,54 @@ html.viewing{overflow:hidden}
 .askname{margin:12px 0 0 60px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border:1px dashed var(--marg);border-radius:10px;padding:9px 12px;font-family:var(--sans);font-size:13.5px}
 .askname input{border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-family:var(--sans);font-size:14px;background:var(--sheet);color:var(--ink);flex:1 1 140px;min-width:0}
 @media (max-width:520px){.askname{margin-left:56px}}
+
+/* 4.11 · list photos, writing */
+.srow{grid-template-columns:44px 1fr auto 40px}
+.sph{display:flex;gap:4px;align-items:center;padding-right:2px}
+.sthumb{width:40px;height:40px;padding:2px;border:0;border-radius:4px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transform:rotate(-2deg);overflow:hidden;display:grid;place-items:center;font-family:var(--sans);font-size:11px;color:#5b5348}
+.sthumb:nth-child(2){transform:rotate(2deg)}
+.sthumb img{width:100%;height:100%;object-fit:cover;border-radius:2px;display:block}
+.scam{width:34px;height:34px;border:1px dashed var(--line);border-radius:9px;background:transparent;color:var(--muted);display:grid;place-items:center;opacity:.75}
+.scam:hover,.scam:focus-visible{opacity:1;color:var(--accent);border-color:var(--accent)}
+.srow.done .sph{opacity:.6}
+.scamadd{padding:8px 11px;display:inline-grid;place-items:center}
+@media (max-width:520px){.sthumb{width:34px;height:34px}.sadd .scamadd{flex:0 0 auto}}
+.writing h2,.wedit h2{display:flex;align-items:center;gap:10px}.writing h2 svg{color:var(--accent)}
+.wnew{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.wbtn{display:flex;align-items:center;gap:10px;border:1px solid color-mix(in srgb,var(--wc) 40%,var(--line));background:color-mix(in srgb,var(--wc) 8%,var(--ivory));border-radius:12px;padding:12px 14px;font-family:var(--sans);font-size:14px;color:var(--ink);text-align:left}
+.wbtn .wplus{width:28px;height:28px;border-radius:50%;background:var(--wc);color:#fff;display:grid;place-items:center;font-size:18px;line-height:1;flex:0 0 auto}
+.wbtn b{font-weight:600}
+@media (max-width:620px){.wnew{grid-template-columns:1fr}}
+.wcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+.wcard{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:14px 14px 12px;background:var(--ivory);border:1px solid var(--line);border-top:4px solid var(--wc);border-radius:6px;box-shadow:0 6px 14px -12px var(--shadow);min-height:150px;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 27px,color-mix(in srgb,var(--rule) 60%,transparent) 27px,color-mix(in srgb,var(--rule) 60%,transparent) 28px)}
+.wcard:hover{transform:translateY(-1px);box-shadow:0 10px 18px -12px var(--shadow)}
+.wcard:focus-visible{outline:2px solid var(--accent)}
+.wmeta{display:flex;align-items:center;gap:8px;font-family:var(--sans);font-size:11.5px;color:var(--muted)}
+.wtag{color:var(--wc);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:10.5px}
+.wcard b{font-family:var(--serif);font-size:20px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.wex{font-size:15.5px;line-height:1.45;color:color-mix(in srgb,var(--ink) 78%,var(--muted));display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.wcard.t-poem .wex{font-style:italic}
+.wcard small{margin-top:auto;font-family:var(--sans);font-size:11.5px;color:var(--muted)}
+.wbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:8px 0}
+.wbar select{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-family:var(--sans);font-size:13.5px;color:var(--ink)}
+.wbar .tb[aria-pressed="true"]{color:var(--accent)}
+.wsaved{font-family:var(--sans);font-size:12px;color:var(--muted)}
+.wprompt{border:1px dashed var(--wc);border-radius:12px;padding:12px 14px;background:color-mix(in srgb,var(--wc) 6%,var(--ivory));display:flex;flex-direction:column;gap:6px}
+.wprompt .eyebrow{margin:0;color:var(--wc)}
+.wprompt p{margin:0;font-size:19px;font-style:italic}
+.wprompt .row{display:flex;gap:8px;flex-wrap:wrap}
+.wpaper{position:relative;padding:4px 0 0 60px;font-family:var(--wf);--wl:calc(var(--L) * 1.05)}
+.wpaper::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:1.5px;background:var(--marg);opacity:.85}
+.wdate{margin:0 0 2px;font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--wc)}
+.wtitle{width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--rule);background:transparent;padding:6px 0 8px;font-family:var(--wf);font-size:calc(30px * var(--ws));font-weight:600;color:var(--ink);outline:none}
+.wtitle::placeholder,.wbody::placeholder{color:var(--muted);opacity:.7;font-style:italic;font-weight:400}
+.wbody{display:block;width:100%;box-sizing:border-box;border:0;resize:none;overflow:hidden;background:transparent;outline:none;padding:0;margin-top:2px;font-family:var(--wf);font-size:calc(var(--fs) * var(--ws));line-height:var(--wl);color:var(--ink);caret-color:var(--accent);
+  background-image:repeating-linear-gradient(to bottom,transparent 0,transparent calc(var(--wl) - 1px),var(--rule) calc(var(--wl) - 1px),var(--rule) var(--wl));background-attachment:local}
+.wedit.t-poem .wbody,.wedit.t-poem .wtitle{text-align:center}
+.wedit.t-poem .wbody{font-style:italic}
+@media (max-width:520px){.wpaper{padding-left:50px}.wpaper::before{left:38px}.wbar{gap:4px}.wbar .tb.wide span:not(.dev){display:none}.wbar .tsel{flex:0 1 auto;min-width:0}.wbar select{max-width:118px;padding:6px 4px}.wbar .grow{display:none}}
+#printArea .pr-w p{margin:0 0 .3em;line-height:1.6}
+#printArea .pr-poem{text-align:center;font-style:italic}
 </style>
 </head>
 <body>
@@ -883,14 +932,14 @@ function diaryTitle(){const n=myName();return n?n+'’s Diary':'My Diary'}
 function setMyName(n,sync){n=String(n||'').trim().replace(/\s+/g,' ').slice(0,30);if(!n)return false;S.prefs.name=n;S.prefs.nameAt=Date.now();try{localStorage.setItem('diary-name',n)}catch(e){}if(sync!==false)mark('prefs');document.title=diaryTitle();return true}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.10';
+const APP_VERSION='4.11';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
 var S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S){let old=null;try{old=JSON.parse(localStorage.getItem('second-brain-v2'))}catch(e){}S={diary:(old&&old.diary)||{}}}
-S.diary=S.diary||{};S.mem=S.mem||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl','shop','ulist','exp','bills'].forEach(k=>S.lists[k]=S.lists[k]||{});
+S.diary=S.diary||{};S.mem=S.mem||{};S.wr=S.wr||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl','shop','ulist','exp','bills'].forEach(k=>S.lists[k]=S.lists[k]||{});
 var G=null;try{G=JSON.parse(localStorage.getItem(GKEY))}catch(e){}
 G=G||{connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};G.off=G.off||[];G.cals=G.cals||[];G.events=G.events||[];
 let saveT;
@@ -899,7 +948,7 @@ function saveNow(){clearTimeout(saveT);try{localStorage.setItem(KEY,JSON.stringi
 addEventListener('pagehide',saveNow);
 
 /* ================= sync engine (entry-level merge) ================= */
-const dirty=new Set((()=>{try{return (JSON.parse(localStorage.getItem('sb-dirty'))||[]).filter(k=>k.startsWith('diary:')||k.startsWith('mem:')||k==='gcal'||k==='prefs'||k==='lists')}catch(e){return []}})());
+const dirty=new Set((()=>{try{return (JSON.parse(localStorage.getItem('sb-dirty'))||[]).filter(k=>k.startsWith('diary:')||k.startsWith('mem:')||k.startsWith('wr:')||k==='gcal'||k==='prefs'||k==='lists')}catch(e){return []}})());
 let writing=false,flushT;
 function keepDirty(){try{localStorage.setItem('sb-dirty',JSON.stringify([...dirty]))}catch(e){}}
 const SNAP=new WeakMap();
@@ -930,9 +979,9 @@ function mergeNote(L,R){
   return out;
 }
 function pageSig(p){return JSON.stringify([p.items||[],p.mood||'',p.bm||0,p.tags||[],(p.att||[]).map(a=>a.id),p.carryOff||0,p.people||[]])}
-function mark(...ids){if(col&&sync!=='offline'&&sync!=='saving')setSync('saving');const now=Date.now();ids.forEach(i=>{if(i.startsWith('diary:')&&typeof uRecord==='function')uRecord(i.slice(6));dirty.add(i);if(i==='gcal')G._ts=now;else if(i==='prefs')S.prefs._ts=now;else if(i==='lists')S.lists._ts=now;else if(i.startsWith('mem:')){const m=S.mem[i.slice(4)];if(m)m._ts=now}else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500);if(typeof refreshStreak==='function')refreshStreak()}
-const docName=id=>id==='gcal'?'g_events':id==='prefs'||id==='lists'?id:id.startsWith('mem:')?'mem_'+id.slice(4):'d_'+id.slice(6);
-const body=id=>id==='gcal'?{folder:G.folder||null,v2:G.v2||0,connected:G.connected,events:G.events,cals:G.cals,off:G.off,fetchedAt:G.fetchedAt,bkM:G.bkM||'',bkAt:G.bkAt||0,bkName:G.bkName||'',bkLink:G.bkLink||'',_ts:G._ts||0}:id==='prefs'?S.prefs:id==='lists'?S.lists:id.startsWith('mem:')?S.mem[id.slice(4)]:getRef(id);
+function mark(...ids){if(col&&sync!=='offline'&&sync!=='saving')setSync('saving');const now=Date.now();ids.forEach(i=>{if(i.startsWith('diary:')&&typeof uRecord==='function')uRecord(i.slice(6));dirty.add(i);if(i==='gcal')G._ts=now;else if(i==='prefs')S.prefs._ts=now;else if(i==='lists')S.lists._ts=now;else if(i.startsWith('wr:')){const w=S.wr[i.slice(3)];if(w)w._ts=now}else if(i.startsWith('mem:')){const m=S.mem[i.slice(4)];if(m)m._ts=now}else stamp(i,now)});keepDirty();saveLocal();clearTimeout(flushT);flushT=setTimeout(flush,500);if(typeof refreshStreak==='function')refreshStreak()}
+const docName=id=>id==='gcal'?'g_events':id==='prefs'||id==='lists'?id:id.startsWith('wr:')?'wr_'+id.slice(3):id.startsWith('mem:')?'mem_'+id.slice(4):'d_'+id.slice(6);
+const body=id=>id==='gcal'?{folder:G.folder||null,v2:G.v2||0,connected:G.connected,events:G.events,cals:G.cals,off:G.off,fetchedAt:G.fetchedAt,bkM:G.bkM||'',bkAt:G.bkAt||0,bkName:G.bkName||'',bkLink:G.bkLink||'',_ts:G._ts||0}:id==='prefs'?S.prefs:id==='lists'?S.lists:id.startsWith('wr:')?S.wr[id.slice(3)]:id.startsWith('mem:')?S.mem[id.slice(4)]:getRef(id);
 var col=null,sync='local',syncErr='';
 async function flush(){
   if(!col||writing||!dirty.size)return;
@@ -980,6 +1029,7 @@ function applyRow(name,data){
     S.prefs._ts=Math.max(S.prefs._ts||0,data._ts||0);return ch;
   }
   if(name==='lists'){const ch=mergeLists(data);if(ch)setTimeout(refreshCart,0);return ch}
+  if(name.startsWith('wr_')){const id=name.slice(3),l=S.wr[id];if(dirty.has('wr:'+id)&&l)return false;if(l&&(l._ts||0)>=(data._ts||0))return false;if(l&&wrNew===null&&wrId===id&&view==='wedit'&&document.activeElement&&/wTitle|wBody/.test(document.activeElement.id||''))return false;S.wr[id]=Object.assign({},data,{id});return true}
   if(name.startsWith('mem_')){
     const id=name.slice(4),k='mem:'+id,l=S.mem[id];
     if(dirty.has(k)&&l)return false;
@@ -1004,7 +1054,7 @@ function afterApply(changed){if(changed){saveLocal();softRender()}}
 let pulling=false;
 async function pullAll(){
   if(pulling||!sb)return;pulling=true;
-  let res;try{res=await withTimeout(sb.from('notes').select('note_id,data').or('note_id.like.d_*,note_id.like.mem_*,note_id.eq.settings,note_id.eq.g_events,note_id.eq.prefs,note_id.eq.lists'),15000)}catch(e){res={error:e}}finally{pulling=false}
+  let res;try{res=await withTimeout(sb.from('notes').select('note_id,data').or('note_id.like.d_*,note_id.like.mem_*,note_id.eq.settings,note_id.eq.g_events,note_id.eq.prefs,note_id.eq.lists,note_id.like.wr_*'),15000)}catch(e){res={error:e}}finally{pulling=false}
   const {data,error}=res;
   if(error){setSync(isNet(error)?'offline':'error',error.message);return}
   let changed=false;(data||[]).forEach(r=>{if(applyRow(r.note_id,r.data))changed=true});
@@ -1021,7 +1071,7 @@ setInterval(()=>{if(me&&col&&!document.hidden&&navigator.onLine){if(dirty.size&&
 async function startSync(){
   col=makeCol(me.id);setSync('connecting');
   try{const {data:{session}}=await sb.auth.getSession();if(session&&sb.realtime&&sb.realtime.setAuth)sb.realtime.setAuth(session.access_token)}catch(e){}
-  await pullAll();listen();
+  await pullAll();listen();if(typeof imgFlush==='function')imgFlush();
 }
 async function hashPin(pin,salt){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pin+':'+me.id));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 async function savePin(pin){
@@ -1104,7 +1154,7 @@ async function onSignedIn(user,viaPassword){
   if(me&&me.id===user.id&&col){if(viaPassword&&pinRec)unlock();return}
   const keepOpen=lockMode==='open'&&me&&me.id===user.id;
   const owner=localStorage.getItem(OWNKEY);
-  if(owner&&owner!==user.id){['diary-name','sb-bio','alok-bknag','alok-billnag','sb-active'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});dirty.clear();keepDirty();S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
+  if(owner&&owner!==user.id){['diary-name','sb-bio','alok-bknag','alok-billnag','sb-active'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});dirty.clear();keepDirty();S={diary:{},mem:{},wr:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
   try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
   me=user;startSync().then(()=>{if(!S.prefs.name){let n='';try{n=localStorage.getItem('diary-pendname')||''}catch(e){}n=n||(user.user_metadata&&user.user_metadata.name)||'';if(n){setMyName(n);render(true)}}try{localStorage.removeItem('diary-pendname')}catch(e){}if(S.prefs.name){try{localStorage.setItem('diary-name',S.prefs.name)}catch(e){}}document.title=diaryTitle();if(lockMode!=='open'&&!lockEl.hidden)drawLock()});
   if(!pinRec){try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}}
@@ -1289,13 +1339,13 @@ function setApp(html){if(app.__html===html)return false;app.innerHTML=html;app._
 function render(preserve){
   const keep={},ae=document.activeElement;let aid=null,sel=null;
   if(preserve){app.querySelectorAll('input[id]').forEach(e=>{if(e.type!=='checkbox'&&e.type!=='file')keep[e.id]=e.value});if(ae&&ae.id){aid=ae.id;try{sel=[ae.selectionStart,ae.selectionEnd]}catch(e){}}}
-  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else if(view==='shop')shopView();else if(view==='money')moneyView();else diaryView();
+  if(view==='settings')settingsView();else if(view==='stats')statsView();else if(view==='bookmarks')bookmarksView();else if(view==='upcoming')upcomingView();else if(view==='memories')memoriesView();else if(view==='memory')memoryView();else if(view==='memedit')memEditView();else if(view==='quotes')quotesView();else if(view==='shop')shopView();else if(view==='money')moneyView();else if(view==='writing')writingView();else if(view==='wedit')weditView();else diaryView();
   enhanceDates(app);renderSide();renderNav();if(document.title!==diaryTitle())document.title=diaryTitle();
   if(preserve){for(const k in keep){const e=$(k);if(e)e.value=keep[k]}if(aid&&$(aid)){$(aid).focus();try{if(sel&&sel[0]!=null)$(aid).setSelectionRange(sel[0],sel[1])}catch(e){}}}
   tickClock();
 }
 function goView(v){
-  dFlushSoon();closeDrawer();closeMood();
+  dFlushSoon();if(view==='wedit'&&v!=='wedit'){clearTimeout(wrSaveT);wrSave()}closeDrawer();closeMood();
   if(v===view){if(v==='diary'){dq='';render()}return}
   if(v==='diary'){if(history.state&&history.state.v&&history.state.v!=='diary')history.back();else{view='diary';app.__html='';render()}return}
   if(view==='diary')history.pushState({v},'','#'+v);else history.replaceState({v},'','#'+v);
@@ -1303,7 +1353,7 @@ function goView(v){
 }
 function goSettings(){goView('settings')}
 function goDiary(){goView('diary')}
-addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming','memories','memory','memedit','quotes','shop','money'].includes(v)?v:'diary';if(view==='memedit'&&!memEdit)view='memories';if(view==='diary')closeViewer();app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
+addEventListener('popstate',e=>{const v=(e.state&&e.state.v)||'diary';if(v!==view){view=['settings','stats','bookmarks','upcoming','memories','memory','memedit','quotes','shop','money','writing','wedit'].includes(v)?v:'diary';if(view==='memedit'&&!memEdit)view='memories';if(view==='diary')closeViewer();app.__html='';closeDrawer();render();window.scrollTo(0,0)}});
 
 /* ---------- icons used by the chrome ---------- */
 const UI={
@@ -1562,7 +1612,8 @@ function topBar(){
    </div>
    <div class="tb-c">${wxHTML()}${nextChip()}</div>
    <div class="tb-r">
-     <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${['memories','memory','memedit'].includes(view)?' on':''}" id="tbMem" type="button" aria-label="Memories" title="Memories">${svg(UI.mem)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
+     <span class="only-wide icons"><button class="ic-btn" id="tbSearch" type="button" aria-label="Search the diary">${svg(UI.search)}</button><button class="ic-btn${['writing','wedit'].includes(view)?' on':''}" id="tbWr" type="button" aria-label="Writing: journal, stories and poems" title="Writing">${svg(UI.pen)}</button><button class="ic-btn${['memories','memory','memedit'].includes(view)?' on':''}" id="tbMem" type="button" aria-label="Memories" title="Memories">${svg(UI.mem)}</button><button class="ic-btn${view==='bookmarks'?' on':''}" id="tbBm" type="button" aria-label="Bookmarked pages">${svg(UI.bm)}</button><button class="ic-btn${view==='stats'?' on':''}" id="tbStats" type="button" aria-label="Statistics">${svg(UI.stats)}</button><button class="ic-btn${view==='settings'?' on':''}" id="tbSet" type="button" aria-label="Settings">${GEAR}</button></span>
+     <button class="ic-btn only-narrow${['writing','wedit'].includes(view)?' on':''}" id="tbWrM" type="button" aria-label="Writing: journal, stories and poems" title="Writing">${svg(UI.pen)}</button>
      <button class="ic-btn cartbtn only-wide${view==='money'?' on':''}" id="tbMoney" type="button" aria-label="Expenses and bills${billsDue(3).length?', '+billsDue(3).length+' due soon':''}" title="Expenses and bills">${svg(UI.rupee)}${moneyBadge()}</button>
      <button class="ic-btn cartbtn only-wide${view==='shop'?' on':''}" id="tbCart" type="button" aria-label="Lists${shopToBuy('shop').length?', '+shopToBuy('shop').length+' to buy':''}" title="Shopping and other lists">${svg(UI.cart)}${cartBadge()}</button>
      <span class="syncbox"><span class="sync syncEl ${sync}">${esc(syncLabel())}</span><small class="lastsync" id="lastSync">${lastSyncAt?'Last synced '+fmtTime(lastSyncAt):''}</small></span>
@@ -1581,6 +1632,7 @@ function bindTop(){
   if($('tbSearch'))$('tbSearch').onclick=focusSearch;
   if($('tbBm'))$('tbBm').onclick=()=>goView(view==='bookmarks'?'diary':'bookmarks');
   if($('tbMem'))$('tbMem').onclick=()=>goView(view==='memories'?'diary':'memories');
+  ['tbWr','tbWrM'].forEach(k=>{if($(k))$(k).onclick=()=>{if(view==='wedit'){clearTimeout(wrSaveT);wrSave()}goView(['writing','wedit'].includes(view)?'diary':'writing')}});
   if($('tbCart'))$('tbCart').onclick=()=>{shopEdit=null;listNew=false;goView(view==='shop'?'diary':'shop')};
   if($('tbMoney'))$('tbMoney').onclick=()=>{expEdit=null;billEdit=null;goView(view==='money'?'diary':'money')};
   bindQuote();
@@ -1666,7 +1718,7 @@ function renderSide(){
      <div class="calfoot"><span></span><button class="btn sm" id="sToday" type="button">Today</button></div></div>
    <div class="panel"><div class="phead"><p class="eyebrow">Next 7 days</p>${G.connected?'<button class="linkbtn" id="sideUp" type="button">View all →</button>':''}</div>${G.connected?(up.length?`<ul class="up">${up.map(x=>`<li class="k-${x.e.k}"><button type="button" data-sd="${x.d}">${icon(x.e.k)}<span class="t">${esc(evTitle(x.e))}</span><span class="w">${x.d===t?'Today':x.d===dAdd(t,1)?'Tomorrow':dShort(x.d)}${x.e.tm?' · '+x.e.tm:''}${evAge(x.e,x.d)?' · '+evAge(x.e,x.d):''}</span></button></li>`).join('')}</ul>`:'<p class="note">Nothing on your calendar this week.</p>')
      :`<p class="note">Connect Google Calendar in Settings to see birthdays, holidays and events here and on each page.</p>`}</div>
-   <div class="panel drlinks only-narrow"><button type="button" id="drMem">${svg(UI.mem,20)}<span>Memories</span></button><button type="button" id="drStats">${svg(UI.stats,20)}<span>Statistics</span></button><button type="button" id="drBm">${svg(UI.bm,20)}<span>Bookmarks</span></button></div>
+   <div class="panel drlinks only-narrow"><button type="button" id="drWr">${svg(UI.pen,20)}<span>Writing</span></button><button type="button" id="drMem">${svg(UI.mem,20)}<span>Memories</span></button><button type="button" id="drStats">${svg(UI.stats,20)}<span>Statistics</span></button><button type="button" id="drBm">${svg(UI.bm,20)}<span>Bookmarks</span></button></div>
    ${statsCard()}
    <p class="keys only-wide"><kbd>←</kbd> <kbd>→</kbd> pages · <kbd>T</kbd> today · <kbd>/</kbd> search · <kbd>C</kbd> calendar · <kbd>B</kbd> bookmark · <kbd>F</kbd> focus · <kbd>[</kbd> hide panel · <kbd>Ctrl</kbd>+<kbd>S</kbd> save</p>`;
   if(side.__html!==html){const f=document.activeElement&&document.activeElement.id==='sq';side.innerHTML=html;side.__html=html;if(f){const i=$('sq');i.focus();i.setSelectionRange(i.value.length,i.value.length)}}
@@ -1681,7 +1733,7 @@ function renderSide(){
   if($('drawerX'))$('drawerX').onclick=closeDrawer;
   if($('sideUp'))$('sideUp').onclick=()=>goView('upcoming');
   $('sideStats').onclick=()=>goView('stats');
-  if($('drMem'))$('drMem').onclick=()=>goView('memories');if($('drStats'))$('drStats').onclick=()=>goView('stats');if($('drBm'))$('drBm').onclick=()=>goView('bookmarks');
+  if($('drWr'))$('drWr').onclick=()=>goView('writing');if($('drMem'))$('drMem').onclick=()=>goView('memories');if($('drStats'))$('drStats').onclick=()=>goView('stats');if($('drBm'))$('drBm').onclick=()=>goView('bookmarks');
   side.querySelectorAll('[data-sd]').forEach(b=>b.onclick=()=>{const d=b.dataset.sd;closeDrawer();if(view!=='diary')goDiary();sideM=null;dq='';mSearch=false;if(d===diaryDate)render();else dGo(d)});
 }
 
@@ -1875,11 +1927,12 @@ function dSearchHTML(){
     Object.keys(S.diary).sort().reverse().forEach(d=>{const p=S.diary[d];(p.items||[]).forEach(l=>{if(l.t&&l.t.toLowerCase().includes(ql))hits.push({d,t:l.t,done:l.done})});
       (p.tags||[]).forEach(t=>{if(t.includes(ql))hits.push({d,t:'#'+t,tag:1})});(p.att||[]).forEach(a=>{if(a.name.toLowerCase().includes(ql))hits.push({d,t:a.name,file:1})})});
     G.events.forEach(e=>{if(evTitle(e).toLowerCase().includes(ql)&&!G.off.includes(e.c))hits.push({d:e.d,t:evTitle(e),ev:e.k})});
+    wrAll().forEach(w=>{if(((w.title||'')+' '+(w.body||'')).toLowerCase().includes(ql))hits.push({d:dFmt(new Date(w.cAt||w._ts)),t:wrTitle(w),wr:w.id,wt:wtype(w.type).n})});
     Object.values(S.mem).forEach(m=>{if(m&&!m.deleted&&m.date&&((m.title||'')+' '+(m.desc||'')).toLowerCase().includes(ql))hits.push({d:m.date,t:m.title||'(untitled)',mem:m.id})});
     const dm=raw.match(/^(\d{1,2})[\/\-. ](\d{1,2})(?:[\/\-. ](\d{2,4}))?$/);if(dm){let y=dm[3]?+dm[3]:dParse(today()).getFullYear();if(y<100)y+=2000;const s=y+'-'+pad(+dm[2])+'-'+pad(+dm[1]);if(!isNaN(dParse(s)))hits.unshift({d:s,t:'Open the page for '+dLong(s),go:1})}
   }
   hits.sort((a,b)=>(b.go||0)-(a.go||0)||(a.d<b.d?1:-1));
-  return hits.length?`<p class="note">${hits.length} ${hits.length===1?'result':'results'} for “${esc(raw)}”</p><ul class="results">${hits.slice(0,120).map(h=>`<li><button ${h.mem?`data-mgo="${h.mem}"`:`data-dgo="${h.d}"`} type="button"><div class="where">${esc(dLong(h.d))}${h.mem?' · Memory':h.ev?' · '+KLABEL[h.ev]:h.tag?' · Tag':h.file?' · File':''}</div><div class="${h.done?'dstruck':''}">${hl(h.t,raw.replace(/^#/,''))}</div></button></li>`).join('')}</ul>`
+  return hits.length?`<p class="note">${hits.length} ${hits.length===1?'result':'results'} for “${esc(raw)}”</p><ul class="results">${hits.slice(0,120).map(h=>`<li><button ${h.wr?`data-wrgo="${h.wr}"`:h.mem?`data-mgo="${h.mem}"`:`data-dgo="${h.d}"`} type="button"><div class="where">${esc(dLong(h.d))}${h.wr?' · '+h.wt:h.mem?' · Memory':h.ev?' · '+KLABEL[h.ev]:h.tag?' · Tag':h.file?' · File':''}</div><div class="${h.done?'dstruck':''}">${hl(h.t,raw.replace(/^#/,''))}</div></button></li>`).join('')}</ul>`
     :`<p class="empty">No diary page, tag or calendar event matches “${esc(raw)}”.</p>`;
 }
 function diaryView(){
@@ -1941,6 +1994,7 @@ function diaryView(){
   if($('dqX'))$('dqX').onclick=()=>{dq='';mSearch=false;render()};
   app.querySelectorAll('[data-dgo]').forEach(b=>b.onclick=()=>{dq='';mSearch=false;dAnim='next';diaryDate=b.dataset.dgo;sideM=null;render();window.scrollTo({top:0})});
   app.querySelectorAll('[data-mgo]').forEach(b=>b.onclick=()=>{dq='';mSearch=false;openMem('m:'+b.dataset.mgo)});
+  app.querySelectorAll('[data-wrgo]').forEach(b=>b.onclick=()=>{dq='';mSearch=false;wrId=b.dataset.wrgo;wrNew=null;wrAsk=false;wrPrompt=null;goView('wedit')});
   const pp=$('dpaper');if(!pp)return;
   if(dAnim){pp.classList.add('turn-'+dAnim);dAnim=''}
   if(changed){pp.querySelectorAll('.dtxt').forEach(dAutosize);confetti()}
@@ -2173,7 +2227,7 @@ function dFlipSound(){
 }
 
 /* ================= settings ================= */
-var restoreData=null,restoreFrom='',restoreMem=null,restorePrefs=null,restoreLists=null;
+var restoreData=null,restoreFrom='',restoreMem=null,restorePrefs=null,restoreLists=null,restoreWr=null;
 function settingsView(){
   const lm=lockMin(),t=today(),mStart=t.slice(0,8)+'01';
   setApp(`<div class="dy">${topBar()}<div class="sheet">
@@ -2606,7 +2660,7 @@ function hTok(w){
 const HSTOP=new Set(['k','kh','g','gh','ch','chh','j','jh','T','Th','D','Dh','t','th','d','dh']);
 const HLONG=new Set(['aa','A','ii','ee','I','uu','oo','U','e','ai','ei','o','au','ou']);
 /* common words whose usual Roman spelling does not follow the letter rules */
-const HDICT={hum:'हम',ham:'हम',mein:'में',me:'में',yeh:'यह',ye:'ये',woh:'वह',wo:'वो',vah:'वह',kyon:'क्यों',kyun:'क्यों',nahi:'नहीं',kuch:'कुछ',kuchh:'कुछ',acha:'अच्छा',accha:'अच्छा',parivar:'परिवार',diwali:'दिवाली',papa:'पापा',mummy:'मम्मी',mumma:'मम्मा',beti:'बेटी',office:'ऑफिस',bank:'बैंक',school:'स्कूल',meeting:'मीटिंग',phone:'फ़ोन',time:'टाइम',report:'रिपोर्ट',branch:'ब्रांच',loan:'लोन',aap:'आप',apna:'अपना',apni:'अपनी',kaam:'काम',ek:'एक',do:'दो',teen:'तीन',char:'चार',paanch:'पांच',main:'मैं',hain:'हैं'};
+const HDICT={hum:'हम',ham:'हम',mein:'में',me:'में',yeh:'यह',ye:'ये',woh:'वह',wo:'वो',vah:'वह',kyon:'क्यों',kyun:'क्यों',nahi:'नहीं',kuch:'कुछ',kuchh:'कुछ',acha:'अच्छा',accha:'अच्छा',parivar:'परिवार',diwali:'दिवाली',papa:'पापा',mummy:'मम्मी',mumma:'मम्मा',beti:'बेटी',office:'ऑफिस',bank:'बैंक',school:'स्कूल',meeting:'मीटिंग',phone:'फ़ोन',time:'टाइम',report:'रिपोर्ट',branch:'ब्रांच',loan:'लोन',aap:'आप',apna:'अपना',apni:'अपनी',kaam:'काम',ek:'एक',do:'दो',teen:'तीन',char:'चार',paanch:'पांच',main:'मैं',hain:'हैं',ladki:'लड़की',ladka:'लड़का',ladke:'लड़के',ladkiyan:'लड़कियाँ',bada:'बड़ा',badi:'बड़ी',bade:'बड़े',padh:'पढ़',padhna:'पढ़ना',padhai:'पढ़ाई',padhti:'पढ़ती',ghadi:'घड़ी',pahad:'पहाड़',ped:'पेड़',chhota:'छोटा',chhoti:'छोटी',chhote:'छोटे',pyaar:'प्यार',pyar:'प्यार',dost:'दोस्त',kahani:'कहानी',kavita:'कविता',sapna:'सपना',sapne:'सपने',duniya:'दुनिया',aasman:'आसमान',asman:'आसमान',suraj:'सूरज',sooraj:'सूरज',chand:'चाँद',chaand:'चाँद',taare:'तारे',phool:'फूल',pani:'पानी',paani:'पानी',barish:'बारिश',baarish:'बारिश',mausam:'मौसम',khushi:'ख़ुशी',dil:'दिल',maa:'माँ',didi:'दीदी',bahan:'बहन',behen:'बहन',bhai:'भाई',gaya:'गया',gayi:'गई',raat:'रात',hawa:'हवा',zindagi:'ज़िंदगी',jindagi:'ज़िंदगी',sath:'साथ',yaad:'याद',khwab:'ख़्वाब',ankhen:'आँखें',aankhen:'आँखें',hansi:'हँसी',muskaan:'मुस्कान',muskan:'मुस्कान',nadi:'नदी',samundar:'समुंदर',chidiya:'चिड़िया',titli:'तितली',parivaar:'परिवार',bachpan:'बचपन',sundar:'सुंदर',accha:'अच्छा'};
 function toHindi(w){
   if(!/^[A-Za-z]+$/.test(w))return w;
   if(HDICT[w.toLowerCase()])return HDICT[w.toLowerCase()];
@@ -2635,7 +2689,7 @@ var hinTyped=false;
 document.addEventListener('focusin',()=>{hinTyped=false});document.addEventListener('pointerdown',()=>{hinTyped=false},true);
 document.addEventListener('keydown',e=>{if(/^(Arrow|Home|End|Page)/.test(e.key))hinTyped=false},true);
 function hindiBefore(e){
-  const ta=e.target;if(!hindiOn()||!ta.classList||!ta.classList.contains('dtxt')||ta.readOnly)return false;
+  const ta=e.target;if(!hindiOn()||!ta.classList||!(ta.classList.contains('dtxt')||ta.classList.contains('hin-ok'))||ta.readOnly)return false;
   if(e.inputType==='insertText'&&e.data&&/^[A-Za-z]+$/.test(e.data)){hinTyped=true;return false}
   let ch=null;if(e.inputType==='insertLineBreak')ch='\n';else if(e.inputType==='insertText'&&e.data&&/^[ .,?!;:]$/.test(e.data))ch=e.data;
   if(ch===null||ta.selectionStart!==ta.selectionEnd)return false;
@@ -2652,7 +2706,7 @@ function toggleHindi(){P.hin=!P.hin;savePrefs();const b=$('tHin');if(b)b.setAttr
   const a=dActive&&$('dl-'+dActive);if(a)a.focus({preventScroll:true})}
 
 /* ---------- monthly backup to Google Drive ---------- */
-function backupObj(){return {app:'alok-diary',version:APP_VERSION,exported:new Date().toISOString(),diary:S.diary,memories:S.mem,prefs:S.prefs,lists:S.lists}}
+function backupObj(){return {app:'alok-diary',version:APP_VERSION,exported:new Date().toISOString(),diary:S.diary,memories:S.mem,writing:S.wr,prefs:S.prefs,lists:S.lists}}
 function bkDue(){return (G.bkM||'')!==today().slice(0,7)&&Object.keys(S.diary).some(dHas)}
 var bkBusy=false;
 async function driveBackup(manual){
@@ -2710,6 +2764,7 @@ function shopRow(x,L){
   return `<li class="srow${x.done?' done':''}${shopFresh.has(x.id)?' fresh':''}" data-sid="${x.id}">
     <button type="button" class="stick" data-stick="${x.id}" role="checkbox" aria-checked="${!!x.done}" aria-label="${x.done?'Mark '+esc(x.t)+' as not '+L.v:'Mark '+esc(x.t)+' as '+L.v}">${svg('<path d="m6.5 12.5 3.6 3.6 7.4-8"/>',16)}</button>
     <button type="button" class="sname" data-sedit-open="${x.id}" title="Edit"><span class="st">${esc(x.t)}</span>${x.q?`<span class="sqty">${esc(x.q)}</span>`:''}${x.done&&x.doneAt?`<small>${esc(L.dn)} ${esc(fmtDT(x.doneAt))}</small>`:''}</button>
+    <span class="sph">${(x.ph||[]).slice(0,3).map((p,i)=>`<button type="button" class="sthumb" data-sph="${x.id}" data-i="${i}" aria-label="Photo ${i+1} of ${esc(x.t)}"><img src="${p.th}" alt=""></button>`).join('')}${(x.ph||[]).length>3?`<button type="button" class="sthumb more" data-sph="${x.id}" data-i="3">+${x.ph.length-3}</button>`:''}${!(x.ph||[]).length?`<button type="button" class="scam" data-scam="${x.id}" aria-label="Add a photo of ${esc(x.t)}" title="Add a photo">${svg(UI.photo,18)}</button>`:''}</span>
     <button type="button" class="sdel" data-sdel="${x.id}" aria-label="Delete ${esc(x.t)}">×</button></li>`;
 }
 function shopView(){
@@ -2726,6 +2781,7 @@ function shopView(){
      <form class="sadd" id="sAddF" autocomplete="off">
        <input class="sin" id="sIn" list="sPast" maxlength="400" placeholder="${esc(L.ph)}" aria-label="New item">
        <input class="sq" id="sQ" maxlength="30" placeholder="${esc(L.q)}" aria-label="${esc(L.q)}, optional">
+       <button class="btn ghost scamadd" id="sCam" type="button" aria-label="Add an item from a photo" title="Add from a photo">${svg(UI.photo,20)}</button>
        <button class="btn" type="submit">Add</button>
        <datalist id="sPast">${past.map(t=>`<option value="${esc(t)}">`).join('')}</datalist>
      </form>
@@ -2754,6 +2810,9 @@ function shopView(){
     if(x.done&&(x.l||'shop')==='shop')toastAct(`“${x.t}” bought`,'Add cost',()=>{moneyTab='exp';expPrefill={n:x.t,c:'groc'};goView('money')},6000)});
   app.querySelectorAll('[data-sdel]').forEach(b=>b.onclick=()=>{const x=S.lists.shop[b.dataset.sdel];if(!x)return;ldel('shop',x.id);render(true);refreshCart();
     toastAct(`“${x.t}” deleted`,'Undo',()=>{delete x.deleted;lput('shop',x);render(true);refreshCart()})});
+  app.querySelectorAll('[data-sph]').forEach(b=>b.onclick=()=>openItemPhotos(b.dataset.sph,+b.dataset.i));
+  app.querySelectorAll('[data-scam]').forEach(b=>b.onclick=()=>pickItemPhotos(b.dataset.scam));
+  $('sCam').onclick=()=>{const t=si.value.trim();if(t){const before=new Set(listItems(curList).map(x=>x.id));shopAdd(t,$('sQ').value.trim(),curList);si.value='';$('sQ').value='';const nw=listItems(curList).find(x=>!before.has(x.id))||listItems(curList).find(x=>x.t.toLowerCase()===t.split(',')[0].trim().toLowerCase());render(true);if(nw)pickItemPhotos(nw.id)}else pickItemPhotos(null)};
   app.querySelectorAll('[data-sedit-open]').forEach(b=>b.onclick=()=>{shopEdit=b.dataset.seditOpen;render(true);const i=$('seT');if(i){i.focus();i.select()}});
   const ef=app.querySelector('[data-sedit]');if(ef){
     ef.onsubmit=e=>{e.preventDefault();const x=S.lists.shop[ef.dataset.sedit],t=$('seT').value.trim();if(!t){$('seT').focus();return}x.t=t.slice(0,80);x.q=$('seQ').value.trim().slice(0,30);lput('shop',x);shopEdit=null;render(true)};
@@ -2907,6 +2966,177 @@ function billNag(){
   if(lockMode!=='open')return;const due=billsDue(2);if(!due.length)return;
   let last='';try{last=localStorage.getItem('alok-billnag')||''}catch(e){}if(last===today())return;try{localStorage.setItem('alok-billnag',today())}catch(e){}
   const b=due[0];toastAct(due.length===1?`${b.n}${b.a?' ('+inr(b.a)+')':''}: ${billState(b).t.toLowerCase()}.`:`${due.length} bills are due within 2 days.`,'View',()=>{moneyTab='bills';goView('money')},9000);
+}
+
+/* ---------- photos on list items ----------
+   The full photo (reduced to at most 1600 px) is saved in its own row "img_<id>" of the account, uploaded from a
+   queue kept in IndexedDB so nothing is lost offline. Only a small preview is stored on the item itself.
+   Full photos are fetched only when opened, and then kept on the device. */
+const IMG_MAX=6;
+function imgScale(file,max,q){return new Promise(ok=>{let u;try{u=URL.createObjectURL(file)}catch(e){ok(null);return}const i=new Image();
+  i.onload=()=>{const s=Math.min(1,max/Math.max(i.naturalWidth,i.naturalHeight)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(i.naturalWidth*s));c.height=Math.max(1,Math.round(i.naturalHeight*s));
+    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.imageSmoothingQuality='high';g.drawImage(i,0,0,c.width,c.height);URL.revokeObjectURL(u);ok({d:c.toDataURL('image/jpeg',q),w:c.width,h:c.height})};
+  i.onerror=()=>{URL.revokeObjectURL(u);ok(null)};i.src=u})}
+async function imgPut(rec){try{const db=await idb();await new Promise((ok,no)=>{const tx=db.transaction('imgs','readwrite');tx.objectStore('imgs').put(rec);tx.oncomplete=ok;tx.onerror=()=>no(tx.error)});return true}catch(e){return false}}
+async function imgLocal(id){try{const db=await idb();return await new Promise(ok=>{const r=db.transaction('imgs').objectStore('imgs').get(id);r.onsuccess=()=>ok(r.result||null);r.onerror=()=>ok(null)})}catch(e){return null}}
+const imgMem=new Map();
+async function imgGet(id){
+  if(imgMem.has(id))return imgMem.get(id);
+  const l=await imgLocal(id);if(l&&l.d){imgMem.set(id,l.d);return l.d}
+  if(!sb||!me)return null;
+  try{const {data}=await withTimeout(sb.from('notes').select('data').eq('note_id','img_'+id).maybeSingle(),20000);const d=data&&data.data&&data.data.d;if(d){imgMem.set(id,d);imgPut({id,d,up:true,at:Date.now()})}return d||null}catch(e){return null}
+}
+var imgBusy=false;
+async function imgFlush(){
+  if(imgBusy||!col)return;imgBusy=true;
+  try{const db=await idb();const all=await new Promise(ok=>{const r=db.transaction('imgs').objectStore('imgs').getAll();r.onsuccess=()=>ok(r.result||[]);r.onerror=()=>ok([])});
+    for(const r of all){if(r.up)continue;
+      if(r.del){try{await col.doc('img_'+r.id).delete()}catch(e){if(e&&e.code==='unavailable')break;continue}
+        await new Promise(ok=>{const tx=db.transaction('imgs','readwrite');tx.objectStore('imgs').delete(r.id);tx.oncomplete=ok;tx.onerror=ok});continue}
+      try{await col.doc('img_'+r.id).set({d:r.d,w:r.w||0,h:r.h||0,at:r.at});r.up=true;await imgPut(r)}catch(e){break}}
+  }catch(e){}
+  imgBusy=false;
+}
+setInterval(()=>{if(col&&navigator.onLine&&!document.hidden)imgFlush()},30000);
+async function imgDelete(id){imgMem.delete(id);await imgPut({id,del:true,up:false,at:Date.now()});imgFlush()}
+/* pick photos and attach them to a list item (or to a new item when none is given) */
+function pickItemPhotos(itemId,onDone){
+  const f=document.createElement('input');f.type='file';f.accept='image/*';f.multiple=true;
+  f.onchange=async()=>{const files=[...f.files].filter(x=>/^image\//.test(x.type)||/\.(jpe?g|png|webp|heic|gif)$/i.test(x.name));if(!files.length){if(f.files.length)toast('Only photos can be added here.');return}
+    let x=itemId&&S.lists.shop[itemId];
+    if(!x){x={id:uid(),t:'Item from photo',q:'',done:false,l:curList==='shop'?undefined:curList,fromPhoto:1}}
+    const room=IMG_MAX-(x.ph||[]).length;if(room<=0){toast(`An item can have up to ${IMG_MAX} photos.`);return}
+    toast('Adding '+Math.min(room,files.length)+(files.length===1?' photo…':' photos…'));let n=0,bad=0;
+    for(const file of files.slice(0,room)){const big=await imgScale(file,1600,.82),th=await imgScale(file,200,.72);if(!big||!th){bad++;continue}
+      const id=uid(),ok=await imgPut({id,d:big.d,w:big.w,h:big.h,up:false,at:Date.now()});imgMem.set(id,big.d);if(!ok){bad++;}
+      x.ph=(x.ph||[]).concat([{id,th:th.d}]);n++}
+    if(n){lput('shop',x);shopFresh.add(x.id);render(true);refreshCart();imgFlush();toast(n+(n===1?' photo':' photos')+' added'+(x.fromPhoto&&!itemId?'. Tap the item to give it a name.':''))}
+    if(bad)toast(bad+(bad===1?' photo':' photos')+' could not be read.');if(onDone)onDone(x)};
+  f.click();
+}
+function openItemPhotos(itemId,i){
+  const x=S.lists.shop[itemId];if(!x||!(x.ph||[]).length)return;
+  let v=$('viewer');if(!v){v=document.createElement('div');v.id='viewer';v.className='viewer';v.setAttribute('role','dialog');v.setAttribute('aria-modal','true');document.body.appendChild(v)}
+  let cur=i,ask=false;const ret=document.activeElement;
+  const close=()=>{v.hidden=true;v.innerHTML='';document.documentElement.classList.remove('viewing');document.removeEventListener('keydown',key,true);if(ret&&ret.focus)try{ret.focus({preventScroll:true})}catch(e){}};
+  const key=e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}else if(e.key==='ArrowRight'){e.stopPropagation();step(1)}else if(e.key==='ArrowLeft'){e.stopPropagation();step(-1)}};
+  const step=k=>{const n=(x.ph||[]).length;if(n<2)return;cur=(cur+k+n)%n;ask=false;draw()};
+  const draw=async()=>{const ph=x.ph||[];if(!ph.length){close();return}if(cur>=ph.length)cur=ph.length-1;const p=ph[cur],n=ph.length,full=imgMem.get(p.id);
+    v.hidden=false;document.documentElement.classList.add('viewing');
+    v.innerHTML=`<div class="vw-top"><span class="vw-n">${cur+1} of ${n}</span><span class="vw-name">${esc(x.t)}${x.q?' · '+esc(x.q):''}</span><button class="vw-btn" id="ivX" type="button" aria-label="Close">${svg(UI.x,22)}</button></div>
+      <div class="vw-stage" id="ivStage">${n>1?`<button class="vw-nav l" id="ivPrev" type="button" aria-label="Previous photo">${svg(UI.left,26)}</button>`:''}<img id="ivImg" src="${full||p.th}" alt="Photo of ${esc(x.t)}" draggable="false">${n>1?`<button class="vw-nav r" id="ivNext" type="button" aria-label="Next photo">${svg(UI.right,26)}</button>`:''}</div>
+      <div class="vw-bar"><span class="vw-q" id="ivQ">${full?'Full photo':'Loading the full photo…'}</span><span class="row"><button class="btn sm ghost" id="ivAdd" type="button">Add another photo</button><button class="btn sm warn" id="ivRm" type="button">Remove…</button></span>
+      ${ask?`<div class="confirm" role="alertdialog"><span>Remove this photo from “${esc(x.t)}”?</span><span class="row"><button class="btn warn sm" id="ivRmY" type="button">Remove</button><button class="btn ghost sm" id="ivRmN" type="button">Keep it</button></span></div>`:''}</div>`;
+    $('ivX').onclick=close;if($('ivPrev'))$('ivPrev').onclick=()=>step(-1);if($('ivNext'))$('ivNext').onclick=()=>step(1);
+    $('ivRm').onclick=()=>{ask=true;draw()};if($('ivRmN'))$('ivRmN').onclick=()=>{ask=false;draw()};
+    if($('ivRmY'))$('ivRmY').onclick=()=>{const rm=x.ph.splice(cur,1)[0];lput('shop',x);imgDelete(rm.id);ask=false;render(true);toast('Photo removed');draw()};
+    $('ivAdd').onclick=()=>{close();pickItemPhotos(x.id)};
+    const st=$('ivStage');let sx=null;st.onpointerdown=e=>{if(!e.target.closest('button'))sx=e.clientX};st.onpointerup=e=>{if(sx===null)return;const dx=e.clientX-sx;sx=null;if(Math.abs(dx)>50)step(dx<0?1:-1)};st.onclick=e=>{if(e.target===st)close()};
+    $('ivX').focus({preventScroll:true});
+    if(!full){const d=await imgGet(p.id);if(v.hidden||(x.ph||[])[cur]!==p)return;const im=$('ivImg'),q=$('ivQ');if(d){if(im)im.src=d;if(q)q.textContent='Full photo'}else if(q)q.textContent=navigator.onLine?'The full photo is not available yet; showing the preview.':'Offline: showing the preview.'}};
+  document.addEventListener('keydown',key,true);draw();
+}
+
+/* ================= writing: journal, stories and poems =================
+   Each piece is its own synced row "wr_<id>"; the newest save wins, and removed pieces keep a "deleted" mark. */
+UI.pen='<path d="M4.5 19.5 9 18.6l9.7-9.7a2.2 2.2 0 0 0-3.1-3.1L5.9 15.5Z"/><path d="m14.3 7.2 3 3M4 21.5h16"/>';
+const WTYPES=[{k:'journal',n:'Journal',p:'Journal',c:'var(--k-meet)'},{k:'story',n:'Story',p:'Stories',c:'var(--k-travel)'},{k:'poem',n:'Poem',p:'Poems',c:'var(--k-bday)'}];
+const WPROMPTS={
+  journal:['What made you smile today, and why?','Describe a place where you feel completely calm.','Write a letter to yourself one year from now.','What is something new you learned this week?','Three things you are grateful for today, and why each one matters.','A moment from today you want to remember forever.','What would your perfect Sunday look like, hour by hour?','Who inspired you recently, and what did they do?','Something that worried you, and what helped.','If today had a title, what would it be?','What are you looking forward to this month?','Describe your room as if a stranger were seeing it for the first time.'],
+  story:['A girl finds a key that opens any door, but only once.','The school library has a secret room that appears only on rainy days.','A cat who understands every language decides to help someone.','You wake up and your shadow has gone missing.','A letter arrives addressed to you, dated fifty years in the future.','Two friends discover a map hidden inside an old book.','The last mango on the tree can grant one wish.','A small robot wants to learn how to tell jokes.','On the night of Diwali, every lamp in town goes out at once.','A new student arrives who seems to know what will happen tomorrow.','Your grandmother’s old trunk holds something that should not exist.','A kite flies away carrying a message.'],
+  poem:['The sound of rain on the roof','The moon as an old friend','Your favourite colour','A mother’s hands','The first morning of winter','A tree that has seen everything','What the river would say','Morning tea and quiet thoughts','Friendship','The view from a train window','A starry night on the terrace','Seasons changing']
+};
+var wrType='all',wrQ='',wrId=null,wrNew=null,wrAsk=false,wrPrompt=null,wrSaveT=null;
+function wtype(k){return WTYPES.find(t=>t.k===k)||WTYPES[0]}
+function wrAll(){return Object.values(S.wr).filter(w=>w&&!w.deleted)}
+function wrWords(t){return (String(t||'').match(/[\p{L}\p{N}’'-]+/gu)||[]).length}
+function wrCur(){return wrId&&S.wr[wrId]?S.wr[wrId]:wrNew}
+function wrTitle(w){if(w.title&&w.title.trim())return w.title.trim();const l=String(w.body||'').split('\n').find(x=>x.trim());return l?l.trim().slice(0,60)+(l.trim().length>60?'…':''):'Untitled '+wtype(w.type).n.toLowerCase()}
+function writingView(){
+  const all=wrAll(),q=wrQ.trim().toLowerCase();
+  const list=all.filter(w=>(wrType==='all'||(wrType==='fav'?w.fav:w.type===wrType))&&(!q||((w.title||'')+' '+(w.body||'')).toLowerCase().includes(q))).sort((a,b)=>(b._ts||0)-(a._ts||0));
+  const words=all.reduce((s,w)=>s+wrWords(w.body),0);
+  setApp(`<div class="dy">${topBar()}<div class="sheet writing">
+   <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button></div>
+   <h2>${svg(UI.pen,26)} Writing</h2>
+   <p class="note">${all.length?`${all.length} ${all.length===1?'piece':'pieces'} · ${words.toLocaleString('en-IN')} words written`:'A quiet place for journal entries, stories and poems.'}</p>
+   <div class="wnew">${WTYPES.map(t=>`<button type="button" class="wbtn" data-wnew="${t.k}" style="--wc:${t.c}"><span class="wplus">+</span><b>New ${t.n.toLowerCase()}</b></button>`).join('')}</div>
+   ${all.length?`<div class="ltabs" role="tablist">${[['all','All'],...WTYPES.map(t=>[t.k,t.p]),['fav','Favourites']].map(([k,n])=>{const c=k==='all'?all.length:k==='fav'?all.filter(w=>w.fav).length:all.filter(w=>w.type===k).length;return `<button type="button" role="tab" class="ltab${wrType===k?' on':''}" aria-selected="${wrType===k}" data-wt="${k}">${n}${c?`<span>${c}</span>`:''}</button>`}).join('')}</div>
+   <span class="search msearch"><span class="sic">${svg(UI.search,18)}</span><input id="wq" type="search" placeholder="Search your writing" value="${esc(wrQ)}" autocomplete="off" aria-label="Search your writing"></span>`:''}
+   ${list.length?`<div class="wcards">${list.map(w=>{const t=wtype(w.type),ex=String(w.body||'').split('\n').filter(x=>x.trim()).slice(w.title&&w.title.trim()?0:1,(w.title&&w.title.trim()?0:1)+(w.type==='poem'?3:2)).join(w.type==='poem'?'\n':' ');return `<button type="button" class="wcard t-${w.type}" data-wopen="${w.id}" style="--wc:${t.c}">
+     <span class="wmeta"><span class="wtag">${t.n}</span><span>${esc(fmtDMY(dFmt(new Date(w.cAt||w._ts))))}</span>${w.fav?`<span class="tl-fav">${svg(HEART,13).replace('fill="none"','fill="currentColor"')}</span>`:''}</span>
+     <b>${esc(wrTitle(w))}</b>${ex?`<span class="wex">${esc(ex.slice(0,240))}</span>`:''}<small>${wrWords(w.body)} words${w._ts&&w.cAt&&w._ts-w.cAt>60000?' · edited '+esc(fmtDT(w._ts)):''}</small></button>`}).join('')}</div>`
+     :all.length?'<p class="empty">Nothing matches.</p>':`<p class="empty">Nothing written yet. Choose “New journal”, “New story” or “New poem” to begin.</p>`}
+  </div><p class="credit">Crafted by Alok</p></div>`);
+  bindTop();$('vBack').onclick=goDiary;
+  app.querySelectorAll('[data-wnew]').forEach(b=>b.onclick=()=>wrStart(b.dataset.wnew));
+  app.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{wrType=b.dataset.wt;render()});
+  app.querySelectorAll('[data-wopen]').forEach(b=>b.onclick=()=>{wrId=b.dataset.wopen;wrNew=null;wrAsk=false;wrPrompt=null;goView('wedit')});
+  const wq=$('wq');if(wq)wq.oninput=()=>{wrQ=wq.value;render(true)};
+}
+function wrStart(type){wrId=null;wrNew={id:uid(),type,title:'',body:'',fav:false,font:type==='poem'?'lora':''};wrAsk=false;wrPrompt=null;goView('wedit')}
+/* a piece is saved only once something has been written in it */
+function wrSave(){
+  const w=wrCur();if(!w)return;
+  if(!S.wr[w.id]){if(!(w.title||'').trim()&&!(w.body||'').trim())return;w.cAt=Date.now();S.wr[w.id]=w;wrId=w.id;wrNew=null}
+  mark('wr:'+w.id);const s=$('wSaved');if(s)s.textContent='Saved · '+fmtTime(Date.now());
+}
+function wrStats(){const w=wrCur();if(!w)return;const n=wrWords(w.body),ch=String(w.body||'').length,lines=String(w.body||'').split('\n').filter(x=>x.trim()).length,m=Math.max(1,Math.round(n/200));
+  const el=$('wStats');if(el)el.textContent=`${n} ${n===1?'word':'words'} · ${ch} characters${w.type==='poem'?` · ${lines} ${lines===1?'line':'lines'}`:` · ${n?m+' min read':'—'}`}`}
+function wrGrow(t){t.style.height='auto';t.style.height=Math.max(t.scrollHeight,lineH()*12)+'px'}
+function weditView(){
+  const w=wrCur();if(!w){goView('writing');return}
+  const t=wtype(w.type),F=fontOf(w.font||P.font);loadFont(F);
+  setApp(`<div class="dy">${topBar()}<div class="sheet wedit t-${w.type}" style="--wc:${t.c}">
+   <div class="shead"><button class="back" id="vBack" type="button">← All writing</button><span class="wsaved" id="wSaved">${S.wr[w.id]?'Saved':'Starts saving when you write'}</span></div>
+   <div class="wbar">
+     <label class="tsel"><span class="sr">Type</span><select id="wType">${WTYPES.map(x=>`<option value="${x.k}" ${w.type===x.k?'selected':''}>${x.n}</option>`).join('')}</select></label>
+     <label class="tsel"><span class="sr">Font</span><select id="wFont">${FONTS.map(f=>`<option value="${f.k}" ${(w.font||P.font)===f.k?'selected':''}>${esc(f.n)}</option>`).join('')}</select></label>
+     <button type="button" class="tb wide hin" id="wHin" aria-pressed="${!!P.hin}" title="Hindi typing"><span class="dev">अ</span><span>Hindi</span></button>
+     <button type="button" class="tb" id="wFav" aria-pressed="${!!w.fav}" aria-label="${w.fav?'Remove from favourites':'Add to favourites'}">${svg(HEART,17).replace('fill="none"',w.fav?'fill="currentColor"':'fill="none"')}</button>
+     <button type="button" class="tb wide" id="wIdea">${svg('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V17h5v-1.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/>',17)}<span>Need an idea?</span></button>
+     <span class="grow"></span>
+     <button type="button" class="tb" id="wMore" aria-haspopup="menu" aria-label="More actions">${svg('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',18)}</button>
+   </div>
+   ${wrPrompt?`<div class="wprompt"><span class="eyebrow">${t.n} idea</span><p>${esc(wrPrompt)}</p><span class="row"><button class="btn sm" id="wpUse" type="button">Use as the title</button><button class="btn ghost sm" id="wpNext" type="button">Another idea</button><button class="btn ghost sm" id="wpX" type="button">Close</button></span></div>`:''}
+   ${wrAsk?`<div class="confirm" role="alertdialog"><span>Delete “${esc(wrTitle(w))}”?</span><span class="row"><button class="btn warn sm" id="wDelY" type="button">Delete</button><button class="btn ghost sm" id="wDelN" type="button">Keep it</button></span></div>`:''}
+   <div class="wpaper" style="--wf:${F.f};--ws:${F.s}">
+     ${w.type==='journal'?`<p class="wdate">${esc(dLong(dFmt(new Date(w.cAt||Date.now()))))}</p>`:''}
+     <input id="wTitle" class="wtitle hin-ok" maxlength="120" placeholder="${w.type==='poem'?'Title of the poem':w.type==='story'?'Title of the story':'Title (optional)'}" value="${esc(w.title||'')}" aria-label="Title">
+     <textarea id="wBody" class="wbody hin-ok" placeholder="${w.type==='poem'?'Write your poem here. Each line stays as you write it; leave an empty line between verses.':w.type==='story'?'Once upon a time…':'Dear diary…'}" aria-label="${t.n} text">${esc(w.body||'')}</textarea>
+   </div>
+   <p class="note" id="wStats"></p>
+  </div><p class="credit">Crafted by Alok</p></div>`);
+  bindTop();
+  const back=()=>{clearTimeout(wrSaveT);wrSave();goView('writing')};$('vBack').onclick=back;
+  const ti=$('wTitle'),bo=$('wBody');wrGrow(bo);wrStats();
+  const changed=()=>{w.title=ti.value;w.body=bo.value;wrGrow(bo);wrStats();const s=$('wSaved');if(s)s.textContent='Saving…';clearTimeout(wrSaveT);wrSaveT=setTimeout(wrSave,700)};
+  ti.oninput=changed;bo.oninput=changed;bo.addEventListener('beforeinput',e=>{hindiBefore(e)});ti.addEventListener('beforeinput',e=>{hindiBefore(e)});
+  ti.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();bo.focus()}};
+  if(!S.wr[w.id])(w.title?bo:ti).focus();
+  $('wType').onchange=e=>{w.type=e.target.value;if(S.wr[w.id])wrSave();app.__html='';render(true)};
+  $('wFont').onchange=e=>{w.font=e.target.value;if(S.wr[w.id])wrSave();app.__html='';render(true)};
+  $('wHin').onclick=()=>{toggleHindi();const b=$('wHin');if(b)b.setAttribute('aria-pressed',!!P.hin);bo.focus()};
+  $('wFav').onclick=()=>{w.fav=!w.fav;if(S.wr[w.id])wrSave();app.__html='';render(true);toast(w.fav?'Added to favourites':'Removed from favourites')};
+  const pick=()=>{const l=WPROMPTS[w.type]||WPROMPTS.journal;let p;do{p=l[Math.floor(Math.random()*l.length)]}while(l.length>1&&p===wrPrompt);wrPrompt=p;app.__html='';render(true)};
+  $('wIdea').onclick=pick;
+  if($('wpNext'))$('wpNext').onclick=pick;if($('wpX'))$('wpX').onclick=()=>{wrPrompt=null;app.__html='';render(true)};
+  if($('wpUse'))$('wpUse').onclick=()=>{w.title=wrPrompt;wrPrompt=null;wrSave();app.__html='';render(true);const b=$('wBody');if(b)b.focus()};
+  $('wMore').onclick=e=>openMenu(e.currentTarget,`<button type="button" class="mopt" data-wa="copy">Copy text</button><button type="button" class="mopt" data-wa="txt">Download as a text file</button><button type="button" class="mopt" data-wa="print">Print or save as PDF</button><button type="button" class="mopt" data-wa="share">Share</button><button type="button" class="mopt" data-wa="del">Delete…</button>`,el=>{
+    el.querySelectorAll('[data-wa]').forEach(b=>b.onclick=async()=>{closeMenu();const a=b.dataset.wa,txt=(w.title?w.title+'\n\n':'')+(w.body||'');
+      if(a==='copy'){try{await navigator.clipboard.writeText(txt);toast('Copied')}catch(x){toast('Copying is not available here.')}}
+      else if(a==='txt'){saveFile(txt,(wrTitle(w).replace(/[\\/:*?"<>|]+/g,'').slice(0,40)||'writing')+'.txt','text/plain;charset=utf-8');toast('Text file downloaded')}
+      else if(a==='print')wrPrint(w);
+      else if(a==='share'){if(navigator.share){try{await navigator.share({title:wrTitle(w),text:txt})}catch(x){}}else{try{await navigator.clipboard.writeText(txt);toast('Sharing is not available here; the text was copied instead.')}catch(x){}}}
+      else if(a==='del'){if(!S.wr[w.id]){wrNew=null;goView('writing');return}wrAsk=true;app.__html='';render(true)}})});
+  if($('wDelN'))$('wDelN').onclick=()=>{wrAsk=false;app.__html='';render(true)};
+  if($('wDelY'))$('wDelY').onclick=()=>{const x=S.wr[w.id];x.deleted=true;mark('wr:'+x.id);wrAsk=false;wrId=null;goView('writing');toastAct('“'+wrTitle(x)+'” deleted','Undo',()=>{delete x.deleted;mark('wr:'+x.id);render()})};
+}
+function wrPrint(w){
+  let pa=$('printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa)}
+  const F=fontOf(w.font||P.font);
+  pa.innerHTML=`<section class="pr-page pr-w ${w.type==='poem'?'pr-poem':''}" style="font-family:${F.f}"><p class="pr-meta">${esc(wtype(w.type).n)} · ${esc(fmtDMY(dFmt(new Date(w.cAt||Date.now()))))}</p><h2>${esc(wrTitle(w))}</h2>${esc(w.body||'').split('\n').map(l=>`<p>${l||'&nbsp;'}</p>`).join('')}<p class="pr-foot">— ${esc(myName()||'')}</p></section>`;
+  document.documentElement.classList.add('printing');setTimeout(()=>{window.print();setTimeout(()=>document.documentElement.classList.remove('printing'),500)},60);
 }
 
 /* ================= memory timeline =================
@@ -3133,7 +3363,7 @@ function exportPDF(from,to){
 }
 
 /* ---------- automatic local backups (IndexedDB, one per day, last 14 kept) ---------- */
-function idb(){return new Promise((ok,no)=>{try{const r=indexedDB.open('alok-diary',2);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('snaps'))db.createObjectStore('snaps',{keyPath:'day'});if(!db.objectStoreNames.contains('pending'))db.createObjectStore('pending',{keyPath:'id'})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})}
+function idb(){return new Promise((ok,no)=>{try{const r=indexedDB.open('alok-diary',3);r.onupgradeneeded=()=>{const db=r.result;if(!db.objectStoreNames.contains('imgs'))db.createObjectStore('imgs',{keyPath:'id'});if(!db.objectStoreNames.contains('snaps'))db.createObjectStore('snaps',{keyPath:'day'});if(!db.objectStoreNames.contains('pending'))db.createObjectStore('pending',{keyPath:'id'})};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}catch(e){no(e)}})}
 async function autoSnapshot(){
   try{const n=Object.keys(S.diary).filter(dHas).length;if(!n)return;const db=await idb(),day=today();
     await new Promise((ok,no)=>{const tx=db.transaction('snaps','readwrite'),st=tx.objectStore('snaps');st.put({day,at:Date.now(),pages:n,diary:JSON.parse(JSON.stringify(S.diary)),mem:JSON.parse(JSON.stringify(S.mem))});
@@ -3148,7 +3378,7 @@ async function signOut(){
   if(chan)sb.removeChannel(chan);chan=null;col=null;
   try{await sb.auth.signOut()}catch(e){}me=null;pinRec=null;dirty.clear();
   ['sb-pin','sb-dirty',KEY,GKEY,'second-brain-v2','diary-name'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  S={diary:{},mem:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
+  S={diary:{},mem:{},wr:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
   view='diary';try{history.replaceState({v:'diary'},'',location.pathname)}catch(e){}diaryDate=today();dq='';mSearch=false;app.__html='';render();signupMode=false;lock('login');setSync('local');
 }
 async function updateApp(){
@@ -3172,12 +3402,15 @@ async function backupXLSX(from,to){
   if(rows.length){const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:12},{wch:11},{wch:70},{wch:11},{wch:14},{wch:11},{wch:22},{wch:11}];XLSX.utils.book_append_sheet(wb,ws,'Diary')}
   const xrows=lall('exp').filter(x=>x.d>=from&&x.d<=to).sort((a,b)=>a.d<b.d?-1:1).map(x=>({Date:x.d,Category:xcat(x.c).n,'For what':x.n||'',Amount:+x.a}));
   if(xrows.length){const ws=XLSX.utils.json_to_sheet(xrows);ws['!cols']=[{wch:12},{wch:22},{wch:40},{wch:12}];XLSX.utils.book_append_sheet(wb,ws,'Expenses')}
+  const wrows=wrAll().filter(w=>{const d=dFmt(new Date(w.cAt||w._ts));return d>=from&&d<=to}).sort((a,b)=>(a.cAt||0)-(b.cAt||0)).map(w=>({Date:dFmt(new Date(w.cAt||w._ts)),Type:wtype(w.type).n,Title:wrTitle(w),Text:w.body||'',Words:wrWords(w.body)}));
+  if(wrows.length){const ws=XLSX.utils.json_to_sheet(wrows);ws['!cols']=[{wch:12},{wch:10},{wch:36},{wch:90},{wch:8}];XLSX.utils.book_append_sheet(wb,ws,'Writing')}
   if(mrows.length){const ws=XLSX.utils.json_to_sheet(mrows);ws['!cols']=[{wch:12},{wch:40},{wch:22},{wch:70},{wch:10},{wch:50}];XLSX.utils.book_append_sheet(wb,ws,'Memories')}
   XLSX.writeFile(wb,'alok-diary-'+(from==='0000'?'all':from+'-to-'+to)+'.xlsx');toast('Excel file downloaded');
 }
-function restorePick(){const f=document.createElement('input');f.type='file';f.accept='.json,application/json';f.onchange=async()=>{try{const j=JSON.parse(await f.files[0].text());const d=j.diary||(j.data&&j.data.diary);if(!d||typeof d!=='object')throw 0;restoreData=d;restoreMem=j.memories&&typeof j.memories==='object'?j.memories:null;restorePrefs=j.prefs&&j.prefs.qfav?j.prefs:null;restoreLists=j.lists&&typeof j.lists==='object'?j.lists:null;restoreFrom='the selected file';render();toast('Backup loaded. Please confirm the restore.')}catch(e){toast('That file is not a diary backup.')}};f.click()}
+function restorePick(){const f=document.createElement('input');f.type='file';f.accept='.json,application/json';f.onchange=async()=>{try{const j=JSON.parse(await f.files[0].text());const d=j.diary||(j.data&&j.data.diary);if(!d||typeof d!=='object')throw 0;restoreData=d;restoreMem=j.memories&&typeof j.memories==='object'?j.memories:null;restorePrefs=j.prefs&&j.prefs.qfav?j.prefs:null;restoreLists=j.lists&&typeof j.lists==='object'?j.lists:null;restoreWr=j.writing&&typeof j.writing==='object'?j.writing:null;restoreFrom='the selected file';render();toast('Backup loaded. Please confirm the restore.')}catch(e){toast('That file is not a diary backup.')}};f.click()}
 function restoreNow(){if(!restoreData)return;restoreFrom='';const now=Date.now();S.diary=restoreData;Object.values(S.diary).forEach(p=>{p._ts=now;(p.items||[]).forEach(i=>i.u=now)});restoreData=null;
   /* memories in the backup are added back; memories made after the backup are kept */
+  if(restoreWr){Object.values(restoreWr).forEach(w=>{if(w&&w.id){S.wr[w.id]=Object.assign({},w,{_ts:now});dirty.add('wr:'+w.id)}})}restoreWr=null;
   if(restoreMem){Object.values(restoreMem).forEach(m=>{if(m&&m.id){S.mem[m.id]=Object.assign({},m,{_ts:now});dirty.add('mem:'+m.id)}})}
   if(restorePrefs){for(const k in restorePrefs.qfav){const f=restorePrefs.qfav[k];if(!S.prefs.qfav[k]&&f){S.prefs.qfav[k]=Object.assign({},f,{at:now})}}S.prefs._ts=now;dirty.add('prefs')}
   if(restoreLists){LCOLS.forEach(c=>{const r=restoreLists[c]||{};for(const id in r){if(!S.lists[c][id]&&r[id])S.lists[c][id]=Object.assign({},r[id],{at:now})}});dirty.add('lists')}
