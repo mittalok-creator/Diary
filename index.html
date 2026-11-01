@@ -847,7 +847,7 @@ html.viewing{overflow:hidden}
 .wbtn{display:flex;align-items:center;gap:10px;border:1px solid color-mix(in srgb,var(--wc) 40%,var(--line));background:color-mix(in srgb,var(--wc) 8%,var(--ivory));border-radius:12px;padding:12px 14px;font-family:var(--sans);font-size:14px;color:var(--ink);text-align:left}
 .wbtn .wplus{width:28px;height:28px;border-radius:50%;background:var(--wc);color:#fff;display:grid;place-items:center;font-size:18px;line-height:1;flex:0 0 auto}
 .wbtn b{font-weight:600}
-@media (max-width:620px){.wnew{grid-template-columns:1fr}}
+@media (max-width:620px){.wnew{grid-template-columns:repeat(3,1fr);gap:8px}.wbtn{flex-direction:column;align-items:center;text-align:center;gap:6px;padding:10px 6px}.wbtn b{font-size:12.5px}}
 .wcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .wcard{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;gap:6px;padding:14px 14px 12px;background:var(--ivory);border:1px solid var(--line);border-top:4px solid var(--wc);border-radius:6px;box-shadow:0 6px 14px -12px var(--shadow);min-height:150px;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 27px,color-mix(in srgb,var(--rule) 60%,transparent) 27px,color-mix(in srgb,var(--rule) 60%,transparent) 28px)}
 .wcard:hover{transform:translateY(-1px);box-shadow:0 10px 18px -12px var(--shadow)}
@@ -878,6 +878,66 @@ html.viewing{overflow:hidden}
 @media (max-width:520px){.wpaper{padding-left:50px}.wpaper::before{left:38px}.wbar{gap:4px}.wbar .tb.wide span:not(.dev){display:none}.wbar .tsel{flex:0 1 auto;min-width:0}.wbar select{max-width:118px;padding:6px 4px}.wbar .grow{display:none}}
 #printArea .pr-w p{margin:0 0 .3em;line-height:1.6}
 #printArea .pr-poem{text-align:center;font-style:italic}
+
+/* 4.12 · writing extras */
+.wstreak{font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ok);border:1px solid color-mix(in srgb,var(--ok) 50%,transparent);border-radius:999px;padding:3px 10px}
+.wdaily{border-left:4px solid var(--wc);background:color-mix(in srgb,var(--wc) 7%,var(--ivory));border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.wdaily .eyebrow{margin:0;color:var(--wc)}.wdaily p{margin:0;font-size:20px;font-style:italic;line-height:1.35}
+.wmain{border-bottom:1px solid var(--rule);padding-bottom:8px}
+.wfilters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fchip .cdot{width:9px;height:9px;border-radius:50%;background:var(--cc);display:inline-block}
+.fchip.add{border-style:dashed;color:var(--muted)}
+.wbookbar{display:flex;flex-direction:column;gap:6px;border:1px dashed var(--accent);border-radius:10px;padding:10px 12px;font-family:var(--sans);font-size:13px}
+.wbookbar .row{display:flex;gap:8px;flex-wrap:wrap}
+.wbookbar input{flex:1 1 200px;border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-family:var(--serif);font-size:16px;background:var(--sheet);color:var(--ink)}
+.wcard{position:relative}
+.wcard.sel{outline:2px solid var(--accent);outline-offset:1px}
+.wchk{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:6px;border:1.6px solid var(--accent);display:grid;place-items:center;font-family:var(--sans);font-weight:700;color:#fff;background:transparent}
+.wcard.sel .wchk{background:var(--accent)}
+.idlist,.wblist,.verlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.idlist li{border:1px solid var(--line);border-left:3px solid var(--k-hol);border-radius:8px;padding:10px 12px;background:var(--ivory);display:flex;flex-direction:column;gap:4px}
+.idlist p{margin:0;font-size:18px;white-space:pre-wrap;overflow-wrap:anywhere}.idlist small{font-family:var(--sans);font-size:11.5px;color:var(--muted)}
+.idlist .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.xform textarea{border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-family:var(--serif);font-size:17px;background:var(--ivory);color:var(--ink);resize:vertical}
+.xform .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.xgrid.wbg{grid-template-columns:1fr 2fr}
+@media (max-width:620px){.xgrid.wbg{grid-template-columns:1fr}}
+.wblist li{display:grid;grid-template-columns:minmax(90px,auto) 1fr 32px;gap:12px;align-items:baseline;border-bottom:1px dashed var(--line);padding:6px 2px}
+.wblist b{font-size:19px;font-weight:600}.wblist span{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.wpanel{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--sheet) 60%,var(--ivory));display:flex;flex-direction:column;gap:6px}
+.wpanel .eyebrow{margin:0}.wpanel .row{display:flex;gap:14px}
+.wchips{display:flex;gap:6px;flex-wrap:wrap}
+.verlist li{display:flex;flex-direction:column;gap:6px;border-bottom:1px dashed var(--line);padding:6px 0;font-family:var(--sans);font-size:13px}
+.verlist .row{display:flex;gap:6px}
+.verpre{white-space:pre-wrap;font-family:var(--serif);font-size:15px;background:var(--ivory);border:1px solid var(--line);border-radius:8px;padding:8px 10px;max-height:240px;overflow:auto;margin:0}
+.wbar .tb.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.wbar select{max-width:170px}
+.wjour{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.wjour select{background:var(--sheet);border:1px solid var(--line);border-radius:10px;padding:6px 8px;font-family:var(--sans);font-size:13.5px;color:var(--ink)}
+.wcnew{margin:0}
+.wchaps{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 0 4px}
+.wchead{display:flex;align-items:center;gap:10px}
+.wcht{flex:1;border:0;border-bottom:1px dashed var(--rule);background:transparent;font-family:var(--wf);font-size:calc(21px * var(--ws));font-weight:600;color:var(--wc);padding:4px 0;outline:none}
+html.wfocus .side,html.wfocus .topbar,html.wfocus .quote,html.wfocus .bnav,html.wfocus .credit,html.wfocus .wedit .wbar,html.wfocus .wedit .shead,html.wfocus .wedit .wjour,html.wfocus .wedit .wchaps{display:none!important}
+html.wfocus .shell{grid-template-columns:minmax(0,1fr)!important;max-width:900px}
+html.wfocus .wedit{box-shadow:none;padding-bottom:90px}
+.wfbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--desk);border-radius:14px;padding:8px 10px 8px 12px;box-shadow:0 10px 30px -10px rgba(0,0,0,.5);font-family:var(--sans);font-size:12.5px;width:min(620px,calc(100vw - 24px));box-sizing:border-box}
+.wfbar select{background:transparent;color:inherit;border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:4px 6px;font-family:inherit;font-size:12.5px}
+.wfbar select option{color:#222}
+.wftrack{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden;min-width:40px}.wftrack i{display:block;height:100%;width:0;background:var(--ok);transition:width .4s}
+.wflab{white-space:nowrap}
+.wfbar .btn{background:var(--desk);color:var(--ink)}
+@media (max-width:520px){.wflab{display:none}}
+@media print{
+  #printArea .pr-break{break-before:page}
+  #printArea .pr-cover{height:85vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:3px double #888;margin:4vh 6vw;padding:20px}
+  #printArea .pr-cover h1{font-size:40px;margin:10px 0}
+  #printArea .pr-ctype{font-family:Arial,sans-serif;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:#777;margin:0}
+  #printArea .pr-cby{font-size:20px;font-style:italic;margin:6px 0}#printArea .pr-cyr{font-family:Arial,sans-serif;font-size:12px;color:#777}
+  #printArea .pr-toc ol{padding-left:22px;font-size:15px;line-height:2}#printArea .pr-toc small{font-family:Arial,sans-serif;color:#888;margin-left:10px;font-size:11px}
+  #printArea .pr-w h2{font-size:24px;margin:4px 0 14px}#printArea .pr-w h3{font-size:18px;margin:16px 0 8px}
+  @page{margin:16mm 16mm 20mm;@bottom-center{content:counter(page);font-family:Georgia,serif;font-size:10pt;color:#777}}
+}
 </style>
 </head>
 <body>
@@ -932,14 +992,14 @@ function diaryTitle(){const n=myName();return n?n+'’s Diary':'My Diary'}
 function setMyName(n,sync){n=String(n||'').trim().replace(/\s+/g,' ').slice(0,30);if(!n)return false;S.prefs.name=n;S.prefs.nameAt=Date.now();try{localStorage.setItem('diary-name',n)}catch(e){}if(sync!==false)mark('prefs');document.title=diaryTitle();return true}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.11';
+const APP_VERSION='4.12';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
 var S=null;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S){let old=null;try{old=JSON.parse(localStorage.getItem('second-brain-v2'))}catch(e){}S={diary:(old&&old.diary)||{}}}
-S.diary=S.diary||{};S.mem=S.mem||{};S.wr=S.wr||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl','shop','ulist','exp','bills'].forEach(k=>S.lists[k]=S.lists[k]||{});
+S.diary=S.diary||{};S.mem=S.mem||{};S.wr=S.wr||{};S.prefs=S.prefs||{};S.prefs.qfav=S.prefs.qfav||{};S.lists=S.lists||{};['pins','rules','people','tpl','shop','ulist','exp','bills','ideas','words','wcoll'].forEach(k=>S.lists[k]=S.lists[k]||{});
 var G=null;try{G=JSON.parse(localStorage.getItem(GKEY))}catch(e){}
 G=G||{connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};G.off=G.off||[];G.cals=G.cals||[];G.events=G.events||[];
 let saveT;
@@ -1024,6 +1084,7 @@ function applyRow(name,data){
     const qf=S.prefs.qfav,rq=data.qfav||{};let ch=false;
     for(const k in rq){if(!qf[k]||(rq[k].at||0)>(qf[k].at||0)){qf[k]=rq[k];ch=true}}
     if(Object.keys(qf).some(k=>!rq[k]||(qf[k].at||0)>(rq[k].at||0))&&!dirty.has('prefs')){dirty.add('prefs');keepDirty();clearTimeout(flushT);flushT=setTimeout(flush,800)}
+    {const wd=S.prefs.wdays=S.prefs.wdays||{},rd=data.wdays||{};for(const k in rd)if(!wd[k]){wd[k]=1;ch=true}if(Object.keys(wd).some(k=>!rd[k])&&!dirty.has('prefs')){dirty.add('prefs');keepDirty();clearTimeout(flushT);flushT=setTimeout(flush,800)}}
     if((data.nameAt||0)>(S.prefs.nameAt||0)&&data.name){S.prefs.name=data.name;S.prefs.nameAt=data.nameAt;try{localStorage.setItem('diary-name',data.name)}catch(e){}ch=true}
     else if((S.prefs.nameAt||0)>(data.nameAt||0)&&S.prefs.name&&!dirty.has('prefs')){dirty.add('prefs');keepDirty();clearTimeout(flushT);flushT=setTimeout(flush,800)}
     S.prefs._ts=Math.max(S.prefs._ts||0,data._ts||0);return ch;
@@ -1154,7 +1215,7 @@ async function onSignedIn(user,viaPassword){
   if(me&&me.id===user.id&&col){if(viaPassword&&pinRec)unlock();return}
   const keepOpen=lockMode==='open'&&me&&me.id===user.id;
   const owner=localStorage.getItem(OWNKEY);
-  if(owner&&owner!==user.id){['diary-name','sb-bio','alok-bknag','alok-billnag','sb-active'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});dirty.clear();keepDirty();S={diary:{},mem:{},wr:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
+  if(owner&&owner!==user.id){['diary-name','sb-bio','alok-bknag','alok-billnag','sb-active'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});dirty.clear();keepDirty();S={diary:{},mem:{},wr:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{},ideas:{},words:{},wcoll:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
   try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
   me=user;startSync().then(()=>{if(!S.prefs.name){let n='';try{n=localStorage.getItem('diary-pendname')||''}catch(e){}n=n||(user.user_metadata&&user.user_metadata.name)||'';if(n){setMyName(n);render(true)}}try{localStorage.removeItem('diary-pendname')}catch(e){}if(S.prefs.name){try{localStorage.setItem('diary-name',S.prefs.name)}catch(e){}}document.title=diaryTitle();if(lockMode!=='open'&&!lockEl.hidden)drawLock()});
   if(!pinRec){try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}}
@@ -1345,7 +1406,7 @@ function render(preserve){
   tickClock();
 }
 function goView(v){
-  dFlushSoon();if(view==='wedit'&&v!=='wedit'){clearTimeout(wrSaveT);wrSave()}closeDrawer();closeMood();
+  dFlushSoon();if(view==='wedit'&&v!=='wedit'){clearTimeout(wrSaveT);wrSave();wrFocusOff()}closeDrawer();closeMood();
   if(v===view){if(v==='diary'){dq='';render()}return}
   if(v==='diary'){if(history.state&&history.state.v&&history.state.v!=='diary')history.back();else{view='diary';app.__html='';render()}return}
   if(view==='diary')history.pushState({v},'','#'+v);else history.replaceState({v},'','#'+v);
@@ -1927,7 +1988,7 @@ function dSearchHTML(){
     Object.keys(S.diary).sort().reverse().forEach(d=>{const p=S.diary[d];(p.items||[]).forEach(l=>{if(l.t&&l.t.toLowerCase().includes(ql))hits.push({d,t:l.t,done:l.done})});
       (p.tags||[]).forEach(t=>{if(t.includes(ql))hits.push({d,t:'#'+t,tag:1})});(p.att||[]).forEach(a=>{if(a.name.toLowerCase().includes(ql))hits.push({d,t:a.name,file:1})})});
     G.events.forEach(e=>{if(evTitle(e).toLowerCase().includes(ql)&&!G.off.includes(e.c))hits.push({d:e.d,t:evTitle(e),ev:e.k})});
-    wrAll().forEach(w=>{if(((w.title||'')+' '+(w.body||'')).toLowerCase().includes(ql))hits.push({d:dFmt(new Date(w.cAt||w._ts)),t:wrTitle(w),wr:w.id,wt:wtype(w.type).n})});
+    wrAll().forEach(w=>{if(((w.title||'')+' '+wrText(w)).toLowerCase().includes(ql))hits.push({d:dFmt(new Date(w.cAt||w._ts)),t:wrTitle(w),wr:w.id,wt:wtype(w.type).n})});
     Object.values(S.mem).forEach(m=>{if(m&&!m.deleted&&m.date&&((m.title||'')+' '+(m.desc||'')).toLowerCase().includes(ql))hits.push({d:m.date,t:m.title||'(untitled)',mem:m.id})});
     const dm=raw.match(/^(\d{1,2})[\/\-. ](\d{1,2})(?:[\/\-. ](\d{2,4}))?$/);if(dm){let y=dm[3]?+dm[3]:dParse(today()).getFullYear();if(y<100)y+=2000;const s=y+'-'+pad(+dm[2])+'-'+pad(+dm[1]);if(!isNaN(dParse(s)))hits.unshift({d:s,t:'Open the page for '+dLong(s),go:1})}
   }
@@ -2504,7 +2565,7 @@ function statsView(){
 /* ================= synced lists: pinned notes, repeating tasks, people, page templates =================
    Stored together in one row named "lists". Each entry merges on its own by its "at" time, so edits made
    on two devices do not overwrite each other. Removed entries keep a "deleted" mark. */
-const LCOLS=['pins','rules','people','tpl','shop','ulist','exp','bills'];
+const LCOLS=['pins','rules','people','tpl','shop','ulist','exp','bills','ideas','words','wcoll'];
 function lall(c){return Object.values(S.lists[c]||{}).filter(x=>x&&!x.deleted).sort((a,b)=>(a.cAt||0)-(b.cAt||0))}
 function lput(c,o){const now=Date.now();o.at=now;o.cAt=o.cAt||now;S.lists[c][o.id]=o;mark('lists');return o}
 function ldel(c,id){const x=S.lists[c][id];if(!x)return;x.deleted=true;x.at=Date.now();mark('lists')}
@@ -3038,106 +3099,250 @@ function openItemPhotos(itemId,i){
 }
 
 /* ================= writing: journal, stories and poems =================
-   Each piece is its own synced row "wr_<id>"; the newest save wins, and removed pieces keep a "deleted" mark. */
+   Each piece is its own synced row "wr_<id>"; the newest save wins, and removed pieces keep a "deleted" mark.
+   Ideas, the word bank and collections are kept in the synced "lists" row; writing days in the prefs row. */
 UI.pen='<path d="M4.5 19.5 9 18.6l9.7-9.7a2.2 2.2 0 0 0-3.1-3.1L5.9 15.5Z"/><path d="m14.3 7.2 3 3M4 21.5h16"/>';
+UI.bulb='<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V17h5v-1.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/>';
 const WTYPES=[{k:'journal',n:'Journal',p:'Journal',c:'var(--k-meet)'},{k:'story',n:'Story',p:'Stories',c:'var(--k-travel)'},{k:'poem',n:'Poem',p:'Poems',c:'var(--k-bday)'}];
+const WMOODS=[['happy','Happy'],['calm','Calm'],['grateful','Grateful'],['excited','Excited'],['thoughtful','Thoughtful'],['sad','Sad'],['worried','Worried'],['tired','Tired']];
+const WCOLS=['#b8426b','#4a6fa5','#3d8a4f','#b07a12','#7d4a8f','#2f7a7a','#b5473a','#6d5c45'];
 const WPROMPTS={
-  journal:['What made you smile today, and why?','Describe a place where you feel completely calm.','Write a letter to yourself one year from now.','What is something new you learned this week?','Three things you are grateful for today, and why each one matters.','A moment from today you want to remember forever.','What would your perfect Sunday look like, hour by hour?','Who inspired you recently, and what did they do?','Something that worried you, and what helped.','If today had a title, what would it be?','What are you looking forward to this month?','Describe your room as if a stranger were seeing it for the first time.'],
-  story:['A girl finds a key that opens any door, but only once.','The school library has a secret room that appears only on rainy days.','A cat who understands every language decides to help someone.','You wake up and your shadow has gone missing.','A letter arrives addressed to you, dated fifty years in the future.','Two friends discover a map hidden inside an old book.','The last mango on the tree can grant one wish.','A small robot wants to learn how to tell jokes.','On the night of Diwali, every lamp in town goes out at once.','A new student arrives who seems to know what will happen tomorrow.','Your grandmother’s old trunk holds something that should not exist.','A kite flies away carrying a message.'],
-  poem:['The sound of rain on the roof','The moon as an old friend','Your favourite colour','A mother’s hands','The first morning of winter','A tree that has seen everything','What the river would say','Morning tea and quiet thoughts','Friendship','The view from a train window','A starry night on the terrace','Seasons changing']
+  journal:['What made you smile today, and why?','Describe a place where you feel completely calm.','Write a letter to yourself one year from now.','What is something new you learned this week?','Three things you are grateful for today, and why each one matters.','A moment from today you want to remember forever.','What would your perfect Sunday look like, hour by hour?','Who inspired you recently, and what did they do?','Something that worried you, and what helped.','If today had a title, what would it be?','What are you looking forward to this month?','Describe your room as if a stranger were seeing it for the first time.','What is a small thing you are proud of this week?','Write about a smell that brings back a memory.','What would you tell your younger self?','Your favourite meal and the people you like to share it with.','A song that matches your mood today, and why.','What did you notice on the way to school today?','Write about a time you were brave.','If you could learn any skill instantly, what would it be?','Describe the best day of the last holidays.','What makes a good friend?','Something you changed your mind about.','Write about a teacher you will remember.','आज का सबसे अच्छा पल कौन-सा था?','आज आपने किसकी मदद की, या किसने आपकी मदद की?','अपने घर की सबसे प्यारी जगह के बारे में लिखिए।','अगर आज एक दिन के लिए कुछ भी बन सकतीं, तो क्या बनतीं?'],
+  story:['A girl finds a key that opens any door, but only once.','The school library has a secret room that appears only on rainy days.','A cat who understands every language decides to help someone.','You wake up and your shadow has gone missing.','A letter arrives addressed to you, dated fifty years in the future.','Two friends discover a map hidden inside an old book.','The last mango on the tree can grant one wish.','A small robot wants to learn how to tell jokes.','On the night of Diwali, every lamp in town goes out at once.','A new student arrives who seems to know what will happen tomorrow.','Your grandmother’s old trunk holds something that should not exist.','A kite flies away carrying a message.','The painting in the hallway blinks.','A street dog follows you home and turns out to be a guardian.','Everyone in the city forgets one word — and it is your name.','A train that only appears at midnight stops at your station.','You find a phone that receives calls from yesterday.','The class pet escapes on the day of the school inspection.','A tiny dragon hatches from an egg bought at the market.','Your umbrella can take you anywhere it is raining.','एक गाँव में हर रात एक तारा नीचे उतर आता है।','दादी की पुरानी चाबी किस दरवाज़े की है?','एक तोता जो सच बोलना सिखाता है।'],
+  poem:['The sound of rain on the roof','The moon as an old friend','Your favourite colour','A mother’s hands','The first morning of winter','A tree that has seen everything','What the river would say','Morning tea and quiet thoughts','Friendship','The view from a train window','A starry night on the terrace','Seasons changing','A kite in the evening sky','The smell of wet earth','Grandmother’s stories','A butterfly in the garden','The last day of school','Your city at night','A letter to the sun','Silence','माँ','बारिश की पहली बूँद','दोस्ती','सपने','चाँदनी रात','मेरा गाँव']
 };
-var wrType='all',wrQ='',wrId=null,wrNew=null,wrAsk=false,wrPrompt=null,wrSaveT=null;
+/* rhyme families: built in, so the helper works offline; common words only */
+const RHYMES=[
+ ['ain','rain train again lane plain chain brain pain main gain remain explain'],['ight','night light bright flight sight fight might right white kite write delight tonight polite'],
+ ['ay','day play way stay say may ray grey away today pray okay'],['ee','tree see free sea me be key three bee glee tea agree'],['ing','sing spring wing ring king bring thing swing string everything'],
+ ['all','ball call fall tall wall small all hall'],['ow','glow slow snow grow flow know show below rainbow go so'],['ue','blue true new through you few view dew too flew grew'],
+ ['ear','dear near clear year here fear cheer appear'],['art','heart start part apart art smart'],['ove','love above dove glove'],['ire','fire desire higher tire wire inspire'],
+ ['ong','song long along strong belong wrong'],['eam','dream stream gleam beam cream team seem theme'],['ound','sound ground around found round bound'],['and','hand land sand stand band grand understand'],
+ ['ace','face place space grace race embrace trace'],['oon','moon soon tune June noon balloon spoon afternoon'],['ar','star far car jar are guitar'],['old','gold cold old told hold bold fold unfold'],
+ ['ide','ride side wide pride glide hide guide inside tide'],['ile','smile while mile style awhile'],['ind','mind kind find behind blind remind'],['ell','bell tell well shell smell spell fell farewell'],
+ ['ess','less dress bless guess yes press happiness'],['ade','shade made fade parade played stayed'],['ime','time rhyme climb chime sometime'],['own','down town crown brown gown frown'],
+ ['est','best rest nest test west chest guest quest'],['ice','nice ice twice rice price slice advice paradise'],['ook','book look brook cook took'],['eep','sleep deep keep sweep sheep'],['ever','ever never forever clever whatever together'],
+ ['ाना','गाना जाना आना खाना पुराना सुहाना ज़माना दीवाना बहाना ठिकाना तराना मुस्कुराना'],['ार','प्यार बहार यार संसार इंतज़ार हार चार त्योहार दीवार'],['ात','बात रात सौग़ात मुलाक़ात बरसात हालात जज़्बात प्रभात'],
+ ['िल','दिल मिल खिल मंज़िल साहिल महफ़िल'],['ी','ख़ुशी हँसी ज़िंदगी रोशनी चाँदनी दोस्ती नदी कमी नमी अभी कभी सभी'],['ान','आसमान मुस्कान जहान अरमान पहचान इंसान मकान तूफ़ान'],
+ ['ोर','ओर शोर मोर भोर डोर ज़ोर'],['ाग','आग बाग राग भाग जाग'],['ंग','रंग संग उमंग तरंग पतंग ढंग'],['पना','सपना अपना तपना जपना'],['ाँव','गाँव छाँव पाँव'],['आ','हवा दुआ घटा वफ़ा सदा फ़िज़ा अदा']
+].map(([k,w])=>({k,w:w.split(' ')}));
+function rhymesFor(word){
+  word=String(word||'').toLowerCase().replace(/[^\p{L}\p{M}]/gu,'');if(!word)return [];
+  const fam=RHYMES.filter(f=>f.w.includes(word)||word.endsWith(f.k)||(f.k==='आ'&&/ा$/.test(word))).sort((a,b)=>(b.w.includes(word)?9:0)+b.k.length-((a.w.includes(word)?9:0)+a.k.length))[0];
+  let out=fam?fam.w:[];if(!out.length){const e=word.slice(-3);RHYMES.forEach(f=>f.w.forEach(x=>{if(x.endsWith(e))out.push(x)}))}
+  return [...new Set(out)].filter(x=>x!==word).slice(0,24);
+}
+var wrType='all',wrQ='',wrId=null,wrNew=null,wrAsk=false,wrPrompt=null,wrSaveT=null,wrTab='pieces',wrColl='',wrTag='',wrBook=null,wrPanel=null,wrCh=0,wrVerView=null,wrFocus=null,wrCollNew=false,wrChAsk=false;
 function wtype(k){return WTYPES.find(t=>t.k===k)||WTYPES[0]}
 function wrAll(){return Object.values(S.wr).filter(w=>w&&!w.deleted)}
-function wrWords(t){return (String(t||'').match(/[\p{L}\p{N}’'-]+/gu)||[]).length}
+function wrText(w){return w&&w.ch&&w.ch.length?w.ch.map(c=>(c.t?c.t+'\n':'')+(c.b||'')).join('\n\n'):(w&&w.body)||''}
+function wrWords(t){return (String(t||'').match(/[\p{L}\p{N}\p{M}’'-]+/gu)||[]).length}
 function wrCur(){return wrId&&S.wr[wrId]?S.wr[wrId]:wrNew}
-function wrTitle(w){if(w.title&&w.title.trim())return w.title.trim();const l=String(w.body||'').split('\n').find(x=>x.trim());return l?l.trim().slice(0,60)+(l.trim().length>60?'…':''):'Untitled '+wtype(w.type).n.toLowerCase()}
+function wrTitle(w){if(w.title&&w.title.trim())return w.title.trim();const l=wrText(w).split('\n').find(x=>x.trim());return l?l.trim().slice(0,60)+(l.trim().length>60?'…':''):'Untitled '+wtype(w.type).n.toLowerCase()}
+function wcoll(id){const c=S.lists.wcoll&&S.lists.wcoll[id];return c&&!c.deleted?c:null}
+/* writing days and the daily prompt */
+function wrMarkDay(){const t=today();S.prefs.wdays=S.prefs.wdays||{};if(!S.prefs.wdays[t]){S.prefs.wdays[t]=1;mark('prefs')}}
+function wrStreak(){const d0=S.prefs.wdays||{};let d=today();if(!d0[d])d=dAdd(d,-1);let n=0;while(d0[d]&&n<5000){n++;d=dAdd(d,-1)}return n}
+function dailyPrompt(d){const n=dDiff(d||today(),'2026-01-01'),type=WTYPES[((n%3)+3)%3].k,l=WPROMPTS[type];return {type,text:l[((Math.floor(n/3)*7)%l.length+l.length)%l.length]}}
 function writingView(){
-  const all=wrAll(),q=wrQ.trim().toLowerCase();
-  const list=all.filter(w=>(wrType==='all'||(wrType==='fav'?w.fav:w.type===wrType))&&(!q||((w.title||'')+' '+(w.body||'')).toLowerCase().includes(q))).sort((a,b)=>(b._ts||0)-(a._ts||0));
-  const words=all.reduce((s,w)=>s+wrWords(w.body),0);
+  const all=wrAll(),q=wrQ.trim().toLowerCase(),words=all.reduce((s,w)=>s+wrWords(wrText(w)),0),dp=dailyPrompt(),st=wrStreak();
+  const tabs=[['pieces','Pieces',all.length],['ideas','Ideas',lall('ideas').length],['words','Word bank',lall('words').length],['stats','Stats',0]];
+  let body='';
+  if(wrTab==='pieces'){
+    const colls=lall('wcoll'),tags=[...new Set(all.flatMap(w=>w.tags||[]))].sort();
+    const list=all.filter(w=>(wrType==='all'||(wrType==='fav'?w.fav:w.type===wrType))&&(!wrColl||w.coll===wrColl)&&(!wrTag||(w.tags||[]).includes(wrTag))&&(!q||((w.title||'')+' '+wrText(w)+' '+(w.tags||[]).join(' ')).toLowerCase().includes(q))).sort((a,b)=>(b._ts||0)-(a._ts||0));
+    body=`${all.length?`<div class="ltabs" role="tablist">${[['all','All'],...WTYPES.map(t=>[t.k,t.p]),['fav','Favourites']].map(([k,n])=>{const c=k==='all'?all.length:k==='fav'?all.filter(w=>w.fav).length:all.filter(w=>w.type===k).length;return `<button type="button" role="tab" class="ltab${wrType===k?' on':''}" aria-selected="${wrType===k}" data-wt="${k}">${n}${c?`<span>${c}</span>`:''}</button>`}).join('')}</div>
+      <div class="wfilters">${colls.map(c=>`<button type="button" class="fchip${wrColl===c.id?' on':''}" data-wcoll="${c.id}" style="--cc:${c.c}"><i class="cdot"></i>${esc(c.n)}</button>`).join('')}${wrCollNew?`<form class="lnew" id="wcF"><input id="wcIn" maxlength="30" placeholder="Collection name" aria-label="Collection name"><button class="btn sm" type="submit">Create</button><button class="btn ghost sm" type="button" id="wcX">Cancel</button></form>`:`<button type="button" class="fchip add" id="wcNew">+ Collection</button>`}${wrColl?`<button type="button" class="linkbtn" id="wcDel">Delete this collection</button>`:''}</div>
+      ${tags.length?`<div class="wfilters">${tags.map(t=>`<button type="button" class="fchip${wrTag===t?' on':''}" data-wtag="${esc(t)}">#${esc(t)}</button>`).join('')}</div>`:''}
+      <div class="mtools"><span class="search msearch"><span class="sic">${svg(UI.search,18)}</span><input id="wq" type="search" placeholder="Search your writing" value="${esc(wrQ)}" autocomplete="off" aria-label="Search your writing"></span><button class="btn ghost sm" id="wBook" type="button">${wrBook?'Cancel book':'Make a book'}</button></div>`:''}
+      ${wrBook?`<div class="wbookbar"><b>Make a book</b><span>Select the pieces to include (${wrBook.sel.size} selected), give the book a title, then print or save it as a PDF.</span><span class="row"><input id="wbT" maxlength="60" value="${esc(wrBook.title)}" placeholder="Book title"><button class="btn sm" id="wbGo" type="button" ${wrBook.sel.size?'':'disabled'}>Create the book</button><button class="btn ghost sm" id="wbAll" type="button">Select all shown</button></span></div>`:''}
+      ${list.length?`<div class="wcards">${list.map(w=>{const t=wtype(w.type),c=wcoll(w.coll),hasT=!!(w.title&&w.title.trim()),lines=wrText(w).split('\n').filter(x=>x.trim()),ex=lines.slice(hasT?0:1,(hasT?0:1)+(w.type==='poem'?3:2)).join(w.type==='poem'?'\n':' ');
+        return `<button type="button" class="wcard t-${w.type}${wrBook&&wrBook.sel.has(w.id)?' sel':''}" data-wopen="${w.id}" style="--wc:${c?c.c:t.c}">${wrBook?`<span class="wchk" aria-hidden="true">${wrBook.sel.has(w.id)?'✓':''}</span>`:''}
+        <span class="wmeta"><span class="wtag">${t.n}</span><span>${esc(fmtDMY(dFmt(new Date(w.cAt||w._ts))))}</span>${w.mood?`<span>· ${esc((WMOODS.find(m=>m[0]===w.mood)||['',''])[1])}</span>`:''}${w.fav?`<span class="tl-fav">${svg(HEART,13).replace('fill="none"','fill="currentColor"')}</span>`:''}</span>
+        <b>${esc(wrTitle(w))}</b>${ex?`<span class="wex">${esc(ex.slice(0,240))}</span>`:''}<small>${wrWords(wrText(w))} words${w.ch&&w.ch.length?` · ${w.ch.length} chapters`:''}${c?' · '+esc(c.n):''}${(w.tags||[]).length?' · #'+w.tags.map(esc).join(' #'):''}</small></button>`}).join('')}</div>`
+      :all.length?'<p class="empty">Nothing matches.</p>':`<p class="empty">Nothing written yet. Choose “New journal”, “New story” or “New poem”, or write today’s prompt.</p>`}`;
+  }else if(wrTab==='ideas'){
+    const ideas=lall('ideas').sort((a,b)=>(b.cAt||0)-(a.cAt||0));
+    body=`<form class="xform" id="idF"><p class="eyebrow">Save an idea</p><textarea id="idT" rows="2" maxlength="500" placeholder="A story idea, a poem line, a character name, something you overheard…" class="hin-ok"></textarea>
+      <div class="row"><label class="tsel"><span class="sr">For</span><select id="idK"><option value="">Any kind</option>${WTYPES.map(t=>`<option value="${t.k}">${t.n}</option>`).join('')}</select></label><button class="btn sm" type="submit">Save idea</button></div></form>
+      ${ideas.length?`<ul class="idlist">${ideas.map(x=>`<li><p>${esc(x.t)}</p><small>${x.k?esc(wtype(x.k).n)+' · ':''}${esc(fmtDMY(dFmt(new Date(x.cAt))))}</small><span class="row">${(x.k?[x.k]:['story','poem','journal']).map(k=>`<button type="button" class="btn sm ghost" data-iduse="${x.id}" data-k="${k}">Write a ${wtype(k).n.toLowerCase()}</button>`).join('')}<button type="button" class="sdel" data-iddel="${x.id}" aria-label="Delete idea">×</button></span></li>`).join('')}</ul>`:'<p class="empty">No ideas saved yet. Write them down here before they are forgotten.</p>'}`;
+  }else if(wrTab==='words'){
+    const ws=lall('words').sort((a,b)=>a.w.localeCompare(b.w)),wq2=q;
+    body=`<form class="xform" id="wbF"><p class="eyebrow">Add a word</p><div class="xgrid wbg"><label>Word<input id="wbW" maxlength="40" class="hin-ok" placeholder="e.g. serene, उमंग"></label><label>Meaning or note<input id="wbM" maxlength="160" class="hin-ok" placeholder="calm and peaceful"></label></div><div class="row"><button class="btn sm" type="submit">Add word</button></div></form>
+      ${ws.length?`<span class="search msearch"><span class="sic">${svg(UI.search,18)}</span><input id="wq" type="search" placeholder="Search words" value="${esc(wrQ)}" autocomplete="off" aria-label="Search words"></span>
+      <ul class="wblist">${ws.filter(x=>!wq2||(x.w+' '+(x.m||'')).toLowerCase().includes(wq2)).map(x=>`<li><b>${esc(x.w)}</b><span>${esc(x.m||'')}</span><button type="button" class="sdel" data-wbdel="${x.id}" aria-label="Delete ${esc(x.w)}">×</button></li>`).join('')}</ul>`:'<p class="empty">Your word bank is empty. Save words you like or want to use; they appear under “Words” while you write.</p>'}`;
+  }else{
+    const byType=WTYPES.map(t=>({t,n:all.filter(w=>w.type===t.k).length,wd:all.filter(w=>w.type===t.k).reduce((s,w)=>s+wrWords(wrText(w)),0)}));
+    const longest=all.slice().sort((a,b)=>wrWords(wrText(b))-wrWords(wrText(a)))[0],now=dParse(today()),y=now.getFullYear(),m=now.getMonth(),wd=S.prefs.wdays||{};
+    const months=Array.from({length:12},(_,i)=>{const d=new Date(y,m-11+i,1),k=d.getFullYear()+'-'+pad(d.getMonth()+1);return {l:d.toLocaleDateString('en-IN',{month:'short'}),n:all.filter(w=>dFmt(new Date(w.cAt||w._ts)).startsWith(k)).length}});
+    const fd=new Date(y,m,1).getDay();let cal='';for(let i=0;i<fd;i++)cal+='<span class="mc out"></span>';
+    for(let d=1;d<=monthLen(y,m);d++){const s=y+'-'+pad(m+1)+'-'+pad(d);cal+=`<span class="mc${wd[s]?' w':''}${s===today()?' tday':''}" title="${esc(dLong(s))}${wd[s]?': wrote':''}">${d}</span>`}
+    const daysThisMonth=Object.keys(wd).filter(k=>k.startsWith(y+'-'+pad(m+1))).length;
+    body=`<div class="tiles"><div><b>${all.length}</b><span>Pieces</span></div><div><b>${words.toLocaleString('en-IN')}</b><span>Words</span></div><div><b>${st}</b><span>Day streak</span></div><div><b>${daysThisMonth}</b><span>Writing days this month</span></div></div>
+      <div class="tiles">${byType.map(x=>`<div><b>${x.n}</b><span>${x.t.p} · ${x.wd.toLocaleString('en-IN')} words</span></div>`).join('')}<div><b>${longest?wrWords(wrText(longest)):0}</b><span>Longest piece${longest?': '+esc(wrTitle(longest).slice(0,22)):''}</span></div></div>
+      <section class="set"><p class="eyebrow">Writing days · ${esc(now.toLocaleDateString('en-IN',{month:'long',year:'numeric'}))}</p><div class="mcal">${['S','M','T','W','T','F','S'].map(x=>`<span class="mc h">${x}</span>`).join('')}${cal}</div><p class="note">Highlighted days are days you wrote or edited a piece. Days are counted from this version onwards.</p></section>
+      <section class="set"><p class="eyebrow">Pieces started each month</p>${barChart(months.map(x=>x.n),months.map(x=>x.l),v=>v,'var(--accent)')}</section>`;
+  }
   setApp(`<div class="dy">${topBar()}<div class="sheet writing">
-   <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button></div>
+   <div class="shead"><button class="back" id="vBack" type="button">← Back to the diary</button>${st?`<span class="wstreak" title="Consecutive days with writing">${st}-day writing streak</span>`:''}</div>
    <h2>${svg(UI.pen,26)} Writing</h2>
    <p class="note">${all.length?`${all.length} ${all.length===1?'piece':'pieces'} · ${words.toLocaleString('en-IN')} words written`:'A quiet place for journal entries, stories and poems.'}</p>
+   <div class="wdaily" style="--wc:${wtype(dp.type).c}"><span class="eyebrow">Today’s prompt · ${wtype(dp.type).n}</span><p>${esc(dp.text)}</p><button class="btn sm" id="wDaily" type="button">Write this ${wtype(dp.type).n.toLowerCase()}</button></div>
    <div class="wnew">${WTYPES.map(t=>`<button type="button" class="wbtn" data-wnew="${t.k}" style="--wc:${t.c}"><span class="wplus">+</span><b>New ${t.n.toLowerCase()}</b></button>`).join('')}</div>
-   ${all.length?`<div class="ltabs" role="tablist">${[['all','All'],...WTYPES.map(t=>[t.k,t.p]),['fav','Favourites']].map(([k,n])=>{const c=k==='all'?all.length:k==='fav'?all.filter(w=>w.fav).length:all.filter(w=>w.type===k).length;return `<button type="button" role="tab" class="ltab${wrType===k?' on':''}" aria-selected="${wrType===k}" data-wt="${k}">${n}${c?`<span>${c}</span>`:''}</button>`}).join('')}</div>
-   <span class="search msearch"><span class="sic">${svg(UI.search,18)}</span><input id="wq" type="search" placeholder="Search your writing" value="${esc(wrQ)}" autocomplete="off" aria-label="Search your writing"></span>`:''}
-   ${list.length?`<div class="wcards">${list.map(w=>{const t=wtype(w.type),ex=String(w.body||'').split('\n').filter(x=>x.trim()).slice(w.title&&w.title.trim()?0:1,(w.title&&w.title.trim()?0:1)+(w.type==='poem'?3:2)).join(w.type==='poem'?'\n':' ');return `<button type="button" class="wcard t-${w.type}" data-wopen="${w.id}" style="--wc:${t.c}">
-     <span class="wmeta"><span class="wtag">${t.n}</span><span>${esc(fmtDMY(dFmt(new Date(w.cAt||w._ts))))}</span>${w.fav?`<span class="tl-fav">${svg(HEART,13).replace('fill="none"','fill="currentColor"')}</span>`:''}</span>
-     <b>${esc(wrTitle(w))}</b>${ex?`<span class="wex">${esc(ex.slice(0,240))}</span>`:''}<small>${wrWords(w.body)} words${w._ts&&w.cAt&&w._ts-w.cAt>60000?' · edited '+esc(fmtDT(w._ts)):''}</small></button>`}).join('')}</div>`
-     :all.length?'<p class="empty">Nothing matches.</p>':`<p class="empty">Nothing written yet. Choose “New journal”, “New story” or “New poem” to begin.</p>`}
+   <div class="ltabs wmain" role="tablist">${tabs.map(([k,n,c])=>`<button type="button" role="tab" class="ltab${wrTab===k?' on':''}" aria-selected="${wrTab===k}" data-wtab="${k}">${n}${c?`<span>${c}</span>`:''}</button>`).join('')}</div>
+   ${body}
   </div><p class="credit">Crafted by Alok</p></div>`);
   bindTop();$('vBack').onclick=goDiary;
   app.querySelectorAll('[data-wnew]').forEach(b=>b.onclick=()=>wrStart(b.dataset.wnew));
+  $('wDaily').onclick=()=>wrStart(dp.type,{title:dp.text});
+  app.querySelectorAll('[data-wtab]').forEach(b=>b.onclick=()=>{wrTab=b.dataset.wtab;wrQ='';wrBook=null;render()});
   app.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{wrType=b.dataset.wt;render()});
-  app.querySelectorAll('[data-wopen]').forEach(b=>b.onclick=()=>{wrId=b.dataset.wopen;wrNew=null;wrAsk=false;wrPrompt=null;goView('wedit')});
+  app.querySelectorAll('[data-wcoll]').forEach(b=>b.onclick=()=>{wrColl=wrColl===b.dataset.wcoll?'':b.dataset.wcoll;render()});
+  app.querySelectorAll('[data-wtag]').forEach(b=>b.onclick=()=>{wrTag=wrTag===b.dataset.wtag?'':b.dataset.wtag;render()});
+  if($('wcNew'))$('wcNew').onclick=()=>{wrCollNew=true;render();$('wcIn').focus()};
+  if($('wcX'))$('wcX').onclick=()=>{wrCollNew=false;render()};
+  if($('wcF'))$('wcF').onsubmit=e=>{e.preventDefault();const n=$('wcIn').value.trim().slice(0,30);if(!n){$('wcIn').focus();return}const c=lput('wcoll',{id:uid(),n,c:WCOLS[lall('wcoll').length%WCOLS.length]});wrCollNew=false;wrColl=c.id;render();toast('Collection created: '+n+'. Choose it in a piece’s toolbar to add the piece.')};
+  if($('wcDel'))$('wcDel').onclick=()=>{const c=wcoll(wrColl);if(!c)return;ldel('wcoll',c.id);wrColl='';render();toastAct('Collection “'+c.n+'” deleted; its pieces are kept','Undo',()=>{delete c.deleted;lput('wcoll',c);render()})};
   const wq=$('wq');if(wq)wq.oninput=()=>{wrQ=wq.value;render(true)};
+  if($('wBook'))$('wBook').onclick=()=>{wrBook=wrBook?null:{sel:new Set(),title:(myName()?myName()+'’s ':'My ')+'Writing'};render()};
+  if($('wbT'))$('wbT').oninput=e=>{wrBook.title=e.target.value};
+  if($('wbAll'))$('wbAll').onclick=()=>{app.querySelectorAll('[data-wopen]').forEach(b=>wrBook.sel.add(b.dataset.wopen));render(true)};
+  if($('wbGo'))$('wbGo').onclick=()=>{const ps=[...wrBook.sel].map(id=>S.wr[id]).filter(Boolean).sort((a,b)=>(a.cAt||0)-(b.cAt||0));if(ps.length)wrPrintBook(ps,wrBook.title||'My Writing')};
+  app.querySelectorAll('[data-wopen]').forEach(b=>b.onclick=()=>{const id=b.dataset.wopen;if(wrBook){wrBook.sel.has(id)?wrBook.sel.delete(id):wrBook.sel.add(id);render(true);return}wrId=id;wrNew=null;wrAsk=false;wrPrompt=null;wrPanel=null;wrCh=0;wrVerView=null;goView('wedit')});
+  if($('idF'))$('idF').onsubmit=e=>{e.preventDefault();const t=$('idT').value.trim().slice(0,500);if(!t){$('idT').focus();return}lput('ideas',{id:uid(),t,k:$('idK').value||''});render();toast('Idea saved')};
+  if($('idT'))$('idT').addEventListener('beforeinput',e=>hindiBefore(e));
+  app.querySelectorAll('[data-iduse]').forEach(b=>b.onclick=()=>{const x=S.lists.ideas[b.dataset.iduse];if(!x)return;const k=b.dataset.k,first=x.t.split('\n')[0];wrStart(k,k==='poem'||first.length<=80?{title:first.slice(0,120),body:x.t.includes('\n')?x.t.split('\n').slice(1).join('\n'):'',idea:x.id}:{body:x.t,idea:x.id})});
+  app.querySelectorAll('[data-iddel]').forEach(b=>b.onclick=()=>{const x=S.lists.ideas[b.dataset.iddel];ldel('ideas',x.id);render();toastAct('Idea deleted','Undo',()=>{delete x.deleted;lput('ideas',x);render()})});
+  if($('wbF'))$('wbF').onsubmit=e=>{e.preventDefault();const w=$('wbW').value.trim().slice(0,40);if(!w){$('wbW').focus();return}if(lall('words').some(x=>x.w.toLowerCase()===w.toLowerCase())){toast('“'+w+'” is already in your word bank.');return}lput('words',{id:uid(),w,m:$('wbM').value.trim().slice(0,160)});render();const i=$('wbW');if(i)i.focus();toast('Word added')};
+  ['wbW','wbM'].forEach(k=>{if($(k))$(k).addEventListener('beforeinput',e=>hindiBefore(e))});
+  app.querySelectorAll('[data-wbdel]').forEach(b=>b.onclick=()=>{const x=S.lists.words[b.dataset.wbdel];ldel('words',x.id);render(true);toastAct('“'+x.w+'” removed','Undo',()=>{delete x.deleted;lput('words',x);render(true)})});
 }
-function wrStart(type){wrId=null;wrNew={id:uid(),type,title:'',body:'',fav:false,font:type==='poem'?'lora':''};wrAsk=false;wrPrompt=null;goView('wedit')}
+function wrStart(type,pre){wrTab='pieces';wrId=null;wrNew=Object.assign({id:uid(),type,title:'',body:'',fav:false,font:type==='poem'?'lora':'',coll:wrColl||undefined},pre||{});wrAsk=false;wrPrompt=null;wrPanel=null;wrCh=0;wrVerView=null;goView('wedit')}
 /* a piece is saved only once something has been written in it */
 function wrSave(){
   const w=wrCur();if(!w)return;
-  if(!S.wr[w.id]){if(!(w.title||'').trim()&&!(w.body||'').trim())return;w.cAt=Date.now();S.wr[w.id]=w;wrId=w.id;wrNew=null}
-  mark('wr:'+w.id);const s=$('wSaved');if(s)s.textContent='Saved · '+fmtTime(Date.now());
+  if(!S.wr[w.id]){if(!(w.title||'').trim()&&!wrText(w).trim())return;w.cAt=Date.now();S.wr[w.id]=w;wrId=w.id;wrNew=null;if(w.idea&&S.lists.ideas[w.idea]){const x=S.lists.ideas[w.idea];x.used=w.id;lput('ideas',x)}}
+  mark('wr:'+w.id);wrMarkDay();const s=$('wSaved');if(s)s.textContent='Saved · '+fmtTime(Date.now());
 }
-function wrStats(){const w=wrCur();if(!w)return;const n=wrWords(w.body),ch=String(w.body||'').length,lines=String(w.body||'').split('\n').filter(x=>x.trim()).length,m=Math.max(1,Math.round(n/200));
-  const el=$('wStats');if(el)el.textContent=`${n} ${n===1?'word':'words'} · ${ch} characters${w.type==='poem'?` · ${lines} ${lines===1?'line':'lines'}`:` · ${n?m+' min read':'—'}`}`}
+function wrStats(){const w=wrCur();if(!w)return;const tx=wrText(w),n=wrWords(tx),ch=tx.length,lines=tx.split('\n').filter(x=>x.trim()).length,m=Math.max(1,Math.round(n/200));
+  const el=$('wStats');if(el)el.textContent=`${n} ${n===1?'word':'words'} · ${ch} characters${w.type==='poem'?` · ${lines} ${lines===1?'line':'lines'}`:` · ${n?m+' min read':'—'}`}${w.ch&&w.ch.length?` · chapter ${wrCh+1}: ${wrWords(w.ch[wrCh].b)} words`:''}`;
+  wrFocusTick()}
 function wrGrow(t){t.style.height='auto';t.style.height=Math.max(t.scrollHeight,lineH()*12)+'px'}
+function wrInsert(word){const bo=$('wBody');if(!bo)return;const s=bo.selectionStart,e=bo.selectionEnd,v=bo.value,pre=v.slice(0,s),sp=pre&&!/\s$/.test(pre)?' ':'';bo.value=pre+sp+word+v.slice(e);const c=(pre+sp+word).length;bo.focus();bo.setSelectionRange(c,c);bo.dispatchEvent(new Event('input',{bubbles:true}))}
+function wrLastWord(){const bo=$('wBody');if(!bo)return '';const v=bo.value,s=bo.selectionStart;const sel=v.slice(bo.selectionStart,bo.selectionEnd).trim();if(sel)return sel.split(/\s+/).pop();
+  const lines=v.slice(0,s).split('\n');let line=lines.pop();if(!line.trim()&&lines.length)line=lines.pop();const m=line.match(/([\p{L}\p{M}’']+)[^\p{L}\p{M}]*$/u);return m?m[1]:''}
+/* focus mode: full screen with an optional goal */
+function wrFocusTick(){if(!wrFocus)return;const w=wrCur(),el=$('wfProg'),lb=$('wfLab');if(!el||!w)return;let p=0,t='';
+  if(wrFocus.g==='w'){const done=Math.max(0,wrWords(wrText(w))-wrFocus.base);p=Math.min(1,done/wrFocus.n);t=`${done} of ${wrFocus.n} words`}
+  else if(wrFocus.g==='m'){const mins=(Date.now()-wrFocus.at)/60000;p=Math.min(1,mins/wrFocus.n);t=`${Math.floor(mins)} of ${wrFocus.n} minutes`}
+  else t=wrWords(wrText(w))+' words';
+  el.style.width=Math.round(p*100)+'%';if(lb)lb.textContent=t+(p>=1?' · goal reached':'');
+  if(p>=1&&!wrFocus.done){wrFocus.done=1;toast('Goal reached. Well done!')}}
+setInterval(()=>{if(wrFocus&&wrFocus.g==='m')wrFocusTick()},15000);
 function weditView(){
   const w=wrCur();if(!w){goView('writing');return}
-  const t=wtype(w.type),F=fontOf(w.font||P.font);loadFont(F);
-  setApp(`<div class="dy">${topBar()}<div class="sheet wedit t-${w.type}" style="--wc:${t.c}">
+  const t=wtype(w.type),F=fontOf(w.font||P.font),colls=lall('wcoll'),c=wcoll(w.coll);loadFont(F);
+  if(w.ch&&w.ch.length&&wrCh>=w.ch.length)wrCh=w.ch.length-1;
+  const hasCh=!!(w.ch&&w.ch.length),curCh=hasCh?w.ch[wrCh]:null,txt=hasCh?curCh.b||'':w.body||'';
+  const panel=wrPanel==='words'?`<div class="wpanel"><span class="eyebrow">Your word bank</span>${lall('words').length?`<div class="wchips">${lall('words').sort((a,b)=>a.w.localeCompare(b.w)).map(x=>`<button type="button" class="fchip" data-wins="${esc(x.w)}" title="${esc(x.m||'')}">${esc(x.w)}</button>`).join('')}</div><p class="note">Tap a word to add it where the cursor is.</p>`:'<p class="note">No words yet. Add some in Writing → Word bank.</p>'}<button class="linkbtn" id="wpClose" type="button">Close</button></div>`
+    :wrPanel==='rhyme'?(()=>{const lw=wrLastWord(),r=rhymesFor(lw);return `<div class="wpanel"><span class="eyebrow">Rhymes${lw?' for “'+esc(lw)+'”':''}</span>${!lw?'<p class="note">Write a line, then tap “Rhymes” to see words that rhyme with its last word. You can also select a word first.</p>':r.length?`<div class="wchips">${r.map(x=>`<button type="button" class="fchip" data-wins="${esc(x)}">${esc(x)}</button>`).join('')}</div><p class="note">From a built-in list of common English and Hindi rhymes. Tap a word to add it.</p>`:'<p class="note">No rhymes for this word in the built-in list. Try a different ending word.</p>'}<span class="row"><button class="linkbtn" id="wpAgain" type="button">Check the last word again</button><button class="linkbtn" id="wpClose" type="button">Close</button></span></div>`})()
+    :wrPanel==='ver'?`<div class="wpanel"><span class="eyebrow">Saved versions</span>${(w.ver||[]).length?`<ul class="verlist">${w.ver.slice().reverse().map((v,i)=>{const k=w.ver.length-1-i;return `<li><span>${esc(fmtDT(v.at))} · ${wrWords(v.ch?v.ch.map(c=>c.b||'').join(' '):v.body)} words${v.title?' · '+esc(v.title.slice(0,30)):''}</span><span class="row"><button class="btn sm ghost" data-vview="${k}" type="button">${wrVerView===k?'Hide':'View'}</button><button class="btn sm ghost" data-vres="${k}" type="button">Restore</button></span>${wrVerView===k?`<pre class="verpre">${esc((v.title?v.title+'\n\n':'')+(v.ch?v.ch.map(c=>(c.t?c.t+'\n':'')+(c.b||'')).join('\n\n'):v.body||''))}</pre>`:''}</li>`}).join('')}</ul><p class="note">Restoring first saves the current text as a version, so nothing is lost.</p>`:'<p class="note">No versions saved yet. Use ⋯ → “Save this version” before big changes.</p>'}<button class="linkbtn" id="wpClose" type="button">Close</button></div>`:'';
+  setApp(`<div class="dy">${topBar()}<div class="sheet wedit t-${w.type}" style="--wc:${c?c.c:t.c}">
    <div class="shead"><button class="back" id="vBack" type="button">← All writing</button><span class="wsaved" id="wSaved">${S.wr[w.id]?'Saved':'Starts saving when you write'}</span></div>
    <div class="wbar">
      <label class="tsel"><span class="sr">Type</span><select id="wType">${WTYPES.map(x=>`<option value="${x.k}" ${w.type===x.k?'selected':''}>${x.n}</option>`).join('')}</select></label>
      <label class="tsel"><span class="sr">Font</span><select id="wFont">${FONTS.map(f=>`<option value="${f.k}" ${(w.font||P.font)===f.k?'selected':''}>${esc(f.n)}</option>`).join('')}</select></label>
+     <label class="tsel"><span class="sr">Collection</span><select id="wColl"><option value="">No collection</option>${colls.map(x=>`<option value="${x.id}" ${w.coll===x.id?'selected':''}>${esc(x.n)}</option>`).join('')}<option value="__new">+ New collection…</option></select></label>
      <button type="button" class="tb wide hin" id="wHin" aria-pressed="${!!P.hin}" title="Hindi typing"><span class="dev">अ</span><span>Hindi</span></button>
      <button type="button" class="tb" id="wFav" aria-pressed="${!!w.fav}" aria-label="${w.fav?'Remove from favourites':'Add to favourites'}">${svg(HEART,17).replace('fill="none"',w.fav?'fill="currentColor"':'fill="none"')}</button>
-     <button type="button" class="tb wide" id="wIdea">${svg('<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V17h5v-1.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3Z"/>',17)}<span>Need an idea?</span></button>
+     <button type="button" class="tb wide" id="wIdea" title="Need an idea?">${svg(UI.bulb,17)}<span>Idea</span></button>
+     <button type="button" class="tb wide${wrPanel==='words'?' on':''}" id="wWords" title="Your word bank">${svg(UI.tag,17)}<span>Words</span></button>
+     ${w.type==='poem'?`<button type="button" class="tb wide${wrPanel==='rhyme'?' on':''}" id="wRhyme" title="Rhyming words">${svg('<path d="M4 7h10M4 12h7M4 17h10"/><path d="m17 10 3 3-3 3"/>',17)}<span>Rhymes</span></button>`:''}
+     <button type="button" class="tb wide" id="wFocusB" title="Focus mode">${svg(UI.focus,17)}<span>Focus</span></button>
      <span class="grow"></span>
      <button type="button" class="tb" id="wMore" aria-haspopup="menu" aria-label="More actions">${svg('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',18)}</button>
    </div>
+   ${wrCollNew&&view==='wedit'?`<form class="lnew wcnew" id="wcF2"><input id="wcIn2" maxlength="30" placeholder="New collection name" aria-label="New collection name"><button class="btn sm" type="submit">Create</button><button class="btn ghost sm" type="button" id="wcX2">Cancel</button></form>`:''}
+   ${w.type==='journal'?`<div class="wjour"><label class="tsel"><span class="sr">Mood</span><select id="wMood"><option value="">Mood…</option>${WMOODS.map(([k,n])=>`<option value="${k}" ${w.mood===k?'selected':''}>${n}</option>`).join('')}</select></label>
+     ${(w.tags||[]).map(x=>`<span class="tagchip"><button type="button" tabindex="-1">#${esc(x)}</button><button type="button" class="tx" data-wtagx="${esc(x)}" aria-label="Remove tag ${esc(x)}">×</button></span>`).join('')}<input id="wTagIn" class="tagin" maxlength="24" placeholder="Add a tag, then Enter" aria-label="Add a tag"></div>`:''}
    ${wrPrompt?`<div class="wprompt"><span class="eyebrow">${t.n} idea</span><p>${esc(wrPrompt)}</p><span class="row"><button class="btn sm" id="wpUse" type="button">Use as the title</button><button class="btn ghost sm" id="wpNext" type="button">Another idea</button><button class="btn ghost sm" id="wpX" type="button">Close</button></span></div>`:''}
+   ${panel}
    ${wrAsk?`<div class="confirm" role="alertdialog"><span>Delete “${esc(wrTitle(w))}”?</span><span class="row"><button class="btn warn sm" id="wDelY" type="button">Delete</button><button class="btn ghost sm" id="wDelN" type="button">Keep it</button></span></div>`:''}
    <div class="wpaper" style="--wf:${F.f};--ws:${F.s}">
      ${w.type==='journal'?`<p class="wdate">${esc(dLong(dFmt(new Date(w.cAt||Date.now()))))}</p>`:''}
      <input id="wTitle" class="wtitle hin-ok" maxlength="120" placeholder="${w.type==='poem'?'Title of the poem':w.type==='story'?'Title of the story':'Title (optional)'}" value="${esc(w.title||'')}" aria-label="Title">
-     <textarea id="wBody" class="wbody hin-ok" placeholder="${w.type==='poem'?'Write your poem here. Each line stays as you write it; leave an empty line between verses.':w.type==='story'?'Once upon a time…':'Dear diary…'}" aria-label="${t.n} text">${esc(w.body||'')}</textarea>
+     ${w.type==='story'?`<div class="wchaps">${hasCh?w.ch.map((x,i)=>`<button type="button" class="ltab${i===wrCh?' on':''}" data-wch="${i}">${esc(x.t||'Chapter '+(i+1))}</button>`).join(''):''}<button type="button" class="ltab add" id="wChAdd">+ ${hasCh?'Chapter':'Split into chapters'}</button></div>
+       ${hasCh?`<div class="wchead"><input id="wChT" class="wcht hin-ok" maxlength="80" value="${esc(curCh.t||'')}" placeholder="Chapter ${wrCh+1} title" aria-label="Chapter title">${w.ch.length>1?`<button type="button" class="linkbtn" id="wChDel">Delete chapter</button>`:''}</div>${wrChAsk?`<div class="confirm" role="alertdialog"><span>Delete “${esc(curCh.t||'Chapter '+(wrCh+1))}” and its text?</span><span class="row"><button class="btn warn sm" id="wChDelY" type="button">Delete</button><button class="btn ghost sm" id="wChDelN" type="button">Keep it</button></span></div>`:''}`:''}`:''}
+     <textarea id="wBody" class="wbody hin-ok" placeholder="${w.type==='poem'?'Write your poem here. Each line stays as you write it; leave an empty line between verses.':w.type==='story'?'Once upon a time…':'Dear diary…'}" aria-label="${t.n} text">${esc(txt)}</textarea>
    </div>
    <p class="note" id="wStats"></p>
-  </div><p class="credit">Crafted by Alok</p></div>`);
+  </div><p class="credit">Crafted by Alok</p></div>
+  ${wrFocus?`<div class="wfbar" role="region" aria-label="Focus mode"><select id="wfGoal" aria-label="Goal"><option value="">No goal</option>${[100,300,500,1000].map(n=>`<option value="w${n}" ${wrFocus.g==='w'&&wrFocus.n===n?'selected':''}>${n} words</option>`).join('')}${[10,15,30].map(n=>`<option value="m${n}" ${wrFocus.g==='m'&&wrFocus.n===n?'selected':''}>${n} minutes</option>`).join('')}</select><span class="wftrack"><i id="wfProg"></i></span><span id="wfLab" class="wflab"></span><button class="btn sm" id="wfExit" type="button">Exit focus</button></div>`:''}`);
   bindTop();
-  const back=()=>{clearTimeout(wrSaveT);wrSave();goView('writing')};$('vBack').onclick=back;
+  const back=()=>{clearTimeout(wrSaveT);wrSave();wrFocusOff();goView('writing')};$('vBack').onclick=back;
   const ti=$('wTitle'),bo=$('wBody');wrGrow(bo);wrStats();
-  const changed=()=>{w.title=ti.value;w.body=bo.value;wrGrow(bo);wrStats();const s=$('wSaved');if(s)s.textContent='Saving…';clearTimeout(wrSaveT);wrSaveT=setTimeout(wrSave,700)};
+  const changed=()=>{w.title=ti.value;if(hasCh)w.ch[wrCh].b=bo.value;else w.body=bo.value;wrGrow(bo);wrStats();const s=$('wSaved');if(s)s.textContent='Saving…';clearTimeout(wrSaveT);wrSaveT=setTimeout(wrSave,700)};
   ti.oninput=changed;bo.oninput=changed;bo.addEventListener('beforeinput',e=>{hindiBefore(e)});ti.addEventListener('beforeinput',e=>{hindiBefore(e)});
   ti.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();bo.focus()}};
-  if(!S.wr[w.id])(w.title?bo:ti).focus();
-  $('wType').onchange=e=>{w.type=e.target.value;if(S.wr[w.id])wrSave();app.__html='';render(true)};
-  $('wFont').onchange=e=>{w.font=e.target.value;if(S.wr[w.id])wrSave();app.__html='';render(true)};
+  if(!S.wr[w.id]&&!wrPanel)(w.title?bo:ti).focus();
+  const re=()=>{app.__html='';render(true)};
+  $('wType').onchange=e=>{w.type=e.target.value;if(w.type!=='story'&&w.ch&&w.ch.length){w.body=wrText(w);delete w.ch;wrCh=0}if(S.wr[w.id])wrSave();re()};
+  $('wFont').onchange=e=>{w.font=e.target.value;if(S.wr[w.id])wrSave();re()};
+  $('wColl').onchange=e=>{const v=e.target.value;if(v==='__new'){wrCollNew=true;re();const i=$('wcIn2');if(i)i.focus();return}w.coll=v||undefined;if(S.wr[w.id])wrSave();re()};
+  if($('wcF2'))$('wcF2').onsubmit=e=>{e.preventDefault();const n=$('wcIn2').value.trim().slice(0,30);if(!n){$('wcIn2').focus();return}const cc=lput('wcoll',{id:uid(),n,c:WCOLS[lall('wcoll').length%WCOLS.length]});w.coll=cc.id;wrCollNew=false;if(S.wr[w.id])wrSave();re();toast('Added to the new collection “'+n+'”')};
+  if($('wcX2'))$('wcX2').onclick=()=>{wrCollNew=false;re()};
   $('wHin').onclick=()=>{toggleHindi();const b=$('wHin');if(b)b.setAttribute('aria-pressed',!!P.hin);bo.focus()};
-  $('wFav').onclick=()=>{w.fav=!w.fav;if(S.wr[w.id])wrSave();app.__html='';render(true);toast(w.fav?'Added to favourites':'Removed from favourites')};
-  const pick=()=>{const l=WPROMPTS[w.type]||WPROMPTS.journal;let p;do{p=l[Math.floor(Math.random()*l.length)]}while(l.length>1&&p===wrPrompt);wrPrompt=p;app.__html='';render(true)};
-  $('wIdea').onclick=pick;
-  if($('wpNext'))$('wpNext').onclick=pick;if($('wpX'))$('wpX').onclick=()=>{wrPrompt=null;app.__html='';render(true)};
-  if($('wpUse'))$('wpUse').onclick=()=>{w.title=wrPrompt;wrPrompt=null;wrSave();app.__html='';render(true);const b=$('wBody');if(b)b.focus()};
-  $('wMore').onclick=e=>openMenu(e.currentTarget,`<button type="button" class="mopt" data-wa="copy">Copy text</button><button type="button" class="mopt" data-wa="txt">Download as a text file</button><button type="button" class="mopt" data-wa="print">Print or save as PDF</button><button type="button" class="mopt" data-wa="share">Share</button><button type="button" class="mopt" data-wa="del">Delete…</button>`,el=>{
-    el.querySelectorAll('[data-wa]').forEach(b=>b.onclick=async()=>{closeMenu();const a=b.dataset.wa,txt=(w.title?w.title+'\n\n':'')+(w.body||'');
-      if(a==='copy'){try{await navigator.clipboard.writeText(txt);toast('Copied')}catch(x){toast('Copying is not available here.')}}
-      else if(a==='txt'){saveFile(txt,(wrTitle(w).replace(/[\\/:*?"<>|]+/g,'').slice(0,40)||'writing')+'.txt','text/plain;charset=utf-8');toast('Text file downloaded')}
-      else if(a==='print')wrPrint(w);
-      else if(a==='share'){if(navigator.share){try{await navigator.share({title:wrTitle(w),text:txt})}catch(x){}}else{try{await navigator.clipboard.writeText(txt);toast('Sharing is not available here; the text was copied instead.')}catch(x){}}}
-      else if(a==='del'){if(!S.wr[w.id]){wrNew=null;goView('writing');return}wrAsk=true;app.__html='';render(true)}})});
-  if($('wDelN'))$('wDelN').onclick=()=>{wrAsk=false;app.__html='';render(true)};
-  if($('wDelY'))$('wDelY').onclick=()=>{const x=S.wr[w.id];x.deleted=true;mark('wr:'+x.id);wrAsk=false;wrId=null;goView('writing');toastAct('“'+wrTitle(x)+'” deleted','Undo',()=>{delete x.deleted;mark('wr:'+x.id);render()})};
+  $('wFav').onclick=()=>{w.fav=!w.fav;if(S.wr[w.id])wrSave();re();toast(w.fav?'Added to favourites':'Removed from favourites')};
+  const pick=()=>{const l=WPROMPTS[w.type]||WPROMPTS.journal;let p;do{p=l[Math.floor(Math.random()*l.length)]}while(l.length>1&&p===wrPrompt);wrPrompt=p;re()};
+  $('wIdea').onclick=pick;if($('wpNext'))$('wpNext').onclick=pick;if($('wpX'))$('wpX').onclick=()=>{wrPrompt=null;re()};
+  if($('wpUse'))$('wpUse').onclick=()=>{w.title=wrPrompt;wrPrompt=null;wrSave();re();const b=$('wBody');if(b)b.focus()};
+  $('wWords').onclick=()=>{wrPanel=wrPanel==='words'?null:'words';re()};
+  if($('wRhyme'))$('wRhyme').onmousedown=e=>e.preventDefault();
+  if($('wRhyme'))$('wRhyme').onclick=()=>{wrPanel=wrPanel==='rhyme'?null:'rhyme';const s=bo.selectionStart,e2=bo.selectionEnd;app.__html='';render(true);const b=$('wBody');if(b){b.focus();b.setSelectionRange(s,e2)}};
+  if($('wpAgain'))$('wpAgain').onmousedown=e=>e.preventDefault();
+  if($('wpAgain'))$('wpAgain').onclick=()=>{const s=bo.selectionStart;re();const b=$('wBody');if(b){b.focus();b.setSelectionRange(s,s)}};
+  if($('wpClose'))$('wpClose').onclick=()=>{wrPanel=null;wrVerView=null;re()};
+  app.querySelectorAll('[data-wins]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=()=>wrInsert(b.dataset.wins)});
+  if($('wMood'))$('wMood').onchange=e=>{w.mood=e.target.value||undefined;if(S.wr[w.id])wrSave();re()};
+  if($('wTagIn'))$('wTagIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const v=e.target.value.trim().replace(/^#+/,'').toLowerCase().replace(/[^\p{L}\p{N}_-]+/gu,'-').replace(/^-|-$/g,'').slice(0,24);if(!v)return;w.tags=[...new Set((w.tags||[]).concat(v))];wrSave();re();const i=$('wTagIn');if(i)i.focus()}};
+  app.querySelectorAll('[data-wtagx]').forEach(b=>b.onclick=()=>{w.tags=(w.tags||[]).filter(x=>x!==b.dataset.wtagx);if(!w.tags.length)delete w.tags;wrSave();re()});
+  app.querySelectorAll('[data-wch]').forEach(b=>b.onclick=()=>{wrCh=+b.dataset.wch;wrChAsk=false;re();const x=$('wBody');if(x)x.focus()});
+  if($('wChAdd'))$('wChAdd').onclick=()=>{if(!w.ch||!w.ch.length){w.ch=[{id:uid(),t:'Chapter 1',b:w.body||''}];w.body=''}w.ch.push({id:uid(),t:'Chapter '+(w.ch.length+1),b:''});wrCh=w.ch.length-1;if(S.wr[w.id])wrSave();re();const x=$('wBody');if(x)x.focus()};
+  if($('wChT'))$('wChT').oninput=e=>{w.ch[wrCh].t=e.target.value;clearTimeout(wrSaveT);wrSaveT=setTimeout(wrSave,700);const b=app.querySelector(`[data-wch="${wrCh}"]`);if(b)b.textContent=e.target.value||'Chapter '+(wrCh+1)};
+  if($('wChT'))$('wChT').addEventListener('beforeinput',e=>hindiBefore(e));
+  if($('wChDel'))$('wChDel').onclick=()=>{wrChAsk=true;re()};
+  if($('wChDelN'))$('wChDelN').onclick=()=>{wrChAsk=false;re()};
+  if($('wChDelY'))$('wChDelY').onclick=()=>{wrSaveVersion(w,true);w.ch.splice(wrCh,1);if(w.ch.length===1){w.body=w.ch[0].b;delete w.ch}wrCh=Math.max(0,wrCh-1);wrChAsk=false;wrSave();re();toast('Chapter deleted. A copy was kept in Versions.')};
+  $('wFocusB').onclick=()=>{if(wrFocus)wrFocusOff();else{wrFocus={g:'',n:0,base:wrWords(wrText(w)),at:Date.now()};document.documentElement.classList.add('wfocus')}re();const x=$('wBody');if(x)x.focus()};
+  if($('wfExit'))$('wfExit').onclick=()=>{wrFocusOff();re()};
+  if($('wfGoal'))$('wfGoal').onchange=e=>{const v=e.target.value;wrFocus.g=v?v[0]:'';wrFocus.n=v?+v.slice(1):0;wrFocus.base=wrWords(wrText(w));wrFocus.at=Date.now();wrFocus.done=0;wrFocusTick();const x=$('wBody');if(x)x.focus()};
+  $('wMore').onclick=e=>openMenu(e.currentTarget,`<button type="button" class="mopt" data-wa="ver">Save this version</button><button type="button" class="mopt" data-wa="vers">Versions${(w.ver||[]).length?' ('+w.ver.length+')':''}…</button><button type="button" class="mopt" data-wa="copy">Copy text</button><button type="button" class="mopt" data-wa="txt">Download as a text file</button><button type="button" class="mopt" data-wa="print">Print or save as PDF</button><button type="button" class="mopt" data-wa="share">Share</button><button type="button" class="mopt" data-wa="del">Delete…</button>`,el=>{
+    el.querySelectorAll('[data-wa]').forEach(b=>b.onclick=async()=>{closeMenu();const a=b.dataset.wa,tx=(w.title?w.title+'\n\n':'')+wrText(w);
+      if(a==='ver'){if(!S.wr[w.id]){toast('Write something first.');return}wrSaveVersion(w);wrSave();toast('Version saved · '+fmtTime(Date.now()))}
+      else if(a==='vers'){wrPanel='ver';wrVerView=null;re()}
+      else if(a==='copy'){try{await navigator.clipboard.writeText(tx);toast('Copied')}catch(x){toast('Copying is not available here.')}}
+      else if(a==='txt'){saveFile(tx,(wrTitle(w).replace(/[\\/:*?"<>|]+/g,'').slice(0,40)||'writing')+'.txt','text/plain;charset=utf-8');toast('Text file downloaded')}
+      else if(a==='print')wrPrintBook([w],null);
+      else if(a==='share'){if(navigator.share){try{await navigator.share({title:wrTitle(w),text:tx})}catch(x){}}else{try{await navigator.clipboard.writeText(tx);toast('Sharing is not available here; the text was copied instead.')}catch(x){}}}
+      else if(a==='del'){if(!S.wr[w.id]){wrNew=null;wrFocusOff();goView('writing');return}wrAsk=true;re()}})});
+  app.querySelectorAll('[data-vview]').forEach(b=>b.onclick=()=>{const k=+b.dataset.vview;wrVerView=wrVerView===k?null:k;re()});
+  app.querySelectorAll('[data-vres]').forEach(b=>b.onclick=()=>{const v=w.ver[+b.dataset.vres];if(!v)return;wrSaveVersion(w,true);w.title=v.title||'';if(v.ch){w.ch=JSON.parse(JSON.stringify(v.ch));w.body=''}else{w.body=v.body||'';delete w.ch}wrCh=0;wrPanel=null;wrSave();re();toast('Version from '+fmtDT(v.at)+' restored. The text before restoring was saved as a version.')});
+  if($('wDelN'))$('wDelN').onclick=()=>{wrAsk=false;re()};
+  if($('wDelY'))$('wDelY').onclick=()=>{const x=S.wr[w.id];x.deleted=true;mark('wr:'+x.id);wrAsk=false;wrId=null;wrFocusOff();goView('writing');toastAct('“'+wrTitle(x)+'” deleted','Undo',()=>{delete x.deleted;mark('wr:'+x.id);render()})};
 }
-function wrPrint(w){
+function wrSaveVersion(w,quiet){const snap={at:Date.now(),title:w.title||'',body:w.ch?'':w.body||''};if(w.ch)snap.ch=JSON.parse(JSON.stringify(w.ch));
+  const last=(w.ver||[]).slice(-1)[0];if(last&&last.title===snap.title&&last.body===snap.body&&JSON.stringify(last.ch||null)===JSON.stringify(snap.ch||null))return;w.ver=(w.ver||[]).concat([snap]).slice(-15)}
+function wrFocusOff(){wrFocus=null;document.documentElement.classList.remove('wfocus')}
+/* print one piece, or several as a small book with a cover, contents and page numbers */
+function wrPrintBook(ps,title){
   let pa=$('printArea');if(!pa){pa=document.createElement('div');pa.id='printArea';document.body.appendChild(pa)}
-  const F=fontOf(w.font||P.font);
-  pa.innerHTML=`<section class="pr-page pr-w ${w.type==='poem'?'pr-poem':''}" style="font-family:${F.f}"><p class="pr-meta">${esc(wtype(w.type).n)} · ${esc(fmtDMY(dFmt(new Date(w.cAt||Date.now()))))}</p><h2>${esc(wrTitle(w))}</h2>${esc(w.body||'').split('\n').map(l=>`<p>${l||'&nbsp;'}</p>`).join('')}<p class="pr-foot">— ${esc(myName()||'')}</p></section>`;
+  const piece=(w,i)=>{const F=fontOf(w.font||P.font);const parts=w.ch&&w.ch.length?w.ch.map(c=>`${c.t?`<h3>${esc(c.t)}</h3>`:''}${esc(c.b||'').split('\n').map(l=>`<p>${l||'&nbsp;'}</p>`).join('')}`).join(''):esc(w.body||'').split('\n').map(l=>`<p>${l||'&nbsp;'}</p>`).join('');
+    return `<section class="pr-w ${w.type==='poem'?'pr-poem':''} ${title?'pr-break':''}" id="pw${i}" style="font-family:${F.f}"><p class="pr-meta">${esc(wtype(w.type).n)} · ${esc(fmtDMY(dFmt(new Date(w.cAt||Date.now()))))}</p><h2>${esc(wrTitle(w))}</h2>${parts}${title?'':`<p class="pr-foot">— ${esc(myName()||'')}</p>`}</section>`};
+  pa.innerHTML=title?`<section class="pr-cover"><p class="pr-ctype">${[...new Set(ps.map(w=>wtype(w.type).p))].join(' · ')}</p><h1>${esc(title)}</h1><p class="pr-cby">by ${esc(myName()||'')}</p><p class="pr-cyr">${esc(fmtDMY(today()))}</p></section>
+    <section class="pr-toc pr-break"><h2>Contents</h2><ol>${ps.map((w,i)=>`<li><span>${esc(wrTitle(w))}</span><small>${esc(wtype(w.type).n)}</small></li>`).join('')}</ol></section>${ps.map(piece).join('')}`:piece(ps[0],0);
   document.documentElement.classList.add('printing');setTimeout(()=>{window.print();setTimeout(()=>document.documentElement.classList.remove('printing'),500)},60);
 }
+function wrPrint(w){wrPrintBook([w],null)}
 
 /* ================= memory timeline =================
    Saved memories are rows "mem_<id>" in the same notes table. Items collected automatically are worked out
@@ -3378,7 +3583,7 @@ async function signOut(){
   if(chan)sb.removeChannel(chan);chan=null;col=null;
   try{await sb.auth.signOut()}catch(e){}me=null;pinRec=null;dirty.clear();
   ['sb-pin','sb-dirty',KEY,GKEY,'second-brain-v2','diary-name'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});
-  S={diary:{},mem:{},wr:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
+  S={diary:{},mem:{},wr:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{},ideas:{},words:{},wcoll:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};gTok=null;try{sessionStorage.removeItem('gtok')}catch(e){}
   view='diary';try{history.replaceState({v:'diary'},'',location.pathname)}catch(e){}diaryDate=today();dq='';mSearch=false;app.__html='';render();signupMode=false;lock('login');setSync('local');
 }
 async function updateApp(){
@@ -3402,7 +3607,7 @@ async function backupXLSX(from,to){
   if(rows.length){const ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=[{wch:12},{wch:11},{wch:70},{wch:11},{wch:14},{wch:11},{wch:22},{wch:11}];XLSX.utils.book_append_sheet(wb,ws,'Diary')}
   const xrows=lall('exp').filter(x=>x.d>=from&&x.d<=to).sort((a,b)=>a.d<b.d?-1:1).map(x=>({Date:x.d,Category:xcat(x.c).n,'For what':x.n||'',Amount:+x.a}));
   if(xrows.length){const ws=XLSX.utils.json_to_sheet(xrows);ws['!cols']=[{wch:12},{wch:22},{wch:40},{wch:12}];XLSX.utils.book_append_sheet(wb,ws,'Expenses')}
-  const wrows=wrAll().filter(w=>{const d=dFmt(new Date(w.cAt||w._ts));return d>=from&&d<=to}).sort((a,b)=>(a.cAt||0)-(b.cAt||0)).map(w=>({Date:dFmt(new Date(w.cAt||w._ts)),Type:wtype(w.type).n,Title:wrTitle(w),Text:w.body||'',Words:wrWords(w.body)}));
+  const wrows=wrAll().filter(w=>{const d=dFmt(new Date(w.cAt||w._ts));return d>=from&&d<=to}).sort((a,b)=>(a.cAt||0)-(b.cAt||0)).map(w=>({Date:dFmt(new Date(w.cAt||w._ts)),Type:wtype(w.type).n,Title:wrTitle(w),Text:wrText(w),Words:wrWords(wrText(w))}));
   if(wrows.length){const ws=XLSX.utils.json_to_sheet(wrows);ws['!cols']=[{wch:12},{wch:10},{wch:36},{wch:90},{wch:8}];XLSX.utils.book_append_sheet(wb,ws,'Writing')}
   if(mrows.length){const ws=XLSX.utils.json_to_sheet(mrows);ws['!cols']=[{wch:12},{wch:40},{wch:22},{wch:70},{wch:10},{wch:50}];XLSX.utils.book_append_sheet(wb,ws,'Memories')}
   XLSX.writeFile(wb,'alok-diary-'+(from==='0000'?'all':from+'-to-'+to)+'.xlsx');toast('Excel file downloaded');
