@@ -992,7 +992,7 @@ function diaryTitle(){const n=myName();return n?n+'’s Diary':'My Diary'}
 function setMyName(n,sync){n=String(n||'').trim().replace(/\s+/g,' ').slice(0,30);if(!n)return false;S.prefs.name=n;S.prefs.nameAt=Date.now();try{localStorage.setItem('diary-name',n)}catch(e){}if(sync!==false)mark('prefs');document.title=diaryTitle();return true}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.13';
+const APP_VERSION='4.13.1';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
@@ -1197,7 +1197,9 @@ function drawLock(){
         if(signupMode){
           const nm=($('lkN')&&$('lkN').value||'').trim().slice(0,30);if(!nm)throw new Error('Please enter your name.');try{localStorage.setItem('diary-pendname',nm)}catch(e){}
           const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:location.origin+location.pathname,data:{name:nm}}});
-          if(error)throw error;if(!data.session){signupMode=false;lock('check',email);return}
+          if(error)throw error;
+          if(data.user&&Array.isArray(data.user.identities)&&!data.user.identities.length){signupMode=false;lock('login','This email already has an account. Sign in with its password, or use “Forgot password?” below.');setTimeout(()=>{const e=$('lkE');if(e)e.value=email;const p=$('lkP');if(p)p.focus()},0);return}
+          if(!data.session){signupMode=false;lock('check',email);return}
           await onSignedIn(data.session.user,true);
         }else{
           const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
