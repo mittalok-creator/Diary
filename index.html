@@ -992,7 +992,7 @@ function diaryTitle(){const n=myName();return n?n+'’s Diary':'My Diary'}
 function setMyName(n,sync){n=String(n||'').trim().replace(/\s+/g,' ').slice(0,30);if(!n)return false;S.prefs.name=n;S.prefs.nameAt=Date.now();try{localStorage.setItem('diary-name',n)}catch(e){}if(sync!==false)mark('prefs');document.title=diaryTitle();return true}
 function hl(text,q){const s=esc(text);if(!q)return s;const i=s.toLowerCase().indexOf(esc(q).toLowerCase());return i<0?s:s.slice(0,i)+'<mark>'+s.slice(i,i+esc(q).length)+'</mark>'+s.slice(i+esc(q).length)}
 function dReduce(){return matchMedia('(prefers-reduced-motion: reduce)').matches}
-const APP_VERSION='4.12';
+const APP_VERSION='4.13';
 
 /* ================= local state ================= */
 const KEY='alok-diary-v3', GKEY='alok-diary-gcal';
@@ -1161,7 +1161,14 @@ function drawLock(){
     <form id="lkF" class="lk-form">${signupMode?'<input id="lkN" type="text" placeholder="Your first name (shown in the diary)" autocomplete="given-name" maxlength="30" required>':''}<input id="lkE" type="email" placeholder="Email" autocomplete="email" required>
     <input id="lkP" type="password" placeholder="Password (at least 6 characters)" autocomplete="${signupMode?'new-password':'current-password'}" minlength="6" required>
     <button class="btn">${signupMode?'Create account':'Sign in'}</button></form>
-    <button class="linkbtn" id="lkSw" type="button">${signupMode?'Already have an account? Sign in':'New here? Create an account'}</button>`;
+    <button class="linkbtn" id="lkSw" type="button">${signupMode?'Already have an account? Sign in':'New here? Create an account'}</button>${signupMode?'':'<button class="linkbtn" id="lkReset" type="button">Forgot password?</button>'}`;
+  if(lockMode==='reset')h=`${brand}<h2 class="lk-h">Reset your password</h2><p class="lk-sub">Enter the email of your account. A link to choose a new password will be sent to it.</p>
+    <form id="lkF" class="lk-form"><input id="lkE" type="email" placeholder="Email" autocomplete="email" required value="${esc(lockMsg||(me&&me.email)||'')}"><button class="btn">Send the reset link</button></form>
+    <button class="linkbtn" id="lkBack" type="button">Back to sign in</button>`;
+  if(lockMode==='resetsent')h=`${brand}<h2 class="lk-h">Check your email</h2><p class="lk-sub">If <b>${esc(lockMsg)}</b> has an account, a link to reset the password has been sent to it. Open the link on this device; it brings you back here to choose a new password.</p><p class="lk-sub">No email after a few minutes? Check the Spam folder. Only a few reset emails can be sent per hour, so please wait before asking again.</p><button class="btn" id="lkBack" type="button">Back to sign in</button>`;
+  if(lockMode==='newpw')h=`${brand}<h2 class="lk-h">Choose a new password</h2><p class="lk-sub">For ${esc((me&&me.email)||'your account')}. At least 6 characters.</p>
+    <form id="lkF" class="lk-form"><input id="lkP" type="password" placeholder="New password" autocomplete="new-password" minlength="6" required><input id="lkP2" type="password" placeholder="New password again" autocomplete="new-password" minlength="6" required><button class="btn">Save the new password</button></form>
+    ${recoverFrom==='settings'?'<button class="linkbtn" id="lkCancelPw" type="button">Cancel</button>':''}`;
   if(lockMode==='check')h=`${brand}<h2 class="lk-h">Confirm your email</h2><p class="lk-sub">A confirmation link was sent to <b>${esc(lockMsg)}</b>. Open it, then return here and sign in.</p><button class="btn" id="lkBack" type="button">Back to sign in</button>`;
   if(lockMode==='setpin')h=`${brand}<h2 class="lk-h">${pinFirst?'Enter the passcode again':'Set a 4-digit passcode'}</h2><p class="lk-sub">${pinFirst?'To confirm it.':'It is asked each time the diary opens, on all your devices.'}</p>
     <form id="lkF" class="lk-form"><input id="lkPin" class="pin" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" aria-label="Passcode" required><button class="btn">${pinFirst?'Save passcode':'Next'}</button></form>`;
@@ -1171,7 +1178,7 @@ function drawLock(){
     <button class="linkbtn" id="lkForgot" type="button">Forgot passcode?</button>`;
   if(lockMode==='forgot')h=`${brand}<h2 class="lk-h">Reset passcode</h2><p class="lk-sub">Enter your account password.</p>
     <form id="lkF" class="lk-form"><input id="lkP" type="password" placeholder="Password" autocomplete="current-password" required><button class="btn">Continue</button></form>
-    <button class="linkbtn" id="lkBack2" type="button">Back</button>`;
+    <button class="linkbtn" id="lkBack2" type="button">Back</button><button class="linkbtn" id="lkReset" type="button">Forgot the password too?</button>`;
   lockEl.innerHTML=`<div class="lk-card">${h}<p class="lk-err" id="lkErr" role="alert">${lockMode==='check'?'':esc(lockMsg)}</p></div>`;
   const f=$('lkF'),pin=$('lkPin');
   if(pin){pin.focus();pin.oninput=()=>{pin.value=pin.value.replace(/\D/g,'').slice(0,4);if(pin.value.length===4)f.requestSubmit()}}
@@ -1179,6 +1186,8 @@ function drawLock(){
   if($('lkSw'))$('lkSw').onclick=()=>{signupMode=!signupMode;lock('login')};
   if($('lkBack'))$('lkBack').onclick=()=>{signupMode=false;lock('login')};
   if($('lkBack2'))$('lkBack2').onclick=()=>lock('pin');
+  if($('lkReset'))$('lkReset').onclick=()=>{const e=$('lkE')?$('lkE').value.trim():(me&&me.email)||'';lock('reset',e)};
+  if($('lkCancelPw'))$('lkCancelPw').onclick=()=>{recoverFrom='';unlock()};
   if($('lkForgot'))$('lkForgot').onclick=()=>lock('forgot');
   if($('lkBio'))$('lkBio').onclick=()=>bioUnlock(false);
   if(f)f.onsubmit=async e=>{e.preventDefault();const err=$('lkErr');err.textContent='';const btn=f.querySelector('button');btn.disabled=true;
@@ -1203,6 +1212,19 @@ function drawLock(){
       }else if(lockMode==='pin'){
         if(await hashPin(pin.value,pinRec.salt)===pinRec.pinHash){pinTry=0;unlock()}
         else{pinTry++;if(pinTry>=5){pinTry=0;lock('forgot','Too many incorrect attempts. Enter your password to continue.')}else lock('pin',`Incorrect passcode. ${5-pinTry} attempts left.`)}
+      }else if(lockMode==='reset'){
+        const email=$('lkE').value.trim();
+        const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+        if(error)throw new Error(/rate|seconds|limit/i.test(error.message)?'Too many reset emails were asked for. Please wait a while and try again.':error.message);
+        lock('resetsent',email);return;
+      }else if(lockMode==='newpw'){
+        const a=$('lkP').value,b=$('lkP2').value;if(a.length<6)throw new Error('The password must have at least 6 characters.');if(a!==b)throw new Error('The two passwords do not match.');
+        const {error}=await sb.auth.updateUser({password:a});
+        if(error)throw new Error(/same|different/i.test(error.message)?'Please choose a password different from the old one.':/session|expired|jwt/i.test(error.message)?'The reset link has expired. Please ask for a new one.':error.message);
+        const from=recoverFrom;recoverFrom='';recovering=false;try{history.replaceState({v:'diary'},'',location.pathname)}catch(e){}
+        toast('Your new password is saved. Use it on all your devices.');
+        if(from==='settings'){unlock();return}
+        if(me){const {data:{session}}=await sb.auth.getSession();if(session)await onSignedIn(session.user,true);else lock('login')}else lock('login');return;
       }else if(lockMode==='forgot'){
         const {error}=await sb.auth.signInWithPassword({email:me.email,password:$('lkP').value});
         if(error)throw new Error(isNet(error)?'You are offline. Connect to the internet to reset the passcode.':'The password is incorrect.');
@@ -1211,12 +1233,14 @@ function drawLock(){
     }catch(x){err.textContent=isNet(x)?'No internet connection. Please try again when online.':(x.message||'Something went wrong. Please try again.');btn.disabled=false}
   };
 }
+var recovering=/type=recovery/.test(location.hash||'')||/[?&]type=recovery/.test(location.search||''),recoverFrom='';
 async function onSignedIn(user,viaPassword){
   if(me&&me.id===user.id&&col){if(viaPassword&&pinRec)unlock();return}
   const keepOpen=lockMode==='open'&&me&&me.id===user.id;
   const owner=localStorage.getItem(OWNKEY);
   if(owner&&owner!==user.id){['diary-name','sb-bio','alok-bknag','alok-billnag','sb-active'].forEach(k=>{try{localStorage.removeItem(k)}catch(e){}});dirty.clear();keepDirty();S={diary:{},mem:{},wr:{},prefs:{qfav:{}},lists:{pins:{},rules:{},people:{},tpl:{},shop:{},ulist:{},exp:{},bills:{},ideas:{},words:{},wcoll:{}}};G={connected:false,events:[],cals:[],off:[],fetchedAt:0,_ts:0};saveNow();pinRec=null;try{localStorage.removeItem(PINKEY)}catch(e){}}
   try{localStorage.setItem(OWNKEY,user.id)}catch(e){}
+  if(recovering){me=user;if(!col)startSync();lock('newpw');return}
   me=user;startSync().then(()=>{if(!S.prefs.name){let n='';try{n=localStorage.getItem('diary-pendname')||''}catch(e){}n=n||(user.user_metadata&&user.user_metadata.name)||'';if(n){setMyName(n);render(true)}}try{localStorage.removeItem('diary-pendname')}catch(e){}if(S.prefs.name){try{localStorage.setItem('diary-name',S.prefs.name)}catch(e){}}document.title=diaryTitle();if(lockMode!=='open'&&!lockEl.hidden)drawLock()});
   if(!pinRec){try{const {data}=await sb.from('notes').select('data').eq('note_id','settings').maybeSingle();if(data&&data.data&&data.data.pinHash){pinRec=data.data;localStorage.setItem(PINKEY,JSON.stringify(pinRec))}}catch(e){}}
   if(!pinRec)lock('setpin');
@@ -2330,7 +2354,7 @@ function settingsView(){
    <section class="set"><p class="eyebrow">Security</p>
      <p class="set-line"><label for="sLock">Lock the diary after</label><select id="sLock">${[[0,'Immediately'],[1,'1 minute'],[2,'2 minutes'],[5,'5 minutes'],[15,'15 minutes']].map(([v,t])=>`<option value="${v}" ${v===lm?'selected':''}>${t}</option>`).join('')}</select></p>
      <p class="set-line"><span>Fingerprint, face or Windows Hello</span><button class="btn sm ${bioOn()?'ghost':''}" id="sBio" type="button">${bioOn()?'Turn off':'Turn on'}</button></p>
-     <div class="row"><button class="btn ghost sm" id="lockNow" type="button">Lock now</button><button class="btn ghost sm" id="chPin" type="button">Change passcode</button></div>
+     <div class="row"><button class="btn ghost sm" id="lockNow" type="button">Lock now</button><button class="btn ghost sm" id="chPin" type="button">Change passcode</button><button class="btn ghost sm" id="chPw" type="button">Change password</button></div>
      <p class="note">The diary is protected by your account sign-in and a passcode on every device. Your pages are stored in your private Supabase account, readable only after you sign in. Pages are not separately encrypted.</p>
    </section>
    <section class="set"><p class="eyebrow">Diary</p>
@@ -2371,6 +2395,7 @@ function settingsView(){
   $('sBio').onclick=async()=>{if(bioOn()){try{localStorage.removeItem('sb-bio')}catch(e){}render();toast('Fingerprint unlock is off');return}await bioEnable();render()};
   $('lockNow').onclick=()=>lock('pin');
   $('chPin').onclick=()=>{pinFirst='';lock('forgot','Enter your password to set a new passcode.')};
+  $('chPw').onclick=()=>{recoverFrom='settings';lock('newpw')};
   $('sSound').onclick=()=>{const on=!dSoundOn();try{localStorage.setItem('sb-sound',on?'1':'0')}catch(e){}if(on)dFlipSound();render();toast(on?'Page-turn sound is on':'Page-turn sound is off')};
   const rng=()=>{let a=$('exFrom').value,b=$('exTo').value;if(!a||!b){toast('Please choose both dates.');return null}if(a>b)[a,b]=[b,a];return [a,b]};
   $('exPdf').onclick=()=>{const r=rng();if(r)exportPDF(r[0],r[1])};
@@ -3677,7 +3702,7 @@ history.replaceState({v:'diary'},'',location.pathname);
     return;
   }
   sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
-  sb.auth.onAuthStateChange((ev,session)=>{if(ev==='SIGNED_IN'&&session&&!col)setTimeout(()=>{if(!col)onSignedIn(session.user,false)},0)});
+  sb.auth.onAuthStateChange((ev,session)=>{if(ev==='PASSWORD_RECOVERY'&&session){recovering=true;recoverFrom='';setTimeout(()=>{if(me&&me.id===session.user.id&&col)lock('newpw');else onSignedIn(session.user,false)},0);return}if(ev==='SIGNED_IN'&&session&&!col)setTimeout(()=>{if(!col)onSignedIn(session.user,false)},0)});
   const {data:{session}}=await sb.auth.getSession();
   if(session&&!col)await onSignedIn(session.user,false);
   else if(!session)lock('login');
